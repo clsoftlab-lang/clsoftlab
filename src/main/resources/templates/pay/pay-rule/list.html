@@ -547,7 +547,7 @@
 		        const checkResult = Number(await response.text());
 		        
 		        if (checkResult > 0) { 
-		            alert('선택하신 항목코드에 해당 기간이 포함된 규칙이 이미 존재합니다.\n시작일 또는 종료일을 수정해주세요.'); 
+		            alert('입력하신 기간이 기존 규칙의 기간과 중복됩니다. 시작일 또는 종료일을 다시 확인해주세요.'); 
 		            return;
 		        }
 
@@ -650,7 +650,7 @@
 		        const checkResult = Number(await checkresponse.text());
 		        
 		        if (checkResult > 0) { 
-		            alert('선택하신 항목코드에 해당 기간이 포함된 규칙이 이미 존재합니다.\n시작일 또는 종료일을 수정해주세요.'); 
+		            alert('수정한 기간이 다른 규칙의 기간과 중복됩니다. 시작일 또는 종료일을 다시 확인해주세요.'); 
 		            return;
 		        }
 		        

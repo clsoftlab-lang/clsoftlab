@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -22,8 +21,7 @@ import lombok.Setter;
 public class TaxTableRequestDto {
 
 	@NotNull(message = "연도는 필수입니다.")
-    @Min(value = 1000, message = "연도는 4자리 숫자여야 합니다.")
-	@Max(value = 9999, message = "연도는 4자리 숫자여야 합니다.")
+	@Digits(integer = 4, fraction = 0, message = "연도는 4자리 정수여야 합니다.")
     private Integer year;
 
     @NotNull(message = "가족 수는 필수입니다.")

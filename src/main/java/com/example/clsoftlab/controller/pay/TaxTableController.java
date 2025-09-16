@@ -20,6 +20,8 @@ import com.example.clsoftlab.dto.pay.TaxTableSearchRequestDto;
 import com.example.clsoftlab.entity.id.TaxTableId;
 import com.example.clsoftlab.service.pay.TaxTableService;
 
+import jakarta.validation.Valid;
+
 @Controller
 @RequestMapping("/pay/tax")
 public class TaxTableController {
@@ -54,12 +56,13 @@ public class TaxTableController {
 	
 	// 새 세율/기간 등록
 	@PostMapping("")
-	public ResponseEntity<Void> addNewTaxTable (@RequestBody TaxTableRequestDto dto) {
+	public ResponseEntity<Void> addNewTaxTable (@Valid @RequestBody TaxTableRequestDto dto) {
 		
 		taxTableService.addNewTaxTable(dto);
 		return ResponseEntity.ok().build();
 	}
 	
+	// 세율/기간 수정
 	@PutMapping("")
 	public ResponseEntity<Void> UpdateTaxTable (@ModelAttribute TaxTableId id, @RequestBody TaxTableRequestDto dto) {
 		
@@ -86,6 +89,7 @@ public class TaxTableController {
 				
 	}
 	
+	//삭제
 	@DeleteMapping("")
 	public ResponseEntity<Void> deleteById (@ModelAttribute TaxTableId id) {
 

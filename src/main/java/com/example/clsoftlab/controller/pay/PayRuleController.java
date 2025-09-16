@@ -34,6 +34,7 @@ public class PayRuleController {
 	}
 
 	
+	// 전체 목록 조회
 	@GetMapping("")
 	public String payRuleList(@RequestParam(defaultValue = "")String itemCode, @RequestParam(defaultValue = "") String ruleType, 
 			@RequestParam(defaultValue = "") String useYn, @RequestParam (required = false) Integer page, 
@@ -95,6 +96,7 @@ public class PayRuleController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
+	// 계산 규칙 수정
 	@PutMapping("/{ruleId}")
 	public ResponseEntity<Void> updatePayRule (@PathVariable long ruleId, @Valid @RequestBody PayRuleRequestDto dto) {
 		

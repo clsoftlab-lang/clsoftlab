@@ -117,7 +117,7 @@ VALUES
 
 -- 세율/구간 관리 --  
 CREATE TABLE ZHR_TAX_TABLE (
-    ZYEAR               YEAR            NOT NULL COMMENT '적용 연도',
+    ZYEAR               SMALLINT            NOT NULL COMMENT '적용 연도',
     ZFAMILY_CNT         TINYINT         NOT NULL COMMENT '가족 수 (공제 대상)',
     ZINCOME_AMT  		DECIMAL(18, 0)  NOT NULL COMMENT '과세 기준 소득 (구간 시작 금액)',
     ZTAX_PC             DECIMAL(5, 2)   NULL     COMMENT '근로소득세율 (%)',
@@ -176,4 +176,82 @@ VALUES
 -- 2024년 귀속 (과거 데이터 예시)
 (2024, 1, 3000000, 3.00, 0.30, 90110, 'N', 'system_admin', '2024년 귀속분 (현재 미사용)');
 
+-- 소급 규칙 관리 --
+CREATE TABLE ZHR_BACKPAY_RULE (
+    RULE_ID       BIGINT         NOT NULL AUTO_INCREMENT COMMENT '규칙 고유 ID (기본 키)',
+    ZITEM_CD      VARCHAR(20)    NOT NULL COMMENT '적용 항목 코드 (소급될 항목, FK)',
+    ZBASE_ITEM    VARCHAR(20)    NOT NULL COMMENT '기준 항목 코드 (소급 계산의 기준이 되는 항목, FK)',
+    ZRULE_TY      VARCHAR(10)    NOT NULL COMMENT '소급 방식 (FIXED: 고정비율, DIFF: 차액계산)',
+    ZBACK_PC      DECIMAL(5, 2)  NULL     COMMENT '소급 비율 (FIXED 방식일 때 사용, 예: 999.99)',
+    ZUSE_YN       CHAR(1)        NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZNOTE         VARCHAR(500)   NULL     COMMENT '비고',
+    CREATED_AT    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY    VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME       NULL     COMMENT '수정 일시',
+    UPDATED_BY    VARCHAR(50)    NULL     COMMENT '수정자',
 
+    PRIMARY KEY (RULE_ID),
+    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD),
+    FOREIGN KEY (ZBASE_ITEM) REFERENCES ZHR_PAY_ITEM(ZITEM_CD),
+    
+    -- === 제약 조건 (데이터 무결성 보장) ===
+    CONSTRAINT CHK_ZRULE_TY CHECK (ZRULE_TY IN ('FIXED', 'DIFF')),
+    CONSTRAINT CHK_ZUSE_YN_BACKPAY CHECK (ZUSE_YN IN ('Y', 'N')),
+    
+    -- === 인덱스 (조회 성능 향상) ===
+    INDEX IX_ZHR_BACKPAY_RULE_01 (ZITEM_CD),
+    INDEX IX_ZHR_BACKPAY_RULE_02 (ZBASE_ITEM)
+) COMMENT '과거 지급 내역에 대한 소급 적용 규칙 정의 테이블';
+
+-- backpay_rule 더미 데이터 --
+
+INSERT INTO ZHR_BACKPAY_RULE 
+(ZITEM_CD, ZBASE_ITEM, ZRULE_TY, ZBACK_PC, ZUSE_YN, ZNOTE, CREATED_BY) 
+VALUES
+-- === 시나리오 1: 기본급(PAY001) 인상 시 연동되는 소급 규칙 ===
+('PAY001', 'PAY001', 'DIFF', NULL, 'Y', '기본급 인상 시, 기본급 자체에 대한 차액 소급', 'system_admin'),
+('PAY002', 'PAY001', 'FIXED', 150.00, 'Y', '기본급 인상 시, 기본급의 150%로 계산되는 상여금 소급', 'system_admin'),
+('PAY007', 'PAY001', 'DIFF', NULL, 'Y', '기본급(통상임금) 인상에 따른 연장근로수당 재계산 소급', 'system_admin'),
+('PAY009', 'PAY001', 'DIFF', NULL, 'Y', '기본급 인상에 따른 성과급 재계산 소급', 'system_admin'),
+('TAX001', 'PAY001', 'DIFF', NULL, 'Y', '기본급 인상으로 과세표준 변경 시 소득세 재정산 소급', 'tax_manager'),
+('TAX002', 'PAY001', 'DIFF', NULL, 'Y', '기본급 인상에 따른 지방소득세 재정산 소급', 'tax_manager'),
+('INS001', 'PAY001', 'FIXED', 4.50, 'Y', '기본급 인상에 따른 국민연금 소급 (과세소득의 4.5%)', 'system_admin'),
+('INS002', 'PAY001', 'FIXED', 3.55, 'Y', '기본급 인상에 따른 건강보험 소급 (과세소득의 3.545%)', 'system_admin'),
+('INS003', 'PAY001', 'DIFF', NULL, 'Y', '기본급 인상에 따른 장기요양보험(건강보험 연동) 소급', 'system_admin'),
+('INS004', 'PAY001', 'FIXED', 0.90, 'Y', '기본급 인상에 따른 고용보험 소급 (과세소득의 0.9%)', 'system_admin'),
+
+-- === 시나리오 2: 특정 수당이 자체적으로 변경/신설될 경우 ===
+('PAY004', 'PAY004', 'DIFF', NULL, 'Y', '직책수당 자체 인상/변경 시 차액 소급', 'hr_manager'),
+('PAY005', 'PAY005', 'DIFF', NULL, 'Y', '자격수당 자체 인상/변경 시 차액 소급', 'hr_manager'),
+('PAY006', 'PAY006', 'DIFF', NULL, 'Y', '가족수당 자체 인상/변경 시 차액 소급', 'hr_manager'),
+
+-- === 시나리오 3: 과세/보험료율 변경에 따른 재정산 ===
+('TAX001', 'TAX001', 'DIFF', NULL, 'Y', '연말정산 등으로 소득세 결정세액 변동 시 소급 적용', 'tax_manager'),
+('TAX002', 'TAX001', 'FIXED', 10.00, 'Y', '소득세 변동 시 지방소득세(소득세의 10%) 연동 소급', 'tax_manager'),
+('INS002', 'INS002', 'DIFF', NULL, 'Y', '건강보험료 정산으로 인한 차액 발생 시 소급 적용', 'system_admin'),
+('INS003', 'INS002', 'DIFF', NULL, 'Y', '건강보험료 정산 시 장기요양보험료 연동 소급', 'system_admin'),
+
+-- === 시나리오 4: 비활성화된 규칙 (과거 규칙) ===
+('PAY002', 'PAY001', 'FIXED', 120.00, 'N', '과거 상여금 소급 규칙 (기본급의 120%)', 'system_admin'),
+('INS002', 'PAY001', 'FIXED', 3.50, 'N', '2024년 건강보험 요율 기준 소급 규칙', 'system_admin'),
+
+-- === 시나리오 5: 다양한 기준 항목에 따른 규칙들 ===
+('TAX001', 'PAY002', 'DIFF', NULL, 'Y', '상여금 지급으로 과세표준 변경 시 소득세 재정산', 'tax_manager'),
+('TAX001', 'PAY009', 'DIFF', NULL, 'Y', '성과급 지급으로 과세표준 변경 시 소득세 재정산', 'tax_manager'),
+('INS001', 'PAY002', 'DIFF', NULL, 'Y', '상여금 지급에 따른 국민연금 재정산', 'system_admin'),
+('INS002', 'PAY009', 'DIFF', NULL, 'Y', '성과급 지급에 따른 건강보험 재정산', 'system_admin'),
+
+-- === 시나리오 6: 추가적인 연동 규칙들 ===
+('PAY007', 'PAY004', 'DIFF', NULL, 'Y', '직책수당이 통상임금에 포함될 경우, 연장근로수당 재계산 소급', 'hr_manager'),
+('PAY007', 'PAY005', 'DIFF', NULL, 'Y', '자격수당이 통상임금에 포함될 경우, 연장근로수당 재계산 소급', 'hr_manager'),
+('TAX001', 'PAY007', 'DIFF', NULL, 'Y', '연장근로수당 지급으로 인한 소득세 변동분 소급', 'tax_manager'),
+('INS004', 'PAY007', 'DIFF', NULL, 'Y', '연장근로수당 지급으로 인한 고용보험 변동분 소급', 'system_admin'),
+
+-- === 시나리오 7: 복잡한 연동 관계 ===
+('TAX002', 'TAX001', 'FIXED', 10.00, 'Y', '소득세 변동에 따른 지방소득세 소급 (중복처럼 보이지만 명시적 규칙)', 'tax_manager'),
+('INS003', 'INS002', 'FIXED', 12.95, 'Y', '건강보험료 변동 시 장기요양보험료(건보료의 12.95%) 소급', 'system_admin'),
+('PAY001', 'PAY004', 'DIFF', NULL, 'N', '직책수당이 기본급에 영향을 주는 가상 시나리오 (미사용)', 'hr_manager'),
+('PAY002', 'PAY009', 'FIXED', 10.00, 'N', '성과급의 10%를 특별 상여로 소급하는 가상 시나리오 (미사용)', 'hr_manager'),
+('TAX001', 'PAY004', 'DIFF', NULL, 'Y', '직책수당 지급으로 인한 소득세 변동분 소급', 'tax_manager');
+
+	

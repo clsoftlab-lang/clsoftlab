@@ -49,6 +49,7 @@ public class PayItemController {
 		this.payItemService = payItemService;
 	}
 	
+	//전체 목록 조회
 	@GetMapping("")
 	public String payItemList(@RequestParam(defaultValue = "") String itemName, @RequestParam(defaultValue = "") String itemType,
 			@RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page,

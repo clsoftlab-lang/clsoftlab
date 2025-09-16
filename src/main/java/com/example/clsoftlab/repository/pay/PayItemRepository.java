@@ -13,6 +13,7 @@ import com.example.clsoftlab.entity.PayItem;
 public interface PayItemRepository extends JpaRepository<PayItem, String> {
 
 	
+	// 검색어로 조회
 	@Query("SELECT p "
 			+ "FROM PayItem p "
 			+ "WHERE (itemName like concat('%',:itemName,'%')) "

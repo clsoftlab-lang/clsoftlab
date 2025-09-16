@@ -261,6 +261,7 @@
 
 	<script src="/assets/js/jquery-3.7.1.min.js"></script>
 	<script src="/assets/js/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/jquery.slimscroll.min.js"></script>
 	<script src="https://unpkg.com/feather-icons"></script>
 	<script src="/assets/js/jquery.dataTables.min.js"></script>
 	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
@@ -321,7 +322,7 @@
 		        const checkResult = Number(await response.text());
 		        
 		        if (checkResult > 0) { 
-		            alert('선택하신 ... 포함된 규칙이 이미 존재합니다.'); 
+		            alert('입력하신 [연도, 가족 수, 소득 기준]에 해당하는 규칙이 이미 존재합니다. 값을 다시 확인해주세요.'); 
 		            return;
 		        }
 
@@ -433,7 +434,7 @@
 			        const checkResult = Number(await checkresponse.text());
 			        
 			        if (checkResult > 0) { 
-			            alert('선택하신 항목코드에 해당 기간이 포함된 규칙이 이미 존재합니다.\n시작일 또는 종료일을 수정해주세요.'); 
+			            alert('수정하려는 [연도, 가족 수, 소득 기준]이 이미 다른 규칙으로 존재합니다. 값을 다시 확인해주세요.'); 
 			            return;
 			        }
 			        

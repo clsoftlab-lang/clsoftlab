@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/pay/pay-detail")
 public class PayDetailController {
 
+	// 미완성
 	@GetMapping("")
 	public String payDetailList() {
 		
