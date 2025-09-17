@@ -1,6 +1,8 @@
-create database clsoftlab default character set utf8mb4 collate utf8mb4_unicode_ci;
+create database clsoftlabnew default character set utf8mb4 collate utf8mb4_unicode_ci;
 
-use clsoftlab;
+use clsoftlabnew;
+
+show tables;
 
 -- 급여 항목 관리 --
 CREATE TABLE ZHR_PAY_ITEM (  
@@ -15,6 +17,10 @@ CREATE TABLE ZHR_PAY_ITEM (
     ZINSR_YN CHAR(1) NOT NULL,        -- 4대 보험 대상 여부 (Y/N)
     ZUSE_YN CHAR(1) NOT NULL DEFAULT 'Y', -- 사용 여부 (기본값 'Y')
     ZNOTE VARCHAR(500),               -- 비고
+    CREATED_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY VARCHAR(50) NOT NULL COMMENT '생성자',
+    UPDATED_AT DATETIME NULL COMMENT '수정 일시',
+    UPDATED_BY VARCHAR(50) NULL COMMENT '수정자',
 
     -- === 제약 조건 (데이터 무결성 보장) ===
     CONSTRAINT CHK_ZITEM_TY CHECK (ZITEM_TY IN ('PAY', 'DEDUCT', 'INSURANCE', 'TAX', 'BACKPAY')),
@@ -24,34 +30,35 @@ CREATE TABLE ZHR_PAY_ITEM (
     CONSTRAINT CHK_ZUSE_YN CHECK (ZUSE_YN IN ('Y', 'N'))
 );
 
+
 INSERT INTO ZHR_PAY_ITEM 
-(ZITEM_CD, ZITEM_NM, ZITEM_TY, ZTAX_YN, ZTAX_TY, ZTAX_PC, ZROUND_TY, ZBACK_YN, ZINSR_YN, ZUSE_YN, ZNOTE) 
+(ZITEM_CD, ZITEM_NM, ZITEM_TY, ZTAX_YN, ZTAX_TY, ZTAX_PC, ZROUND_TY, ZBACK_YN, ZINSR_YN, ZUSE_YN, ZNOTE, CREATED_BY) 
 VALUES
-('PAY001', '기본급', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'Y', 'Y', 'Y', '월 기본 급여 항목'),
-('PAY002', '상여금', 'PAY', 'Y', 'PERCENT', NULL, 'TEN', 'N', 'Y', 'Y', '정기/비정기 상여금'),
-('PAY003', '식대(비과세)', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '비과세 식대 항목 (월 20만원 한도)'),
-('TAX001', '소득세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '근로소득세 갑근세 원천징수'),
-('INS001', '국민연금', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 국민연금 근로자 부담분'),
-('INS002', '건강보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 건강보험 근로자 부담분'),
-('DED001', '학자금상환', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'N', '취업 후 학자금 상환 의무공제'),
-('PAY004', '직책수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '팀장/임원 직책 보유자 수당'),
-('PAY005', '자격수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '자격증/면허 보유자 수당'),
-('PAY006', '가족수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '부양가족 기준 지급 수당'),
-('PAY007', '연장근로수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '연장/야간/휴일 근로 수당'),
-('PAY008', '차량유지비', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '개인 차량 유지보조비'),
-('PAY009', '성과급', 'PAY', 'Y', 'PERCENT', NULL, 'TEN', 'N', 'Y', 'Y', '목표 달성 시 성과급 지급'),
-('PAY010', '휴가비', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '정기 휴가비 지원'),
-('TAX002', '지방소득세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '소득세 연계 지방세'),
-('TAX003', '주민세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '특별세 성격 주민세'),
-('TAX004', '농어촌특별세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'N', '특정 대상자 농어촌특별세'),
-('INS003', '장기요양보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '건강보험 연계 장기요양보험'),
-('INS004', '고용보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 고용보험 근로자 부담분'),
-('INS005', '산재보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'N', '사용자 부담 관리용'),
-('DED002', '노조비', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '노동조합 조합비'),
-('DED003', '사내대출상환', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '사내대출 원리금 상환'),
-('DED004', '기숙사비', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '사내 기숙사 사용료'),
-('DED005', '복지기금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '동호회비/복지기금'),
-('DED006', '개인연금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '개인연금(회사 대납 후 공제)');
+('PAY001', '기본급', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'Y', 'Y', 'Y', '월 기본 급여 항목', 'system_admin'),
+('PAY002', '상여금', 'PAY', 'Y', 'PERCENT', NULL, 'TEN', 'N', 'Y', 'Y', '정기/비정기 상여금', 'system_admin'),
+('PAY003', '식대(비과세)', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '비과세 식대 항목 (월 20만원 한도)', 'system_admin'),
+('TAX001', '소득세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '근로소득세 갑근세 원천징수', 'system_admin'),
+('INS001', '국민연금', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 국민연금 근로자 부담분', 'system_admin'),
+('INS002', '건강보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 건강보험 근로자 부담분', 'system_admin'),
+('DED001', '학자금상환', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'N', '취업 후 학자금 상환 의무공제', 'system_admin'),
+('PAY004', '직책수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '팀장/임원 직책 보유자 수당', 'system_admin'),
+('PAY005', '자격수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '자격증/면허 보유자 수당', 'system_admin'),
+('PAY006', '가족수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '부양가족 기준 지급 수당', 'system_admin'),
+('PAY007', '연장근로수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '연장/야간/휴일 근로 수당', 'system_admin'),
+('PAY008', '차량유지비', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '개인 차량 유지보조비', 'system_admin'),
+('PAY009', '성과급', 'PAY', 'Y', 'PERCENT', NULL, 'TEN', 'N', 'Y', 'Y', '목표 달성 시 성과급 지급', 'system_admin'),
+('PAY010', '휴가비', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '정기 휴가비 지원', 'system_admin'),
+('TAX002', '지방소득세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '소득세 연계 지방세', 'system_admin'),
+('TAX003', '주민세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '특별세 성격 주민세', 'system_admin'),
+('TAX004', '농어촌특별세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'N', '특정 대상자 농어촌특별세', 'system_admin'),
+('INS003', '장기요양보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '건강보험 연계 장기요양보험', 'system_admin'),
+('INS004', '고용보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 고용보험 근로자 부담분', 'system_admin'),
+('INS005', '산재보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'N', '사용자 부담 관리용', 'system_admin'),
+('DED002', '노조비', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '노동조합 조합비', 'system_admin'),
+('DED003', '사내대출상환', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '사내대출 원리금 상환', 'system_admin'),
+('DED004', '기숙사비', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '사내 기숙사 사용료', 'system_admin'),
+('DED005', '복지기금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '동호회비/복지기금', 'system_admin'),
+('DED006', '개인연금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '개인연금(회사 대납 후 공제)', 'system_admin');
 
 
 -- 계산 규칙 관리 --
@@ -254,4 +261,141 @@ VALUES
 ('PAY002', 'PAY009', 'FIXED', 10.00, 'N', '성과급의 10%를 특별 상여로 소급하는 가상 시나리오 (미사용)', 'hr_manager'),
 ('TAX001', 'PAY004', 'DIFF', NULL, 'Y', '직책수당 지급으로 인한 소득세 변동분 소급', 'tax_manager');
 
+
+-- 지급 주기 관리 테이블 --
+CREATE TABLE ZHR_PAY_CYCLE (
+    ZJOB_GRP   VARCHAR(20)  NOT NULL COMMENT '직군 코드 (PK)',
+    ZSTART_DAY TINYINT      NOT NULL COMMENT '급여 기준 시작일 (1~31)',
+    ZEND_DAY   TINYINT      NOT NULL COMMENT '급여 기준 종료일 (1~31), 시작일보다 작으면 익월 마감',
+    ZPAY_DAY   TINYINT      NOT NULL COMMENT '실제 급여 지급일 (1~31)',
+    ZUSE_YN    CHAR(1)      NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZNOTE      VARCHAR(500) NULL COMMENT '비고 및 설명',
+    CREATED_AT DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT DATETIME     NULL COMMENT '수정 일시',
+    UPDATED_BY VARCHAR(50)  NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (ZJOB_GRP),
+
+    -- 데이터 무결성을 위한 제약 조건
+    CONSTRAINT CHK_ZSTART_DAY CHECK (ZSTART_DAY BETWEEN 1 AND 31),
+    CONSTRAINT CHK_ZEND_DAY CHECK (ZEND_DAY BETWEEN 1 AND 31),
+    CONSTRAINT CHK_ZPAY_DAY CHECK (ZPAY_DAY BETWEEN 1 AND 31),
+    CONSTRAINT CHK_ZUSE_YN_PAY_CYCLE CHECK (ZUSE_YN IN ('Y', 'N'))
+) COMMENT '직군별 급여 기준일 및 지급일 관리 테이블';
 	
+    
+-- 더미데이터 --
+INSERT INTO ZHR_PAY_CYCLE
+(ZJOB_GRP, ZSTART_DAY, ZEND_DAY, ZPAY_DAY, ZUSE_YN, ZNOTE, CREATED_BY)
+VALUES
+-- === 일반적인 당월 정산 (1일 ~ 말일 기준) ===
+('HR_PAYROLL', 1, 31, 25, 'Y', '인사팀 급여담당: 당월 1일~말일 기준, 당월 25일 지급', 'hr_admin'),
+('FIN_ACCOUNTING', 1, 31, 25, 'Y', '재무팀 회계담당: 당월 1일~말일 기준, 당월 25일 지급', 'hr_admin'),
+('IT_DEV_SENIOR', 1, 31, 25, 'Y', 'IT개발팀 선임급: 당월 1일~말일 기준, 당월 25일 지급', 'system_manager'),
+('IT_INFRA', 1, 31, 25, 'Y', 'IT인프라팀: 당월 1일~말일 기준, 당월 25일 지급', 'system_manager'),
+('EXEC_BOARD', 1, 31, 20, 'Y', '임원진: 당월 1일~말일 기준, 당월 20일 지급', 'hr_admin'),
+('MKT_BRAND', 1, 31, 25, 'Y', '마케팅 브랜드팀: 당월 1일~말일 기준, 당월 25일 지급', 'hr_admin'),
+('RND_RESEARCHER', 1, 31, 25, 'Y', '연구소 연구원: 당월 1일~말일 기준, 당월 25일 지급', 'hr_admin'),
+('LEGAL_TEAM', 1, 31, 25, 'Y', '법무팀: 당월 1일~말일 기준, 당월 25일 지급', 'hr_admin'),
+('SUPPORT_ADMIN', 1, 31, 25, 'Y', '경영지원팀: 당월 1일~말일 기준, 당월 25일 지급', 'hr_admin'),
+('DESIGN_UXUI', 1, 31, 25, 'Y', '디자인팀 UX/UI: 당월 1일~말일 기준, 당월 25일 지급', 'system_manager'),
+('PLANNING_BIZ', 1, 31, 25, 'Y', '기획팀 사업기획: 당월 1일~말일 기준, 당월 25일 지급', 'hr_admin'),
+('QA_TEAM', 1, 31, 25, 'Y', '품질보증(QA)팀: 당월 1일~말일 기준, 당월 25일 지급', 'payroll_specialist'),
+('SERVICE_OPS', 1, 31, 25, 'Y', '서비스운영팀: 당월 1일~말일 기준, 당월 25일 지급', 'hr_admin'),
+('FIN_AUDIT', 1, 31, 20, 'Y', '재무팀 내부감사: 당월 1일~말일 기준, 당월 20일 지급', 'hr_admin'),
+
+-- === 익월 마감 (전월 21일 ~ 당월 20일 등) ===
+('PROD_LINE_A', 21, 20, 28, 'Y', '생산1라인: 전월 21일~당월 20일 기준, 당월 28일 지급', 'payroll_specialist'),
+('PROD_LINE_B', 21, 20, 28, 'Y', '생산2라인: 전월 21일~당월 20일 기준, 당월 28일 지급', 'payroll_specialist'),
+('PROD_QC', 21, 20, 28, 'Y', '생산 품질관리(QC): 전월 21일~당월 20일 기준, 당월 28일 지급', 'payroll_specialist'),
+('LOGISTICS_SEOUL', 26, 25, 5, 'Y', '물류팀 서울센터: 전월 26일~당월 25일 기준, 익월 5일 지급', 'system_manager'),
+('LOGISTICS_BUSAN', 26, 25, 5, 'Y', '물류팀 부산센터: 전월 26일~당월 25일 기준, 익월 5일 지급', 'system_manager'),
+('SALES_DOMESTIC', 21, 20, 31, 'Y', '국내영업팀: 전월 21일~당월 20일 기준, 당월 말일 지급', 'hr_admin'),
+('SALES_OVERSEAS', 21, 20, 31, 'Y', '해외영업팀: 전월 21일~당월 20일 기준, 당월 말일 지급', 'hr_admin'),
+('SALES_B2B', 21, 20, 10, 'Y', 'B2B영업팀: 전월 21일~당월 20일 기준, 익월 10일 지급(실적합산)', 'hr_admin'),
+('FIELD_SVC_ENG', 26, 25, 10, 'Y', '필드서비스 엔지니어: 전월 26일~당월 25일 기준, 익월 10일 지급', 'system_manager'),
+('PROD_MAINTENANCE', 21, 20, 28, 'Y', '생산 설비보전팀: 전월 21일~당월 20일 기준, 당월 28일 지급', 'payroll_specialist'),
+('LOGISTICS_INTL', 26, 25, 5, 'Y', '국제물류팀: 전월 26일~당월 25일 기준, 익월 5일 지급', 'system_manager'),
+('CUSTOMER_SUPPORT', 16, 15, 25, 'Y', '고객지원팀(교대): 당월 16일~익월 15일 기준, 익월 25일 지급', 'hr_admin'),
+
+-- === 다양한 계약 형태 (파트타임, 인턴, 프리랜서 등) ===
+('PARTTIME_STORE', 16, 15, 20, 'Y', '매장 아르바이트: 당월 16일~익월 15일 기준, 익월 20일 지급', 'payroll_specialist'),
+('INTERN_2025_SM', 1, 31, 10, 'Y', '2025년 하계인턴: 당월 1일~말일 기준, 익월 10일 지급', 'hr_admin'),
+('INTERN_2025_WN', 1, 31, 10, 'Y', '2025년 동계인턴: 당월 1일~말일 기준, 익월 10일 지급', 'hr_admin'),
+('FREELANCER_DEV', 1, 31, 15, 'Y', '개발 프리랜서: 당월 1일~말일 기준, 익월 15일 정산', 'system_manager'),
+('FREELANCER_DESIGN', 1, 31, 15, 'Y', '디자인 프리랜서: 당월 1일~말일 기준, 익월 15일 정산', 'system_manager'),
+('CONTRACTOR_CS', 1, 31, 25, 'Y', '고객센터 계약직: 당월 1일~말일 기준, 당월 25일 지급', 'payroll_specialist'),
+('DISPATCH_TECH', 21, 20, 7, 'Y', '기술지원 파견직: 전월 21일~당월 20일 기준, 익월 7일 지급', 'hr_admin'),
+('PARTTIME_OFFICE', 1, 15, 20, 'Y', '사무보조 아르바이트: 당월 1일~15일(상반기) 기준, 당월 20일 지급', 'payroll_specialist'),
+('PARTTIME_OFFICE_B', 16, 31, 5, 'Y', '사무보조 아르바이트: 당월 16일~말일(하반기) 기준, 익월 5일 지급', 'payroll_specialist'),
+('CONTRACTOR_PMO', 1, 31, 10, 'Y', 'PMO 계약직: 당월 1일~말일 기준, 익월 10일 지급', 'system_manager'),
+('INTERN_RND_2026', 1, 31, 10, 'Y', '2026년 연구소 인턴: 당월 1일~말일 기준, 익월 10일 지급', 'hr_admin'),
+('FREELANCER_WRITER', 1, 31, 20, 'Y', '프리랜서 작가: 당월 1일~말일 기준, 익월 20일 정산', 'system_manager'),
+('DISPATCH_ACCOUNT', 1, 31, 10, 'Y', '회계 파견직: 당월 1일~말일 기준, 익월 10일 지급', 'hr_admin'),
+('COLLEGE_TRAINEE', 1, 31, 10, 'Y', '산학협력 연수생: 당월 1일~말일 기준, 익월 10일 지급', 'hr_admin');
+
+-- 기준급여 마스터 테이블 (숫자 ID를 기본 키로 사용) --
+CREATE TABLE ZHR_BASE_PAY (
+    PAY_ID  		BIGINT         NOT NULL AUTO_INCREMENT COMMENT '급여이력 ID (PK)',
+    ZEMP_NO         VARCHAR(20)    NOT NULL COMMENT '사원번호',
+    ZFROM_DT        DATE           NOT NULL COMMENT '적용 시작일',
+    ZTO_DT          DATE           NOT NULL COMMENT '적용 종료일',
+    ZBASE_PAY       DECIMAL(18, 2) NOT NULL COMMENT '기준급여',
+    ZBASE_UNIT      VARCHAR(10)    NOT NULL COMMENT '급여 단위 (YEARLY, MONTHLY, DAILY, HOURLY)',
+    ZSTD_HOURS      SMALLINT       NOT NULL COMMENT '월 소정 근로시간',
+    ZNOTE           VARCHAR(500)   NULL     COMMENT '비고',
+    CREATED_AT      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME       NULL     COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)    NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (PAY_ID),
+
+    -- 비즈니스 규칙을 위한 UNIQUE KEY 설정 (사번 + 시작일 중복 방지)
+    UNIQUE KEY UK_ZHR_BASE_PAY (ZEMP_NO, ZFROM_DT),
+
+    -- 데이터 무결성을 위한 제약 조건
+    CONSTRAINT CHK_ZBASE_PAY   CHECK (ZBASE_PAY >= 0),
+    CONSTRAINT CHK_ZBASE_UNIT  CHECK (ZBASE_UNIT IN ('YEARLY', 'MONTHLY', 'DAILY', 'HOURLY')),
+    CONSTRAINT CHK_ZSTD_HOURS  CHECK (ZSTD_HOURS > 0)
+) COMMENT '사원별 기준급여 및 이력 관리 테이블 (ID 기준)';
+
+INSERT INTO ZHR_BASE_PAY 
+(ZEMP_NO, ZFROM_DT, ZTO_DT, ZBASE_PAY, ZBASE_UNIT, ZSTD_HOURS, ZNOTE, CREATED_BY)
+VALUES
+-- 기존 데이터 --
+('EMP001', '2023-03-02', '2023-12-31', 48000000.00, 'YEARLY', 209, '신입사원 초임 연봉', 'HR_Admin'),
+('EMP001', '2024-01-01', '2024-12-31', 53000000.00, 'YEARLY', 209, '2024년 정기 급여 인상', 'HR_Admin'),
+('EMP001', '2025-01-01', '9999-12-31', 62000000.00, 'YEARLY', 209, '대리 승진에 따른 연봉 인상', 'HR_Admin'),
+('EMP002', '2024-07-01', '2024-12-31', 68000000.00, 'YEARLY', 209, '과장 직급 경력 입사', 'HR_Admin'),
+('EMP002', '2025-01-01', '9999-12-31', 72000000.00, 'YEARLY', 209, '2025년 정기 급여 인상', 'HR_Admin'),
+('EMP003', '2025-01-15', '9999-12-31', 4000000.00, 'MONTHLY', 209, '전문 계약직 (월급)', 'HR_Admin'),
+('EMP004', '2024-11-01', '9999-12-31', 50000000.00, 'YEARLY', 209, '신입사원', 'HR_Admin'),
+('EMP005', '2021-09-01', '2022-12-31', 58000000.00, 'YEARLY', 209, '경력 입사 (선임)', 'HR_Admin'),
+('EMP005', '2023-01-01', '2023-12-31', 61500000.00, 'YEARLY', 209, '2023년 정기 인상', 'HR_Admin'),
+('EMP005', '2024-01-01', '2024-12-31', 65000000.00, 'YEARLY', 209, '2024년 정기 인상', 'HR_Admin'),
+('EMP005', '2025-01-01', '9999-12-31', 71000000.00, 'YEARLY', 209, '책임(팀장) 승진', 'HR_Admin'),
+('EMP006', '2024-03-04', '2024-12-31', 55000000.00, 'YEARLY', 209, '신규 입사 (우수 인재)', 'HR_Admin'),
+('EMP006', '2025-01-01', '9999-12-31', 65000000.00, 'YEARLY', 209, '2025년 특별 성과 인상', 'HR_Admin'),
+('EMP007', '2023-07-10', '2024-06-30', 75000000.00, 'YEARLY', 209, '프로젝트 리더로 입사', 'system_manager'),
+('EMP007', '2024-07-01', '9999-12-31', 70000000.00, 'YEARLY', 209, '본사 스태프 직무로 변경', 'system_manager'),
+('EMP008', '2024-09-02', '2025-03-31', 12000.00, 'HOURLY', 209, '마케팅팀 아르바이트', 'payroll_specialist'),
+('EMP008', '2025-04-01', '9999-12-31', 13500.00, 'HOURLY', 209, '시급 인상', 'payroll_specialist'),
+('EMP009', '2023-11-01', '2024-10-31', 3800000.00, 'MONTHLY', 209, '1년 계약직 (IT지원)', 'HR_Admin'),
+('EMP009', '2024-11-01', '9999-12-31', 51000000.00, 'YEARLY', 209, '정규직 전환', 'HR_Admin'),
+('EMP010', '2025-02-17', '9999-12-31', 250000.00, 'DAILY', 209, '설비 기술지원 전문가 (일급)', 'system_manager'),
+('EMP011', '2022-08-16', '2023-12-31', 47000000.00, 'YEARLY', 209, '디자이너 신규 입사', 'HR_Admin'),
+('EMP011', '2024-01-01', '2024-12-31', 52000000.00, 'YEARLY', 209, '2024년 정기 인상', 'HR_Admin'),
+('EMP011', '2025-01-01', '9999-12-31', 56500000.00, 'YEARLY', 209, '2025년 정기 인상', 'HR_Admin'),
+('EMP012', '2023-01-10', '2024-12-31', 45000000.00, 'YEARLY', 209, '영업팀 신입', 'HR_Admin'),
+('EMP012', '2025-01-01', '9999-12-31', 48000000.00, 'YEARLY', 209, '영업관리 직무 이동', 'HR_Admin'),
+('EMP013', '2023-04-01', '2023-12-31', 11000.00, 'HOURLY', 209, '사무보조 아르바이트', 'payroll_specialist'),
+('EMP013', '2024-01-01', '2024-12-31', 11500.00, 'HOURLY', 209, '2024년 시급 인상', 'payroll_specialist'),
+('EMP013', '2025-01-01', '9999-12-31', 12500.00, 'HOURLY', 209, '2025년 시급 인상', 'payroll_specialist'),
+('EMP014', '2024-02-01', '2024-12-31', 95000000.00, 'YEARLY', 209, '부장급 경력 입사', 'system_manager'),
+('EMP014', '2025-01-01', '9999-12-31', 102000000.00, 'YEARLY', 209, '2025년 임원 승진', 'system_manager'),
+('EMP015', '2025-09-01', '9999-12-31', 49000000.00, 'YEARLY', 209, '2025년 하반기 공채 신입', 'HR_Admin'),
+('EMP016', '2025-08-19', '9999-12-31', 3500000.00, 'MONTHLY', 209, '인사팀 계약직 (1년)', 'HR_Admin');

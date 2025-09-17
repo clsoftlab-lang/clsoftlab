@@ -19,7 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "ZHR_PAY_ITEM")
-public class PayItem {
+public class PayItem extends BaseEntity {
 
 	@Id
     @Column(name = "ZITEM_CD", length = 20)

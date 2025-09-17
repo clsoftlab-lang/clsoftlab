@@ -15,6 +15,6 @@ spring:
 # db를 생성하셨다면 사용하신 db의 username과 비밀번호를 설정해주세요.
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/clsoftlab
+    url: jdbc:mysql://61.74.135.228:3306/clsoftlabnew
     username: root
-    password: 1qazxsw2#EDC
+    password: clsoftlab2024!@#
