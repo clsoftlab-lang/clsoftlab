@@ -3,6 +3,8 @@ package com.example.clsoftlab.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.example.clsoftlab.dto.pay.BasePayRequestDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -47,4 +49,13 @@ public class BasePay extends BaseEntity {
 
     @Column(name = "ZNOTE", length = 500)
     private String note; // 비고
+    
+    public void update (BasePayRequestDto dto) {
+    	this.fromDate = dto.getFromDate();
+    	this.toDate = dto.getToDate();
+    	this.basePay = dto.getBasePay();
+    	this.baseUnit = dto.getBaseUnit();
+    	this.standardHours = dto.getStandardHours();
+    	this.note = dto.getNote();
+    }
 }

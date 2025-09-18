@@ -399,3 +399,68 @@ VALUES
 ('EMP014', '2025-01-01', '9999-12-31', 102000000.00, 'YEARLY', 209, '2025년 임원 승진', 'system_manager'),
 ('EMP015', '2025-09-01', '9999-12-31', 49000000.00, 'YEARLY', 209, '2025년 하반기 공채 신입', 'HR_Admin'),
 ('EMP016', '2025-08-19', '9999-12-31', 3500000.00, 'MONTHLY', 209, '인사팀 계약직 (1년)', 'HR_Admin');
+
+-- 월별/직군별 소정 근로시간 관리 테이블 --
+CREATE TABLE ZHR_STD_HOURS (
+    STD_HOURS_ID    BIGINT          NOT NULL AUTO_INCREMENT COMMENT '소정근로시간 ID (PK)',
+    ZCAL_YM         VARCHAR(6)      NOT NULL COMMENT '기준연월 (YYYYMM)',
+    ZJOB_GRP        VARCHAR(10)     NULL     COMMENT '직군코드',
+    ZSTD_HOURS      SMALLINT        NOT NULL COMMENT '월 소정 근로시간',
+    ZNOTE           VARCHAR(500)    NULL     COMMENT '설명 (시간 편차 등 메모)',
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NULL     COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (STD_HOURS_ID),
+
+    -- 비즈니스 규칙을 위한 UNIQUE KEY 설정 (기준연월 + 직군코드 중복 방지)
+    UNIQUE KEY UK_ZHR_STD_HOURS (ZCAL_YM, ZJOB_GRP),
+
+    -- 데이터 무결성을 위한 제약 조건
+    CONSTRAINT CHK_ZSTD_HOURS_POSITIVE CHECK (ZSTD_HOURS >= 0)
+) COMMENT '월별/직군별 소정 근로시간 관리 테이블';
+
+
+-- 더미 데이터 --
+INSERT INTO ZHR_STD_HOURS
+(ZCAL_YM, ZJOB_GRP, ZSTD_HOURS, ZNOTE, CREATED_BY)
+VALUES
+-- 2024년 데이터 (직군 공통)
+('202401', NULL, 209, '1월 공휴일(신정) 반영', 'HR_Admin'),
+('202402', NULL, 191, '2월 공휴일(설날) 반영, 윤년', 'HR_Admin'),
+('202403', NULL, 209, '3월 공휴일(삼일절) 반영', 'HR_Admin'),
+('202404', NULL, 201, '4월 공휴일(총선) 반영', 'HR_Admin'),
+('202405', NULL, 200, '5월 공휴일(어린이날, 부처님오신날) 반영', 'HR_Admin'),
+('202406', NULL, 200, '6월 공휴일(현충일) 반영', 'HR_Admin'),
+('202407', NULL, 217, '공휴일 없음', 'HR_Admin'),
+('202408', NULL, 209, '8월 공휴일(광복절) 반영', 'HR_Admin'),
+('202409', NULL, 184, '9월 공휴일(추석) 반영', 'HR_Admin'),
+('202410', NULL, 200, '10월 공휴일(개천절, 한글날) 반영', 'HR_Admin'),
+('202411', NULL, 209, '공휴일 없음', 'HR_Admin'),
+('202412', NULL, 209, '12월 공휴일(성탄절) 반영', 'HR_Admin'),
+
+-- 2025년 데이터 (직군 공통)
+('202501', NULL, 209, '1월 공휴일(신정, 설날) 반영', 'HR_Admin'),
+('202502', NULL, 200, '공휴일 없음', 'HR_Admin'),
+('202503', NULL, 209, '3월 공휴일(삼일절) 반영', 'HR_Admin'),
+('202504', NULL, 209, '공휴일 없음', 'HR_Admin'),
+('202505', NULL, 200, '5월 공휴일(어린이날, 부처님오신날) 반영', 'HR_Admin'),
+('202506', NULL, 208, '6월 공휴일(현충일) 반영', 'HR_Admin'),
+('202507', NULL, 217, '공휴일 없음', 'HR_Admin'),
+('202508', NULL, 209, '8월 공휴일(광복절) 반영', 'HR_Admin'),
+('202509', NULL, 209, '공휴일 없음', 'HR_Admin'),
+('202510', NULL, 192, '10월 공휴일(개천절, 한글날, 추석) 반영', 'HR_Admin'),
+('202511', NULL, 200, '공휴일 없음', 'HR_Admin'),
+('202512', NULL, 209, '12월 공휴일(성탄절) 반영', 'HR_Admin'),
+
+-- 특정 직군 예외 데이터
+('202501', 'PROD', 220, '1월 생산직 특별 근무 편성', 'system_manager'),
+('202502', 'PROD', 210, '2월 생산직 특별 근무 편성', 'system_manager'),
+('202507', 'SALES', 225, '7월 영업팀 성수기 특별 근무', 'payroll_specialist'),
+('202508', 'SALES', 225, '8월 영업팀 성수기 특별 근무', 'payroll_specialist'),
+('202512', 'DEV', 192, '12월 개발팀 연말 프로젝트 집중 기간 단축 근무', 'HR_Admin'),
+('202512', 'CS', 168, '고객지원팀 교대근무 B조 기준', 'HR_Admin');
+
+

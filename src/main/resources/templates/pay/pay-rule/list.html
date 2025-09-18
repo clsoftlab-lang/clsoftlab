@@ -645,7 +645,7 @@
 		    }
 		    
 		    try {
-				const checkresponse = await fetch(`/pay/pay-rule/checkOverlap/edit?itemCode=${data.itemCode}&ruleId=${data.ruleId}&fromDate=${data.fromDate}&toDate=${data.toDate}`);
+				const checkresponse = await fetch(`/pay/pay-rule/checkOverlap/update?itemCode=${data.itemCode}&ruleId=${data.ruleId}&fromDate=${data.fromDate}&toDate=${data.toDate}`);
 		        
 		        const checkResult = Number(await checkresponse.text());
 		        

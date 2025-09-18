@@ -80,7 +80,7 @@ public class PayRuleController {
 	
 	// 중복 검사용(수정시)
 	@ResponseBody
-	@GetMapping("/checkOverlap/edit")
+	@GetMapping("/checkOverlap/update")
 	public long checkOverlappingRulesForUpdate (@RequestParam String itemCode, @RequestParam long ruleId ,
 			@RequestParam LocalDate fromDate,@RequestParam LocalDate toDate) {
 		
