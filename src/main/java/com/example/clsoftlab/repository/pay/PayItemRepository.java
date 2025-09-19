@@ -23,4 +23,7 @@ public interface PayItemRepository extends JpaRepository<PayItem, String> {
             @Param("itemType") String itemType,
             @Param("useYn") String useYn,
             Pageable pageable);
+	
+	// 검색
+	public Page<PayItem> findByItemNameContainingAndUseYnContainingAndItemTypeContaining(String itemName, String useYn, String itemType, Pageable pageable);
 }

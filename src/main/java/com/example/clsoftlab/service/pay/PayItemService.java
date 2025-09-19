@@ -58,4 +58,13 @@ public class PayItemService {
 
 		payItem.update(payItemDto);
 	}
+	
+	//DEDUCT만 검색
+	public Page<PayItemListDto> searchDeduct (String itemName, String useYn, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by("itemCode"));
+		
+		return payItemRepository.findByItemNameContainingAndUseYnContainingAndItemTypeContaining(itemName, useYn, "DEDUCT", pageable)
+				.map(i -> modelMapper.map(i, PayItemListDto.class));
+		
+	}
 }

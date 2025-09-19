@@ -463,4 +463,143 @@ VALUES
 ('202512', 'DEV', 192, '12월 개발팀 연말 프로젝트 집중 기간 단축 근무', 'HR_Admin'),
 ('202512', 'CS', 168, '고객지원팀 교대근무 B조 기준', 'HR_Admin');
 
+-- 사원별 소정 근로시간 예외 관리 테이블 --
+CREATE TABLE ZHR_STD_HOURS_EMP (
+    STD_HOURS_EMP_ID BIGINT       NOT NULL AUTO_INCREMENT COMMENT '소정근로시간 예외 ID (PK)',
+    ZCAL_YM          VARCHAR(6)   NOT NULL COMMENT '기준연월 (YYYYMM)',
+    ZEMP_NO          VARCHAR(20)  NOT NULL COMMENT '사번',
+    ZSTD_HOURS       SMALLINT     NOT NULL COMMENT '월 소정 근로시간',
+    ZREASON_CD       VARCHAR(20)  NULL     COMMENT '예외 사유코드',
+    ZNOTE            VARCHAR(500) NULL     COMMENT '비고 (예외 원인 주석)',
+    CREATED_AT       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY       VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT       DATETIME     NULL     COMMENT '수정 일시',
+    UPDATED_BY       VARCHAR(50)  NULL     COMMENT '수정자',
 
+    -- 기본 키 설정
+    PRIMARY KEY (STD_HOURS_EMP_ID),
+
+    -- 비즈니스 규칙을 위한 UNIQUE KEY 설정 (사번 + 기준연월 중복 방지)
+    UNIQUE KEY UK_ZHR_STD_HOURS_EMP (ZEMP_NO, ZCAL_YM),
+
+    -- 데이터 무결성을 위한 제약 조건
+    CONSTRAINT CHK_ZSTD_HOURS_EMP_POSITIVE CHECK (ZSTD_HOURS >= 0)
+) COMMENT '사원별 소정 근로시간 예외 관리';
+
+
+-- 사원별 소정 근로시간 예외 관리 테이블 더미 데이터 --
+INSERT INTO ZHR_STD_HOURS_EMP
+(ZCAL_YM, ZEMP_NO, ZSTD_HOURS, ZREASON_CD, ZNOTE, CREATED_BY)
+VALUES
+-- 2024년 데이터 --
+('202401', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
+('202402', 'EMP001', 152, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
+('202403', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
+('202404', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
+('202401', 'EMP002', 104, 'E02', '주 20시간 계약직', 'HR_Admin'),
+('202402', 'EMP002', 96, 'E02', '주 20시간 계약직', 'HR_Admin'),
+('202403', 'EMP002', 104, 'E02', '주 20시간 계약직', 'HR_Admin'),
+('202404', 'EMP002', 104, 'E02', '주 20시간 계약직', 'HR_Admin'),
+('202410', 'EMP003', 120, 'E03', '건강상 사유로 한시적 단축 근무 (3개월)', 'HR_Admin'),
+('202411', 'EMP003', 120, 'E03', '건강상 사유로 한시적 단축 근무 (3개월)', 'HR_Admin'),
+('202412', 'EMP003', 120, 'E03', '건강상 사유로 한시적 단축 근무 (3개월)', 'HR_Admin'),
+('202412', 'EMP004', 180, 'E04', '미주 파견 복귀 후 1주간 시차 적응', 'HR_Admin'),
+('202411', 'EMP005', 168, 'E05', '임신기 근로시간 단축 신청', 'HR_Admin'),
+('202412', 'EMP005', 168, 'E05', '임신기 근로시간 단축 신청', 'HR_Admin'),
+
+-- 2025년 데이터 --
+('202501', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
+('202502', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
+('202501', 'EMP002', 104, 'E02', '주 20시간 계약직 연장', 'HR_Admin'),
+('202502', 'EMP002', 100, 'E02', '주 20시간 계약직 연장', 'HR_Admin'),
+('202503', 'EMP002', 104, 'E02', '주 20시간 계약직 연장', 'HR_Admin'),
+('202501', 'EMP101', 180, 'E06', '수습기간 중 교육으로 인한 근로시간 조정', 'system_manager'),
+('202502', 'EMP102', 230, 'E07', '2월 긴급 프로젝트 투입', 'payroll_specialist'),
+('202503', 'EMP102', 230, 'E07', '3월 긴급 프로젝트 투입', 'payroll_specialist'),
+('202504', 'EMP103', 80, 'E08', '월 80시간 자문 계약', 'HR_Admin'),
+('202505', 'EMP103', 80, 'E08', '월 80시간 자문 계약', 'HR_Admin'),
+('202506', 'EMP103', 90, 'E08', '월 80시간 자문 계약 (10시간 추가 정산)', 'HR_Admin'),
+('202503', 'EMP007', 120, 'E09', '석사 학위 과정 이수를 위한 단축 근무', 'HR_Admin'),
+('202504', 'EMP007', 120, 'E09', '석사 학위 과정 이수를 위한 단축 근무', 'HR_Admin'),
+('202505', 'EMP007', 120, 'E09', '석사 학위 과정 이수를 위한 단축 근무', 'HR_Admin'),
+('202506', 'EMP007', 120, 'E09', '석사 학위 과정 이수를 위한 단축 근무', 'HR_Admin'),
+('202509', 'EMP009', 168, 'E11', '1년간의 휴직 후 복귀, 적응 프로그램', 'HR_Admin'),
+('202510', 'EMP009', 168, 'E11', '1년간의 휴직 후 복귀, 적응 프로그램', 'HR_Admin'),
+('202511', 'EMP010', 190, 'E99', '가족 간병을 위한 일시적 근무시간 조정', 'system_manager');
+
+CREATE TABLE ZHR_PAY_DEDUCT_REASON (
+    PAY_DEDUCT_REASON_ID BIGINT       NOT NULL AUTO_INCREMENT COMMENT '징계/병가 공제 ID (PK)',
+    ZEMP_NO              VARCHAR(20)  NOT NULL COMMENT '사번',
+    ZPAY_YM              VARCHAR(6)   NOT NULL COMMENT '급여월 (YYYYMM)',
+    ZSEQ_NO              SMALLINT     NOT NULL COMMENT '급여차수',
+    ZITEM_CD             VARCHAR(20)  NOT NULL COMMENT '감액 항목 코드 (FK)',
+    ZDAYS                DECIMAL(5,2) NULL     COMMENT '감액 일수',
+    ZHOURS               DECIMAL(5,2) NULL     COMMENT '감액 시간',
+    ZAMOUNT              BIGINT       NOT NULL COMMENT '감액 금액',
+    ZREASON_CD           VARCHAR(20)  NOT NULL COMMENT '사유 코드',
+    ZNOTE                VARCHAR(500) NULL     COMMENT '비고 (상세 사유 등)',
+    CREATED_AT           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY           VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT           DATETIME     NULL     COMMENT '수정 일시',
+    UPDATED_BY           VARCHAR(50)  NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (PAY_DEDUCT_REASON_ID),
+
+    -- 비즈니스 규칙을 위한 UNIQUE KEY 설정 (동일 급여월/차수/사번에 동일 항목 중복 등록 방지)
+    UNIQUE KEY UK_ZHR_PAY_DEDUCT_REASON (ZEMP_NO, ZPAY_YM, ZSEQ_NO, ZITEM_CD),
+
+    -- 데이터 무결성을 위한 제약 조건
+    CONSTRAINT CHK_ZDAYS_POSITIVE CHECK (ZDAYS >= 0),
+    CONSTRAINT CHK_ZHOURS_POSITIVE CHECK (ZHOURS >= 0),
+    CONSTRAINT CHK_ZAMOUNT_POSITIVE CHECK (ZAMOUNT >= 0),
+
+    -- 외래 키(Foreign Key) 설정
+    CONSTRAINT FK_DEDUCT_REASON_TO_PAY_ITEM
+    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD)
+) COMMENT '징계/병가 등 급여 감액 사유 관리';
+
+-- ZHR_PAY_DEDUCT_REASON 테이블에 삽입할 더미 데이터 (30건)
+INSERT INTO ZHR_PAY_DEDUCT_REASON 
+(ZEMP_NO, ZPAY_YM, ZSEQ_NO, ZITEM_CD, ZDAYS, ZHOURS, ZAMOUNT, ZREASON_CD, ZNOTE, CREATED_BY) 
+VALUES
+-- === DED001: 학자금상환 ===
+('EMP102', '202507', 1, 'DED001', NULL, NULL, 175000, 'STUDENT_LOAN', '취업 후 학자금 상환 (7월분)', 'hr_manager'),
+('EMP102', '202508', 1, 'DED001', NULL, NULL, 175000, 'STUDENT_LOAN', '취업 후 학자금 상환 (8월분)', 'hr_manager'),
+('EMP102', '202509', 1, 'DED001', NULL, NULL, 175000, 'STUDENT_LOAN', '취업 후 학자금 상환 (9월분)', 'hr_manager'),
+
+-- === DED002: 노조비 ===
+('EMP001', '202507', 1, 'DED002', NULL, NULL, 20000, 'UNION_FEE', '7월 정기 노조비', 'hr_manager'),
+('EMP001', '202508', 1, 'DED002', NULL, NULL, 20000, 'UNION_FEE', '8월 정기 노조비', 'hr_manager'),
+('EMP001', '202509', 1, 'DED002', NULL, NULL, 20000, 'UNION_FEE', '9월 정기 노조비', 'hr_manager'),
+('EMP002', '202507', 1, 'DED002', NULL, NULL, 25000, 'UNION_FEE', '7월 정기 노조비 (간부)', 'hr_manager'),
+('EMP002', '202508', 1, 'DED002', NULL, NULL, 25000, 'UNION_FEE', '8월 정기 노조비 (간부)', 'hr_manager'),
+('EMP002', '202509', 1, 'DED002', NULL, NULL, 25000, 'UNION_FEE', '9월 정기 노조비 (간부)', 'hr_manager'),
+
+-- === DED003: 사내대출상환 ===
+('EMP101', '202507', 1, 'DED003', NULL, NULL, 250000, 'LOAN_REPAY', '사내대출 원리금 상환 (3/24)', 'hr_manager'),
+('EMP101', '202508', 1, 'DED003', NULL, NULL, 250000, 'LOAN_REPAY', '사내대출 원리금 상환 (4/24)', 'hr_manager'),
+('EMP101', '202509', 1, 'DED003', NULL, NULL, 250000, 'LOAN_REPAY', '사내대출 원리금 상환 (5/24)', 'hr_manager'),
+('EMP301', '202509', 1, 'DED003', NULL, NULL, 300000, 'LOAN_REPAY', '긴급 생활자금 대출 상환 (1/12)', 'hr_manager'),
+('EMP102', '202509', 2, 'DED003', NULL, NULL, 50000, 'LOAN_INTEREST', '사내대출 이자 별도 상환(성과급 지급분)', 'system_admin'),
+
+-- === DED004: 기숙사비 ===
+('EMP201', '202507', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '7월 기숙사 관리비', 'hr_manager'),
+('EMP201', '202508', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '8월 기숙사 관리비', 'hr_manager'),
+('EMP201', '202509', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '9월 기숙사 관리비', 'hr_manager'),
+('EMP202', '202507', 1, 'DED004', NULL, NULL, 180000, 'DORM_FEE', '7월 기숙사 관리비 (2인실)', 'hr_manager'),
+('EMP202', '202508', 1, 'DED004', NULL, NULL, 180000, 'DORM_FEE', '8월 기숙사 관리비 (2인실)', 'hr_manager'),
+('EMP301', '202509', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '9월 기숙사비', 'hr_manager'),
+
+-- === DED005: 복지기금 (징계/병가 사유 포함) ===
+('EMP003', '202509', 1, 'DED005', NULL, NULL, 10000, 'WELFARE_FUND', '9월 정기 복지기금', 'hr_manager'),
+('EMP101', '202507', 1, 'DED005', 1.0, NULL, 185000, 'DISCIPLINE_01', '무단결근 1일분 감봉', 'system_admin'),
+('EMP202', '202508', 1, 'DED005', NULL, 4.0, 95000, 'DISCIPLINE_02', '근무지 무단 이탈 4시간분 감급', 'system_admin'),
+('EMP001', '202508', 1, 'DED005', 2.0, NULL, 250000, 'SICK_UNPAID', '개인사유 무급 병가 2일 사용', 'system_admin'),
+('EMP201', '202509', 1, 'DED005', 0.5, NULL, 55000, 'SICK_UNPAID', '오전 무급 병가(반차)', 'system_admin'),
+
+-- === DED006: 개인연금 ===
+('EMP002', '202507', 1, 'DED006', NULL, NULL, 100000, 'PENSION_PRI', '개인연금 대납분 공제 (7월)', 'hr_manager'),
+('EMP002', '202508', 1, 'DED006', NULL, NULL, 100000, 'PENSION_PRI', '개인연금 대납분 공제 (8월)', 'hr_manager'),
+('EMP002', '202509', 1, 'DED006', NULL, NULL, 100000, 'PENSION_PRI', '개인연금 대납분 공제 (9월)', 'hr_manager'),
+('EMP101', '202509', 1, 'DED006', NULL, NULL, 150000, 'PENSION_PRI', '개인연금 신규 가입분 공제', 'hr_manager');

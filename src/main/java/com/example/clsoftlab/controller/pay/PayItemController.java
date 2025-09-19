@@ -114,6 +114,24 @@ public class PayItemController {
 		
 		return itemPage;
 	}
+	
+	// 급여 항목 검색 (DEDUCT만)
+		@ResponseBody
+		@GetMapping("/deductList")
+		public Page<PayItemListDto> getDeductList(@RequestParam(defaultValue = "") String itemName, @RequestParam(defaultValue = "") String useYn, 
+				@RequestParam(required = false) Integer page) { 
+			
+			
+			if (page == null) {
+				page = 0;
+			}
+			int size= 1000;
+			
+			Page<PayItemListDto> itemPage = payItemService.searchDeduct(itemName, useYn, page, size);
+			
+			
+			return itemPage;
+		}
 
     @GetMapping("test")
     public String payItemTestList(@RequestParam(defaultValue = "") String itemName, @RequestParam(defaultValue = "") String itemType,
