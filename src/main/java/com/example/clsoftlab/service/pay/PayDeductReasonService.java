@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.example.clsoftlab.dto.pay.PayDeductReasonDetailDto;
 import com.example.clsoftlab.dto.pay.PayDeductReasonRequestDto;
 import com.example.clsoftlab.entity.PayDeductReason;
-import com.example.clsoftlab.repository.PayDeductReasonRepository;
+import com.example.clsoftlab.repository.pay.PayDeductReasonRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;

@@ -1,4 +1,4 @@
-package com.example.clsoftlab.repository;
+package com.example.clsoftlab.repository.pay;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

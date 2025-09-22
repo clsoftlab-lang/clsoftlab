@@ -37,7 +37,7 @@
                         <h5 class="card-title">검색 조건</h5>
                     </div>
                     <div class="card-body">
-                        <form action="/pay/pay-deduct" method="get">
+                        <form action="/pay/pay-deduct" method="get" id="searchForm">
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
@@ -54,12 +54,13 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>감액 항목 코드</label>
-                                        <input class="form-control" name="itemCode" placeholder="항목 코드 입력" th:value="${itemCode}">
+                                        <input class="form-control" name="itemCode" placeholder="항목 코드 입력" th:value="${itemCode}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end">
                                     <div class="form-group w-100 position-relative">
                                         <button type="submit" class="btn btn-primary w-100">조회</button>
+                              			<button type="button" id="searchResetBtn" class="btn btn-sm btn-outline-secondary position-absolute" style="top: -30px; right: 0;">초기화</button>
                                     </div>
                                 </div>
                             </div>
@@ -132,11 +133,11 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">급여차수</label>
-                                            <input type="number" class="form-control" name="seqNo" required min="1" value="1">
+                                            <input type="number" class="form-control" name="seqNo" required min="1" value="1" max="99999999">
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">감액 항목 코드</label>
-                                            <input type="text" class="form-control" name="itemCode" required maxlength="20">
+                                            <input type="text" class="form-control" name="itemCode" required maxlength="20" readonly>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">감액 일수</label>
@@ -164,7 +165,7 @@
                             <div class="modal-footer gap-2">
                                 <button type="reset" form="addForm" class="btn btn-outline-secondary">초기화</button>
                                 <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
-                                <button type="submit" form="addForm" class="btn btn-primary" onclick="addNewPayDeductReason()">저장</button>
+                                <button type="button" class="btn btn-primary" onclick="addNewPayDeductReason()">저장</button>
                             </div>
                         </div>
                     </div>
@@ -191,11 +192,11 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">급여차수</label>
-                                            <input type="number" class="form-control" name="seqNo">
+                                            <input type="number" class="form-control" name="seqNo" max="99999999">
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">감액 항목 코드</label>
-                                            <input type="text" class="form-control" name="itemCode">
+                                            <input type="text" class="form-control" name="itemCode" readonly="readonly">
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">감액 일수</label>
@@ -223,7 +224,7 @@
                             
                             <div class="modal-footer gap-2">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                <button type="button" class="btn btn-danger" onclick="deletePaydeductReason()">삭제</button>
+                                <button type="button" class="btn btn-danger"  data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" id="initiateDeleteBtn">삭제</button>
                                 <button type="button" onclick="updatePayDeductReason()" class="btn btn-primary">변경사항 저장</button>
                             </div>
                         </div>
@@ -277,6 +278,25 @@
 				        </div>
 				    </div>
 				</div>
+				
+				<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">삭제 확인</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>정말로 삭제하시겠습니까?</p>
+                                <p class="text-danger">이 작업은 되돌릴 수 없습니다.</p>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">삭제 실행</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
 
@@ -340,20 +360,57 @@
 		            }
 		        });
 	    	 
-	     		// 수정 모달창을 열 때, 불러오기.
-		        const tableBody = document.querySelector('.datatable tbody');
-			    if (tableBody) {
-			        tableBody.addEventListener('click', function(event) {
-			        	
-			            const editButton = event.target.closest('.edit-btn');
-			
-			            
-			            if (editButton) {
-			                const id = editButton.dataset.id; 
-			                findDetail(id);
-			            }
-			        });
-			    }
+     		// 수정 모달창을 열 때, 불러오기.
+	        const tableBody = document.querySelector('.table tbody');
+		    if (tableBody) {
+		        tableBody.addEventListener('click', function(event) {
+		        	
+		            const editButton = event.target.closest('.edit-btn');
+		
+		            
+		            if (editButton) {
+		                const id = editButton.dataset.id; 
+		                findDetail(id);
+		            }
+		        });
+		        
+		        
+		        // 삭제 모달, 버튼 관련
+		        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+		        if (deleteConfirmModal) {
+		            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+		            
+		            // '삭제 실행' 버튼 클릭 시 실제 삭제 함수 호출
+		            confirmDeleteBtn.addEventListener('click', function() {
+		                const id = this.dataset.id; // 저장해둔 id 값을 가져옴
+		                deletePayDeductReason(id);
+		            });
+		        }
+		        
+		        // 수정 모달의 '삭제' 버튼을 클릭했을 때, 삭제할 id를 확인 모달에 넘겨주는 역할
+		        const editModal = document.getElementById('editDeductModal');
+		        if (editModal) {
+		            const initiateDeleteBtn = document.getElementById('initiateDeleteBtn');
+		            initiateDeleteBtn.addEventListener('click', function() {
+		                const id = document.querySelector('#editForm input[name="id"]').value;
+		                document.getElementById('confirmDeleteBtn').dataset.id = id;
+		                console.log(id);
+		            });
+		        }
+		        
+	     // 검색창 초기화.
+	        const searchResetBtn = document.getElementById('searchResetBtn');
+	        if (searchResetBtn) {
+	            searchResetBtn.addEventListener('click', function() {
+	                const searchForm = document.getElementById('searchForm');
+	                if (searchForm) {
+	                    searchForm.querySelector('input[name="payYm"]').value = '';
+	                    searchForm.querySelector('input[name="empNo"]').value = '';
+	                    searchForm.querySelector('input[name="itemCode"]').value = '';
+	                }
+	            });
+	        }   
+		    }
 			});
 	    
 		//  input 클릭 시 실행될 공통 함수
@@ -423,6 +480,187 @@
 	            itemListBody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
 	        }
 	    }
+	    
+		 // 새 공제항목 등록
+	    async function addNewPayDeductReason() {
+			const addForm = document.getElementById('addForm');
+		    const formData = new FormData(addForm);
+		    const data = Object.fromEntries(formData.entries());
+
+		    if (!data.empNo || !data.empNo.trim()) {
+		        alert('사번을 입력해주세요.');
+		        return;
+		    }
+
+		    // 정규식을 이용한 'YYYYMM' 형식 검사
+		    const yyyymmRegex = /^\d{6}$/;
+		    if (!yyyymmRegex.test(data.payYm)) {
+		        alert('기준연월은 YYYYMM 형식(예: 202509)으로 입력해야 합니다.');
+		        return;
+		    }
+		    
+		    if (!data.seqNo) {
+		    	alert('급여차수를 입력해주세요.');
+		    	return;
+		    }
+		    
+		    if (!data.itemCode) {
+		    	alert('감액 항목 코드를 입력해주세요.');
+		    	return;
+		    }
+		    
+		    if (!data.amount) {
+		    	alert('감액 금액을 입력해주세요.');
+		    	return;
+		    }
+		    
+		    if (!data.reasonCode) {
+		    	alert('사유 코드를 입력해주세요.');
+		    	return;
+		    }
+		    
+		    // --- 서버 작업 시작 ---
+		    try {
+		    	
+		        const response = await fetch(`/pay/pay-deduct/checkOverlap?payYm=${data.payYm}&empNo=${data.empNo}&seqNo=${data.seqNo}&itemCode=${data.itemCode}`);
+		        const checkResult = await response.text();
+		        
+		        if (checkResult == 'true') { 
+		            alert('...'); 
+		            return;
+		        }
+
+		        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
+		        const saveResponse = await fetch('/pay/pay-deduct', {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (saveResponse.ok) {
+		            alert('성공적으로 등록되었습니다.');
+		            location.reload();
+		        } else {
+		            const errorText = await saveResponse.text();
+		            alert(`등록에 실패했습니다: ${errorText}`);
+		        }
+
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('등록 중 오류가 발생했습니다.');
+		    }
+		};
+		
+		// 수정 모달창 데이터 불러오기.
+		async function findDetail(id) {
+		    try {
+		        const response = await fetch(`/pay/pay-deduct/detail/${id}`);
+		        if (!response.ok) {
+		            throw new Error('데이터를 불러오는 데 실패했습니다.');
+		        }
+		        const data = await response.json();
+		        const editForm = document.getElementById('editForm')
+
+
+		        for (const key in data) {
+		            const field = editForm.querySelector(`[name="${key}"]`);
+		            
+		            if(field) {
+			            field.value = data[key];
+		            }
+		        }
+
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert(error.message);
+		    }
+		}
+		
+		//공제 항목 수정
+		async function updatePayDeductReason() {
+		    const editForm = document.getElementById('editForm');
+		    const formData = new FormData(editForm);
+		    const data = Object.fromEntries(formData.entries());
+		    
+		    if (!data.seqNo) {
+		    	alert('급여차수를 입력해주세요.');
+		    	return;
+		    }
+		    
+		    if (!data.itemCode) {
+		    	alert('감액 항목 코드를 입력해주세요.');
+		    	return;
+		    }
+		    
+		    if (!data.amount) {
+		    	alert('감액 금액을 입력해주세요.');
+		    	return;
+		    }
+		    
+		    if (!data.reasonCode) {
+		    	alert('사유 코드를 입력해주세요.');
+		    	return;
+		    }
+		    
+		    try {
+		    	
+		    	const Checkresponse = await fetch(`/pay/pay-deduct/checkOverlap/update?payYm=${data.payYm}&empNo=${data.empNo}&seqNo=${data.seqNo}&itemCode=${data.itemCode}&id=${data.id}`);
+		        const checkResult = await Checkresponse.text();
+		        
+		        if (checkResult == 'true') { 
+		            alert('...'); 
+		            return;
+		        }
+		        
+		        const url = `/pay/pay-deduct/${data.id}`;
+		        const response = await fetch(url, {
+		            method: 'PUT', 
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (response.ok) {
+		            alert('성공적으로 수정되었습니다.');
+		            location.reload(); // 성공 시 페이지 새로고침
+		        } else {
+		            const errorText = await response.text();
+		            alert(`수정에 실패했습니다: ${errorText}`);
+		        }
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('수정 중 오류가 발생했습니다.');
+		    }
+		}
+		
+		async function deletePayDeductReason(id) {
+		    if (!id) {
+		        alert('삭제할 항목의 ID가 없습니다.');
+		        return;
+		    }
+		    
+		    try {
+		        const url = `/pay/pay-deduct/${id}`;
+		        const response = await fetch(url, {
+		            method: 'DELETE'
+		        });
+
+		        if (response.ok) {
+		            alert('성공적으로 삭제되었습니다.');
+		            location.reload();
+		        } else {
+		            const errorText = await response.text();
+		            alert(`삭제에 실패했습니다: ${errorText}`);
+		        }
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('삭제 중 오류가 발생했습니다.');
+		    }
+		}
+
     
     </script>
 
