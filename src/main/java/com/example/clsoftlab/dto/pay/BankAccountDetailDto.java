@@ -31,6 +31,14 @@ public class BankAccountDetailDto {
         if (accNo == null || accNo.length() < 7) {
             return accNo;
         }
-        return accNo.substring(0, 3) + "-***-" + accNo.substring(accNo.length() - 3);
+        int length = accNo.length();
+        StringBuilder maskedAccount = new StringBuilder(accNo);
+
+        // 계좌번호의 앞 3자리와 마지막 3자리를 제외한 부분을 마스킹
+        for (int i = 3; i < length - 3; i++) {
+            maskedAccount.setCharAt(i, '*');
+        }
+
+        return maskedAccount.toString();
     }
 }

@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +12,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class BankAccountRequestDto {
 
 	@NotBlank(message = "사원번호는 필수입니다.")
@@ -46,4 +44,9 @@ public class BankAccountRequestDto {
     private String useYn;
 
     private String note;
+    
+    public void setAccountNo(String accountNo) {
+        // 정규식을 사용하여 숫자를 제외한 모든 문자를 제거
+        this.accountNo = accountNo.replaceAll("[^0-9]", "");
+    }
 }

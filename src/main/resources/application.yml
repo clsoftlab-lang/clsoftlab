@@ -18,3 +18,8 @@ spring:
     url: jdbc:mysql://61.74.135.228:3306/clsoftlabnew
     username: root
     password: clsoftlab2024!@#
+
+# 테스트용 임시 key
+encrypt:
+  hmac:
+    key: "ClSoftLabTestSecretHMACKey!@#$12"

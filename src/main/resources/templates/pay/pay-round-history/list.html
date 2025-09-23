@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>급여 절사 이력</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+    <div id="global-loader"><div class="page-loader"></div></div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">검색 조건</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/pay/pay-round-history" method="get" id="searchForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사번</label>
+                                        <input class="form-control" name="empNo" placeholder="사번 입력" th:value="${empNo}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>급여월</label>
+                                        <input type="text" class="form-control" name="payYm" th:value="${payYm}" maxlength="6" placeholder="YYYYMM">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>항목코드</label>
+                                        <input class="form-control" name="itemCode" placeholder="항목코드 입력" th:value="${itemCode}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <div class="form-group w-100">
+                                        <button type="submit" class="btn btn-primary w-100">조회</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">절사 이력 목록</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover datatable" id="historyTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>사번</th>
+                                        <th>급여월</th>
+                                        <th>항목</th>
+                                        <th>절사 전 금액</th>
+                                        <th>절사방식</th>
+                                        <th>절사 후 금액</th>
+                                        <th>차이</th>
+                                        <th>출처</th>
+                                        <th>상세</th> 
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="h : ${payRoundHistory}">
+                                        <td th:text="${h.empNo}"></td>
+                                        <td th:text="${h.payYm}"></td>
+                                        <td th:text="${h.itemCode}"></td>
+                                        <td th:text="${#numbers.formatInteger(h.rawAmount, 3, 'COMMA')}"></td>
+                                        <td th:text="${h.roundType}"></td>
+                                        <td th:text="${#numbers.formatInteger(h.roundAmount, 3, 'COMMA')}"></td>
+                                        <td th:text="${#numbers.formatInteger(h.diffAmount, 3, 'COMMA')}"></td>
+                                        <td th:text="${h.sourceCode}"></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info detail-btn" id="detail-btn" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#detailModal"
+                                                    th:data-id="${h.id}">상세</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">절사 이력 상세 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                	<form id="detailForm">
+	                    <div class="row">
+	                        <div class="col-md-4 mb-3">
+	                            <label class="form-label">절사 전 금액</label>
+	                            <input type="text" class="form-control" name="rawAmount" readonly>
+	                        </div>
+	                        <div class="col-md-4 mb-3">
+	                            <label class="form-label">절사 후 금액</label>
+	                            <input type="text" class="form-control" name="roundAmount" readonly>
+	                        </div>
+	                        <div class="col-md-4 mb-3">
+	                            <label class="form-label">차이</label>
+	                            <input type="text" class="form-control" name="diffAmount" readonly>
+	                        </div>
+	                        <div class="col-md-12 mb-3">
+	                            <label class="form-label">절사 기준 설명</label>
+	                            <textarea class="form-control" rows="2" name="note" readonly></textarea>
+	                        </div>
+	                        <div class="col-md-6 mb-3">
+	                            <label class="form-label">계산 출처</label>
+	                            <input type="text" class="form-control" name="sourceCode" readonly>
+	                        </div>
+	                    </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/assets/js/script.js"></script>
+    
+    <script type="text/javascript">
+	    document.addEventListener('DOMContentLoaded', function () {
+	    	
+	    	// 상세 모달창을 열 때, 불러오기.
+		       const tableBody = document.querySelector('.table tbody');
+		  		
+			    if (tableBody) {
+			        tableBody.addEventListener('click', function(event) {
+			        	
+			            const detailButton = event.target.closest('.detail-btn');
+			            
+			            if (detailButton) {
+			                const id = detailButton.dataset.id; 
+			                findDetail(id);
+			            }
+			        });
+			        
+			    }
+	        
+		});
+	    
+	 	//모달창 데이터 불러오기.
+		async function findDetail(id) {
+		    try {
+		        const response = await fetch(`/pay/pay-round-history/detail/${id}`);
+		        if (!response.ok) {
+		            throw new Error('데이터를 불러오는 데 실패했습니다.');
+		        }
+		        const data = await response.json();
+		        const detailForm = document.getElementById('detailForm')
+
+
+		        for (const key in data) {
+		            const field = detailForm.querySelector(`[name="${key}"]`);
+		            
+		            if(field) {
+			            field.value = data[key];
+		            }
+		        }
+
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert(error.message);
+		    }
+		}
+    </script>
+
+</body>
+</html>

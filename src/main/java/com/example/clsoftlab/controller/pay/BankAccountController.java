@@ -77,9 +77,16 @@ public class BankAccountController {
 	
 	// 중복 체크(수정용)
 	@ResponseBody
-	@GetMapping("/checkOverlap/update")
-	public boolean checkOverlap (@RequestParam String empNo, @RequestParam String accountType, @RequestParam String accountNo, 
-			@RequestParam LocalDate fromDate, @RequestParam LocalDate toDate, @RequestParam long id) {
-		return bankAccountService.checkOverlap(empNo, accountType, accountNo, fromDate, toDate, id);
+	@GetMapping("/checkOverlap/update/{id}")
+	public boolean checkOverlap (@RequestParam LocalDate fromDate, @RequestParam LocalDate toDate, @RequestParam long id) {
+		return bankAccountService.checkOverlap(fromDate, toDate, id);
+	}
+	
+	// 세부 정보 조회
+	@GetMapping("/detail/{id}")
+	public ResponseEntity<BankAccountDetailDto> findById (@PathVariable long id) {
+		return bankAccountService.findById(id)
+				.map(dto -> ResponseEntity.ok(dto))
+				.orElse(ResponseEntity.notFound().build());
 	}
 }

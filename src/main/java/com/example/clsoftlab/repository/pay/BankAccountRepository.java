@@ -22,7 +22,7 @@ public interface BankAccountRepository extends JpaRepository<BankAccount, Long> 
 			+ "FROM BankAccount b "
 			+ "WHERE (b.empNo = :empNo) "
 			+ "AND (b.accountType = :accountType) "
-			+ "AND (b.accountNo = :accountNo) "
+			+ "AND (b.accountNoHash = :accountNo) "
 			+ "AND (b.fromDate <= :toDate) "
 			+ "AND (b.toDate >= :fromDate) ")
 	public boolean checkOverlap(@Param("empNo") String empNo, @Param("accountType") String accountType, @Param("accountNo") String accountNo, 
@@ -34,7 +34,7 @@ public interface BankAccountRepository extends JpaRepository<BankAccount, Long> 
 			+ "WHERE (b.empNo = :empNo) "
 			+ "AND (b.id != :id) "
 			+ "AND (b.accountType = :accountType) "
-			+ "AND (b.accountNo = :accountNo) "
+			+ "AND (b.accountNoHash = :accountNo) "
 			+ "AND (b.fromDate <= :toDate) "
 			+ "AND (b.toDate >= :fromDate) ")
 	public boolean checkOverlap(@Param("empNo") String empNo, @Param("accountType") String accountType, @Param("accountNo") String accountNo, 

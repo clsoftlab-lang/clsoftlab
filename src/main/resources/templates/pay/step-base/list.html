@@ -277,6 +277,7 @@
 				const addForm = document.getElementById('addForm');
 			    const formData = new FormData(addForm);
 			    const data = Object.fromEntries(formData.entries());
+			    
 
 			    if (!data.gradeCode || !data.gradeCode.trim()) {
 			        alert('직군코드를 입력해주세요.');
@@ -311,7 +312,7 @@
 			        const checkResult = await response.text();
 			        
 			        if (checkResult == 'true') { 
-			            alert('...'); 
+			            alert('해당 직군의 동일 호봉에 이미 겹치는 기간의 기준이 존재합니다. 기간을 확인해주세요.'); 
 			            return;
 			        }
 
@@ -401,7 +402,7 @@
 			        const checkResult = await Checkresponse.text();
 			        
 			        if (checkResult == 'true') { 
-			            alert('...'); 
+			            alert('해당 직군의 동일 호봉에 이미 겹치는 기간의 기준이 존재합니다. 기간을 확인해주세요.'); 
 			            return;
 			        }
 			        

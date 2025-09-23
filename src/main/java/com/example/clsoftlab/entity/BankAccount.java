@@ -2,9 +2,11 @@ package com.example.clsoftlab.entity;
 
 import java.time.LocalDate;
 
+import com.example.clsoftlab.converter.CryptoConverter;
 import com.example.clsoftlab.dto.pay.BankAccountRequestDto;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,8 +42,12 @@ public class BankAccount extends BaseEntity {
     @Column(name = "ZBANK_NAME", nullable = false, length = 100)
     private String bankName;
 
+    @Convert(converter = CryptoConverter.class)
     @Column(name = "ZACC_NO", nullable = false, length = 255)
     private String accountNo;
+    
+    @Column(name = "ZACC_NO_HASH")
+    private String accountNoHash;
 
     @Column(name = "ZACC_HOLDER", nullable = false, length = 100)
     private String accountHolder;
@@ -59,10 +65,6 @@ public class BankAccount extends BaseEntity {
     private String note;
     
     public void update (BankAccountRequestDto dto) {
-    	this.bankCode = dto.getBankCode();
-    	this.bankName = dto.getBankName();
-    	this.accountNo = dto.getAccountNo();
-    	this.accountHolder = dto.getAccountHolder();
     	this.fromDate = dto.getFromDate();
     	this.toDate = dto.getToDate();
     	this.useYn = dto.getUseYn();

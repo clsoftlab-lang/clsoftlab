@@ -684,6 +684,7 @@ CREATE TABLE ZHR_BANK_ACCOUNT (
     ZBANK_CD          VARCHAR(10)    NOT NULL COMMENT '은행 코드',
     ZBANK_NAME        VARCHAR(100)   NOT NULL COMMENT '은행명',
     ZACC_NO           VARCHAR(255)   NOT NULL COMMENT '계좌번호 (암호화/마스킹 필요)',
+    ZACC_NO_HASH      VARCHAR(64)    NOT NULL COMMENT '계좌번호 검색용 해시 (HMAC-SHA256)',
     ZACC_HOLDER       VARCHAR(100)   NOT NULL COMMENT '예금주',
     ZFROM_DT          DATE           NOT NULL COMMENT '유효 시작일',
     ZTO_DT            DATE           NOT NULL DEFAULT '9999-12-31' COMMENT '유효 종료일',
@@ -693,12 +694,12 @@ CREATE TABLE ZHR_BANK_ACCOUNT (
     CREATED_BY        VARCHAR(50)    NOT NULL COMMENT '생성자',
     UPDATED_AT        DATETIME       NULL     COMMENT '수정 일시',
     UPDATED_BY        VARCHAR(50)    NULL     COMMENT '수정자',
+    
+    INDEX IDX_ZACC_NO_HASH (ZACC_NO_HASH),
 
     -- 기본 키 설정
     PRIMARY KEY (BANK_ACCOUNT_ID),
 
-    -- 비즈니스 규칙을 위한 UNIQUE KEY 설정 
-    UNIQUE KEY UK_ZHR_BANK_ACCOUNT (ZEMP_NO, ZACC_TYPE, ZACC_NO),
 
     -- 데이터 무결성을 위한 제약 조건
     CONSTRAINT CHK_ZACC_TYPE_VALUE CHECK (ZACC_TYPE IN ('MAIN', 'SUB', 'LOAN', 'RETIRE')),
@@ -707,37 +708,201 @@ CREATE TABLE ZHR_BANK_ACCOUNT (
 
 ) COMMENT '사원별 급여 계좌 정보';
 
--- ZHR_BANK_ACCOUNT 테이블에 삽입할 더미 데이터 (30건)
+-- ZHR_BANK_ACCOUNT 테이블에 삽입할 더미 데이터 (임시 암호 테스크 키)
 INSERT INTO ZHR_BANK_ACCOUNT
-(ZEMP_NO, ZACC_TYPE, ZBANK_CD, ZBANK_NAME, ZACC_NO, ZACC_HOLDER, ZFROM_DT, ZTO_DT, ZUSE_YN, ZNOTE, CREATED_BY)
+(ZEMP_NO, ZACC_TYPE, ZBANK_CD, ZBANK_NAME, ZACC_NO, ZACC_NO_HASH, ZACC_HOLDER, ZFROM_DT, ZTO_DT, ZUSE_YN, ZNOTE, CREATED_BY)
 VALUES
-('EMP001', 'MAIN', '004', 'KB국민은행', '110-234-567890', '김철수', '2022-03-02', '9999-12-31', 'Y', '급여 입금용 주거래 계좌', 'hr_manager'),
-('EMP002', 'MAIN', '088', '신한은행', '110-987-654321', '이영희', '2023-01-10', '9999-12-31', 'Y', '주 급여계좌', 'hr_manager'),
-('EMP002', 'SUB', '088', '신한은행', '110-987-654321', '이영희', '2023-01-10', '9999-12-31', 'Y', '경비 지출용 예비 계좌', 'hr_manager'),
-('EMP002', 'LOAN', '088', '신한은행', '110-987-654321', '이영희', '2024-05-01', '9999-12-31', 'Y', '사내 대출 상환용', 'hr_manager'),
-('DEV001', 'MAIN', '020', '우리은행', '200-123-456789', '박개발', '2021-06-15', '2024-12-31', 'N', '이전 급여 계좌. 현재 미사용.', 'system_admin'),
-('DEV001', 'MAIN', '090', '카카오뱅크', '3333-01-1234567', '박개발', '2025-01-01', '9999-12-31', 'Y', '2025년부터 변경된 급여 계좌', 'system_admin'),
-('DSN001', 'MAIN', '081', '하나은행', '500-123456-789', '최디자인', '2020-11-20', '9999-12-31', 'Y', '급여 계좌', 'hr_manager'),
-('DSN001', 'RETIRE', '003', 'IBK기업은행', '777-123456-01-001', '최디자인', '2020-11-20', '9999-12-31', 'Y', '퇴직연금 IRP 계좌', 'hr_manager'),
-('MGT001', 'MAIN', '011', 'NH농협은행', '302-1234-5678-01', '강지원', '2023-09-01', '9999-12-31', 'Y', '경영지원팀 급여계좌', 'hr_manager'),
-('MGT001', 'SUB', '020', '우리은행', '1002-888-123456', '강지원', '2024-02-14', '2024-08-31', 'N', '프로젝트 경비 계좌 (종료)', 'hr_manager'),
-('PLN001', 'MAIN', '088', '신한은행', '110-555-444333', '이기획', '2022-08-01', '9999-12-31', 'Y', '급여계좌', 'hr_manager'),
-('PLN001', 'LOAN', '081', '하나은행', '600-111111-222', '이기획', '2023-03-10', '2025-03-09', 'N', '대출 상환 완료로 미사용 처리', 'hr_manager'),
-('DEV002', 'MAIN', '090', '카카오뱅크', '3333-02-8765432', '오서버', '2024-01-15', '9999-12-31', 'Y', '백엔드 개발자 급여 계좌', 'system_admin'),
-('DSN002', 'MAIN', '027', '한국씨티은행', '123-45-678-90123', '나화면', '2023-07-01', '9999-12-31', 'Y', 'UI/UX 디자이너 급여 계좌', 'hr_manager'),
-('DSN002', 'RETIRE', '027', '한국씨티은행', '123-45-678-90123', '나화면', '2023-07-01', '2025-09-20', 'N', '계좌 통합으로 미사용 처리', 'hr_manager'),
-('MGT002', 'MAIN', '020', '우리은행', '1002-345-678901', '박관리', '2023-11-01', '9999-12-31', 'Y', '급여 계좌', 'hr_manager'),
-('EMP003', 'MAIN', '003', 'IBK기업은행', '987-654-321012', '윤사원', '2024-04-20', '9999-12-31', 'Y', '급여 이체용', 'hr_manager'),
-('EMP003', 'MAIN', '088', '신한은행', '110-321-987654', '윤사원', '2022-02-10', '2024-04-19', 'N', '이전 주거래 계좌', 'hr_manager'),
-('DEV003', 'MAIN', '089', '케이뱅크', '100-123-456789', '김코딩', '2025-01-02', '9999-12-31', 'Y', '신규 입사자 급여 계좌', 'system_admin'),
-('DSN003', 'MAIN', '004', 'KB국민은행', '456-7890-12-345', '정도형', '2021-09-01', '9999-12-31', 'Y', '프리랜서 계약시 사용 계좌', 'hr_manager'),
-('DSN003', 'SUB', '090', '카카오뱅크', '3333-05-5566778', '정도형', '2022-10-01', '9999-12-31', 'Y', '개인 경비 처리용', 'hr_manager'),
-('PLN002', 'MAIN', '081', '하나은행', '789-123456-789', '최기획', '2020-03-16', '9999-12-31', 'Y', '기획팀 급여계좌', 'hr_manager'),
-('PLN002', 'LOAN', '081', '하나은행', '789-123456-789', '최기획', '2025-02-01', '2028-01-31', 'Y', '학자금 대출 상환', 'hr_manager'),
-('MGT002', 'RETIRE', '020', '우리은행', '1005-123-456789', '박관리', '2023-11-01', '9999-12-31', 'Y', '퇴직연금 DC형 계좌', 'hr_manager'),
-('EMP004', 'MAIN', '011', 'NH농협은행', '352-1122-3344-55', '황인턴', '2025-07-01', '2025-12-31', 'Y', '인턴 급여 계좌', 'hr_manager'),
-('DEV001', 'SUB', '090', '카카오뱅크', '3333-01-1234567', '박개발', '2025-03-01', '9999-12-31', 'Y', '사내 스터디 경비 계좌', 'system_admin'),
-('EMP005', 'MAIN', '002', 'KDB산업은행', '020-1234-5678-01', '천재무', '2019-08-12', '9999-12-31', 'Y', '재무팀 급여 계좌', 'hr_manager'),
-('EMP005', 'LOAN', '002', 'KDB산업은행', '020-9876-5432-02', '천재무', '2021-01-01', '2024-12-31', 'N', '상환 완료된 대출 계좌', 'hr_manager'),
-('DSN001', 'SUB', '081', '하나은행', '501-111222-333', '최디자인', '2021-01-01', '2022-12-31', 'N', '프로젝트 종료된 계좌', 'hr_manager'),
-('DEV002', 'RETIRE', '089', '케이뱅크', '100-999-888777', '오서버', '2024-01-15', '9999-12-31', 'Y', '퇴직연금 IRP', 'system_admin');
+('EMP001', 'MAIN', '004', 'KB국민은행', '1zOraYvFUhwKhRyb7Zlq5egCfZZnYnYCYQpuZ5LPp64=', '86edfcd7421e3b6051a20204daba94ae8dad4df370473651ac78d01172835b74', '김철수', '2022-03-02', '9999-12-31', 'Y', '급여 입금용 주거래 계좌', 'hr_manager'),
+('EMP002', 'MAIN', '088', '신한은행', 'YE2UTMTFb3SQsd5p/A7hGa03ysgpicEe0tyTxYVbN7o=', 'c0cdfc57b8c186bff124eb5711da7d231c78b2be5b0d782a8c5dc2796da7e856', '이영희', '2023-01-10', '9999-12-31', 'Y', '주 급여계좌', 'hr_manager'),
+('EMP002', 'SUB', '088', '신한은행', 'YE2UTMTFb3SQsd5p/A7hGa03ysgpicEe0tyTxYVbN7o=', 'c0cdfc57b8c186bff124eb5711da7d231c78b2be5b0d782a8c5dc2796da7e856', '이영희', '2023-01-10', '9999-12-31', 'Y', '경비 지출용 예비 계좌', 'hr_manager'),
+('EMP002', 'LOAN', '088', '신한은행', 'YE2UTMTFb3SQsd5p/A7hGa03ysgpicEe0tyTxYVbN7o=', 'c0cdfc57b8c186bff124eb5711da7d231c78b2be5b0d782a8c5dc2796da7e856', '이영희', '2024-05-01', '9999-12-31', 'Y', '사내 대출 상환용', 'hr_manager'),
+('DEV001', 'MAIN', '020', '우리은행', 'B3pvs6RDpsyRmhZquLc/6+umkWIpMgUrCHWR0oZE/eg=', 'e355b472e470ea8659bb0d6c957b920abc8577885af4cde6f3b2bbce11e6ace5', '박개발', '2021-06-15', '2024-12-31', 'N', '이전 급여 계좌. 현재 미사용.', 'system_admin'),
+('DEV001', 'MAIN', '090', '카카오뱅크', 'hZ3yu/ptQ9iLzH1PfmIziSq7c4nXWfvFxIgeDza+t1s=', 'ac39a4470455079adbe336b7003857c5f87680b647b07c8bf9cbb102c997a790',  '박개발', '2025-01-01', '9999-12-31', 'Y', '2025년부터 변경된 급여 계좌', 'system_admin'),
+('DSN001', 'MAIN', '081', '하나은행', 'PNyQqcfNp3OPl6Z6lrlHwOiCN0DWUcGlQZcGhw6so6Y=', '846695d300455ba7b55497e4ea413bc816d05985bfcb13b16aa51f101f5d6e20', '최디자인', '2020-11-20', '9999-12-31', 'Y', '급여 계좌', 'hr_manager'),
+('DSN001', 'RETIRE', '003', 'IBK기업은행', 'g80jqHfkLbHtrCm53Ju4N7fgPjyOVT6tS1KWirEH8mA=', '8305a21339fb26e0b439bcbdf0b1422bb966d92c4bc93c9d801e731f81f8fce5', '최디자인', '2020-11-20', '9999-12-31', 'Y', '퇴직연금 IRP 계좌', 'hr_manager'),
+('MGT001', 'MAIN', '011', 'NH농협은행', 'kYz1nO5Bfqw/y7WFV1gXomUkYnxmHxU6qVkwHbQaLO8=', '9511f8924e130e12da351b63051b7d0fdc97a31438cb7d5ca8e5da8ed6deba92', '강지원', '2023-09-01', '9999-12-31', 'Y', '경영지원팀 급여계좌', 'hr_manager'),
+('MGT001', 'SUB', '020', '우리은행', 'zRX3sDc15BmhhnTyDdJAoLESbaW4qr7MAjbkwRa3uNI=', 'd7d97a025a8cdc17b76b368530b83c786c0bbd2679670ca274c4edab532edba0', '강지원', '2024-02-14', '2024-08-31', 'N', '프로젝트 경비 계좌 (종료)', 'hr_manager'),
+('PLN001', 'MAIN', '088', '신한은행', 'vjWIPe8woFDzzl2sJOWWto9VsdqJuyEjaLy8D7bSW8E=', 'ca5d5b775698a8a68d515a590eed7317929aadfa2250064094ca5350afc742f1', '이기획', '2022-08-01', '9999-12-31', 'Y', '급여계좌', 'hr_manager'),
+('PLN001', 'LOAN', '081', '하나은행', '6xyaNZ9eMpjisURoZdFDsxAWBB7DR426h4O8//kECTc=', 'cc48a07fb7412f70d151a9495d4bc3d074167d1ad475d6294b452f76f3192417', '이기획', '2023-03-10', '2025-03-09', 'N', '대출 상환 완료로 미사용 처리', 'hr_manager'),
+('DEV002', 'MAIN', '090', '카카오뱅크', 'xjE/wctutSud16gc9PfGxbNAi1XIQbhm2HB7fk0mB04=', '833186db9558fe3d308f0b476b4ce906550ca67dcea6918b637d3f46c32f411d', '오서버', '2024-01-15', '9999-12-31', 'Y', '백엔드 개발자 급여 계좌', 'system_admin'),
+('DSN002', 'MAIN', '027', '한국씨티은행', '98eQ+UZ/ElpQDO7QyOa4ATLIBGUAX4I4xjo44O3XPOc=', '58e5a9cb937bd8e54c4d079d0df15f769c35c3bc1ad39bffec4ff78cd9290b73', '나화면', '2023-07-01', '9999-12-31', 'Y', 'UI/UX 디자이너 급여 계좌', 'hr_manager'),
+('DSN002', 'RETIRE', '027', '한국씨티은행', '98eQ+UZ/ElpQDO7QyOa4ATLIBGUAX4I4xjo44O3XPOc=', '58e5a9cb937bd8e54c4d079d0df15f769c35c3bc1ad39bffec4ff78cd9290b73', '나화면', '2023-07-01', '2025-09-20', 'N', '계좌 통합으로 미사용 처리', 'hr_manager'),
+('MGT002', 'MAIN', '020', '우리은행', 'lYkD1V+MZOSk7KCMwTWJrbj/xQdg6S4PrQ9pZeSHz/A=', 'b07351e1b494e32aea1c5b6e78ba1981460fd8c1d50f9838bdadccb8597c9d62', '박관리', '2023-11-01', '9999-12-31', 'Y', '급여 계좌', 'hr_manager'),
+('EMP003', 'MAIN', '003', 'IBK기업은행', 'VNQIEUeA4g+C0un3X1jNriJQeo88m9QPzFqN4mQXWlA=', 'VNQIEUeA4g+C0un3X1jNriJQeo88m9QPzFqN4mQXWlA=', '윤사원', '2024-04-20', '9999-12-31', 'Y', '급여 이체용', 'hr_manager'),
+('EMP003', 'MAIN', '088', '신한은행', 'X8O7Tzvvn3XWRbVnpKJwgJdDZSL+r1C59JgvhBgiL6w=', '43285fc4429caee88a3d581945579e86564eb3935dedac31b9b1816398daf29a', '윤사원', '2022-02-10', '2024-04-19', 'N', '이전 주거래 계좌', 'hr_manager'),
+('DEV003', 'MAIN', '089', '케이뱅크', 'kq5/PiDLSE378MT0+tD2+h7BIomlANf9YNvEUO3CoVg=', '856f9879b4b62de4c8d2638f6bd97e780ffb79626a346c885429da04d297ddb0', '김코딩', '2025-01-02', '9999-12-31', 'Y', '신규 입사자 급여 계좌', 'system_admin'),
+('DSN003', 'MAIN', '004', 'KB국민은행', 'PFEMBwOiFZxRVXLooJ3dbmcCX0Adfcb8V0ByUfhimjo=', '70f8978fdb09db33e3e284fd0ee668ef7d42e506f6cbe18c876b13526f2f1382', '정도형', '2021-09-01', '9999-12-31', 'Y', '프리랜서 계약시 사용 계좌', 'hr_manager'),
+('DSN003', 'SUB', '090', '카카오뱅크', '5GPwMGr6zd0MWXJMOLObQENb3Di4H4jKt215aGyv3s8=', 'db535d11ab1837b7d57db23d924033304972d7a240b10996aecfee89626091ee', '정도형', '2022-10-01', '9999-12-31', 'Y', '개인 경비 처리용', 'hr_manager'),
+('PLN002', 'MAIN', '081', '하나은행', 'qcAfGvzmwp+sz7oqzADz6pdUk5RB5+/i811TfycdTvc=', '049d6cc81b95aa57a25efaf7bf36795865fd62552bb1ec1787ffadb8db247f52', '최기획', '2020-03-16', '9999-12-31', 'Y', '기획팀 급여계좌', 'hr_manager'),
+('PLN002', 'LOAN', '081', '하나은행', 'qcAfGvzmwp+sz7oqzADz6pdUk5RB5+/i811TfycdTvc=', '049d6cc81b95aa57a25efaf7bf36795865fd62552bb1ec1787ffadb8db247f52', '최기획', '2025-02-01', '2028-01-31', 'Y', '학자금 대출 상환', 'hr_manager'),
+('MGT002', 'RETIRE', '020', '우리은행', 'ZUzYdQM2qvB+hhA0SMdUd0wqZ0fhw6LU4wDYhYGAIN0=', '2613f1fb2c50ee556490293f52d6a8a8b4e140bfb6e162592e326d4ba7fdead3', '박관리', '2023-11-01', '9999-12-31', 'Y', '퇴직연금 DC형 계좌', 'hr_manager'),
+('EMP004', 'MAIN', '011', 'NH농협은행', 'j27PB3+IX6ds3vj1Kurmc3sP45+NWRBpi1qLn+FiJVg=', '6bbc4011f890e2f8bfef3f7a539b1135c2b4c5426264b5882a7e58d05a35fc34', '황인턴', '2025-07-01', '2025-12-31', 'Y', '인턴 급여 계좌', 'hr_manager'),
+('DEV001', 'SUB', '090', '카카오뱅크', 'hZ3yu/ptQ9iLzH1PfmIziSq7c4nXWfvFxIgeDza+t1s=', 'ac39a4470455079adbe336b7003857c5f87680b647b07c8bf9cbb102c997a790', '박개발', '2025-03-01', '9999-12-31', 'Y', '사내 스터디 경비 계좌', 'system_admin'),
+('EMP005', 'MAIN', '002', 'KDB산업은행', 'E41MzMkh6JmyGsOyjpeYXbhlzph7Wy8gwfVoiMo/X2I=', '6ca25bf84fa99056c2c50950a413a5ad918843306df7cd7bca846cc239eb97d4', '천재무', '2019-08-12', '9999-12-31', 'Y', '재무팀 급여 계좌', 'hr_manager'),
+('EMP005', 'LOAN', '002', 'KDB산업은행', 'JnQsTvyOdhrMJYoHxjK/AbbwIqIsa/jtTiH0aNn8lxQ=', '38ac0f693e577215b03d3e8f8c15be0ade4806c10a546e7325ca9e398f17fc52', '천재무', '2021-01-01', '2024-12-31', 'N', '상환 완료된 대출 계좌', 'hr_manager'),
+('DSN001', 'SUB', '081', '하나은행', 'IfgdOb5i6yMhRRk/z10PnOb/fN1WPHlMHQrIatd4KX8=', '36244f31afa5e28ad2ccb0ea75ad1125469f371215289250d39e0c0e2a217898', '최디자인', '2021-01-01', '2022-12-31', 'N', '프로젝트 종료된 계좌', 'hr_manager'),
+('DEV002', 'RETIRE', '089', '케이뱅크', '2TBUhdbrCKaC1omXJT1jP8YDMkwQMuNJwBpAfn/2MvY=', 'f15be905582ecb0ec3fb373648317b873da775c2b7221f100b7c8e06e58bba8a', '오서버', '2024-01-15', '9999-12-31', 'Y', '퇴직연금 IRP', 'system_admin');
+
+
+CREATE TABLE ZHR_EMP_FAMILY (
+    FAMILY_ID         BIGINT         NOT NULL AUTO_INCREMENT COMMENT '가족 ID (PK)',
+    ZEMP_NO           VARCHAR(20)    NOT NULL COMMENT '사원번호',
+    ZFAM_SEQ          INT            NOT NULL COMMENT '가족 순번 (사번별 순차)',
+    ZFAM_TYPE         VARCHAR(20)    NOT NULL COMMENT '관계 (SPOUSE, SON, DAUGHTER 등)',
+    ZFAM_NAME         VARCHAR(100)   NOT NULL COMMENT '가족 성명',
+    ZBIRTH            DATE           NOT NULL COMMENT '생년월일',
+    ZGENDER           CHAR(1)        NOT NULL COMMENT '성별 (M: 남자, F: 여자)',
+    ZDEPEND_YN        CHAR(1)        NOT NULL DEFAULT 'N' COMMENT '부양가족 여부 (Y/N)',
+    ZALLOW_YN         CHAR(1)        NOT NULL DEFAULT 'N' COMMENT '수당 적용 여부 (Y/N)',
+    ZTAX_YN           CHAR(1)        NOT NULL DEFAULT 'N' COMMENT '세금공제 대상 여부 (Y/N)',
+    ZDISABLED_YN      CHAR(1)        NOT NULL DEFAULT 'N' COMMENT '장애 여부 (Y/N)',
+    ZFROM_DT          DATE           NOT NULL COMMENT '적용 시작일',
+    ZTO_DT            DATE           NOT NULL DEFAULT '9999-12-31' COMMENT '적용 종료일',
+    ZNOTE             VARCHAR(500)   NULL     COMMENT '비고',
+    CREATED_AT        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY        VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT        DATETIME       NULL     COMMENT '수정 일시',
+    UPDATED_BY        VARCHAR(50)    NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (FAMILY_ID),
+
+    -- 비즈니스 키 (사번 + 가족 순번) 고유성 보장
+    UNIQUE KEY UK_ZHR_EMP_FAMILY_01 (ZEMP_NO, ZFAM_SEQ),
+    
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZFAM_NAME (ZFAM_NAME),
+
+    -- 데이터 무결성을 위한 제약 조건
+    CONSTRAINT CHK_ZFAM_TYPE_VALUE CHECK (ZFAM_TYPE IN ('SPOUSE', 'SON', 'DAUGHTER', 'FATHER', 'MOTHER', 'ETC')),
+    CONSTRAINT CHK_ZGENDER_VALUE CHECK (ZGENDER IN ('M', 'F')),
+    CONSTRAINT CHK_ZDEPEND_YN_VALUE CHECK (ZDEPEND_YN IN ('Y', 'N')),
+    CONSTRAINT CHK_ZALLOW_YN_VALUE CHECK (ZALLOW_YN IN ('Y', 'N')),
+    CONSTRAINT CHK_ZTAX_YN_VALUE CHECK (ZTAX_YN IN ('Y', 'N')),
+    CONSTRAINT CHK_ZDISABLED_YN_VALUE CHECK (ZDISABLED_YN IN ('Y', 'N')),
+    CONSTRAINT CHK_FAMILY_VALID_DATE_RANGE CHECK (ZFROM_DT <= ZTO_DT)
+
+) COMMENT '사원별 가족 구성원 정보';
+
+-- 사원별 가족 더미데이터 --
+INSERT INTO ZHR_EMP_FAMILY
+(ZEMP_NO, ZFAM_SEQ, ZFAM_TYPE, ZFAM_NAME, ZBIRTH, ZGENDER, ZDEPEND_YN, ZALLOW_YN, ZTAX_YN, ZDISABLED_YN, ZFROM_DT, ZTO_DT, ZNOTE, CREATED_BY)
+VALUES
+('EMP001', 1, 'SPOUSE', '박서연', '1988-05-15', 'F', 'Y', 'Y', 'Y', 'N', '2015-06-01', '9999-12-31', '배우자', 'hr_manager'),
+('EMP001', 2, 'SON', '김민준', '2016-09-20', 'M', 'Y', 'Y', 'Y', 'N', '2016-09-20', '9999-12-31', '첫째 자녀', 'hr_manager'),
+('EMP001', 3, 'DAUGHTER', '김지아', '2019-03-10', 'F', 'Y', 'Y', 'Y', 'N', '2019-03-10', '9999-12-31', '둘째 자녀', 'hr_manager'),
+('EMP002', 1, 'FATHER', '이강산', '1955-02-28', 'M', 'Y', 'N', 'Y', 'N', '2023-01-10', '9999-12-31', '부', 'hr_manager'),
+('EMP002', 2, 'MOTHER', '최은혜', '1958-11-05', 'F', 'Y', 'N', 'Y', 'Y', '2023-01-10', '9999-12-31', '모, 장애인 공제 대상', 'hr_manager'),
+('DEV001', 1, 'SPOUSE', '윤지수', '1992-08-01', 'F', 'N', 'N', 'N', 'N', '2024-05-20', '9999-12-31', '맞벌이 배우자, 부양가족 아님', 'system_admin'),
+('DEV001', 2, 'FATHER', '박종철', '1960-07-11', 'M', 'Y', 'N', 'Y', 'N', '2021-06-15', '9999-12-31', '부', 'system_admin'),
+('DSN001', 1, 'MOTHER', '최미경', '1965-01-25', 'F', 'Y', 'N', 'Y', 'N', '2020-11-20', '9999-12-31', '모', 'hr_manager'),
+('MGT001', 1, 'SPOUSE', '송하준', '1990-12-30', 'M', 'Y', 'Y', 'Y', 'N', '2022-10-10', '9999-12-31', '배우자', 'hr_manager'),
+('MGT001', 2, 'SON', '송시우', '2024-03-05', 'M', 'Y', 'Y', 'Y', 'N', '2024-03-05', '9999-12-31', '자녀', 'hr_manager'),
+('PLN001', 1, 'SPOUSE', '한유라', '1985-04-16', 'F', 'Y', 'Y', 'Y', 'N', '2010-11-20', '9999-12-31', '배우자', 'hr_manager'),
+('PLN001', 2, 'SON', '이도윤', '2004-06-30', 'M', 'N', 'N', 'N', 'N', '2004-06-30', '9999-12-31', '자녀, 만 20세 초과로 공제 대상 제외', 'hr_manager'),
+('DEV002', 1, 'DAUGHTER', '오아린', '2020-07-07', 'F', 'Y', 'Y', 'Y', 'Y', '2024-01-15', '9999-12-31', '자녀, 장애인 공제 대상', 'system_admin'),
+('DEV002', 2, 'SPOUSE', '장미래', '1993-02-14', 'F', 'Y', 'Y', 'Y', 'N', '2024-01-15', '9999-12-31', '배우자', 'system_admin'),
+('DSN002', 1, 'FATHER', '나영웅', '1962-10-10', 'M', 'Y', 'N', 'Y', 'N', '2023-07-01', '2025-01-15', '부, 2025년 별도 세대 분리', 'hr_manager'),
+('MGT002', 1, 'SPOUSE', '정유미', '1989-09-09', 'F', 'N', 'N', 'N', 'N', '2016-05-02', '2022-08-15', '이혼으로 인한 관계 종료', 'hr_manager'),
+('MGT002', 2, 'DAUGHTER', '박서아', '2018-04-01', 'F', 'Y', 'Y', 'Y', 'N', '2018-04-01', '9999-12-31', '자녀, 한부모 공제 대상', 'hr_manager'),
+('EMP003', 1, 'MOTHER', '윤정희', '1968-12-24', 'F', 'Y', 'N', 'Y', 'N', '2022-02-10', '9999-12-31', '모', 'hr_manager'),
+('PLN002', 1, 'SPOUSE', '배서준', '1982-01-18', 'M', 'Y', 'Y', 'Y', 'N', '2008-05-12', '9999-12-31', '배우자', 'hr_manager'),
+('PLN002', 2, 'DAUGHTER', '최하윤', '2010-02-25', 'F', 'Y', 'Y', 'Y', 'N', '2010-02-25', '9999-12-31', '첫째 자녀', 'hr_manager'),
+('PLN002', 3, 'SON', '최하람', '2015-11-30', 'M', 'Y', 'Y', 'Y', 'N', '2015-11-30', '9999-12-31', '둘째 자녀', 'hr_manager'),
+('PLN002', 4, 'FATHER', '최경환', '1950-03-01', 'M', 'Y', 'N', 'Y', 'Y', '2020-03-16', '9999-12-31', '부, 장애인 공제 및 경로 우대 대상', 'hr_manager'),
+('DSN003', 1, 'ETC', '정다운', '2002-09-17', 'M', 'Y', 'N', 'Y', 'N', '2021-09-01', '2024-02-29', '동생, 대학 졸업으로 부양 종료', 'hr_manager'),
+('EMP004', 1, 'FATHER', '황대호', '1961-04-19', 'M', 'Y', 'N', 'Y', 'N', '2025-07-01', '9999-12-31', '부', 'hr_manager'),
+('EMP005', 1, 'SPOUSE', '홍길순', '1984-06-22', 'F', 'Y', 'Y', 'Y', 'N', '2019-08-12', '9999-12-31', '배우자', 'hr_manager'),
+('EMP005', 2, 'SON', '천명훈', '2021-12-25', 'M', 'Y', 'Y', 'Y', 'N', '2021-12-25', '9999-12-31', '자녀', 'hr_manager'),
+('DEV003', 1, 'MOTHER', '김미자', '1966-07-20', 'F', 'Y', 'N', 'Y', 'N', '2025-01-02', '9999-12-31', '모', 'system_admin'),
+('DEV003', 2, 'FATHER', '김영철', '1963-03-15', 'M', 'Y', 'N', 'Y', 'N', '2025-01-02', '9999-12-31', '부', 'system_admin'),
+('MGT002', 3, 'MOTHER', '박순자', '1960-01-01', 'F', 'Y', 'N', 'Y', 'N', '2023-11-01', '9999-12-31', '모', 'hr_manager'),
+('EMP001', 4, 'MOTHER', '김영숙', '1959-10-27', 'F', 'Y', 'N', 'Y', 'N', '2015-06-01', '9999-12-31', '모', 'hr_manager'),
+('EMP001', 5, 'FATHER', '김정수', '1957-08-14', 'M', 'N', 'N', 'N', 'N', '2015-06-01', '2023-12-31', '부, 소득 발생으로 부양가족 제외', 'hr_manager'),
+('PLN001', 3, 'MOTHER', '이순희', '1960-01-10', 'F', 'Y', 'N', 'Y', 'N', '2022-08-01', '9999-12-31', '모', 'hr_manager');
+
+-- ZHR_PAY_ITEM 테이블이 먼저 생성되어 있어야 하며, ZITEM_CD가 기본 키(PK) 또는 고유 키(Unique Key)로 설정되어 있어야 합니다.
+
+CREATE TABLE ZHR_PAY_ROUND_HISTORY (
+    ROUND_HISTORY_ID  BIGINT          NOT NULL AUTO_INCREMENT COMMENT '절사 이력 ID (PK)',
+    ZEMP_NO           VARCHAR(20)     NOT NULL COMMENT '사원번호',
+    ZPAY_YM           VARCHAR(6)      NOT NULL COMMENT '급여월 (YYYYMM)',
+    ZITEM_CD          VARCHAR(20)     NOT NULL COMMENT '급여 항목 코드',
+    ZRAW_AMT          BIGINT          NOT NULL DEFAULT 0 COMMENT '절사 전 원금액',
+    ZROUND_TY         VARCHAR(20)     NOT NULL COMMENT '절사 방식 (WON, TEN, HUNDRED 등)',
+    ZROUND_AMT        BIGINT          NOT NULL DEFAULT 0 COMMENT '절사 후 금액 (실제 지급/공제액)',
+    ZDIFF_AMT         BIGINT          NOT NULL DEFAULT 0 COMMENT '차액 (ZRAW_AMT - ZROUND_AMT)',
+    ZSRC_CD           VARCHAR(20)     NOT NULL COMMENT '절사 기준 항목 코드 (ZHR_PAY_ITEM.ZITEM_CD 참조)',
+    ZNOTE             VARCHAR(500)    NULL     COMMENT '절사 기준 설명 및 비고',
+    CREATED_AT        DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY        VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT        DATETIME        NULL     COMMENT '수정 일시',
+    UPDATED_BY        VARCHAR(50)     NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (ROUND_HISTORY_ID),
+
+    -- 비즈니스 키 (사번 + 급여월 + 항목) 고유성 보장
+    UNIQUE KEY UK_ZHR_PAY_ROUND_HISTORY_01 (ZEMP_NO, ZPAY_YM, ZITEM_CD),
+    
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZPAY_YM (ZPAY_YM),
+    INDEX IDX_ZSRC_CD (ZSRC_CD), -- 외래 키 성능을 위한 인덱스 추가
+
+    -- 데이터 무결성을 위한 제약 조건
+    CONSTRAINT CHK_ZROUND_TY_VALUE CHECK (ZROUND_TY IN ('WON', 'TEN', 'HUNDRED', 'THOUSAND')),
+    CONSTRAINT CHK_AMOUNT_VALIDITY CHECK (ZRAW_AMT >= ZROUND_AMT),
+
+    -- 외래 키 제약 조건 추가
+    CONSTRAINT FK_ZHR_PAY_ROUND_HISTORY_01
+        FOREIGN KEY (ZSRC_CD)
+        REFERENCES ZHR_PAY_ITEM(ZITEM_CD)
+
+) COMMENT '급여 항목별 금액 절사 이력';
+
+INSERT INTO ZHR_PAY_ROUND_HISTORY 
+(ZEMP_NO, ZPAY_YM, ZITEM_CD, ZRAW_AMT, ZROUND_TY, ZROUND_AMT, ZDIFF_AMT, ZSRC_CD, ZNOTE, CREATED_BY) 
+VALUES
+-- EMP1001, 2025년 9월 급여
+('EMP1001', '202509', 'TAX001', 158234, 'WON', 158230, 4, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
+('EMP1001', '202509', 'TAX002', 15823, 'WON', 15820, 3, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
+('EMP1001', '202509', 'INS001', 265509, 'TEN', 265500, 9, 'INS001', '국민연금법 고지 금액 기준', 'system_batch'),
+('EMP1001', '202509', 'INS002', 210875, 'TEN', 210870, 5, 'INS002', '건강보험법 고지 금액 기준', 'system_batch'),
+('EMP1001', '202509', 'INS003', 27092, 'TEN', 27090, 2, 'INS003', '장기요양보험법 고지 금액 기준', 'system_batch'),
+('EMP1001', '202509', 'INS004', 52981, 'TEN', 52980, 1, 'INS004', '고용보험법 기준 절사', 'system_batch'),
+('EMP1001', '202509', 'PAY009', 1250008, 'TEN', 1250000, 8, 'PAY009', '성과급 지급 규정 10원 단위 절사', 'system_batch'),
+
+-- EMP2004, 2025년 9월 급여
+('EMP2004', '202509', 'TAX001', 89442, 'WON', 89440, 2, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
+('EMP2004', '202509', 'TAX002', 8944, 'WON', 8940, 4, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
+('EMP2004', '202509', 'INS001', 180001, 'TEN', 180000, 1, 'INS001', '국민연금법 고지 금액 기준', 'system_batch'),
+('EMP2004', '202509', 'INS002', 145678, 'TEN', 145670, 8, 'INS002', '건강보험법 고지 금액 기준', 'system_batch'),
+('EMP2004', '202509', 'INS003', 18721, 'TEN', 18720, 1, 'INS003', '장기요양보험법 고지 금액 기준', 'system_batch'),
+('EMP2004', '202509', 'INS004', 35555, 'TEN', 35550, 5, 'INS004', '고용보험법 기준 절사', 'system_batch'),
+
+-- EMP3015, 2025년 9월 급여
+('EMP3015', '202509', 'TAX001', 310569, 'WON', 310560, 9, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
+('EMP3015', '202509', 'TAX002', 31056, 'WON', 31050, 6, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
+('EMP3015', '202509', 'INS001', 265500, 'TEN', 265500, 0, 'INS001', '국민연금 상한액, 절사 금액 없음', 'system_batch'),
+('EMP3015', '202509', 'INS002', 288443, 'TEN', 288440, 3, 'INS002', '건강보험법 고지 금액 기준', 'system_batch'),
+('EMP3015', '202509', 'INS003', 37064, 'TEN', 37060, 4, 'INS003', '장기요양보험법 고지 금액 기준', 'system_batch'),
+('EMP3015', '202509', 'INS004', 65547, 'TEN', 65540, 7, 'INS004', '고용보험법 기준 절사', 'system_batch'),
+
+-- EMP4210, 2025년 9월 급여
+('EMP4210', '202509', 'TAX001', 45111, 'WON', 45110, 1, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
+('EMP4210', '202509', 'TAX002', 4511, 'WON', 4510, 1, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
+('EMP4210', '202509', 'INS001', 166503, 'TEN', 166500, 3, 'INS001', '국민연금법 고지 금액 기준', 'system_batch'),
+
+-- EMP1001, 2025년 8월 급여
+('EMP1001', '202508', 'TAX001', 157998, 'WON', 157990, 8, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
+('EMP1001', '202508', 'TAX002', 15799, 'WON', 15790, 9, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
+('EMP1001', '202508', 'INS001', 265501, 'TEN', 265500, 1, 'INS001', '국민연금법 고지 금액 기준', 'system_batch'),
+('EMP1001', '202508', 'INS002', 210871, 'TEN', 210870, 1, 'INS002', '건강보험법 고지 금액 기준', 'system_batch'),
+('EMP1001', '202508', 'INS003', 27099, 'TEN', 27090, 9, 'INS003', '장기요양보험법 고지 금액 기준', 'system_batch'),
+('EMP1001', '202508', 'INS004', 52988, 'TEN', 52980, 8, 'INS004', '고용보험법 기준 절사', 'system_batch'),
+('EMP1001', '202508', 'PAY002', 800005, 'TEN', 800000, 5, 'PAY002', '명절 상여금 지급', 'system_batch'),
+
+-- EMP2004, 2025년 8월 급여
+('EMP2004', '202508', 'TAX001', 89333, 'WON', 89330, 3, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
+('EMP2004', '202508', 'TAX002', 8933, 'WON', 8930, 3, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
+('EMP2004', '202508', 'INS002', 145672, 'TEN', 145670, 2, 'INS002', '건강보험법 고지 금액 기준', 'system_batch');
