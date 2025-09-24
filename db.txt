@@ -906,3 +906,215 @@ VALUES
 ('EMP2004', '202508', 'TAX001', 89333, 'WON', 89330, 3, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
 ('EMP2004', '202508', 'TAX002', 8933, 'WON', 8930, 3, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
 ('EMP2004', '202508', 'INS002', 145672, 'TEN', 145670, 2, 'INS002', '건강보험법 고지 금액 기준', 'system_batch');
+
+CREATE TABLE ZHR_PAY_CERTIFICATE (
+    
+    CERTIFICATE_ID    BIGINT          NOT NULL AUTO_INCREMENT COMMENT '지급명세표 ID (PK)',
+    ZCERT_NO          VARCHAR(30)     NOT NULL UNIQUE COMMENT '지급명세표 번호 (화면 표시용/참조용)',
+    ZYEAR             VARCHAR(4)      NOT NULL COMMENT '귀속 연도 (YYYY)',
+    ZEMP_NO           VARCHAR(20)     NOT NULL COMMENT '사원번호',
+    ZPERIOD_TY        VARCHAR(20)     NOT NULL COMMENT '기간 유형 (HALF, MONTH, QUARTER, YEAR)',
+    ZPERIOD_FROM      DATE            NOT NULL COMMENT '귀속 기간 시작일',
+    ZPERIOD_TO        DATE            NOT NULL COMMENT '귀속 기간 종료일',
+    ZTOT_GROSS        BIGINT          NOT NULL DEFAULT 0 COMMENT '총 지급액 (과세+비과세)',
+    ZTOT_TAXABLE      BIGINT          NOT NULL DEFAULT 0 COMMENT '과세 대상 금액',
+    ZTOT_NONTAX       BIGINT          NOT NULL DEFAULT 0 COMMENT '비과세 금액',
+    ZTOT_TAX          BIGINT          NOT NULL DEFAULT 0 COMMENT '소득세',
+    ZTOT_LOCAL_TAX    BIGINT          NOT NULL DEFAULT 0 COMMENT '지방소득세',
+    ZTOT_INSURANCE    BIGINT          NOT NULL DEFAULT 0 COMMENT '4대보험 총액',
+    ZINSR_DETAIL      VARCHAR(1000)   NULL     COMMENT '보험 상세 내역 (JSON 또는 텍스트)',
+    ZPAY_COUNT        INT             NOT NULL DEFAULT 0 COMMENT '급여 지급 횟수',
+    ZNOTE             VARCHAR(500)    NULL     COMMENT '비고',
+    CREATED_AT        DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY        VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT        DATETIME        NULL     COMMENT '수정 일시',
+    UPDATED_BY        VARCHAR(50)     NULL     COMMENT '수정자',
+    -- 기본 키 설정
+    PRIMARY KEY (CERTIFICATE_ID),
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZEMP_NO (ZEMP_NO),
+    INDEX IDX_ZCERT_NO (ZCERT_NO) -- 명세서 번호로도 검색할 수 있으므로 인덱스 추가
+) COMMENT '지급명세표(근로소득 원천징수영수증) 정보';
+
+INSERT INTO ZHR_PAY_CERTIFICATE 
+(ZCERT_NO, ZYEAR, ZEMP_NO, ZPERIOD_TY, ZPERIOD_FROM, ZPERIOD_TO, ZTOT_GROSS, ZTOT_TAXABLE, ZTOT_NONTAX, ZTOT_TAX, ZTOT_LOCAL_TAX, ZTOT_INSURANCE, ZINSR_DETAIL, ZPAY_COUNT, ZNOTE, CREATED_BY) 
+VALUES
+-- EMP1001
+('2024-EMP1001-1', '2024', 'EMP1001', 'YEAR', '2024-01-01', '2024-12-31', 65000000, 62600000, 2400000, 3855000, 385500, 5984000, '국민:2817000, 건강:2200000, 장기:280000, 고용:587000', 12, '2024년 귀속 연말정산', 'admin'),
+('2024-EMP1001-2', '2024', 'EMP1001', 'QUARTER', '2024-04-01', '2024-06-30', 16250000, 15650000, 600000, 960000, 96000, 1496000, NULL, 3, '2024년 2분기', 'user_park'),
+('2023-EMP1001-1', '2023', 'EMP1001', 'YEAR', '2023-01-01', '2023-12-31', 62000000, 59600000, 2400000, 3510000, 351000, 5680000, '국민:2682000, 건강:2100000, 장기:268000, 고용:530000', 12, '2023년 귀속 연말정산', 'admin'),
+('2023-EMP1001-2', '2023', 'EMP1001', 'HALF', '2023-07-01', '2023-12-31', 31000000, 29800000, 1200000, 1750000, 175000, 2840000, NULL, 6, '2023년 하반기 관공서 제출용', 'user_kim'),
+('2025-EMP1001-1', '2025', 'EMP1001', 'QUARTER', '2025-01-01', '2025-03-31', 17000000, 16400000, 600000, 1050000, 105000, 1550000, NULL, 3, '2025년 1분기', 'system_batch'),
+('2025-EMP1001-2', '2025', 'EMP1001', 'QUARTER', '2025-04-01', '2025-06-30', 17000000, 16400000, 600000, 1050000, 105000, 1550000, NULL, 3, '2025년 2분기', 'system_batch'),
+('2025-EMP1001-3', '2025', 'EMP1001', 'MONTH', '2025-09-01', '2025-09-30', 5600000, 5400000, 200000, 310000, 31000, 510000, NULL, 1, '2025년 9월분', 'system_batch'),
+
+-- EMP2004
+('2024-EMP2004-1', '2024', 'EMP2004', 'YEAR', '2024-01-01', '2024-12-31', 42000000, 39600000, 2400000, 1450000, 145000, 3800000, '국민:1782000, 건강:1395000, 장기:178000, 고용:356000', 12, '2024년 귀속 연말정산', 'admin'),
+('2023-EMP2004-1', '2023', 'EMP2004', 'YEAR', '2023-01-01', '2023-12-31', 38000000, 35600000, 2400000, 1180000, 118000, 3410000, '국민:1602000, 건강:1250000, 장기:158000, 고용:310000', 12, '2023년 귀속 연말정산', 'admin'),
+('2023-EMP2004-2', '2023', 'EMP2004', 'MONTH', '2023-11-01', '2023-11-30', 3160000, 2960000, 200000, 98000, 9800, 284000, NULL, 1, '2023년 11월분', 'system_batch'),
+('2025-EMP2004-1', '2025', 'EMP2004', 'HALF', '2025-01-01', '2025-06-30', 22000000, 20800000, 1200000, 810000, 81000, 1950000, NULL, 6, '2025년 상반기', 'system_batch'),
+('2024-EMP2004-2', '2024', 'EMP2004', 'MONTH', '2024-10-01', '2024-10-31', 3500000, 3300000, 200000, 120000, 12000, 316000, NULL, 1, '2024년 10월분', 'system_batch'),
+
+-- EMP3015
+('2024-EMP3015-1', '2024', 'EMP3015', 'YEAR', '2024-01-01', '2024-12-31', 95000000, 92600000, 2400000, 11500000, 1150000, 8310000, '국민:3186000, 건강:3250000, 장기:415000, 고용:859000', 12, '2024년 귀속 연말정산', 'admin'),
+('2023-EMP3015-1', '2023', 'EMP3015', 'YEAR', '2023-01-01', '2023-12-31', 91000000, 88600000, 2400000, 10800000, 1080000, 7950000, '국민:3042000, 건강:3110000, 장기:398000, 고용:800000', 12, '2023년 귀속 연말정산', 'admin'),
+('2023-EMP3015-2', '2023', 'EMP3015', 'QUARTER', '2023-10-01', '2023-12-31', 22750000, 22150000, 600000, 2700000, 270000, 1987500, NULL, 3, '2023년 4분기', 'user_park'),
+('2023-EMP3015-3', '2023', 'EMP3015', 'HALF', '2023-01-01', '2023-06-30', 45500000, 44300000, 1200000, 5400000, 540000, 3975000, NULL, 6, '2023년 상반기', 'user_lee'),
+('2025-EMP3015-1', '2025', 'EMP3015', 'MONTH', '2025-07-01', '2025-07-31', 8200000, 8000000, 200000, 980000, 98000, 710000, NULL, 1, '2025년 7월분', 'user_kim'),
+('2025-EMP3015-2', '2025', 'EMP3015', 'MONTH', '2025-08-01', '2025-08-31', 8200000, 8000000, 200000, 980000, 98000, 710000, NULL, 1, '2025년 8월분', 'user_kim'),
+
+-- EMP4210
+('2024-EMP4210-1', '2024', 'EMP4210', 'YEAR', '2024-07-01', '2024-12-31', 21000000, 19800000, 1200000, 680000, 68000, 1900000, '국민:891000, 건강:697500, 장기:89000, 고용:178000', 6, '2024년 귀속 연말정산 (중도입사)', 'admin'),
+('2025-EMP4210-1', '2025', 'EMP4210', 'MONTH', '2025-08-01', '2025-08-31', 3500000, 3300000, 200000, 113000, 11300, 316000, NULL, 1, '2025년 8월 급여명세서', 'user_lee'),
+
+-- EMP5500
+('2024-EMP5500-1', '2024', 'EMP5500', 'YEAR', '2024-01-01', '2024-12-31', 51000000, 48600000, 2400000, 2350000, 235000, 4610000, '국민:2187000, 건강:1710000, 장기:218000, 고용:437000', 12, '2024년 귀속 연말정산', 'admin'),
+('2024-EMP5500-2', '2024', 'EMP5500', 'QUARTER', '2024-04-01', '2024-06-30', 12750000, 12150000, 600000, 587500, 58750, 1152500, NULL, 3, '2024년 2분기', 'user_park'),
+('2024-EMP5500-3', '2024', 'EMP5500', 'QUARTER', '2024-07-01', '2024-09-30', 12750000, 12150000, 600000, 587500, 58750, 1152500, NULL, 3, '2024년 3분기', 'system_batch'),
+('2023-EMP5500-1', '2023', 'EMP5500', 'YEAR', '2023-01-01', '2023-12-31', 48000000, 45600000, 2400000, 2100000, 210000, 4320000, '국민:2052000, 건강:1605000, 장기:205000, 고용:400000', 12, '2023년 귀속 연말정산', 'admin'),
+('2025-EMP5500-1', '2025', 'EMP5500', 'MONTH', '2025-09-01', '2025-09-30', 4500000, 4300000, 200000, 195000, 19500, 400000, NULL, 1, '2025년 9월 급여명세서', 'system_batch');
+
+CREATE TABLE ZHR_CLUB_ITEM (
+    ZCLUB_CD      VARCHAR(10)     NOT NULL COMMENT '회비 코드 (PK)',
+    ZCLUB_NM      VARCHAR(100)    NOT NULL COMMENT '회비 명칭',
+    ZAMOUNT       BIGINT          NOT NULL DEFAULT 0 COMMENT '회비 금액',
+    ZUSE_YN       VARCHAR(1)      NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZNOTE         VARCHAR(500)    NULL COMMENT '비고 (금액 변경 이력 등)',
+    CREATED_AT    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY    VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME        NULL COMMENT '수정 일시',
+    UPDATED_BY    VARCHAR(50)     NULL COMMENT '수정자',
+    -- 기본 키 설정
+    PRIMARY KEY (ZCLUB_CD),
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZCLUB_NM (ZCLUB_NM) -- 회비명으로도 검색할 수 있으므로 인덱스 추가
+) COMMENT '사내 회비 항목 마스터';
+
+INSERT INTO ZHR_CLUB_ITEM (ZCLUB_CD, ZCLUB_NM, ZAMOUNT, ZUSE_YN, ZNOTE, CREATED_BY) VALUES
+-- 필수/공통 회비
+('UNION001', '전사 노동조합비', 25000, 'Y', '매월 급여 공제', 'admin'),
+('ASSOC001', '사우회비', 10000, 'Y', '경조사 지원 및 사내 복지 기금', 'admin'),
+('MUTUAL01', '상조회비', 5000, 'Y', '본인/가족 조사 발생 시 지원', 'admin'),
+('FUND001', '연말 불우이웃돕기 성금', 10000, 'Y', '매년 12월 급여에서 공제', 'user_lee'),
+
+-- 동호회 회비 (사용 중)
+('CLUB_HIKE', '한마음 산악회', 20000, 'Y', '매월 정기 산행 및 활동비', 'user_park'),
+('CLUB_SOC', '위닝FC (축구 동호회)', 30000, 'Y', '유니폼, 구장 대관료 등', 'user_kim'),
+('CLUB_FISH', '강태공 낚시 동호회', 25000, 'Y', '정기 출조 및 장비 구매 지원', 'user_kim'),
+('CLUB_BAND', '사내 밴드부', 35000, 'Y', '합주실 대여 및 악기 관리비', 'user_park'),
+('CLUB_BOOK', '지식나눔 독서모임', 15000, 'Y', '매월 도서 구매 및 모임 비용', 'user_lee'),
+('CLUB_VOL', '사랑나눔 봉사활동', 5000, 'Y', '봉사활동 시 필요한 물품 구매', 'system_batch'),
+('CLUB_MOV', '시네마천국 영화감상회', 20000, 'Y', '단체 영화 관람 및 활동비', 'user_lee'),
+('CLUB_GAME', '보드게임 동호회', 15000, 'Y', '신규 게임 구매 및 모임 공간 대여', 'user_kim'),
+('CLUB_PHOTO', '찰나의순간 사진 동호회', 30000, 'Y', '2025년부터 25,000원에서 인상 적용', 'admin'),
+('CLUB_BOWL', '스트라이크 볼링 동호회', 25000, 'Y', '정기전 게임비 및 뒷풀이 지원', 'user_park'),
+('CLUB_TENN', '테니스 동호회', 40000, 'Y', '코트 대관 및 레슨비 지원', 'user_kim'),
+('CLUB_GOLF', '스크린골프 동호회', 50000, 'Y', '월 2회 정기 모임 비용', 'admin'),
+('CLUB_BAD', '배드민턴 동호회', 20000, 'Y', '셔틀콕 구매 및 체육관 대관료', 'user_lee'),
+('CLUB_CYCLE', '자전거 동호회', 15000, 'Y', '정기 라이딩 및 안전용품 지원', 'system_batch'),
+
+-- 금액 변경 이력이 있는 항목
+('ASSOC002', '개발본부 기술서적 구매펀드', 10000, 'Y', '2024년 하반기 5,000원에서 인상', 'admin'),
+('UNION002', '지부 조합비', 15000, 'Y', '2023년 물가상승률 반영하여 인상됨', 'admin'),
+('CLUB_SOC2', '여성 풋살 동호회', 20000, 'Y', '2025년 신규 창설. 초기 운영비 포함', 'user_kim'),
+
+-- 사용 중지된 항목
+('ASSOC_OLD', '구) 사우회비', 5000, 'N', '2022년 신규 사우회비(ASSOC001)로 통합', 'admin'),
+('CLUB_GO', '프로기우 바둑 동호회', 10000, 'N', '2024년 8월부로 활동 중단', 'user_park'),
+('TEMP_FUND', '2022년 창립기념일 행사비', 20000, 'N', '일회성 모금 항목. 행사 종료됨', 'system_batch'),
+('CLUB_BILL', '당구 동호회', 20000, 'N', '회원 수 부족으로 2023년 해체', 'user_lee'),
+('UNION_OLD', '구) 노동조합비', 20000, 'N', '2020년 조합비 개편으로 사용 중지', 'admin'),
+
+-- 기타 항목
+('DEPT_MEAL', '영업1팀 점심값 펀드', 50000, 'Y', '팀원 점심 식대 공동 관리', 'user_kim'),
+('DEPT_CFE', '디자인팀 커피 구독료', 15000, 'Y', '팀 공용 커피머신 원두 구독', 'user_lee'),
+('PARKING', '사내 주차비 (카풀)', 30000, 'Y', '카풀 참여 직원 대상 주차비 지원금', 'system_batch'),
+('DONA_CHILD', '결식아동 후원금', 30000, 'Y', '매월 정기 후원', 'admin'),
+('GYM_FEE', '사내 헬스장 이용료', 10000, 'Y', '헬스장 관리 및 기구 유지보수', 'system_batch');
+
+CREATE TABLE ZHR_EMP_CLUB (
+    ZHR_EMP_CLUB_ID BIGINT          NOT NULL AUTO_INCREMENT COMMENT '사원별 회비 설정 ID (PK)',
+    ZEMP_NO         VARCHAR(50)     NOT NULL COMMENT '사원 번호 (FK)',
+    ZCLUB_CD        VARCHAR(10)     NOT NULL COMMENT '회비 코드 (FK)',
+    ZFROM_DT        DATE            NOT NULL COMMENT '적용 시작일',
+    ZTO_DT          DATE            NOT NULL COMMENT '적용 종료일',
+    ZPAY_YN         VARCHAR(1)      NOT NULL DEFAULT 'Y' COMMENT '납부 여부 (Y/N)',
+    ZNOTE           VARCHAR(500)    NULL COMMENT '비고 (미납 사유 등)',
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NULL COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (ZHR_EMP_CLUB_ID),
+
+    -- 비즈니스 규칙에 따른 고유 키 설정 (기간별 중복 방지)
+    UNIQUE KEY UK_EMP_CLUB_PERIOD (ZEMP_NO, ZCLUB_CD, ZFROM_DT),
+
+    -- 외래 키 설정 (회비 항목 마스터 테이블 참조)
+    FOREIGN KEY (ZCLUB_CD) REFERENCES ZHR_CLUB_ITEM(ZCLUB_CD),
+    -- 참고: ZEMP_NO는 사원 마스터 테이블(예: ZHR_EMP_MASTER)을 참조해야 하지만, 해당 테이블 정의가 없어 주석으로 처리합니다.
+    -- FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_MASTER(ZEMP_NO),
+
+    -- 제약 조건 설정
+    CHECK (ZPAY_YN IN ('Y', 'N')), -- 납부 여부는 'Y' 또는 'N'만 가능
+    CHECK (ZTO_DT >= ZFROM_DT),    -- 종료일은 시작일보다 빠를 수 없음
+
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZEMP_NO (ZEMP_NO),    -- 사번으로 조회
+    INDEX IDX_ZCLUB_CD (ZCLUB_CD)   -- 회비코드로 조회
+
+) COMMENT '사원별 회비 납부 설정';
+
+INSERT INTO ZHR_EMP_CLUB (ZEMP_NO, ZCLUB_CD, ZFROM_DT, ZTO_DT, ZPAY_YN, ZNOTE, CREATED_BY) VALUES
+-- EMP001: 일반적인 사원 (필수 회비 + 동호회 2개)
+('EMP001', 'UNION001', '2023-01-01', '9999-12-31', 'Y', '입사 시 자동 가입', 'system_batch'),
+('EMP001', 'ASSOC001', '2023-01-01', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
+('EMP001', 'CLUB_HIKE', '2024-03-01', '9999-12-31', 'Y', '산악회 신규 가입', 'user_park'),
+('EMP001', 'CLUB_BOOK', '2023-05-10', '9999-12-31', 'Y', '독서모임 창립 멤버', 'user_lee'),
+
+-- EMP002: 열정적인 동호회원 (필수 회비 + 동호회 3개 + 헬스장)
+('EMP002', 'UNION001', '2022-05-15', '9999-12-31', 'Y', '입사 시 자동 가입', 'system_batch'),
+('EMP002', 'ASSOC001', '2022-05-15', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
+('EMP002', 'CLUB_SOC', '2022-08-01', '9999-12-31', 'Y', '축구 동호회 활동', 'user_kim'),
+('EMP002', 'CLUB_TENN', '2025-01-01', '9999-12-31', 'Y', '테니스 동호회 가입', 'user_kim'),
+('EMP002', 'CLUB_PHOTO', '2023-11-20', '9999-12-31', 'Y', '사진 동호회 활동', 'admin'),
+('EMP002', 'GYM_FEE', '2024-01-01', '2025-12-31', 'Y', '헬스장 2년 이용권', 'system_batch'),
+
+-- EMP003: 휴직자 (필수 회비 납부 일시 중지)
+('EMP003', 'UNION001', '2021-09-01', '2024-12-31', 'Y', '휴직 전까지 납부', 'admin'),
+('EMP003', 'UNION001', '2025-01-01', '2025-12-31', 'N', '2025년 육아휴직으로 인한 납부 면제', 'admin'),
+('EMP003', 'ASSOC001', '2021-09-01', '9999-12-31', 'Y', '사우회비는 휴직과 관계없이 유지', 'admin'),
+
+-- EMP004: 개발본부 팀원 (기술 펀드 + 팀 펀드 납부)
+('EMP004', 'UNION001', '2024-02-01', '9999-12-31', 'Y', '입사 시 가입', 'system_batch'),
+('EMP004', 'ASSOC001', '2024-02-01', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
+('EMP004', 'ASSOC002', '2024-02-01', '9999-12-31', 'Y', '개발본부 기술서적 구매펀드 참여', 'admin'),
+('EMP004', 'DEPT_CFE', '2025-01-01', '2025-12-31', 'Y', '디자인팀 소속으로 커피 구독료 납부', 'user_lee'),
+('EMP004', 'CLUB_GAME', '2024-07-01', '9999-12-31', 'Y', '보드게임 동호회 활동', 'user_kim'),
+
+-- EMP005: 영업팀 팀원 (팀 점심값 펀드 + 카풀 이용)
+('EMP005', 'UNION001', '2020-03-01', '9999-12-31', 'Y', '기존 가입자', 'admin'),
+('EMP005', 'ASSOC001', '2020-03-01', '9999-12-31', 'Y', '기존 가입자', 'admin'),
+('EMP005', 'DEPT_MEAL', '2025-01-01', '2025-06-30', 'Y', '상반기 영업1팀 점심값 펀드', 'user_kim'),
+('EMP005', 'PARKING', '2025-07-01', '9999-12-31', 'Y', '카풀 참여로 주차비 지원 대상', 'system_batch'),
+('EMP005', 'CLUB_GOLF', '2023-02-01', '9999-12-31', 'Y', '스크린골프 동호회', 'admin'),
+
+-- EMP006: 과거 동호회 활동 이력 보유자
+('EMP006', 'UNION001', '2019-11-01', '9999-12-31', 'Y', NULL, 'admin'),
+('EMP006', 'ASSOC001', '2019-11-01', '9999-12-31', 'Y', NULL, 'admin'),
+('EMP006', 'CLUB_GO', '2022-01-01', '2024-07-31', 'Y', '바둑 동호회 활동 중단으로 종료 처리', 'user_park'),
+('EMP006', 'CLUB_FISH', '2024-09-01', '9999-12-31', 'Y', '낚시 동호회로 이전 가입', 'user_kim'),
+
+-- EMP007: 정기 후원 및 일회성 기부 참여
+('EMP007', 'UNION001', '2023-08-01', '9999-12-31', 'Y', NULL, 'system_batch'),
+('EMP007', 'ASSOC001', '2023-08-01', '9999-12-31', 'Y', NULL, 'system_batch'),
+('EMP007', 'FUND001', '2025-12-01', '2025-12-31', 'Y', '2025년 연말 불우이웃돕기 성금', 'user_lee'),
+('EMP007', 'DONA_CHILD', '2024-01-01', '9999-12-31', 'Y', '결식아동 정기 후원 신청', 'admin'),
+('EMP007', 'CLUB_VOL', '2023-10-01', '9999-12-31', 'Y', '봉사활동 동호회 가입', 'system_batch'),
+
+-- EMP008: 신규 여성 풋살 동호회 가입자
+('EMP008', 'UNION001', '2025-01-15', '9999-12-31', 'Y', NULL, 'system_batch'),
+('EMP008', 'ASSOC001', '2025-01-15', '9999-12-31', 'Y', NULL, 'system_batch'),
+('EMP008', 'CLUB_SOC2', '2025-04-01', '9999-12-31', 'Y', '여성 풋살 동호회 창립 멤버', 'user_kim'),
+('EMP008', 'CLUB_CYCLE', '2025-05-01', '9999-12-31', 'Y', '자전거 동호회 가입', 'system_batch');
