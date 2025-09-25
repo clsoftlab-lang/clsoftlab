@@ -78,4 +78,21 @@ public class ClubItemController {
 				.map(dto -> ResponseEntity.ok(dto))
 				.orElse(ResponseEntity.notFound().build());
 	}
+	
+	// 급여 항목 검색 
+	@ResponseBody
+	@GetMapping("/list")
+	public Page<ClubItemDetailDto> getClubItemList(@RequestParam(defaultValue = "") String clubName,@RequestParam(defaultValue = "") String useYn,
+			@RequestParam(required = false) Integer page) { 
+		
+		
+		if (page == null) {
+			page = 0;
+		}
+		int size= 1000;
+		
+		Page<ClubItemDetailDto> itemPage = clubItemService.searchClubItem("", clubName, useYn, page, size);
+		
+		return itemPage;
+	}
 }

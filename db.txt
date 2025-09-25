@@ -1118,3 +1118,165 @@ INSERT INTO ZHR_EMP_CLUB (ZEMP_NO, ZCLUB_CD, ZFROM_DT, ZTO_DT, ZPAY_YN, ZNOTE, C
 ('EMP008', 'ASSOC001', '2025-01-15', '9999-12-31', 'Y', NULL, 'system_batch'),
 ('EMP008', 'CLUB_SOC2', '2025-04-01', '9999-12-31', 'Y', '여성 풋살 동호회 창립 멤버', 'user_kim'),
 ('EMP008', 'CLUB_CYCLE', '2025-05-01', '9999-12-31', 'Y', '자전거 동호회 가입', 'system_batch');
+
+CREATE TABLE ZHR_OVERTIME_DETAIL (
+    ZHR_OVERTIME_DETAIL_ID BIGINT        NOT NULL AUTO_INCREMENT COMMENT '시간외근무 실적 ID (PK)',
+    ZEMP_NO                VARCHAR(50)   NOT NULL COMMENT '사원 번호 (FK)',
+    ZDATE                  DATE          NOT NULL COMMENT '근무 일자',
+    ZHOURS                 DECIMAL(5,2)  NOT NULL COMMENT '근로 시간',
+    ZTYPE                  VARCHAR(10)   NOT NULL COMMENT '근로 유형 (OVERTIME, NIGHT, HOLIDAY)',
+    ZNOTE                  VARCHAR(500)  NULL     COMMENT '비고 (사유 등)',
+    CREATED_AT             DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY             VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT             DATETIME      NULL     COMMENT '수정 일시',
+    UPDATED_BY             VARCHAR(50)   NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (ZHR_OVERTIME_DETAIL_ID),
+
+    -- 비즈니스 규칙에 따른 고유 키 설정 (중복 입력 방지)
+    UNIQUE KEY UK_OVERTIME_UNIQUE (ZEMP_NO, ZDATE, ZTYPE),
+
+    -- 외래 키 설정 (사원 마스터 테이블 참조)
+    -- 참고: ZEMP_NO는 사원 프로필 테이블(예: ZHR_EMP_PROFILE)을 참조해야 하지만, 해당 테이블 정의가 없어 주석으로 처리합니다.
+    -- FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_PROFILE(ZEMP_NO),
+
+    -- 제약 조건 설정
+    CHECK (ZHOURS > 0), -- 근로시간은 0보다 커야 함
+    CHECK (ZTYPE IN ('OVERTIME', 'NIGHT', 'HOLIDAY')), -- 정의된 근로 유형만 허용
+
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZEMP_NO (ZEMP_NO),   -- 사번으로 조회
+    INDEX IDX_ZDATE (ZDATE)        -- 근무일자로 조회
+
+) COMMENT '시간외근무 실적 상세';
+
+INSERT INTO ZHR_OVERTIME_DETAIL (ZEMP_NO, ZDATE, ZHOURS, ZTYPE, ZNOTE, CREATED_BY) VALUES
+-- EMP001: 프로젝트 마감 등 일반적인 연장 근무
+('EMP001', '2024-11-28', 2.5, 'OVERTIME', '4분기 프로젝트 제안서 마감', 'user_park'),
+('EMP001', '2025-02-10', 3.0, 'OVERTIME', '월간 실적 보고서 작성', 'user_lee'),
+('EMP001', '2025-06-01', 8.0, 'HOLIDAY', '주말 시스템 업데이트 지원 근무', 'admin'),
+('EMP001', '2025-08-22', 2.0, 'NIGHT', '야간 긴급 서버 패치 작업', 'system_batch'),
+
+-- EMP002: 동호회 활동만큼이나 열정적인 연장 근무
+('EMP002', '2024-10-15', 4.0, 'OVERTIME', '신규 서비스 기획안 최종 검토', 'user_kim'),
+('EMP002', '2025-01-28', 8.0, 'HOLIDAY', '설 연휴 기간 서비스 모니터링', 'admin'),
+('EMP002', '2025-03-25', 3.0, 'NIGHT', '해외 지사 화상회의로 인한 야간 근무', 'user_kim'),
+('EMP002', '2025-07-31', 3.5, 'OVERTIME', '반기 마감 실적 취합', 'user_kim'),
+
+-- EMP003: 휴직 전 과거 근무 기록
+('EMP003', '2024-09-10', 2.0, 'OVERTIME', '업무 인수인계 자료 작성', 'admin'),
+('EMP003', '2024-11-05', 3.0, 'OVERTIME', '휴직 전 최종 보고서 제출', 'admin'),
+('EMP003', '2024-12-20', 1.5, 'OVERTIME', '팀 비품 정리 및 인수인계', 'admin'),
+
+-- EMP004: 야간 배포 및 긴급 대응이 잦은 개발자
+('EMP004', '2024-12-20', 4.0, 'NIGHT', '연말 정기 시스템 배포', 'system_batch'),
+('EMP004', '2025-01-11', 8.0, 'HOLIDAY', '주말 긴급 장애 대응', 'admin'),
+('EMP004', '2025-04-16', 3.0, 'NIGHT', '신규 기능 릴리즈 야간 작업', 'system_batch'),
+('EMP004', '2025-05-25', 4.5, 'OVERTIME', '기술 부채 해결을 위한 집중 근무', 'user_lee'),
+('EMP004', '2025-08-01', 2.0, 'NIGHT', 'DB 마이그레이션 모니터링', 'system_batch'),
+
+-- EMP005: 고객사 미팅 및 월말 정산이 있는 영업팀
+('EMP005', '2025-02-28', 3.0, 'OVERTIME', '2월 영업 실적 마감 정산', 'user_kim'),
+('EMP005', '2025-05-15', 8.0, 'HOLIDAY', '고객사 주말 워크샵 기술 지원', 'user_kim'),
+('EMP005', '2025-06-20', 2.0, 'OVERTIME', '주요 고객사 저녁 미팅', 'admin'),
+('EMP005', '2025-09-25', 2.5, 'OVERTIME', '3분기 마감 대비 계약서 검토', 'user_kim'),
+
+-- EMP006: 꾸준히 발생하는 연장 근무
+('EMP006', '2024-08-15', 8.0, 'HOLIDAY', '광복절 대체 근무', 'user_park'),
+('EMP006', '2025-01-02', 2.0, 'OVERTIME', '연초 업무 계획 수립', 'admin'),
+('EMP006', '2025-06-06', 8.0, 'HOLIDAY', '현충일 당직 근무', 'admin'),
+
+-- EMP007: 행사 지원 및 후원 관련 업무
+('EMP007', '2024-12-24', 4.0, 'OVERTIME', '연말 봉사활동 행사 준비', 'user_lee'),
+('EMP007', '2025-05-05', 8.0, 'HOLIDAY', '어린이날 기념 행사 지원', 'system_batch'),
+('EMP007', '2025-07-10', 3.0, 'NIGHT', '해외 후원 재단과 야간 통화', 'admin'),
+
+-- EMP008: 신규 입사자의 업무 적응을 위한 연장 근무
+('EMP008', '2025-03-20', 1.5, 'OVERTIME', '신규입사자 OJT 교육 참여', 'system_batch'),
+('EMP008', '2025-06-18', 2.0, 'OVERTIME', '상반기 성과 리뷰 준비', 'user_kim'),
+('EMP008', '2025-09-01', 3.0, 'OVERTIME', '하반기 사업 전략 수립 지원', 'user_kim'),
+
+-- EMP009: 회계팀 (월말/분기말/연말 집중 근무)
+('EMP009', '2025-03-31', 4.0, 'OVERTIME', '1분기 재무제표 마감', 'admin'),
+('EMP009', '2025-04-01', 3.0, 'NIGHT', '감사 대응 자료 야간 준비', 'admin'),
+('EMP009', '2025-06-30', 4.0, 'OVERTIME', '상반기 결산 작업', 'admin'),
+('EMP009', '2025-07-01', 8.0, 'HOLIDAY', '결산 관련 시스템 점검', 'system_batch'),
+
+-- EMP010: 인프라팀 (주말 및 야간 작업)
+('EMP010', '2025-02-15', 8.0, 'HOLIDAY', '데이터센터 이전 작업', 'system_batch'),
+('EMP010', '2025-02-16', 6.0, 'HOLIDAY', '데이터센터 이전 후 안정화 작업', 'system_batch'),
+('EMP010', '2025-07-12', 4.0, 'NIGHT', '네트워크 장비 교체 및 야간 모니터링', 'system_batch');
+
+CREATE TABLE ZHR_CALC_ORDER (
+    ZITEM_CD      VARCHAR(50)     NOT NULL COMMENT '항목 코드 (PK, FK from ZHR_PAY_ITEM)',
+    ZORDER        INT             NOT NULL COMMENT '계산 순서',
+    ZGROUP_CD     VARCHAR(20)     NOT NULL COMMENT '계산 그룹 (TAX, INSURANCE, ALLOW 등)',
+    ZDEPENDS_ON   VARCHAR(50)     NULL     COMMENT '선행(의존) 항목 코드 (Self-reference)',
+    ZNOTE         VARCHAR(500)    NULL     COMMENT '설명',
+    ZUSE_YN       CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    CREATED_AT    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY    VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME        NULL     COMMENT '수정 일시',
+    UPDATED_BY    VARCHAR(50)     NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (ZITEM_CD),
+
+    -- 비즈니스 규칙에 따른 고유 키 설정 (그룹 내 계산 순서 중복 방지)
+    UNIQUE KEY UK_CALC_ORDER_UNIQUE (ZGROUP_CD, ZORDER),
+
+    -- 외래 키 설정
+    -- ZHR_PAY_ITEM 테이블의 항목 코드를 참조 (항목 정의의 무결성)
+    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD),
+    -- 선행 항목은 ZHR_CALC_ORDER 테이블 내 다른 항목 코드를 참조 (의존성 관계의 무결성)
+    FOREIGN KEY (ZDEPENDS_ON) REFERENCES ZHR_CALC_ORDER(ZITEM_CD),
+
+    -- 제약 조건 설정
+    CHECK (ZUSE_YN IN ('Y', 'N')), -- 사용 여부는 'Y' 또는 'N'만 허용
+    CHECK (ZORDER > 0),            -- 계산 순서는 0보다 커야 함
+
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZGROUP_CD (ZGROUP_CD), -- 계산 그룹으로 조회
+    INDEX IDX_ZUSE_YN (ZUSE_YN)      -- 사용 여부로 조회
+
+) COMMENT '급여 항목 계산 순서 정의';
+
+INSERT INTO ZHR_CALC_ORDER 
+(ZITEM_CD, ZORDER, ZGROUP_CD, ZDEPENDS_ON, ZNOTE, ZUSE_YN, CREATED_BY) 
+VALUES
+-- 1. PAY (과세 지급 항목 그룹) - 과세 표준을 결정하는 첫 단계
+('PAY001', 1,  'PAY', NULL, '가장 기본이 되는 급여 항목', 'Y', 'system_admin'),
+('PAY004', 2,  'PAY', NULL, '기본급 이후 계산되는 수당', 'Y', 'system_admin'),
+('PAY005', 3,  'PAY', NULL, '기본급 이후 계산되는 수당', 'Y', 'system_admin'),
+('PAY006', 4,  'PAY', NULL, '기본급 이후 계산되는 수당', 'Y', 'system_admin'),
+('PAY007', 5,  'PAY', 'PAY001', '통상임금 계산을 위해 기본급 선행 필요', 'Y', 'system_admin'),
+('PAY002', 10, 'PAY', 'PAY001', '기본급 기반으로 계산될 수 있음', 'Y', 'system_admin'),
+('PAY009', 11, 'PAY', 'PAY001', '기본급 기반으로 계산될 수 있음', 'Y', 'system_admin'),
+
+-- 2. ALLOWANCE (비과세 지급 항목 그룹) - 과세 표준에 영향을 주지 않음
+('PAY003', 1, 'ALLOWANCE', NULL, '비과세 항목', 'Y', 'system_admin'),
+('PAY008', 2, 'ALLOWANCE', NULL, '비과세 항목', 'Y', 'system_admin'),
+('PAY010', 3, 'ALLOWANCE', NULL, '비과세 항목', 'Y', 'system_admin'),
+
+-- 3. INSURANCE (4대 보험 그룹) - 과세 표준(PAY 그룹)이 확정된 후 계산
+('INS001', 1, 'INSURANCE', 'PAY001', '과세소득 확정 후 계산', 'Y', 'system_admin'),
+('INS002', 2, 'INSURANCE', 'PAY001', '과세소득 확정 후 계산', 'Y', 'system_admin'),
+('INS004', 3, 'INSURANCE', 'PAY001', '과세소득 확정 후 계산', 'Y', 'system_admin'),
+('INS003', 4, 'INSURANCE', 'INS002', '건강보험료가 먼저 계산되어야 함', 'Y', 'system_admin'),
+('INS005', 5, 'INSURANCE', NULL, '사용자 부담분이므로 계산 로직에서 제외', 'N', 'system_admin'),
+
+-- 4. TAX (세금 그룹) - 과세 표준(PAY 그룹) 확정 후, 비과세(ALLOWANCE)는 제외하고 계산
+('TAX001', 1, 'TAX', 'PAY001', '과세소득 확정 후 계산 (대표의존: 기본급)', 'Y', 'system_admin'),
+('TAX002', 2, 'TAX', 'TAX001', '소득세가 먼저 계산되어야 함', 'Y', 'system_admin'),
+('TAX003', 3, 'TAX', NULL, '독립적으로 계산되는 세금', 'Y', 'system_admin'),
+('TAX004', 4, 'TAX', NULL, '현재 사용하지 않는 세금 항목', 'N', 'system_admin'),
+
+-- 5. DEDUCT (기타 공제 그룹) - 모든 지급, 세금, 보험 계산 후 마지막 단계에서 공제
+('DED002', 1, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
+('DED003', 2, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
+('DED004', 3, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
+('DED005', 4, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
+('DED006', 5, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
+('DED001', 6, 'DEDUCT', NULL, '현재 사용하지 않는 공제 항목', 'N', 'system_admin');
+

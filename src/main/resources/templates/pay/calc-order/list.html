@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>급여 항목 계산 순서 관리</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+    <div id="global-loader">
+    	<div class="page-loader">
+    	</div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">검색 조건</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/pay/calc-order" method="get" id="searchForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>항목 코드</label>
+                                        <input class="form-control" name="keyword" placeholder="항목 코드 입력" th:value="${itemCode}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>계산 그룹</label>
+                                        <select class="form-select" name="groupCode">
+                                            <option value="">전체</option>
+                                            <option value="PAY" th:selected="${groupCode == 'PAY'}">과세지급</option>
+                                            <option value="ALLOWANCE" th:selected="${groupCode == 'ALLOWANCE'}">비과세지급</option>
+                                            <option value="INSURANCE" th:selected="${groupCode == 'INSURANCE'}">사회보험</option>
+                                            <option value="TAX" th:selected="${groupCode == 'TAX'}">세금</option>
+                                            <option value="DEDUCT" th:selected="${groupCode == 'DEDUCT'}">기타공제</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사용 여부</label>
+                                        <select class="form-select" name="useYn">
+                                            <option value="">전체</option>
+                                            <option value="Y" th:selected="${useYn == 'Y'}">Y</option>
+                                            <option value="N" th:selected="${useYn == 'N'}">N</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <div class="form-group w-100">
+                                        <button type="submit" class="btn btn-primary w-100">조회</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">계산 순서 목록</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="calcOrderTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>항목코드</th>
+                                        <th>항목명</th>
+                                        <th>계산순서</th>
+                                        <th>그룹</th>
+                                        <th>선행항목</th>
+                                        <th>설명</th>
+                                        <th>사용여부</th>
+                                        <th>수정</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="c : ${calcOrder}">
+                                        <td th:text="${c.itemCode}"></td>
+                                        <td th:text="${c.itemName}"></td>
+                                        <td th:text="${c.order}"></td>
+                                        <td th:text="${c.groupCode}"></td>
+                                        <td th:text="${c.dependsOn?.itemCode}"></td>
+                                        <td th:text="${#strings.abbreviate(c.note, 50)}"></td>
+                                        <td th:text="${c.useYn}"></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"
+                                                th:data-id="${c.itemCode}">수정</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-3 text-end">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">신규 등록</button>
+                </div>
+
+                <div class="modal fade" id="addModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">신규 계산 순서 등록</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">항목 코드</label>
+                                            <input class="form-control itemName"required readonly>
+                                            <input type="hidden"  name="itemCode">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">계산 순서</label>
+                                            <input type="number" class="form-control" name="order" required min="1" max="99999999">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">계산 그룹</label>
+                                            <select class="form-select" name="groupCode" required>
+                                                <option value="">선택하세요</option>
+                                                <option value="PAY">과세지급</option>
+                                                <option value="ALLOWANCE">비과세지급</option>
+                                                <option value="INSURANCE">사회보험</option>
+                                                <option value="TAX">세금</option>
+                                                <option value="DEDUCT">기타공제</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">선행 항목</label>
+                                            <input class="form-select" name="dependsOn" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사용 여부</label>
+                                            <select class="form-select" name="useYn" required>
+                                                <option value="Y">Y</option>
+                                                <option value="N">N</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">설명</label>
+                                            <textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="reset" form="addForm" class="btn btn-outline-secondary">초기화</button>
+                                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-primary" onclick="addNewCalcOrder()">저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="editModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">계산 순서 수정</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">항목 코드</label>
+                                            <input type="text" class="form-control" name="itemCode" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">계산 순서</label>
+                                            <input type="number" class="form-control" name="order" required min="1" max="99999999">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">계산 그룹</label>
+                                            <select class="form-select" name="groupCode" required>
+                                                <option value="">선택하세요</option>
+                                                <option value="PAY">과세지급</option>
+                                                <option value="ALLOWANCE">비과세지급</option>
+                                                <option value="INSURANCE">사회보험</option>
+                                                <option value="TAX">세금</option>
+                                                <option value="DEDUCT">기타공제</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">선행 항목</label>
+                                            <input class="form-control" name="dependsOn" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사용 여부</label>
+                                            <select class="form-select" name="useYn" required>
+                                                <option value="Y">Y</option>
+                                                <option value="N">N</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">설명</label>
+                                            <textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-primary" onclick="updateCalcOrder()">변경사항 저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/assets/js/script.js"></script>
+    
+    <script type="text/javascript" th:inline="none">
+	    new DataTable('#calcOrderTable', {
+	        order: [[3, 'asc'], [2, 'asc']] // 그룹, 계산순서 순으로 정렬
+	    });
+	    
+ 		document.addEventListener('DOMContentLoaded', function () {
+	  		// 수정 모달창을 열 때, 불러오기.
+	       const tableBody = document.querySelector('.table tbody');
+		    if (tableBody) {
+		        tableBody.addEventListener('click', function(event) {
+		            const editButton = event.target.closest('.edit-btn');
+		            if (editButton) {
+		                const id = editButton.dataset.id; 
+		                findDetail(id);
+		            }
+		        });
+		    }
+		});
+
+    </script>
+
+    </body>
+</html>
