@@ -9,14 +9,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CalcOrderDetailDto {
-	
+public class GlMappingRuleDetailDto {
+
+	private Long id;
     private String itemCode;
     private String itemName;
-    private Integer order;
-    private String groupCode;
-    private CalcOrderSimpleDetailDto dependsOn;
+    private String bizCode;
+    private String costCntr;
+    private String glAccount;
     private String note;
     private String useYn;
-
 }

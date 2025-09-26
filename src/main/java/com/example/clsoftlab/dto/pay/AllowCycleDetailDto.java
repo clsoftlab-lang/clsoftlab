@@ -9,14 +9,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CalcOrderDetailDto {
-	
+public class AllowCycleDetailDto {
+
     private String itemCode;
     private String itemName;
-    private Integer order;
-    private String groupCode;
-    private CalcOrderSimpleDetailDto dependsOn;
+    private String cycle;
     private String note;
     private String useYn;
-
 }

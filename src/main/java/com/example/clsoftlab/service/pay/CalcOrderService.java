@@ -16,6 +16,7 @@ import com.example.clsoftlab.entity.PayItem;
 import com.example.clsoftlab.repository.pay.CalcOrderRepository;
 import com.example.clsoftlab.repository.pay.PayItemRepository;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -25,30 +26,38 @@ public class CalcOrderService {
 	private final CalcOrderRepository calcOrderRepository;
 	private final PayItemRepository payItemRepository;
 	private final ModelMapper modelMapper;
+	private final EntityManager entityManager;
 	
 	public CalcOrderService(CalcOrderRepository calcOrderRepository, PayItemRepository payItemRepository, 
-			ModelMapper modelMapper) {
+			ModelMapper modelMapper, EntityManager entityManager) {
 		this.calcOrderRepository = calcOrderRepository;
 		this.payItemRepository = payItemRepository;
 		this.modelMapper = modelMapper;
+		this.entityManager = entityManager;
 	}
 	
 	// 검색어로 조회
 	public Page<CalcOrderDetailDto> searchCalcOrder (String itemCode, String groupCode, String useYn, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("itemCode"));
 		
-		return calcOrderRepository.findByItemCodeContainingAndGroupCodeContainingAndUseYnContaining(itemCode, groupCode, useYn, pageable)
+		return calcOrderRepository.searchCalcOrder(itemCode, groupCode, useYn, pageable)
 				.map(i -> modelMapper.map(i, CalcOrderDetailDto.class));
 	}
 	
 	// 새 항목 등록
 	@Transactional
 	public void addNewCalcOrder (CalcOrderRequestDto dto) {
+		if (calcOrderRepository.existsById(dto.getItemCode())) {
+	        throw new IllegalStateException("이미 존재하는 항목 코드입니다: " + dto.getItemCode());
+	    }
+		
 		
 		CalcOrder calcOrder = modelMapper.map(dto, CalcOrder.class);
 		
-		PayItem payItem = payItemRepository.findById(calcOrder.getItemCode())
+		
+		PayItem payItem = payItemRepository.findById(dto.getItemCode())
 				.orElseThrow(() -> new EntityNotFoundException("해당 항목을 찾을 수 없습니다. itemCode : " + calcOrder.getItemCode()));
+		
 		
 		calcOrder.setPayItem(payItem);
 		
@@ -58,7 +67,7 @@ public class CalcOrderService {
 			calcOrder.setDependsOn(dependsOn);
 		}
 		
-		calcOrderRepository.save(calcOrder);
+		entityManager.persist(calcOrder);
 	}
 	
 	// 기존 항목 수정
@@ -83,8 +92,8 @@ public class CalcOrderService {
 	}
 	
 	// 계산순서 중복 검사
-	public boolean checkOverlap (Integer order, String groupCode) {
-		return calcOrderRepository.existsByOrderAndGroupCode(order, groupCode);
+	public boolean checkOverlap (Integer order, String groupCode, String itemCode) {
+		return calcOrderRepository.existsByOrderAndGroupCodeAndItemCodeNot(order, groupCode, itemCode);
 	}
 	
 	// 상세 정보 조회

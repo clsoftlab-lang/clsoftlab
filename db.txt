@@ -1280,3 +1280,126 @@ VALUES
 ('DED006', 5, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
 ('DED001', 6, 'DEDUCT', NULL, '현재 사용하지 않는 공제 항목', 'N', 'system_admin');
 
+CREATE TABLE ZHR_ALLOW_CYCLE (
+    ZITEM_CD    VARCHAR(50)     NOT NULL COMMENT '항목 코드 (PK, FK from ZHR_PAY_ITEM)',
+    ZCYCLE      VARCHAR(20)     NOT NULL COMMENT '지급 주기 (MONTHLY, QUARTER, HALF, YEAR)',
+    ZNOTE       VARCHAR(500)    NULL     COMMENT '설명',
+    ZUSE_YN     CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    CREATED_AT  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY  VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT  DATETIME        NULL     COMMENT '수정 일시',
+    UPDATED_BY  VARCHAR(50)     NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (ZITEM_CD),
+
+    -- 외래 키 설정
+    -- ZHR_PAY_ITEM 테이블의 항목 코드를 참조하여 데이터 무결성 보장
+    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD),
+
+    -- 제약 조건 설정
+    -- 지급 주기는 정해진 값(MONTHLY, QUARTER, HALF, YEAR) 중 하나만 허용
+    CHECK (ZCYCLE IN ('MONTHLY', 'QUARTER', 'HALF', 'YEAR')),
+    -- 사용 여부는 'Y' 또는 'N'만 허용
+    CHECK (ZUSE_YN IN ('Y', 'N')),
+
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZCYCLE (ZCYCLE),    -- 지급 주기로 조회
+    INDEX IDX_ZUSE_YN (ZUSE_YN)     -- 사용 여부로 조회
+
+) COMMENT '상여 항목 지급 주기 정의';
+
+
+-- 더미데이터 --
+INSERT INTO ZHR_ALLOW_CYCLE 
+(ZITEM_CD, ZCYCLE, ZNOTE, ZUSE_YN, CREATED_BY) 
+VALUES
+('PAY001', 'MONTHLY', '월 기본급 (매월 지급)', 'Y', 'system_admin'),
+('PAY002', 'HALF', '반기별 정기 상여금 지급 주기', 'Y', 'system_admin'),
+('PAY003', 'MONTHLY', '매월 고정 지급되는 식대 보조금', 'Y', 'system_admin'),
+('PAY004', 'MONTHLY', '직책 보유자에게 매월 지급되는 수당', 'Y', 'system_admin'),
+('PAY005', 'MONTHLY', '자격증 보유자에게 매월 지급 (현재 미사용 정책)', 'N', 'system_admin'),
+('PAY006', 'MONTHLY', '부양가족 기준 매월 지급되는 가족 수당', 'Y', 'system_admin'),
+('PAY007', 'MONTHLY', '연장/야간/휴일근로 정산 후 매월 지급', 'Y', 'system_admin'),
+('PAY008', 'MONTHLY', '차량유지비(유류대) 매월 지급', 'Y', 'system_admin'),
+('PAY009', 'QUARTER', '분기별 성과 평가에 따른 성과급', 'Y', 'system_admin'),
+('PAY010', 'YEAR', '연 1회 지급되는 정기 휴가비', 'Y', 'system_admin');
+
+CREATE TABLE ZHR_GL_MAPPING_RULE (
+    -- 관리용 고유 ID 컬럼 (PK)
+    MAPPING_ID        BIGINT         NOT NULL AUTO_INCREMENT COMMENT '매핑 ID (PK)',
+
+    -- 비즈니스 키 컬럼 (UNIQUE)
+    ZITEM_CD          VARCHAR(50)    NOT NULL COMMENT '항목 코드 (FK from ZHR_PAY_ITEM)',
+    ZBIZ_CD           VARCHAR(10)    NOT NULL COMMENT '사업장 코드',
+    ZCOST_CNTR        VARCHAR(20)    NOT NULL COMMENT '코스트센터',
+
+    -- 데이터 컬럼
+    ZGL_ACCT          VARCHAR(30)    NOT NULL COMMENT '회계 계정 코드',
+    ZNOTE             VARCHAR(500)   NULL     COMMENT '설명',
+    ZUSE_YN           CHAR(1)        NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+
+    -- 감사(Audit) 컬럼
+    CREATED_AT        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY        VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT        DATETIME       NULL     COMMENT '수정 일시',
+    UPDATED_BY        VARCHAR(50)    NULL     COMMENT '수정자',
+
+    -- 기본 키 설정 (새로운 ID 컬럼)
+    PRIMARY KEY (MAPPING_ID),
+
+    -- 고유 키(UNIQUE) 설정
+    -- '항목코드+사업장+코스트센터' 조합의 중복을 방지하는 비즈니스 규칙은 그대로 유지
+    UNIQUE KEY UK_ZHR_GL_MAPPING_RULE (ZITEM_CD, ZBIZ_CD, ZCOST_CNTR),
+
+    -- 외래 키 설정
+    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD),
+
+    -- 제약 조건 설정
+    CHECK (ZUSE_YN IN ('Y', 'N')),
+
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ZUSE_YN (ZUSE_YN)
+
+) COMMENT '급여 항목별 회계 계정 매핑 규칙';
+
+INSERT INTO ZHR_GL_MAPPING_RULE
+(ZITEM_CD, ZBIZ_CD, ZCOST_CNTR, ZGL_ACCT, ZNOTE, ZUSE_YN, CREATED_BY)
+VALUES
+-- 1. 전사 공통 계정 매핑 (급여/수당)
+('PAY001', '*', '*', '51101000', '전사 공통 기본급 계정', 'Y', 'system_loader'),
+('PAY002', '*', '*', '51102000', '전사 공통 상여금 계정', 'Y', 'system_loader'),
+('PAY003', '*', '*', '81105000', '전사 공통 식대(복리후생비)', 'Y', 'system_loader'),
+('PAY004', '*', '*', '51101001', '전사 공통 직책수당 계정', 'Y', 'system_loader'),
+('PAY005', '*', '*', '51101002', '전사 공통 자격수당 계정', 'Y', 'system_loader'),
+('PAY006', '*', '*', '81105001', '전사 공통 가족수당(복리후생비)', 'Y', 'system_loader'),
+('PAY007', '*', '*', '51101003', '전사 공통 연장근로수당 계정', 'Y', 'system_loader'),
+('PAY008', '*', '*', '81106000', '전사 공통 차량유지비 계정', 'Y', 'system_loader'),
+('PAY009', '*', '*', '51102001', '전사 공통 성과급 계정', 'Y', 'system_loader'),
+('PAY010', '*', '*', '81105002', '전사 공통 휴가비(복리후생비)', 'Y', 'system_loader'),
+
+-- 2. 전사 공통 계정 매핑 (세금/보험/공제)
+('TAX001', '*', '*', '21501000', '예수금 - 소득세', 'Y', 'system_loader'),
+('TAX002', '*', '*', '21501001', '예수금 - 지방소득세', 'Y', 'system_loader'),
+('INS001', '*', '*', '21502001', '예수금 - 국민연금', 'Y', 'system_loader'),
+('INS002', '*', '*', '21502002', '예수금 - 건강보험', 'Y', 'system_loader'),
+('INS003', '*', '*', '21502003', '예수금 - 장기요양보험', 'Y', 'system_loader'),
+('INS004', '*', '*', '21502004', '예수금 - 고용보험', 'Y', 'system_loader'),
+('DED002', '*', '*', '21503001', '예수금 - 노조비', 'Y', 'system_loader'),
+('DED003', '*', '*', '21503002', '예수금 - 사내대출상환', 'Y', 'system_loader'),
+('DED004', '*', '*', '21503003', '예수금 - 기숙사비', 'Y', 'system_loader'),
+('DED005', '*', '*', '21503004', '예수금 - 복지기금', 'Y', 'system_loader'),
+
+-- 3. 특정 사업장/코스트센터별 계정 매핑 (우선 적용)
+('PAY001', '2000', '*', '52101000', '생산본부(2000) 소속 직원의 기본급은 제조원가로 처리', 'Y', 'system_loader'),
+('PAY007', '2000', '*', '52101003', '생산본부(2000) 소속 직원의 연장근로수당은 제조원가로 처리', 'Y', 'system_loader'),
+('PAY001', '3000', '*', '61101000', '연구소(3000) 소속 직원의 기본급은 연구개발비로 처리', 'Y', 'system_loader'),
+('PAY005', '3000', '*', '61101002', '연구소(3000) 소속 직원의 자격수당은 연구개발비로 처리', 'Y', 'system_loader'),
+('PAY001', '1000', 'CC_SALES', '81101000', '영업부(CC_SALES) 직원의 기본급은 판매관리비로 처리', 'Y', 'system_loader'),
+('PAY009', '1000', 'CC_SALES', '81102001', '영업부(CC_SALES) 직원의 성과급은 판매관리비로 처리', 'Y', 'system_loader'),
+('PAY008', '1000', 'CC_SALES', '81107000', '영업부(CC_SALES) 직원의 차량유지비는 여비교통비로 처리', 'Y', 'system_loader'),
+
+-- 4. 미사용(N) 또는 특수 계정 매핑
+('DED001', '*', '*', '21503000', '학자금 상환 의무 공제 (현재 미사용)', 'N', 'system_loader'),
+('TAX004', '*', '*', '21501002', '농어촌특별세 (특정 대상자만 적용, 현재 미사용)', 'N', 'system_loader'),
+('DED006', '*', '*', '21503005', '개인연금 대납 후 공제 계정', 'Y', 'system_loader');

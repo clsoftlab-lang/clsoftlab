@@ -75,8 +75,8 @@ public class CalcOrderController {
 	// 계산 순서 중복 체크
 	@ResponseBody
 	@GetMapping("/checkOverlap/order")
-	public boolean checkOverlappingOrder (@RequestParam Integer order, @RequestParam String groupCode) {
-		return calcOrderService.checkOverlap(order, groupCode);
+	public boolean checkOverlappingOrder (@RequestParam Integer order, @RequestParam String groupCode , @RequestParam(defaultValue = "") String itemCode) {
+		return calcOrderService.checkOverlap(order, groupCode, itemCode);
 	}
 	
 	// 상세 정보 조회
@@ -85,5 +85,21 @@ public class CalcOrderController {
 		return calcOrderService.findById(itemCode)
 				.map(dto -> ResponseEntity.ok(dto))
 				.orElse(ResponseEntity.notFound().build());
+	}
+	
+	// 급여 항목 순서 검색'
+	@ResponseBody
+	@GetMapping("/list")
+	public Page<CalcOrderDetailDto> getCalcOrderList (@RequestParam(defaultValue = "") String itemCode, @RequestParam(defaultValue = "") String groupCode ,
+			@RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page) {
+		if (page == null) {
+			page = 0;
+		}
+		
+		int size = 1000;
+		
+		Page<CalcOrderDetailDto> calcOrderPage = calcOrderService.searchCalcOrder(itemCode, groupCode, useYn, page, size);
+		
+		return calcOrderPage;
 	}
 }
