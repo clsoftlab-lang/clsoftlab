@@ -2,8 +2,7 @@ create database clsoftlabnew default character set utf8mb4 collate utf8mb4_unico
 
 use clsoftlabnew;
 
-show tables;
-
+-- 급여 --
 -- 급여 항목 관리 --
 CREATE TABLE ZHR_PAY_ITEM (  
     ZITEM_CD VARCHAR(20) PRIMARY KEY, -- 항목 코드 (기본 키, 중복 불가)
@@ -1403,3 +1402,263 @@ VALUES
 ('DED001', '*', '*', '21503000', '학자금 상환 의무 공제 (현재 미사용)', 'N', 'system_loader'),
 ('TAX004', '*', '*', '21501002', '농어촌특별세 (특정 대상자만 적용, 현재 미사용)', 'N', 'system_loader'),
 ('DED006', '*', '*', '21503005', '개인연금 대납 후 공제 계정', 'Y', 'system_loader');
+
+CREATE TABLE ZHR_INS_RATE (
+    -- 관리용 고유 ID 컬럼 (PK)
+    RATE_ID         BIGINT          NOT NULL AUTO_INCREMENT COMMENT '보험 요율 ID (PK)',
+
+    -- 비즈니스 키 컬럼
+    ZINS_TYPE       VARCHAR(10)     NOT NULL COMMENT '보험 종류 (NPS: 국민연금, HLT: 건강보험, LTC: 장기요양, EMP: 고용보험)',
+    ZFROM_DT        DATE            NOT NULL COMMENT '적용 시작일',
+    ZTO_DT          DATE            NOT NULL COMMENT '적용 종료일',
+
+    -- 데이터 컬럼
+    ZPC_EMP         DECIMAL(8, 5)   NOT NULL COMMENT '근로자 부담율 (%)',
+    ZPC_CMP         DECIMAL(8, 5)   NOT NULL COMMENT '사업주 부담율 (%)',
+    ZNOTE           VARCHAR(500)    NULL     COMMENT '개정 사유 또는 비고',
+    ZUSE_YN         CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+
+    -- 감사(Audit) 컬럼
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NULL     COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (RATE_ID),
+
+    -- 고유 키(UNIQUE) 설정
+    -- '보험 종류 + 적용 시작일' 조합의 중복을 방지하여 이력 데이터의 무결성 확보
+    UNIQUE KEY UK_ZHR_INS_RATE (ZINS_TYPE, ZFROM_DT),
+
+    -- 제약 조건 설정
+    CHECK (ZUSE_YN IN ('Y', 'N')),
+    CHECK (ZINS_TYPE IN ('NPS', 'HLT', 'LTC', 'EMP')),
+    CHECK (ZPC_EMP >= 0),
+    CHECK (ZPC_CMP >= 0),
+
+    -- 검색 성능 향상을 위한 인덱스
+    -- 급여 계산 시 특정 시점의 유효한 요율을 빠르게 조회하기 위함
+    INDEX IDX_INS_RATE_PERIOD (ZINS_TYPE, ZFROM_DT, ZTO_DT)
+
+) COMMENT '4대보험 요율 이력 관리 테이블';
+
+-- 더미데이터 --
+INSERT INTO ZHR_INS_RATE 
+(ZINS_TYPE, ZFROM_DT, ZTO_DT, ZPC_EMP, ZPC_CMP, ZNOTE, ZUSE_YN, CREATED_BY)
+VALUES
+-- 1. 국민연금 (NPS) - National Pension Service
+('NPS', '1999-01-01', '9999-12-31', 4.50000, 4.50000, '국민연금 보험료율 9%로 조정 및 현재까지 유지', 'Y', 'system_loader'),
+('NPS', '1995-07-01', '1998-12-31', 3.00000, 3.00000, '국민연금 보험료율 6% 시기', 'N', 'system_loader'),
+('NPS', '1988-01-01', '1995-06-30', 1.50000, 1.50000, '국민연금 제도 도입 초기 요율', 'N', 'system_loader'),
+
+-- 2. 건강보험 (HLT) - Health Insurance
+('HLT', '2025-01-01', '9999-12-31', 3.54500, 3.54500, '2025년 건강보험요율 (가정)', 'Y', 'system_loader'),
+('HLT', '2024-01-01', '2024-12-31', 3.54500, 3.54500, '2024년 건강보험요율 7.09% 적용', 'Y', 'system_loader'),
+('HLT', '2023-01-01', '2023-12-31', 3.54500, 3.54500, '2023년 건강보험요율 7.09% 적용 (동결)', 'N', 'system_loader'),
+('HLT', '2022-01-01', '2022-12-31', 3.49500, 3.49500, '2022년 건강보험요율 6.99% 적용', 'N', 'system_loader'),
+('HLT', '2021-01-01', '2021-12-31', 3.43000, 3.43000, '2021년 건강보험요율 6.86% 적용', 'N', 'system_loader'),
+('HLT', '2020-01-01', '2020-12-31', 3.33500, 3.33500, '2020년 건강보험요율 6.67% 적용', 'N', 'system_loader'),
+('HLT', '2019-01-01', '2019-12-31', 3.23000, 3.23000, '2019년 건강보험요율 6.46% 적용', 'N', 'system_loader'),
+('HLT', '2018-01-01', '2018-12-31', 3.12000, 3.12000, '2018년 건강보험요율 6.24% 적용', 'N', 'system_loader'),
+
+-- 3. 장기요양보험 (LTC) - Long Term Care Insurance
+('LTC', '2025-01-01', '9999-12-31', 0.45410, 0.45410, '2025년 장기요양보험료율 (건강보험료의 12.81%, 가정)', 'Y', 'system_loader'),
+('LTC', '2024-01-01', '2024-12-31', 0.45410, 0.45410, '2024년 장기요양보험료율 (건강보험료의 12.81%)', 'Y', 'system_loader'),
+('LTC', '2023-01-01', '2023-12-31', 0.45410, 0.45410, '2023년 장기요양보험료율 (건강보험료의 12.81%, 동결)', 'N', 'system_loader'),
+('LTC', '2022-01-01', '2022-12-31', 0.42855, 0.42855, '2022년 장기요양보험료율 (건강보험료의 12.27%)', 'N', 'system_loader'),
+('LTC', '2021-01-01', '2021-12-31', 0.39415, 0.39415, '2021년 장기요양보험료율 (건강보험료의 11.52%)', 'N', 'system_loader'),
+('LTC', '2020-01-01', '2020-12-31', 0.33855, 0.33855, '2020년 장기요양보험료율 (건강보험료의 10.25%)', 'N', 'system_loader'),
+('LTC', '2019-01-01', '2019-12-31', 0.27695, 0.27695, '2019년 장기요양보험료율 (건강보험료의 8.51%)', 'N', 'system_loader'),
+('LTC', '2018-01-01', '2018-12-31', 0.23100, 0.23100, '2018년 장기요양보험료율 (건강보험료의 7.38%)', 'N', 'system_loader'),
+
+-- 4. 고용보험 (EMP) - Employment Insurance (실업급여 요율 기준)
+('EMP', '2022-07-01', '9999-12-31', 0.90000, 0.90000, '실업급여 요율 1.8%로 인상 (근로자/사업주 각 0.9%)', 'Y', 'system_loader'),
+('EMP', '2019-10-01', '2022-06-30', 0.80000, 0.80000, '실업급여 요율 1.6%로 인상', 'N', 'system_loader'),
+('EMP', '2017-07-01', '2019-09-30', 0.65000, 0.65000, '실업급여 요율 1.3% 시기', 'N', 'system_loader'),
+('EMP', '2013-01-01', '2017-06-30', 0.65000, 0.65000, '실업급여 요율 1.3% 유지', 'N', 'system_loader'),
+('EMP', '2011-01-01', '2012-12-31', 0.55000, 0.55000, '실업급여 요율 1.1% 시기', 'N', 'system_loader'),
+
+-- 5. 기타 가상 데이터 (테스트용)
+('NPS', '2026-01-01', '9999-12-31', 5.00000, 5.00000, '국민연금 요율 인상안 (예시)', 'N', 'system_loader'),
+('HLT', '2017-01-01', '2017-12-31', 3.06000, 3.06000, '2017년 건강보험요율 6.12% 적용', 'N', 'system_loader'),
+('LTC', '2017-01-01', '2017-12-31', 0.20043, 0.20043, '2017년 장기요양보험료율 (건강보험료의 6.55%)', 'N', 'system_loader'),
+('EMP', '2009-01-01', '2010-12-31', 0.45000, 0.45000, '실업급여 요율 0.9% 시기', 'N', 'system_loader'),
+('HLT', '2026-01-01', '9999-12-31', 3.60000, 3.60000, '2026년 건강보험료 인상 계획 (미확정)', 'N', 'system_loader'),
+('LTC', '2026-01-01', '9999-12-31', 0.50000, 0.50000, '2026년 장기요양보험료 인상 계획 (미확정)', 'N', 'system_loader');
+
+
+
+-- 인사 --
+-- 사업장 관리 --
+CREATE TABLE ZHR_BIZPLACE (
+    -- 비즈니스 키 컬럼 (PK)
+    ZBIZ_CD         VARCHAR(10)     NOT NULL COMMENT '사업장 코드 (PK)',
+
+    -- 데이터 컬럼
+    ZBIZ_NM         VARCHAR(100)    NOT NULL COMMENT '사업장 명칭',
+    ZADDR           VARCHAR(200)    NOT NULL COMMENT '주소',
+    ZREG_NO         VARCHAR(20)     NULL     COMMENT '사업자등록번호',
+    ZTEL            VARCHAR(20)     NULL     COMMENT '전화번호',
+    ZEMAIL          VARCHAR(50)     NULL     COMMENT '이메일',
+    ZWORK_HOUR      VARCHAR(20)     NULL     COMMENT '근무시간',
+    ZWORK_DAYS      VARCHAR(10)     NULL     COMMENT '주간근무제',
+    ZTYPE           VARCHAR(20)     NULL     COMMENT '사업장 유형 (사무소/공장 등)',
+    ZMANAGER_ID     VARCHAR(12)     NULL     COMMENT '담당자 ID',
+    ZUSE_YN         CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZREMARK         VARCHAR(200)    NULL     COMMENT '비고',
+
+    -- 감사(Audit) 컬럼
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NULL     COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (ZBIZ_CD),
+
+    -- 제약 조건 설정
+    CHECK (ZUSE_YN IN ('Y', 'N')),
+
+    -- 검색 성능 향상을 위한 인덱스
+    -- 사업장명으로 조회하는 경우가 많으므로 인덱스 추가
+    INDEX IDX_BIZPLACE_NM (ZBIZ_NM)
+
+) COMMENT '사업장 마스터 테이블';
+
+-- 더미데이터--
+INSERT INTO ZHR_BIZPLACE 
+(ZBIZ_CD, ZBIZ_NM, ZADDR, ZREG_NO, ZTEL, ZEMAIL, ZWORK_HOUR, ZWORK_DAYS, ZTYPE, ZMANAGER_ID, ZUSE_YN, ZREMARK, CREATED_BY)
+VALUES
+-- 1. 본사 / 연구소
+('H0001', '서울 본사', '서울특별시 강남구 테헤란로 123, 20층', '123-81-00001', '02-1234-5678', 'seoul_hq@company.com', '09:00~18:00', '주 5일', '본사', 'mgr001', 'Y', '본사 및 수도권 영업 총괄', 'system_loader'),
+('R0001', '판교 R&D 센터', '경기도 성남시 분당구 판교역로 235', '123-81-00001', '031-123-4567', 'rnd@company.com', '09:30~18:30', '주 5일', '연구소', 'mgr002', 'Y', '핵심 기술 연구 개발', 'system_loader'),
+('D0001', '춘천 데이터센터', '강원도 춘천시 남산면 버들1길 130', '222-81-00011', '033-111-2222', 'datacenter@company.com', '24시간 3교대', '4조 3교대', '데이터센터', 'mgr003', 'Y', 'IDC 운영', 'system_loader'),
+
+-- 2. 공장
+('F0101', '수원 1공장 (전자)', '경기도 수원시 영통구 삼성로 129', '321-82-00002', '031-222-3333', 'suwon_f1@company.com', '08:00~17:00', '주 5일', '공장', 'mgr101', 'Y', '모바일 부품 생산', 'system_loader'),
+('F0102', '수원 2공장 (반도체)', '경기도 수원시 영통구 중부대로 448번길', '321-82-00002', '031-222-4444', 'suwon_f2@company.com', '24시간 4조 3교대', '4조 3교대', '공장', 'mgr102', 'N', '2024년 평택으로 라인 이전', 'system_loader'),
+('F0201', '구미 1공장 (디스플레이)', '경상북도 구미시 3공단3로 331', '456-83-00003', '054-444-5555', 'gumi_f1@company.com', '08:30~17:30', '주 5일', '공장', 'mgr103', 'Y', 'OLED 패널 생산', 'system_loader'),
+('F0301', '평택 반도체 캠퍼스', '경기도 평택시 고덕면 삼성로 1', '321-82-00002', '031-8096-1114', 'pyeongtaek_f1@company.com', '24시간 4조 3교대', '4조 3교대', '공장', 'mgr104', 'Y', '차세대 반도체 생산 라인', 'system_loader'),
+('F0401', '울산 석유화학 공장', '울산광역시 남구 신항로 123', '555-84-00004', '052-555-6666', 'ulsan_f1@company.com', '07:30~16:30', '주 5일', '공장', 'mgr105', 'Y', '기초 유화 제품 생산', 'system_loader'),
+('F0501', '창원 정밀기계 공장', '경상남도 창원시 성산구 완암로 50', '654-85-00005', '055-777-8888', 'changwon_f1@company.com', '08:00~17:00', '주 5일', '공장', 'mgr106', 'Y', '산업용 로봇 생산', 'system_loader'),
+
+-- 3. 물류센터
+('L0101', '인천 물류센터', '인천광역시 서구 오류동 1543-5', '789-86-00006', '032-987-6543', 'incheon_logis@company.com', '09:00~18:00', '주 6일', '물류센터', 'mgr201', 'Y', '수도권 통합 물류 허브', 'system_loader'),
+('L0201', '부산 신항 물류센터', '부산광역시 강서구 신항남로 33', '888-87-00007', '051-888-9999', 'busan_logis@company.com', '09:00~18:00', '주 5일', '물류센터', 'mgr202', 'Y', '수출입 물류 담당', 'system_loader'),
+('L0301', '용인 허브 터미널', '경기도 용인시 처인구 양지면 중부대로 2374', '789-86-00006', '031-777-6666', 'yongin_hub@company.com', '24시간 운영', '스케줄 근무', '물류센터', 'mgr203', 'Y', '전국 택배 분류', 'system_loader'),
+('L0401', '대구 내륙물류기지', '대구광역시 북구 검단동 1234-1', '789-86-00006', '053-654-3210', 'daegu_logis@company.com', '09:00~18:00', '주 5일', '물류센터', 'mgr204', 'Y', '영남권 물류 담당', 'system_loader'),
+('L0501', '광주 물류센터', '광주광역시 광산구 평동산단로 182', '789-86-00006', '062-111-2222', 'gwangju_logis@company.com', '09:00~18:00', '주 5일', '물류센터', 'mgr205', 'N', '2025년 신규 센터로 이전 예정', 'system_loader'),
+
+-- 4. 지사 / 영업소
+('B0101', '부산 지사', '부산광역시 연제구 중앙대로 1000', '888-87-00007', '051-777-1234', 'busan_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr301', 'Y', '동남권 총괄 지사', 'system_loader'),
+('B0201', '대전 지사', '대전광역시 서구 둔산로 100', '999-88-00008', '042-666-5555', 'daejeon_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr302', 'Y', '중부권 총괄 지사', 'system_loader'),
+('B0301', '광주 지사', '광주광역시 서구 상무중앙로 7', '111-89-00009', '062-444-3333', 'gwangju_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr303', 'Y', '호남권 총괄 지사', 'system_loader'),
+('B0401', '대구 지사', '대구광역시 동구 동대구로 489', '222-90-00010', '053-222-1111', 'daegu_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr304', 'Y', '경북권 총괄 지사', 'system_loader'),
+('B0501', '제주 지사', '제주특별자치도 제주시 노형로 407', '333-91-00012', '064-999-8888', 'jeju_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr305', 'Y', '제주 지역 담당', 'system_loader'),
+('S0101', '강남 영업소', '서울특별시 서초구 강남대로 373', '123-81-00001', '02-345-6789', 'gangnam_sales@company.com', '09:00~18:00', '주 5일', '영업소', 'mgr401', 'Y', NULL, 'system_loader'),
+('S0102', '여의도 영업소', '서울특별시 영등포구 의사당대로 97', '123-81-00001', '02-789-1234', 'yeouido_sales@company.com', '09:00~18:00', '주 5일', '영업소', 'mgr402', 'Y', '금융기관 담당', 'system_loader'),
+('S0201', '세종 영업소', '세종특별자치시 한누리대로 411', '999-88-00008', '044-888-7777', 'sejong_sales@company.com', '09:00~18:00', '주 5일', '영업소', 'mgr403', 'Y', '정부부처 담당', 'system_loader'),
+
+-- 5. 해외 지사 (예시)
+('B9101', '미국 법인 (USA)', '1209 Orange Street, Wilmington, Delaware', NULL, '+1-302-123-4567', 'usa_office@company.com', '09:00~17:00', 'Mon-Fri', '해외법인', 'mgr901', 'Y', '북미 총괄 법인', 'system_loader'),
+('B9201', '베트남 호치민 지사', '1 Le Duan Street, District 1, Ho Chi Minh City', NULL, '+84-28-1234-5678', 'hcm_office@company.com', '08:00~17:00', 'Mon-Fri', '해외지사', 'mgr902', 'Y', '동남아 생산기지 관리', 'system_loader'),
+('B9301', '중국 상하이 지사', '100 Century Avenue, Pudong, Shanghai, China', NULL, '+86-21-9876-5432', 'sh_office@company.com', '09:00~18:00', 'Mon-Fri', '해외지사', 'mgr903', 'Y', '중화권 영업 담당', 'system_loader'),
+
+-- 6. 기타 특수 사업장
+('T0001', '인재개발원', '경기도 용인시 처인구 포곡읍 에버랜드로 199', '123-81-00001', '031-320-5000', 'hrd_center@company.com', '09:00~18:00', '주 5일', '연수원', 'mgr501', 'Y', '그룹 임직원 교육 담당', 'system_loader'),
+('T0002', '송도 R&D 캠퍼스', '인천광역시 연수구 송도과학로 55', '321-82-00002', '032-888-1234', 'songdo_rnd@company.com', '09:00~18:00', '주 5일', '연구소', 'mgr502', 'Y', '바이오 연구', 'system_loader'),
+('F0601', '아산 디스플레이 공장', '충청남도 아산시 탕정면 삼성로 177', '456-83-00003', '041-540-1114', 'asan_f1@company.com', '08:30~17:30', '주 5일', '공장', 'mgr107', 'Y', NULL, 'system_loader'),
+('S0301', '인천공항 사무소', '인천광역시 중구 공항로 272', '123-81-00001', '032-741-1000', 'airport_office@company.com', '09:00~18:00', '주 5일', '사무소', 'mgr404', 'Y', '항공물류 지원', 'system_loader'),
+('B0601', '원주 지사', '강원도 원주시 시청로 1', '222-81-00011', '033-737-2114', 'wonju_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr306', 'Y', '강원권 총괄 지사', 'system_loader'),
+('F0202', '구미 2공장 (모바일)', '경상북도 구미시 1공단로 222', '456-83-00003', '054-444-6666', 'gumi_f2@company.com', '08:30~17:30', '주 5일', '공장', 'mgr108', 'Y', '스마트폰 완제품 조립', 'system_loader');
+
+
+CREATE TABLE ZHR_ORG_UNIT (
+    -- 비즈니스 키 컬럼 (PK)
+    ZORG_CD         VARCHAR(10)     NOT NULL COMMENT '조직 코드 (PK)',
+
+    -- 데이터 컬럼
+    ZORG_NM         VARCHAR(100)    NOT NULL COMMENT '조직명',
+    PARENT_ORG_CD   VARCHAR(10)     NULL     COMMENT '상위 조직 코드',
+    ZORG_TYPE       VARCHAR(10)     NOT NULL COMMENT '조직 유형 (팀, 본부 등)',
+    ZBIZ_CD         VARCHAR(10)     NOT NULL COMMENT '소속 사업장 코드',
+    ZVALID_FROM     DATE            NOT NULL COMMENT '조직 유효 시작일',
+    ZVALID_TO       DATE            NULL     COMMENT '조직 유효 종료일',
+    ZMAIN_POS       VARCHAR(20)     NULL     COMMENT '대표 직책',
+    ZMANAGER_ID     VARCHAR(12)     NULL     COMMENT '조직 담당자 ID',
+    ZUSE_YN         CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZREMARK         VARCHAR(200)    NULL     COMMENT '비고',
+
+    -- 감사(Audit) 컬럼
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NULL     COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (ZORG_CD),
+
+    -- 외래 키 설정 (다른 테이블과의 관계 정의)
+    -- 1. 사업장 테이블(ZHR_BIZPLACE) 연계
+    FOREIGN KEY (ZBIZ_CD) REFERENCES ZHR_BIZPLACE(ZBIZ_CD),
+    -- 2. 상위 조직 연계 (자기 자신 테이블 참조)
+    FOREIGN KEY (PARENT_ORG_CD) REFERENCES ZHR_ORG_UNIT(ZORG_CD),
+
+    -- 제약 조건 설정
+    CHECK (ZUSE_YN IN ('Y', 'N')),
+    CHECK (ZORG_CD <> PARENT_ORG_CD), -- 상위 조직이 자기 자신이 되는 것을 방지
+
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_ORG_UNIT_NM (ZORG_NM), -- 조직명 검색
+    INDEX IDX_ORG_UNIT_BIZ_CD (ZBIZ_CD) -- 사업장별 조회
+
+) COMMENT '조직 마스터 테이블';
+
+
+-- ZHR_ORG_UNIT 테이블 더미 데이터 (조직 코드 10자 이내로 수정) --
+INSERT INTO ZHR_ORG_UNIT 
+(ZORG_CD, ZORG_NM, PARENT_ORG_CD, ZORG_TYPE, ZBIZ_CD, ZVALID_FROM, ZVALID_TO, ZMAIN_POS, ZMANAGER_ID, ZUSE_YN, ZREMARK, CREATED_BY)
+VALUES
+-- 1. 서울 본사 (H0001) 조직도
+('H0001CEO', '최고경영진', NULL, 'CEO', 'H0001', '2020-01-01', NULL, 'CEO', 'mgr001', 'Y', 'CEO 및 주요 임원 그룹', 'system_loader'),
+('H0001CSO', '전략기획본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', 'mgr011', 'Y', '전사 전략 및 기획 총괄', 'system_loader'),
+('H01CSOT1', '전략기획팀', 'H0001CSO', '팀', 'H0001', '2020-01-01', NULL, '팀장', 'mgr012', 'Y', '중장기 사업 전략 수립', 'system_loader'),
+('H01CSOT2', '인사총무팀', 'H0001CSO', '팀', 'H0001', '2021-03-01', NULL, '팀장', 'mgr013', 'Y', '인사, 급여, 복리후생, 총무 업무', 'system_loader'),
+('H0001CFO', '경영지원본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', 'mgr021', 'Y', '재무, 회계, 법무 총괄', 'system_loader'),
+('H01CFOT1', '재무팀', 'H0001CFO', '팀', 'H0001', '2020-01-01', NULL, '팀장', 'mgr022', 'Y', '자금, 회계, 세무 담당', 'system_loader'),
+('H01CFOT2', 'IR팀', 'H0001CFO', '팀', 'H0001', '2022-05-01', NULL, '팀장', 'mgr023', 'Y', '투자자 정보 관리', 'system_loader'),
+('H0001SALES', '국내영업본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', 'mgr031', 'Y', '국내 영업 총괄', 'system_loader'),
+('H01SALEST1', '수도권영업팀', 'H0001SALES', '팀', 'H0001', '2020-01-01', NULL, '팀장', 'mgr032', 'Y', '서울, 경기, 인천 지역 담당', 'system_loader'),
+
+-- 2. 판교 R&D 센터 (R0001) 조직도
+('R0001CTO', '연구소', NULL, '연구소', 'R0001', '2021-01-01', NULL, '연구소장', 'mgr002', 'Y', '기술 연구개발 총괄', 'system_loader'),
+('R0001AI', 'AI연구실', 'R0001CTO', '실', 'R0001', '2021-01-01', NULL, '실장', 'mgr041', 'Y', '인공지능 기술 개발', 'system_loader'),
+('R01AIT1', '자연어처리팀', 'R0001AI', '팀', 'R0001', '2021-01-01', NULL, '팀장', 'mgr042', 'Y', 'NLP 모델 개발', 'system_loader'),
+('R01AIT2', '컴퓨터비전팀', 'R0001AI', '팀', 'R0001', '2022-07-01', '2025-12-31', '팀장', 'mgr043', 'N', '프로젝트 종료로 25년 말 해체 예정', 'system_loader'),
+('R0001PLAT', '플랫폼개발실', 'R0001CTO', '실', 'R0001', '2021-01-01', NULL, '실장', 'mgr051', 'Y', '서비스 플랫폼 개발', 'system_loader'),
+('R01PLATT1', '서버개발팀', 'R0001PLAT', '팀', 'R0001', '2021-01-01', NULL, '팀장', 'mgr052', 'Y', '백엔드 시스템 개발 및 운영', 'system_loader'),
+('R01PLATT2', 'UX/UI디자인팀', 'R0001PLAT', '팀', 'R0001', '2023-02-01', NULL, '팀장', 'mgr053', 'Y', NULL, 'system_loader'),
+
+-- 3. 수원 1공장 (F0101) 조직도
+('F0101FM', '공장운영총괄', NULL, '공장장', 'F0101', '2019-05-01', NULL, '공장장', 'mgr101', 'Y', '수원 1공장 운영 총괄', 'system_loader'),
+('F0101PROD', '생산본부', 'F0101FM', '본부', 'F0101', '2019-05-01', NULL, '본부장', 'mgr111', 'Y', NULL, 'system_loader'),
+('F01PRODT1', '생산1팀', 'F0101PROD', '팀', 'F0101', '2019-05-01', NULL, '팀장', 'mgr112', 'Y', '모바일 부품 A라인 담당', 'system_loader'),
+('F01PRT1P1', 'A라인 주간조', 'F01PRODT1', '파트', 'F0101', '2019-05-01', NULL, '파트장', 'mgr113', 'Y', NULL, 'system_loader'),
+('F01PRT1P2', 'A라인 야간조', 'F01PRODT1', '파트', 'F0101', '2019-05-01', NULL, '파트장', 'mgr114', 'Y', NULL, 'system_loader'),
+('F0101QC', '품질관리팀', 'F0101FM', '팀', 'F0101', '2019-05-01', NULL, '팀장', 'mgr121', 'Y', '생산품 품질 검수', 'system_loader'),
+('F0101MA', '설비보전팀', 'F0101FM', '팀', 'F0101', '2020-08-01', NULL, '팀장', 'mgr122', 'Y', '공장 설비 유지보수', 'system_loader'),
+
+-- 4. 인천 물류센터 (L0101) 조직도
+('L0101CM', '센터운영', NULL, '센터장', 'L0101', '2022-01-01', NULL, '센터장', 'mgr201', 'Y', '인천 물류센터 총괄', 'system_loader'),
+('L0101OPS', '운영팀', 'L0101CM', '팀', 'L0101', '2022-01-01', NULL, '팀장', 'mgr211', 'Y', '입출고 및 재고관리', 'system_loader'),
+('L01OPSP1', '입고파트', 'L0101OPS', '파트', 'L0101', '2022-01-01', NULL, '파트장', 'mgr212', 'Y', NULL, 'system_loader'),
+('L01OPSP2', '출고파트', 'L0101OPS', '파트', 'L0101', '2022-01-01', NULL, '파트장', 'mgr213', 'Y', NULL, 'system_loader'),
+
+-- 5. 평택 반도체 캠퍼스 (F0301) 조직도
+('F0301FM', '캠퍼스총괄', NULL, '총괄', 'F0301', '2023-01-01', NULL, '부사장', 'mgr104', 'Y', '평택 캠퍼스 총괄', 'system_loader'),
+('F0301FAB1', 'FAB1 운영팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', 'mgr131', 'Y', '1번 FAB 라인 운영', 'system_loader'),
+('F0301FAB2', 'FAB2 운영팀', 'F0301FM', '팀', 'F0301', '2024-01-01', NULL, '팀장', 'mgr132', 'Y', '2번 FAB 라인 운영', 'system_loader'),
+('F0301TECH', '공정기술팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', 'mgr133', 'Y', '반도체 공정 기술 개발', 'system_loader'),
+('F0301ENV', '환경안전팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', 'mgr134', 'Y', '사업장 안전 및 환경 관리', 'system_loader');
+

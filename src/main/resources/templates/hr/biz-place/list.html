@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사업장 정보 관리</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+    <div id="global-loader">
+    	<div class="page-loader"></div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">검색 조건</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/hr/biz-place" method="get" id="searchForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사업장 코드</label>
+                                        <input type="text" class="form-control" name="bizCode" th:value="${bizCode}" maxlength="10">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사업장 명</label>
+                                        <input type="text" class="form-control" name="bizName" th:value="${bizName}" maxlength="100">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>지역</label>
+                                        <input class="form-control" name="address" th:value="${address}" maxlength="200">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>사용 여부</label>
+                                        <select class="form-select" name="useYn">
+                                            <option value="">전체</option>
+                                            <option value="Y" th:selected="${useYn == 'Y'}">Y</option>
+                                            <option value="N" th:selected="${useYn == 'N'}">N</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-end justify-content-between gap-2">
+                                     <button type="submit" class="btn btn-primary"><i class="ti ti-search"></i></button>
+                                     <button type="button" class="btn btn-outline-secondary" id="searchResetBtn"><i class="ti ti-refresh"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">사업장 목록</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover datatable" id="bizPlaceTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>사업장 코드</th>
+                                        <th>사업장명</th>
+                                        <th>위치 (주소)</th>
+                                        <th>사업자등록번호</th>
+                                        <th>사용여부</th>
+                                        <th>담당자</th>
+                                        <th>상세보기</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="b : ${bizPlace}">
+                                        <td th:text="${b.bizCode}"></td>
+                                        <td th:text="${b.bizName}"></td>
+                                        <td th:text="${b.address}"></td>
+                                        <td th:text="${b.regNo}"></td>
+                                        <td th:text="${b.useYn}"></td>
+                                        <td th:text="${b.managerId}"></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"
+                                                th:data-id="${b.bizCode}">상세</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-3 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-success" onclick="downloadExcel()">엑셀 다운로드</button>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">신규 등록</button>
+                </div>
+
+                <div class="modal fade" id="addModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">신규 사업장 등록</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사업장 코드 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="bizCode" required maxlength="10">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사업장명 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="bizName" required maxlength="100">
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">주소 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="address" required maxlength="200">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사업자등록번호</label>
+                                            <input type="text" class="form-control" name="regNo" maxlength="20">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">담당자 ID</label>
+                                            <input type="text" class="form-control" name="managerId" maxlength="12">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">전화번호</label>
+                                            <input type="text" class="form-control" name="tel" maxlength="20">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">이메일</label>
+                                            <input type="email" class="form-control" name="email" maxlength="50">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">근무시간</label>
+                                            <input type="text" class="form-control" name="workHour" placeholder="예: 09:00~18:00" maxlength="20">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">주간근무제</label>
+                                            <input type="text" class="form-control" name="workDays" placeholder="예: 주 5일" maxlength="10">
+                                        </div>
+                                         <div class="col-md-6 mb-3">
+                                            <label class="form-label">사업장 유형</label>
+                                            <input type="text" class="form-control" name="type" placeholder="예: 공장/물류센터/사무소" maxlength="20">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사용 여부 <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="useYn" required>
+                                                <option value="Y" selected>Y</option>
+                                                <option value="N">N</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">비고</label>
+                                            <textarea class="form-control" rows="3" name="remark" maxlength="200"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="reset" form="addForm" class="btn btn-outline-secondary">초기화</button>
+                                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-primary" onclick="addNewBizPlace()">저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="editModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">사업장 상세 정보</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사업장 코드</label>
+                                            <input type="text" class="form-control" name="bizCode" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사업장명 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="bizName" required maxlength="100">
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">주소 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="address" required maxlength="200">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사업자등록번호</label>
+                                            <input type="text" class="form-control" name="regNo" maxlength="20">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">담당자 ID</label>
+                                            <input type="text" class="form-control" name="managerId" maxlength="12">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">전화번호</label>
+                                            <input type="text" class="form-control" name="tel" maxlength="20">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">이메일</label>
+                                            <input type="email" class="form-control" name="email" maxlength="50">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">근무시간</label>
+                                            <input type="text" class="form-control" name="workHour" maxlength="20">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">주간근무제</label>
+                                            <input type="text" class="form-control" name="workDays" maxlength="10">
+                                        </div>
+                                         <div class="col-md-6 mb-3">
+                                            <label class="form-label">사업장 유형</label>
+                                            <input type="text" class="form-control" name="type" maxlength="20">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사용 여부 <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="useYn" required>
+                                                <option value="Y">Y</option>
+                                                <option value="N">N</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">비고</label>
+                                            <textarea class="form-control" rows="3" name="remark" maxlength="200"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="button" class="btn btn-outline-danger" onclick="deleteBizPlace()">삭제</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                                <button type="button" class="btn btn-primary" onclick="updateBizPlace()">변경사항 저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/assets/js/script.js"></script>
+    
+    <script type="text/javascript">
+    
+    document.addEventListener('DOMContentLoaded', function () {
+  		// 수정 모달창을 열 때, 불러오기.
+       const tableBody = document.querySelector('.table tbody');
+	    if (tableBody) {
+	        tableBody.addEventListener('click', function(event) {
+	            const editButton = event.target.closest('.edit-btn');
+	            if (editButton) {
+	                const id = editButton.dataset.id; 
+	                findDetail(id);
+	            }
+	        });
+	    }
+	    
+		 // 검색창 초기화.
+        const searchResetBtn = document.getElementById('searchResetBtn');
+        if (searchResetBtn) {
+            searchResetBtn.addEventListener('click', function() {
+                const searchForm = document.getElementById('searchForm');
+                if (searchForm) {
+                    searchForm.querySelector('[name="bizCode"]').value = '';
+                    searchForm.querySelector('[name="bizName"]').value = '';
+                    searchForm.querySelector('[name="address"]').value = '';
+                    searchForm.querySelector('[name="useYn"]').value = '';
+                }
+            });
+       	}  
+	});
+    
+ // 새 항목 등록
+    async function addNewBizPlace() {
+		const addForm = document.getElementById('addForm');
+	    const formData = new FormData(addForm);
+	    const data = Object.fromEntries(formData.entries());
+
+	    if (!data.bizCode || !data.bizCode.trim()) {
+	        alert('사업장 코드를 입력해주세요.');
+	        return;
+	    }
+	    
+	    if (!data.bizName || !data.bizName.trim()) {
+	    	alert('사업장명을 입력해주세요.');
+	    	return;
+	    }
+	    
+	    if (!data.address || !data.address.trim()) {
+	    	alert('주소를 입력해주세요.');
+	    	return;
+	    }
+	    
+	    // --- 서버 작업 시작 ---
+	    try {
+	    	
+	        const codeResponse = await fetch(`/hr/biz-place/checkOverlap?bizCode=${data.bizCode}`);
+	        const codeCheckResult = await codeResponse.text();
+	        
+	        	
+	        if (codeCheckResult == 'true') { 
+	            alert('이미 ...'); 
+	            return;
+	        }
+
+	        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
+	        const saveResponse = await fetch('/hr/biz-place', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (saveResponse.ok) {
+	            alert('성공적으로 등록되었습니다.');
+	            location.reload();
+	        } else {
+	            const errorText = await saveResponse.text();
+	            alert(`등록에 실패했습니다: ${errorText}`);
+	        }
+
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('등록 중 오류가 발생했습니다.');
+	    }
+	};
+	
+	// 수정 모달창 데이터 불러오기.
+	async function findDetail(id) {
+	    try {
+	        const response = await fetch(`/hr/biz-place/detail/${id}`);
+	        if (!response.ok) {
+	            throw new Error('데이터를 불러오는 데 실패했습니다.');
+	        }
+	        const data = await response.json();
+	        const editForm = document.getElementById('editForm')
+
+
+	        for (const key in data) {
+	            const field = editForm.querySelector(`[name="${key}"]`);
+	            
+	            if (field) { 
+                    field.value = data[key];
+	            }
+	        }
+	        
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert(error.message);
+	    }
+	}
+	
+	//항목 정보 수정
+	async function updateBizPlace () {
+	    const editForm = document.getElementById('editForm');
+	    const formData = new FormData(editForm);
+	    const data = Object.fromEntries(formData.entries());
+	    
+	    if (!data.bizName || !data.bizName.trim()) {
+	    	alert('사업장명을 입력해주세요.');
+	    	return;
+	    }
+	    
+	    if (!data.address || !data.address.trim()) {
+	    	alert('주소를 입력해주세요.');
+	    	return;
+	    }
+	    
+	    try {
+	    	
+	        const url = `/hr/biz-place`;
+	        const response = await fetch(url, {
+	            method: 'PUT', 
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (response.ok) {
+	            alert('성공적으로 수정되었습니다.');
+	            location.reload(); // 성공 시 페이지 새로고침
+	        } else {
+	            const errorText = await response.text();
+	            alert(`수정에 실패했습니다: ${errorText}`);
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('수정 중 오류가 발생했습니다.');
+	    }
+	}
+	
+	async function deleteBizPlace() {
+	    if (!confirm('정말로 이 사업장을 비활성화(삭제)하시겠습니까?')) {
+	        return;
+	    }
+
+	    const editForm = document.getElementById('editForm');
+	    const formData = new FormData(editForm);
+	    const data = Object.fromEntries(formData.entries());
+	    
+	    data.useYn = 'N';
+
+	    try {
+	        const url = `/hr/biz-place`;
+	        const response = await fetch(url, {
+	            method: 'PUT', // 비활성화도 수정(PUT)으로 처리
+	            headers: { 'Content-Type': 'application/json' },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (response.ok) {
+	            alert('사업장이 비활성화 처리되었습니다.');
+	            location.reload();
+	        } else {
+	            const errorText = await response.text();
+	            alert(`처리 중 오류가 발생했습니다: ${errorText}`);
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('처리 중 오류가 발생했습니다.');
+	    }
+	}
+	
+	function downloadExcel() {
+	    const form = document.getElementById('searchForm');
+	    const formData = new FormData(form);
+	    const params = new URLSearchParams(formData).toString();
+	    
+	    // 백엔드에 엑셀 다운로드용 Controller를 만들어야 합니다.
+	    const downloadUrl = `/hr/biz-place/excel?${params}`;
+	    
+	    // 새 창이나 현재 창에서 URL을 호출하여 파일 다운로드를 트리거합니다.
+	    location.href = downloadUrl;
+	}
+    </script>
+</body>
+</html>
