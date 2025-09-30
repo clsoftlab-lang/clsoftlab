@@ -19,7 +19,7 @@ public class OrgUnitSpecs {
 			return null;
 		}
 		
-		return (root, query, builder) -> builder.like(root.get("orgName"), orgName);
+		return (root, query, builder) -> builder.like(root.get("orgName"), "%"+orgName+"%");
 	}
 	
 	public static Specification<OrgUnit> withUseYn (String useYn) {

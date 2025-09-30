@@ -8,6 +8,6 @@ import com.example.clsoftlab.entity.OrgUnit;
 
 @Repository
 public interface OrgUnitRepository extends JpaRepository<OrgUnit, String>, JpaSpecificationExecutor<OrgUnit> {
-	
+
 
 }

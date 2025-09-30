@@ -85,4 +85,11 @@ public class BizPlaceService {
 				.map(i -> modelMapper.map(i, BizPlaceDetailDto.class));
 	}
 	
+	// bizPlace list 반환 (useYn)
+	public List<BizPlaceListDto> getBizPlaceList () {
+		return bizPlaceRepository.findAllByUseYnOrderByBizNameAsc("Y")
+				.stream()
+				.map(i -> modelMapper.map(i, BizPlaceListDto.class))
+				.toList();
+	}
 }

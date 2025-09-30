@@ -314,7 +314,7 @@
 	            selectModalInstance = new bootstrap.Modal(selectModal);
 	        }
 	        
-	     	// 급여 선택 항목에서, 검색시 급여 화면으로 넘어가는걸 방지.
+	     	//  선택 항목에서, 검색시 급여 화면으로 넘어가는걸 방지.
 	        document.getElementById('payItemSearchForm').addEventListener('submit', handleModalSearch);
 	        
 	        document.querySelectorAll('.selector-input').forEach(input => {
@@ -341,8 +341,7 @@
 		        });
 		});
 		
-	//  input 클릭 시 실행될 공통 함수
-
+		// input 클릭 시 실행될 공통 함수
 		async function openSelectorModal(event) {
 		    currentTargetInput = event.target; 
 		

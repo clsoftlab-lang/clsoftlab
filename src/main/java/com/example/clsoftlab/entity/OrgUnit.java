@@ -2,6 +2,8 @@ package com.example.clsoftlab.entity;
 
 import java.time.LocalDate;
 
+import com.example.clsoftlab.dto.hr.OrgUnitRequestDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -20,11 +22,14 @@ import lombok.Setter;
 public class OrgUnit extends BaseEntity {
 
     @Id
-    @Column(name = "ZORG_CD", length = 20)
+    @Column(name = "ZORG_CD", length = 10)
     private String orgCode;
     
     @Column(name = "ZORG_NM", nullable = false, length = 100)
     private String orgName;
+    
+    @Column(name = "PARENT_ORG_CD", length = 10)
+    private String parentOrgCode;
 
     @Column(name = "ZORG_TYPE", nullable = false, length = 10)
     private String orgType;
@@ -49,4 +54,16 @@ public class OrgUnit extends BaseEntity {
 
     @Column(name = "ZREMARK", length = 200)
     private String remark;
+    
+    public void update (OrgUnitRequestDto dto) {
+    	this.orgName = dto.getOrgName();
+    	this.parentOrgCode = dto.getParentOrgCode();
+    	this.orgType = dto.getOrgType();
+    	this.validFrom = dto.getValidFrom();
+    	this.validTo = dto.getValidTo();
+    	this.mainPos = dto.getMainPos();
+    	this.managerId = dto.getManagerId();
+    	this.useYn = dto.getUseYn();
+    	this.remark = dto.getRemark();
+    }
 }

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사원 개인정보 관리</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+    <div id="global-loader">
+    	<div class="page-loader"></div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">사원 정보 조회</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchForm">
+                            <div class="row align-items-end">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사번</label>
+                                        <input type="text" class="form-control" name="pernr">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>이름</label>
+                                        <input type="text" class="form-control" name="name" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>소속부서 / 직책</label>
+                                        <input type="text" class="form-control" name="deptAndPosition" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-flex justify-content-end gap-2">
+                                     <button type="button" class="btn btn-primary w-100"><i class="ti ti-search me-1"></i>조회</button>
+                                     <button type="button" class="btn btn-outline-secondary w-100" id="searchResetBtn"><i class="ti ti-refresh me-1"></i>초기화</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">개인정보</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="profileForm">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">성명 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">성별 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="gender" required>
+                                        <option value="M">남</option>
+                                        <option value="F">여</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">생년월일 <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" name="birthdate" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">주민등록번호 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="ssn" placeholder="수정 불가" readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">국적 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="nationality" required>
+                                        <option value="대한민국" selected>대한민국</option>
+                                        <option value="기타">기타</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">연락처 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="phoneNo" placeholder="010-XXXX-XXXX" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">이메일</label>
+                                    <input type="email" class="form-control" name="email">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">주소 <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="address" placeholder="도로명 또는 지번 주소" required>
+                                        <button class="btn btn-outline-secondary" type="button">우편번호 검색</button>
+                                    </div>
+                                    <input type="text" class="form-control mt-2" name="addressDetail" placeholder="상세 주소">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">결혼여부</label>
+                                    <select class="form-select" name="maritalStatus">
+                                        <option value="미혼">미혼</option>
+                                        <option value="기혼">기혼</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                     <label class="form-label">병역사항</label>
+                                     <input type="text" class="form-control" name="militaryInfo" placeholder="예: 복무완료 / 육군 / 병장 / 2009.01~2011.01">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">장애 여부</label>
+                                    <select class="form-select" name="disabilityYn">
+                                        <option value="N" selected>해당없음</option>
+                                        <option value="Y">해당</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="my-3 d-flex justify-content-end">
+                    <div class="gap-2 d-flex">
+                        <button type="button" class="btn btn-outline-info">가족사항 보기</button>
+                        <button type="button" class="btn btn-outline-secondary">비상연락처 입력</button>
+                        <button type="button" class="btn btn-secondary">이력보기</button>
+                        <button type="button" class="btn btn-primary" id="saveBtn">저장</button>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/assets/js/script.js"></script>
+    
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+  		// 이 곳에 JavaScript 로직을 구현합니다.
+	});
+    </script>
+</body>
+</html>

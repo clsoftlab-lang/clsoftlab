@@ -17,10 +17,10 @@ import lombok.Setter;
 public class OrgUnitRequestDto {
 
 	@NotBlank(message = "조직 코드는 필수입니다.")
-	@Size(max = 20, message = "조직 코드는 최대 20자까지 입력 가능합니다.")
+	@Size(max = 10, message = "조직 코드는 최대 20자까지 입력 가능합니다.")
 	private String orgCode;
 	
-	@Size(max = 20, message = "상위 조직 코드는 최대 20자까지 입력 가능합니다.")
+	@Size(max = 10, message = "상위 조직 코드는 최대 20자까지 입력 가능합니다.")
 	private String parentOrgCode;
 	
 	@NotBlank(message = "조직명은 필수입니다.")

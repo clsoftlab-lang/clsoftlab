@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사업장별 조직관리</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.16/themes/default/style.min.css" />
+    
+</head>
+
+<body>
+    <div id="global-loader">
+    	<div class="page-loader"></div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">검색 조건</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchForm" >
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>사업장</label>
+                                        <select class="form-select" name="bizCode" id="bizCodeSelect">
+                                            <option value="">사업장을 선택하세요</option>
+                                            <option th:each="b : ${bizPlace}" th:value="${b.bizCode}" th:text="${b.bizName}"></option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>조직명</label>
+                                        <input type="text" class="form-control" name="orgName">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>사용 여부</label>
+                                        <select class="form-select" name="useYn">
+                                            <option value="">전체</option>
+                                            <option value="Y">Y</option>
+                                            <option value="N">N</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                                     <button type="button" class="btn btn-primary w-100" onclick="searchOrgUnitTree()"><i class="ti ti-search me-1"></i>조회</button>
+                                     <button type="button" class="btn btn-outline-secondary w-100"><i class="ti ti-refresh me-1"></i>초기화</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row">
+				    <div class="col-lg-5">
+				        <div class="card">
+				            <div class="card-header d-flex justify-content-between align-items-center">
+				                <h5 class="card-title mb-0">조직도</h5>
+				                <div>
+				                    <button class="btn btn-sm btn-outline-secondary">전체 펼치기</button>
+				                    <button class="btn btn-sm btn-outline-secondary">전체 접기</button>
+				                </div>
+				            </div>
+				            <div class="card-body" style="min-height: 500px;">
+				                <div id="orgTreeContainer">
+				                 </div>
+				            </div>
+				        </div>
+				    </div>
+				
+				    <div class="col-lg-7" id="editSection" style="display: none;">
+				        <div class="card">
+				            <div class="card-header"><h5 class="card-title">조직 상세 정보 (수정)</h5></div>
+				            <div class="card-body">
+				                <form id="editForm">
+				                    <div class="row">
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">사업장 코드</label>
+				                            <input type="text" class="form-control" name="bizCode" readonly>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">상위 조직</label>
+				                            <input type="text" class="form-control selector-input" name="parentOrgCode" readonly
+				                            data-modal-title="상위 조직 선택" data-api-url="/hr/org-unit/list">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 코드</label>
+				                            <input type="text" class="form-control" name="orgCode" readonly>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직명 <span class="text-danger">*</span></label>
+				                            <input type="text" class="form-control" name="orgName" required>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 유형 <span class="text-danger">*</span></label>
+				                            <input type="text" class="form-control" name="orgType" required placeholder="본부/실/팀/파트 등">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">대표 직책</label>
+				                            <input type="text" class="form-control" name="mainPos">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 유효 시작일 <span class="text-danger">*</span></label>
+				                            <input type="date" class="form-control" name="validFrom" required>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 유효 종료일</label>
+				                            <input type="date" class="form-control" name="validTo">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 담당자</label>
+				                            <input type="text" class="form-control" name="managerId">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">사용 여부 <span class="text-danger">*</span></label>
+				                            <select class="form-select" name="useYn" required>
+				                                <option value="Y">Y</option>
+				                                <option value="N">N</option>
+				                            </select>
+				                        </div>
+				                        <div class="col-md-12 mb-3">
+				                            <label class="form-label">비고</label>
+				                            <textarea class="form-control" rows="3" name="remark"></textarea>
+				                        </div>
+				                    </div>
+				                    <div class="mt-3 d-flex justify-content-end gap-2">
+				                        <button type="button" class="btn btn-danger" onclick="deleteOrgUnit()">삭제</button>
+				                        <button type="button" class="btn btn-primary" onclick="updateOrgUnit()">변경사항 저장</button>
+				                    </div>
+				                </form>
+				            </div>
+				        </div>
+				    </div>
+    
+				    <div class="col-lg-7" id="addSection" style="display: none;">
+				        <div class="card">
+				            <div class="card-header"><h5 class="card-title">신규 조직 등록</h5></div>
+				            <div class="card-body">
+				                <form id="addForm">
+				                    <div class="row">
+				                         <div class="col-md-6 mb-3">
+				                            <label class="form-label">사업장 코드</label>
+				                            <input type="text" class="form-control" name="bizCode" readonly>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">상위 조직</label>
+				                            <input type="text" class="form-control selector-input" name="parentOrgCode" readonly="readonly"
+				                            data-modal-title="상위 조직 선택" data-api-url="/hr/org-unit/list">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 코드 <span class="text-danger">*</span></label>
+				                            <input type="text" class="form-control" name="orgCode" required>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직명 <span class="text-danger">*</span></label>
+				                            <input type="text" class="form-control" name="orgName" required>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 유형 <span class="text-danger">*</span></label>
+				                            <input type="text" class="form-control" name="orgType" required placeholder="본부/실/팀/파트 등">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">대표 직책</label>
+				                            <input type="text" class="form-control" name="mainPos">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 유효 시작일 <span class="text-danger">*</span></label>
+				                            <input type="date" class="form-control" name="validFrom" required>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 유효 종료일</label>
+				                            <input type="date" class="form-control" name="validTo">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">조직 담당자</label>
+				                            <input type="text" class="form-control" name="managerId">
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">사용 여부 <span class="text-danger">*</span></label>
+				                            <select class="form-select" name="useYn" required>
+				                                <option value="Y" selected>Y</option>
+				                                <option value="N">N</option>
+				                            </select>
+				                        </div>
+				                        <div class="col-md-12 mb-3">
+				                            <label class="form-label">비고</label>
+				                            <textarea class="form-control" rows="3" name="remark"></textarea>
+				                        </div>
+				                    </div>
+				                    <div class="mt-3 d-flex justify-content-end gap-2">
+				                        <button type="reset" class="btn btn-outline-secondary">초기화</button>
+				                        <button type="button" class="btn btn-primary" onclick="addNewOrgUnit()">저장</button>
+				                    </div>
+				                </form>
+				            </div>
+				        </div>
+				    </div>
+    
+				    <div class="col-lg-7" id="emptySelectionMessage">
+				        <div class="card">
+				            <div class="card-body d-flex justify-content-center align-items-center" style="min-height: 500px;">
+				                <div class="text-center">
+				                    <i class="ti ti-info-circle" style="font-size: 48px; color: #6c757d;"></i>
+				                    <h5 class="mt-3">조직을 선택해주세요</h5>
+				                    <p class="text-muted">좌측 조직도에서 항목을 선택하거나<br>신규 등록 버튼을 클릭하여 새 조직을 추가할 수 있습니다.</p>
+				                </div>
+				            </div>
+				        </div>
+				    </div>
+				</div>
+
+                <div class="my-3 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-success">조직도 출력</button>
+                    <button type="button" class="btn btn-outline-success" onclick="downloadExcel()">엑셀 다운로드</button>
+                    <button type="button" class="btn btn-primary" id="addNewOrgBtn"><i class="ti ti-plus me-1"></i>신규 등록</button>
+                </div>
+
+            </div>
+            
+            <div class="modal fade" id="selectModal" tabindex="-1">
+				    <div class="modal-dialog modal-lg modal-dialog-centered">
+				        <div class="modal-content">
+				            <div class="modal-header">
+				                <h5 class="modal-title">항목 선택</h5>
+				                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				            </div>
+				            <div class="modal-body">
+				                
+				                <div id="OrgUnitSearchForm" class="card card-body mb-3 modal-search-form" >
+							        <form>
+							            <div class="row">
+							                <div class="col-md-4">
+							                    <input type="text" class="form-control" placeholder="조직명 검색" name="orgName">
+							                </div>
+							                <div class="col-md-3">
+							                    <select class="form-select" name="useYn">
+							                        <option value="Y">사용(Y)</option>
+							                        <option value="N">미사용(N)</option>
+							                        <option value="">전체</option>
+							                    </select>
+							                </div>
+							                <div class="col-md-2">
+							                    <button type="submit" class="btn btn-primary w-100">조회</button>
+							                </div>
+							            </div>
+							        </form>
+							    </div>
+				                
+				                <div class="table-responsive">
+				                    <table class="table table-hover datatable" id="item-select-table">
+				                        <thead>
+				                            <tr>
+				                                <th>사업장 코드</th>
+				                                <th>조직명</th>
+				                                <th>사용여부</th>
+				                            </tr>
+				                        </thead>
+				                        <tbody id="item-list-body">
+				                        </tbody>
+				                    </table>
+				                </div>
+				            </div>
+				        </div>
+				    </div>
+				</div>
+            </div>
+
+            <div th:replace="~{common/footer :: footer}">
+            </div>
+        </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.16/jstree.min.js"></script>
+    <script src="/assets/js/script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    
+    <script type="text/javascript">
+    
+    let selectModalInstance;
+	let selectDataTable;
+	let currentTargetInput;
+	
+    document.addEventListener('DOMContentLoaded', function () {
+        
+     	//  jstree를 div에 적용
+        $('#orgTreeContainer')
+            .on('select_node.jstree', function (e, data) {
+                //  노드를 클릭했을 때 실행될 이벤트
+                const selectedNodeId = data.node.id;
+                console.log('선택된 조직 코드:', selectedNodeId);
+                
+                // 여기에 상세 정보 카드(detailSection)를 보여주고,
+                // API를 호출하여 상세 데이터를 불러와 채워주는 로직을 구현합니다.
+                $('#emptySelectionMessage').hide();
+                $('#addSection').hide();
+                $('#editSection').show();
+                findDetail(selectedNodeId);
+                
+            })
+            .jstree({
+                'core': {
+                    'data': [], // 처음 페이지는 빈 페이지
+                    'themes': {
+                        'name': 'default',
+                        'responsive': true,
+                        'stripes': true // 줄무늬 테마 적용
+                    }
+                }
+            });
+     	
+	        $('#addNewOrgBtn').on('click', showNewOrgForm);
+	        
+	        
+	        const selectModal = document.getElementById('selectModal');
+	        if (selectModal) {
+	            selectModalInstance = new bootstrap.Modal(selectModal);
+	        }
+	        
+	     	//  선택 항목에서, 검색시 급여 화면으로 넘어가는걸 방지.
+	        document.getElementById('OrgUnitSearchForm').addEventListener('submit', handleModalSearch);
+	        
+	        document.querySelectorAll('.selector-input').forEach(input => {
+	            input.addEventListener('click', openSelectorModal);
+	        });
+	    	
+	    	 // 모달 테이블의 행 클릭 시 값 입력 및 모달 닫기 
+	        document.getElementById('item-select-table').addEventListener('click', function(event) {
+		            const selectedRow = event.target.closest('.select-item-row');
+		            if (selectedRow && currentTargetInput ) {
+		                const code = selectedRow.dataset.code;
+		                
+		                currentTargetInput.value = code;
+		                
+		                if (selectModalInstance) selectModalInstance.hide();
+		                currentTargetInput = null; // 사용 후 변수 초기화
+		            }
+		        });
+	    	
+	    	 // 프린트 출력
+	        document.querySelector('button.btn-outline-success:nth-of-type(1)').addEventListener('click', printOrgChart);
+
+        
+	});
+    
+     
+    function transformDataForJsTree(nodes) {
+   	    if (!nodes || nodes.length === 0) {
+   	        return [];
+   	    }
+   	    
+   	    return nodes.map(node => {
+   	        // jstree 노드 객체 생성
+   	        const jstreeNode = {
+   	            id: node.orgCode,       // 조직 코드를 id로
+   	            text: node.orgName,     // 조직명을 text로
+   	            children: transformDataForJsTree(node.children), // 자식들도 재귀적으로 변환
+   	            state: {
+   	                opened: true // 기본적으로 모든 노드를 펼친 상태로 표시
+   	            },
+   	            li_attr: { // li 태그에 추가할 속성
+   	                class: node.useYn === 'N' ? 'jstree-disabled' : '' // 사용 안함 노드 스타일링
+   	            }
+   	        };
+   	        return jstreeNode;
+   	    });
+    }
+    
+ 	// 수정 모달창 데이터 불러오기.
+	async function findDetail(id) {
+	    try {
+	        const response = await fetch(`/hr/org-unit/detail/${id}`);
+	        if (!response.ok) {
+	            throw new Error('데이터를 불러오는 데 실패했습니다.');
+	        }
+	        const data = await response.json();
+	        const editForm = document.getElementById('editForm')
+
+
+	        for (const key in data) {
+	            const field = editForm.querySelector(`[name="${key}"]`);
+	            
+	            if (field) { 
+                    field.value = data[key];
+	            }
+	        }
+	        
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert(error.message);
+	    }
+	}
+ 	
+ 	// 검색어로 tree 조회
+	async function searchOrgUnitTree() {
+        const searchForm = document.getElementById('searchForm');
+        const formData = new FormData(searchForm);
+        
+        const bizCode = formData.get('bizCode');
+        if (!bizCode) {
+            alert('사업장을 먼저 선택해주세요.');
+            return;
+        }
+
+        const params = new URLSearchParams(formData).toString();
+        const url = `/hr/org-unit/tree?${params}`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('조직도 데이터를 불러오는 데 실패했습니다.');
+            }
+            const orgUnitTreeData = await response.json(); // JSON 응답을 객체로 변환
+
+            // 받아온 데이터를 jstree가 알아볼 수 있는 형식으로 변환합니다.
+            const jstreeData = transformDataForJsTree(orgUnitTreeData);
+
+            // jstree를 새로운 데이터로 갱신합니다.
+            const treeInstance = $('#orgTreeContainer').jstree(true);
+            treeInstance.settings.core.data = jstreeData; // 데이터 소스를 교체
+            treeInstance.refresh(); // 트리를 새로고침하여 화면에 반영
+            
+            // 5. 트리 조회 후 상세 정보 영역은 다시 숨깁니다.
+            $('#detailSection').hide();
+            $('#emptySelectionMessage').show();
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+        }
+    }
+ 	
+ 	// 등록 버튼
+	function showNewOrgForm() {
+        const selectedBizCode = $('#bizCodeSelect').val();
+        if (!selectedBizCode) {
+            alert('사업장을 먼저 선택해주세요.');
+            return;
+        }
+
+        $('#emptySelectionMessage').hide();
+        $('#editSection').hide();
+        $('#addSection').show();
+        
+        const addForm = $('#addForm');
+        addForm[0].reset(); // 폼 초기화
+        addForm.find('[name="bizCode"]').val(selectedBizCode); // 사업장 코드 자동 설정
+    }
+ 	
+	// input 클릭 시 실행될 공통 함수
+	async function openSelectorModal(event) {
+	    currentTargetInput = event.target; 
+	
+	    const title = currentTargetInput.dataset.modalTitle;
+	    const apiUrl = currentTargetInput.dataset.apiUrl;
+	    const searchFormId = currentTargetInput.dataset.searchForm;
+	    
+	
+	    document.querySelector('#selectModal .modal-title').textContent = title;
+	    
+	    if (!selectDataTable) { 
+	        initializeDataTable(); // 최초 한 번만 DataTables 초기화
+	    }
+	    await loadDataForModal(apiUrl); // API URL을 인자로 전달
+	
+	    // 5. 모달 띄우기
+	    if (selectModalInstance) {
+	        selectModalInstance.show();
+	    }
+	}
+	
+	 // 모달 내 검색 버튼 클릭 시 실행될 핸들러
+    async function handleModalSearch(event) {
+        event.preventDefault(); // 폼 기본 제출 방지
+        
+        const formData = new FormData(event.target);
+        const searchParams = new URLSearchParams(formData).toString();
+        if (currentTargetInput) {
+            const apiUrl = currentTargetInput.dataset.apiUrl;
+            await loadDataForModal(apiUrl, searchParams);
+        }
+    }
+	 
+ 	// 회비 항목 선택 테이블 초기화 함수
+    function initializeDataTable() {
+        selectDataTable = $('#item-select-table').DataTable({
+            // DataTables 옵션 설정
+            destroy: true,
+            searching: true, 
+            lengthChange: true, 
+            pageLength: 15,       // 한 페이지에 15개씩 표시
+            info: true,          // 'Showing 1 to 5 of...' 정보 표시
+            
+            // 서버에서 받은 JSON 데이터의 키와 테이블 컬럼을 매핑
+            columns: [ 
+                { data: 'orgCode' },
+                { data: 'orgName' },
+                { data: 'useYn' }
+            ],
+            
+            // 각 행(row)이 생성될 때 추가 작업을 수행
+            createdRow: function(row, data, dataIndex) {
+                // 클릭 이벤트를 위해 필요한 클래스와 data-* 속성을 추가
+                $(row).addClass('select-item-row').css('cursor', 'pointer');
+                $(row).attr('data-code', data.orgCode);
+                $(row).attr('data-name', data.orgName);
+            }
+        });
+    }
+ 	
+    // fetch를 이용해  불러오는 함수
+    async function loadDataForModal(apiUrl, searchParams = '') {
+	    try {
+	        const selectedBizCode = $('#bizCodeSelect').val();
+	        if (!selectedBizCode) {
+	        	alert('사업장을 먼저 선택해야 합니다.');
+	        	return;
+	        }
+	        
+	        // bizCode를 기본 파라미터로 추가
+	        const baseParams = new URLSearchParams({ bizCode: selectedBizCode });
+	        const finalParams = `${baseParams.toString()}&${searchParams}`;
+	        
+	        const fullUrl = `${apiUrl}?${finalParams}`;
+	        const response = await fetch(fullUrl); 
+	        if (!response.ok) throw new Error('데이터 로딩 실패');
+	        
+	        const pageData = await response.json();
+	        const items = pageData.content; // API 응답 구조에 따라 조정
+	        
+	        if (selectDataTable) {
+	            selectDataTable.clear().rows.add(items).draw();
+	        }
+	    } catch (error) {
+	        console.error(error);
+	    }
+	}
+    
+ 	// 새 항목 등록
+    async function addNewOrgUnit() {
+		const addForm = document.getElementById('addForm');
+	    const formData = new FormData(addForm);
+	    const data = Object.fromEntries(formData.entries());
+
+	    if (!data.bizCode) {
+	        alert('사업장 코드를 선택해주세요.');
+	        return;
+	    }
+	    
+	    if (!data.orgCode || !data.orgCode.trim()) {
+	    	alert('조직 코드를 입력해주세요.');
+	    	return;
+	    }
+	    if (!data.orgName || !data.orgName.trim()) {
+	    	alert('조직명을 입력해주세요.');
+	    	return;
+	    }
+	    if (!data.orgType || !data.orgType.trim()) {
+	    	alert('조직 유형을 입력해주세요.');
+	    	return;
+	    }
+	    
+	    
+	 	// 시작일, 종료일 검사
+	    if (!data.validFrom) {
+	        alert('시작일을 반드시 입력해야합니다.');
+	        return;
+	    }
+	    
+	    if (data.validTo && data.validFrom > data.validTo) {
+	        alert('종료일은 시작일보다 빠를 수 없습니다.');
+	        return;
+	    }
+	    // --- 서버 작업 시작 ---
+	    try {
+	    	
+	        const codeResponse = await fetch(`/hr/org-unit/checkOverlap?orgCode=${data.orgCode}`);
+	        const codeCheckResult = await codeResponse.text();
+	        
+	        if (codeCheckResult == 'true') { 
+	            alert('이미 사용중인 조직코드입니다.'); 
+	            return;
+	        }
+
+	        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
+	        const saveResponse = await fetch('/hr/org-unit', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (saveResponse.ok) {
+	            alert('성공적으로 등록되었습니다.');
+	            searchOrgUnitTree();
+	        } else {
+	            const errorText = await saveResponse.text();
+	            alert(`등록에 실패했습니다: ${errorText}`);
+	        }
+
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('등록 중 오류가 발생했습니다.');
+	    }
+	};
+ 	
+	//항목 정보 수정
+	async function updateOrgUnit () {
+	    const editForm = document.getElementById('editForm');
+	    const formData = new FormData(editForm);
+	    const data = Object.fromEntries(formData.entries());
+	    
+	    if (!data.orgName || !data.orgName.trim()) {
+	    	alert('조직명을 입력해주세요.');
+	    	return;
+	    }
+	    if (!data.orgType || !data.orgType.trim()) {
+	    	alert('조직 유형을 입력해주세요.');
+	    	return;
+	    }
+	    
+	    
+	 	// 시작일, 종료일 검사
+	    if (!data.validFrom) {
+	        alert('시작일을 반드시 입력해야합니다.');
+	        return;
+	    }
+	    
+	    if (data.validTo && data.validFrom > data.validTo) {
+	        alert('종료일은 시작일보다 빠를 수 없습니다.');
+	        return;
+	    }
+	    
+	    if(data.parentOrgCode == data.orgCode) {
+	    	alert('자기 자신을 상위 조직으로 지정할 수 없습니다.')
+	    	return;
+	    }
+	    
+	    try {
+	        const url = `/hr/org-unit`;
+	        const response = await fetch(url, {
+	            method: 'PUT', 
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (response.ok) {
+	            alert('성공적으로 수정되었습니다.');
+	            searchOrgUnitTree();
+	        } else {
+	            const errorText = await response.text();
+	            alert(`수정에 실패했습니다: ${errorText}`);
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('수정 중 오류가 발생했습니다.');
+	    }
+	}
+	
+	async function deleteOrgUnit() {
+	    if (!confirm('정말로 이 사업장을 비활성화(삭제)하시겠습니까?')) {
+	        return;
+	    }
+
+	    const editForm = document.getElementById('editForm');
+	    const formData = new FormData(editForm);
+	    const data = Object.fromEntries(formData.entries());
+	    
+	    data.useYn = 'N';
+
+	    try {
+	        const url = `/hr/org-unit`;
+	        const response = await fetch(url, {
+	            method: 'PUT', // 비활성화도 수정(PUT)으로 처리
+	            headers: { 'Content-Type': 'application/json' },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (response.ok) {
+	            alert('사업장이 비활성화 처리되었습니다.');
+	            searchOrgUnitTree();
+	        } else {
+	            const errorText = await response.text();
+	            alert(`처리 중 오류가 발생했습니다: ${errorText}`);
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('처리 중 오류가 발생했습니다.');
+	    }
+	}
+	
+	function printOrgChart() {
+		const selectedBizCode = $('#bizCodeSelect').val();
+        if (!selectedBizCode) {
+        	alert('사업장을 먼저 선택해야 합니다.');
+        	return;
+        }
+        // 현재 선택된 사업장 이름을 가져옵니다. (파일 이름으로 사용)
+        const bizName = $('#bizCodeSelect option:selected').text();
+        const fileName = bizName ? `${bizName}_조직도.pdf` : '조직도.pdf';
+        
+        // html2canvas로 조직도 div를 캡처합니다.
+         html2canvas(document.getElementById('orgTreeContainer'), {
+	        useCORS: true,      // 외부 서버의 이미지를 불러올 수 있도록 허용
+	        allowTaint: true,   // CORS를 사용하지 않는 이미지도 허용 (경우에 따라 필요)
+	        scale: 3           // 해상도를 3배로 높여 이미지 품질 개선
+    	}).then(canvas => {
+            // 3. 캡처한 이미지를 데이터 URL로 변환합니다.
+            const imgData = canvas.toDataURL('image/png');
+            
+            // 4. jsPDF를 사용하여 PDF를 생성합니다.
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            const imgWidth = 190; // PDF에 들어갈 이미지 너비 (A4 기준)
+            const pageHeight = 295; // A4 높이
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 10;
+
+            //  이미지를 PDF에 추가합니다.
+            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            
+            // 만약 이미지가 한 페이지를 넘어가면 새 페이지를 추가하고 이미지를 이어 붙입니다.
+            while (heightLeft >= 0) {
+              position = heightLeft - imgHeight;
+              pdf.addPage();
+              pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+              heightLeft -= pageHeight;
+            }
+            
+            // PDF 파일을 다운로드합니다.
+            pdf.save(fileName);
+        });
+    }
+ 	
+	function downloadExcel() {
+	    const form = document.getElementById('searchForm');
+	    const formData = new FormData(form);
+
+	    const bizCode = formData.get('bizCode');
+	    if (!bizCode) {
+	        alert('엑셀 다운로드를 위해 사업장을 먼저 선택해주세요.');
+	        return;
+	    }
+
+	    const params = new URLSearchParams(formData).toString();
+	    
+	    const downloadUrl = `/hr/org-unit/excel?${params}`;
+	    
+	    // 해당 URL로 페이지를 이동시켜 파일 다운로드를 트리거합니다.
+	    location.href = downloadUrl;
+	}
+    
+    </script>
+</body>
+</html>
