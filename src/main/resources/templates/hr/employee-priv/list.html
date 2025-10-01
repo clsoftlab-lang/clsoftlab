@@ -60,7 +60,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2 d-flex justify-content-end gap-2">
-                                     <button type="button" class="btn btn-primary w-100"><i class="ti ti-search me-1"></i>조회</button>
+                                     <button type="button" class="btn btn-primary w-100" onclick="searchEmployee()"><i class="ti ti-search me-1"></i>조회</button>
                                      <button type="button" class="btn btn-outline-secondary w-100" id="searchResetBtn"><i class="ti ti-refresh me-1"></i>초기화</button>
                                 </div>
                             </div>
@@ -68,16 +68,17 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">개인정보</h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="profileForm">
+
+                <div id="editDiv" style="display: none;">
+                    <div class="card">
+                        <div class="card-header"><h5 class="card-title">개인정보 (수정)</h5></div>
+                        <div class="card-body">
+                            <form id="editForm">
+                            <input hidden="" name="pernr">
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">성명 <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="name" required>
+                                    <input type="text" class="form-control" name="name" required maxlength="50">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">성별 <span class="text-danger">*</span></label>
@@ -107,21 +108,21 @@
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">연락처 <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="phoneNo" placeholder="010-XXXX-XXXX" required>
+                                    <input type="text" class="form-control" name="phoneNo" placeholder="010-XXXX-XXXX" required maxlength="20">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">이메일</label>
-                                    <input type="email" class="form-control" name="email">
+                                    <input type="email" class="form-control" name="email" maxlength="100">
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                     <label class="form-label">주소 <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="address" placeholder="도로명 또는 지번 주소" required>
+                                        <input type="text" class="form-control" name="addr" placeholder="도로명 또는 지번 주소" required maxlength="255">
                                         <button class="btn btn-outline-secondary" type="button">우편번호 검색</button>
                                     </div>
-                                    <input type="text" class="form-control mt-2" name="addressDetail" placeholder="상세 주소">
+                                    <input type="text" class="form-control mt-2" name="addrDetail" placeholder="상세 주소" maxlength="255">
                                 </div>
                             </div>
                             <div class="row">
@@ -136,7 +137,7 @@
                             <div class="row">
                                 <div class="col-md-12 mb-3">
                                      <label class="form-label">병역사항</label>
-                                     <input type="text" class="form-control" name="militaryInfo" placeholder="예: 복무완료 / 육군 / 병장 / 2009.01~2011.01">
+                                     <input type="text" class="form-control" name="militaryInfo" placeholder="예: 복무완료 / 육군 / 병장 / 2009.01~2011.01" maxlength="100">
                                 </div>
                             </div>
                             <div class="row">
@@ -148,19 +149,184 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="row" id="editEmergencyDiv" style="display :none;">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">비상연락인 이름 </label>
+                                    <input class="form-control" name="emergencyName"  maxlength="50">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">비상연락인 관계</label>
+                                    <input type="text" class="form-control" name="emergencyRel"   maxlength="20">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">비상연락인 연락처</label>
+                                    <input type="text" class="form-control" name="emergencyPhone" maxlength="20" placeholder="010-XXXX-XXXX">
+                                </div>
+                            </div>
                         </form>
+                        </div>
+	                    <div class="m-3 d-flex justify-content-end">
+	                        <div class="gap-2 d-flex">
+	                            <button type="button" class="btn btn-outline-info">가족사항 보기</button>
+	                            <button type="button" class="btn btn-outline-secondary" onclick="showEditEmergencyDiv()">비상연락처 입력</button>
+	                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#historyModal" onclick="viewHistory()">이력보기</button>
+	                            <button type="button" class="btn btn-primary" onclick="updateEmployeePriv()">변경사항 저장</button>
+	                        </div>
+	                    </div>
                     </div>
                 </div>
 
-                <div class="my-3 d-flex justify-content-end">
-                    <div class="gap-2 d-flex">
-                        <button type="button" class="btn btn-outline-info">가족사항 보기</button>
-                        <button type="button" class="btn btn-outline-secondary">비상연락처 입력</button>
-                        <button type="button" class="btn btn-secondary">이력보기</button>
-                        <button type="button" class="btn btn-primary" id="saveBtn">저장</button>
+                <div id="addDiv" style="display: none;">
+                    <div class="card">
+                        <div class="card-header"><h5 class="card-title">개인정보 (신규 등록)</h5></div>
+                        <div class="card-body">
+                            <form id="addForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">사번 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="pernr" placeholder="중복 불가" maxlength="10">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">성명 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="name" required maxlength="50">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">성별 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="gender" required>
+                                        <option value="M">남</option>
+                                        <option value="F">여</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">생년월일 <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" name="birthdate" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">주민등록번호 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="ssn" placeholder="123456-1234567"  maxlength="14">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">국적 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="nationality" required>
+                                        <option value="대한민국" selected>대한민국</option>
+                                        <option value="기타">기타</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">연락처 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="phoneNo" placeholder="010-XXXX-XXXX" required maxlength="20">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">이메일</label>
+                                    <input type="email" class="form-control" name="email" maxlength="100">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">주소 <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="addr" placeholder="도로명 또는 지번 주소" required>
+                                        <button class="btn btn-outline-secondary" type="button">우편번호 검색</button>
+                                    </div>
+                                    <input type="text" class="form-control mt-2" name="addrDetail" placeholder="상세 주소">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">결혼여부</label>
+                                    <select class="form-select" name="maritalStatus">
+                                        <option value="미혼">미혼</option>
+                                        <option value="기혼">기혼</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                     <label class="form-label">병역사항</label>
+                                     <input type="text" class="form-control" name="militaryInfo" placeholder="예: 복무완료 / 육군 / 병장 / 2009.01~2011.01" maxlength="100">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">장애 여부</label>
+                                    <select class="form-select" name="disabilityYn">
+                                        <option value="N" selected>해당없음</option>
+                                        <option value="Y">해당</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row" id="addEmergencyDiv" style="display :none;">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">비상연락인 이름 </label>
+                                    <input class="form-control" name="emergencyName" maxlength="50">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">비상연락인 관계</label>
+                                    <input type="text" class="form-control" name="emergencyRel"  maxlength="20">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">비상연락인 연락처</label>
+                                    <input type="text" class="form-control" name="emergencyPhone" maxlength="20" placeholder="010-XXXX-XXXX"> 
+                                </div>
+                            </div>
+                        </form>
+                        </div>
+	                    <div class="m-3 d-flex justify-content-end">
+	                        <div class="gap-2 d-flex">
+	                            <button type="button" class="btn btn-outline-secondary" onclick="hideAddDiv()">취소</button>
+	                            <button type="button" class="btn btn-secondary" onclick="showAddEmergencyDiv()">비상연락처 입력</button>
+	                            <button type="button" class="btn btn-primary" onclick="addNewEmployeePriv()">등록하기</button>
+	                        </div>
+	                    </div>
                     </div>
                 </div>
                 
+                <div class="modal fade" id="historyModal" tabindex="-1">
+				    <div class="modal-dialog modal-xl modal-dialog-centered">
+				        <div class="modal-content">
+				            <div class="modal-header">
+				                <h5 class="modal-title">변경 이력 조회</h5>
+				                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				            </div>
+				            <div class="modal-body">
+				                <div class="table-responsive">
+				                    <table class="table table-bordered" id="log-table">
+				                        <thead class="table-light">
+				                            <tr>
+				                                <th>필드 명</th>
+				                                <th>기존 값</th>
+				                                <th>변경 값</th>
+				                                <th>수정자</th>
+				                                <th>수정일시</th>
+				                            </tr>
+				                        </thead>
+				                        <tbody id="historyTableBody">
+				                            <tr>
+				                                <td colspan="5" class="text-center">변경 이력이 없습니다.</td>
+				                            </tr>
+				                        </tbody>
+				                    </table>
+				                </div>
+				            </div>
+				            <div class="modal-footer">
+				                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+				            </div>
+				        </div>
+				    </div>
+				</div>
+                
+                <div id="addBtnDiv" class="my-3 ">
+	                <div class="d-flex justify-content-end" >
+	                    <button type="button" class="btn btn-primary" onclick="showAddDiv()">신규 등록하기</button>
+	                </div>
+                </div>
+
             </div>
 
             <div th:replace="~{common/footer :: footer}"></div>
@@ -176,9 +342,322 @@
     <script src="/assets/js/script.js"></script>
     
     <script type="text/javascript">
+    let logDataTable;
+    
     document.addEventListener('DOMContentLoaded', function () {
-  		// 이 곳에 JavaScript 로직을 구현합니다.
-	});
+        // [초기화] 버튼 클릭 시, 페이지 전체 상태를 초기화합니다.
+        $("#searchResetBtn").on('click', function() {
+            $("#addDiv").hide();
+            $("#editDiv").hide();
+            $("#addBtnDiv").show();
+            $("#searchForm")[0].reset(); 
+        });
+    });
+    
+    function showAddDiv() {
+        $("#addDiv").show();
+        $("#editDiv").hide();
+        $("#addBtnDiv").hide();
+    }
+    
+    function showEditDiv() {
+        $("#addDiv").hide();
+        $("#editDiv").show();
+        $("#addBtnDiv").hide();
+    }
+    
+    function hideAddDiv() {
+    	$("#addDiv").hide();
+    	$("#addBtnDiv").show();
+    	$("#addEmergencyDiv").hide();
+        $("#addForm")[0].reset(); // 등록 폼 내용도 초기화
+    }
+    
+    function hideEditDiv() {
+    	$("#editDiv").hide();
+    	$("#addBtnDiv").show();
+    	$("#editEmergencyDiv").hide();
+    }
+    
+    function showAddEmergencyDiv() {
+		$("#addEmergencyDiv").show();    	
+    }
+    
+    function showEditEmergencyDiv() {
+		$("#editEmergencyDiv").show();    	
+    }
+ 	// 새 항목 등록
+    async function addNewEmployeePriv() {
+		const addForm = document.getElementById('addForm');
+	    const formData = new FormData(addForm);
+	    const data = Object.fromEntries(formData.entries());
+
+	    if (!data.pernr || !data.pernr.trim()) {
+			alert('사번을 입력해 주세요.');
+			return;
+	    }
+	    
+	    
+	    if (!data.name || !data.name.trim()) {
+	        alert('성명을 입력해 주세요.');
+	        return;
+	    }
+	    
+	    if (!data.birthdate) {
+	    	alert('생년월일을 입력해주세요.');
+	    	return;
+	    }
+	    if (!data.ssn || !data.ssn.trim()) {
+	    	alert('주민등록 번호를 입력해주세요.');
+	    	return;
+	    }
+	    
+	    let ssn = data.ssn.replace(/-/g, ''); // 하이픈(-)이 있다면 우선 제거
+        if (!/^\d{13}$/.test(ssn)) {
+            // 숫자 13자리가 아니면 유효하지 않음
+            alert('주민등록번호 형식이 올바르지 않습니다. (13자리 숫자)');
+            return;
+        }
+        // 숫자 13자리가 맞으면, 7번째 자리에 하이픈(-)을 넣어 다시 저장
+        data.ssn = ssn.substring(0, 6) + '-' + ssn.substring(6);
+        
+	    if (!data.phoneNo) {
+	    	alert('연락처를 입력해주세요.');
+	    	return;
+	    }
+	    
+	    const phoneRegex = /^[0-9+-]+$/; // 숫자, +, - 문자만 포함됐는지 확인하는 정규식
+        if (!phoneRegex.test(data.phoneNo)) {
+            alert('연락처는 숫자, +, - 기호만 입력할 수 있습니다.');
+            return;
+        }
+	    
+	    if (data.emergencyPhone && !phoneRegex.test(data.emergencyPhone)) {
+	    	alert('연락처는 숫자, +, - 기호만 입력할 수 있습니다.');
+            return;
+	    }
+	    
+	    if (!data.addr || !data.addr.trim()) {
+	    	alert('주소를 입력해주세요.');
+	    	return;
+	    }
+	    
+	    
+	    
+	    // --- 서버 작업 시작 ---
+	    try {
+	    	
+	        const codeResponse = await fetch(`/hr/employee-priv/checkOverlap?pernr=${data.pernr}`);
+	        const codeCheckResult = await codeResponse.text();
+	        
+	        if (codeCheckResult == 'true') { 
+	            alert('이미 사용중인 사번입니다.'); 
+	            return;
+	        }
+
+	        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
+	        const saveResponse = await fetch('/hr/employee-priv', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (saveResponse.ok) {
+	            alert('성공적으로 등록되었습니다.');
+	            await findDetail(data.pernr);
+	        } else {
+	            const errorText = await saveResponse.text();
+	            alert(`등록에 실패했습니다: ${errorText}`);
+	        }
+
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('등록 중 오류가 발생했습니다.');
+	    }
+	};
+	
+	// 수정 모달창 데이터 불러오기.
+	async function findDetail(id) {
+	    try {
+	        const response = await fetch(`/hr/employee-priv/detail/${id}`);
+	        if (!response.ok) {
+	            if (response.status === 404) {
+	                // 404 Not Found 에러이면 등록되지 않은 사번임
+	                alert('등록되지 않은 사번입니다.');
+	            } else {
+	                // 그 외 다른 서버 에러
+	                throw new Error('데이터를 불러오는 데 실패했습니다.');
+	            }
+	            return; // 함수 종료
+	        }
+	        
+	        const data = await response.json();
+	        const editForm = document.getElementById('editForm');
+
+
+	        for (const key in data) {
+	            const field = editForm.querySelector(`[name="${key}"]`);
+	            
+	            if (field) { 
+                    field.value = data[key];
+	            }
+	        }
+	        showEditDiv();
+	        
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert(error.message);
+	    }
+	}
+	
+	// [조회]버튼 클릭시 상세 정보 확인
+	async function searchEmployee() {
+        const searchForm = document.getElementById('searchForm');
+        const pernr = searchForm.querySelector('[name="pernr"]').value;
+
+        // 사번 입력 여부 확인
+        if (!pernr || !pernr.trim()) {
+            alert('조회할 사번을 입력해주세요.');
+            return;
+        }
+        
+        
+        await findDetail(pernr);
+    }
+	
+	//항목 정보 수정
+	async function updateEmployeePriv () {
+	    const editForm = document.getElementById('editForm');
+	    const formData = new FormData(editForm);
+	    const data = Object.fromEntries(formData.entries());
+	    
+	    if (!data.name || !data.name.trim()) {
+	        alert('성명을 입력해 주세요.');
+	        return;
+	    }
+	    
+	    if (!data.birthdate) {
+	    	alert('생년월일을 입력해주세요.');
+	    	return;
+	    }
+        
+	    if (!data.phoneNo) {
+	    	alert('연락처를 입력해주세요.');
+	    	return;
+	    }
+	    
+	    const phoneRegex = /^[0-9+-]+$/; // 숫자, +, - 문자만 포함됐는지 확인하는 정규식
+        if (!phoneRegex.test(data.phoneNo)) {
+            alert('연락처는 숫자, +, - 기호만 입력할 수 있습니다.');
+            return;
+        }
+	    
+	    if (data.emergencyPhone && !phoneRegex.test(data.emergencyPhone)) {
+	    	alert('연락처는 숫자, +, - 기호만 입력할 수 있습니다.');
+            return;
+	    }
+	    
+	    if (!data.addr || !data.addr.trim()) {
+	    	alert('주소를 입력해주세요.');
+	    	return;
+	    }
+	    
+	    try {
+	    	
+	        const url = `/hr/employee-priv`;
+	        const response = await fetch(url, {
+	            method: 'PUT', 
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (response.ok) {
+	            alert('성공적으로 수정되었습니다.');
+	            findDetail(data.pernr); // 성공 시 페이지 새로고침
+	        } else {
+	            const errorText = await response.text();
+	            alert(`수정에 실패했습니다: ${errorText}`);
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('수정 중 오류가 발생했습니다.');
+	    }
+	}
+	
+	// [이력보기] 버튼 클릭 시 실행되는 함수
+    async function viewHistory() {
+        const editForm = document.getElementById('editForm');
+        const pernr = editForm.querySelector('[name="pernr"]').value;
+
+        if (!pernr) {
+            alert('먼저 조회할 사원를 선택해주세요.');
+            return;
+        }
+        
+        if (!logDataTable) { 
+	        initializeDataTable(); // 최초 한 번만 DataTables 초기화
+	    }
+
+        try {
+            const response = await fetch(`/hr/employee-priv/log/${pernr}`);
+            if (!response.ok) {
+                throw new Error('변경 이력을 불러오는 데 실패했습니다.');
+            }
+            const pageData = await response.json();
+            const items = pageData.content;
+
+            const tableBody = document.getElementById('historyTableBody');
+            
+
+            if (logDataTable) {
+	            logDataTable.clear().rows.add(items).draw();
+	        }
+	    } catch (error) {
+	        console.error(error);
+	    }
+    }
+	
+ 	//  테이블 초기화 함수
+    function initializeDataTable() {
+    	$('#historyTableBody').empty();
+    	
+        logDataTable = $('#log-table').DataTable({
+            // DataTables 옵션 설정
+            destroy: true,
+            searching: true, 
+            lengthChange: true, 
+            pageLength: 15,       // 한 페이지에 15개씩 표시
+            info: true,          // 'Showing 1 to 5 of...' 정보 표시
+            
+            // 서버에서 받은 JSON 데이터의 키와 테이블 컬럼을 매핑
+            columns: [ 
+                { data: 'fieldName' },
+                { data: 'oldValue' },
+                { data: 'newValue' },
+                { data: 'createdBy' },
+                { 
+                    data: 'createdAt',
+                    render: function(data, type, row) {
+                        if (data) {
+                            return data.replace('T', ' ');
+                        }
+                        return '';
+                    }
+                },
+            ],
+            
+            language: {
+                emptyTable: "변경 이력이 없습니다."
+            }
+            
+        });
+    }
+	
+    
     </script>
 </body>
 </html>

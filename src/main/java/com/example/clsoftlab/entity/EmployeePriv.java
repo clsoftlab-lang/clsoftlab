@@ -2,9 +2,11 @@ package com.example.clsoftlab.entity;
 
 import java.time.LocalDate;
 
+import com.example.clsoftlab.converter.CryptoConverter;
 import com.example.clsoftlab.dto.hr.EmployeePrivRequestDto;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -34,6 +36,7 @@ public class EmployeePriv extends BaseEntity {
     @Column(name = "BIRTHDATE", nullable = false)
     private LocalDate birthdate;
 
+    @Convert(converter = CryptoConverter.class)
     @Column(name = "SSN", nullable = false, length = 255)
     private String ssn;
 
@@ -48,6 +51,9 @@ public class EmployeePriv extends BaseEntity {
 
     @Column(name = "ADDR", length = 255)
     private String addr;
+    
+    @Column(name = "ADDR_DETAIL", length = 255)
+    private String addrDetail;
 
     @Column(name = "MARITAL_STATUS", length = 10)
     private String maritalStatus;
@@ -74,6 +80,7 @@ public class EmployeePriv extends BaseEntity {
     	this.phoneNo = dto.getPhoneNo();
     	this.email = dto.getEmail();
     	this.addr = dto.getAddr();
+    	this.addrDetail = dto.getAddrDetail();
     	this.maritalStatus = dto.getMaritalStatus();
     	this.militaryInfo = dto.getMilitaryInfo();
     	this.disabilityYn = dto.getDisabilityYn();

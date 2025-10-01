@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,7 +33,6 @@ public class EmployeePrivRequestDto {
     private LocalDate birthdate;
 
     @NotBlank(message = "주민등록번호는 필수 입력 항목입니다.")
-    @Pattern(regexp = "^\\d{6}-\\d{7}$", message = "주민등록번호 형식이 올바르지 않습니다. (******-*******)")
     private String ssn;
 
     @NotBlank(message = "국적은 필수 입력 항목입니다.")
@@ -42,7 +40,6 @@ public class EmployeePrivRequestDto {
     private String nationality;
 
     @NotBlank(message = "연락처는 필수 입력 항목입니다.")
-    @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "연락처 형식이 올바르지 않습니다. (010-XXXX-XXXX)")
     private String phoneNo;
 
     @Email(message = "이메일 형식이 올바르지 않습니다.")
@@ -51,6 +48,9 @@ public class EmployeePrivRequestDto {
 
     @Size(max = 255, message = "주소는 최대 255자까지 입력 가능합니다.")
     private String addr;
+    
+    @Size(max = 255, message = "상세 주소는 최대 255자까지 입력 가능합니다.")
+    private String addrDetail;
 
     @Size(max = 10, message = "결혼여부는 최대 10자까지 입력 가능합니다.")
     private String maritalStatus;

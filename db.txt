@@ -1677,6 +1677,7 @@ CREATE TABLE ZHR_EMP_PRIV (
     PHONE_NO        VARCHAR(20)     NOT NULL COMMENT '연락처',
     EMAIL           VARCHAR(100)    NULL     COMMENT '이메일',
     ADDR            VARCHAR(255)    NULL     COMMENT '주소',
+    ADDR_DETAIL		VARCHAR(255)	NULL	 COMMENT '상세주소',
     MARITAL_STATUS  VARCHAR(10)     NULL     COMMENT '결혼여부',
     MILITARY_INFO   VARCHAR(100)    NULL     COMMENT '병역사항',
     DISABILITY_YN   CHAR(1)         NULL     DEFAULT 'N' COMMENT '장애여부 (Y/N)',
@@ -1703,47 +1704,215 @@ CREATE TABLE ZHR_EMP_PRIV (
 ) COMMENT '사원 개인정보 테이블';
 
 
--- ZHR_EMP_PRIV 테이블 더미 데이터 (30건 이상) --
-INSERT INTO ZHR_EMP_PRIV 
-(PERNR, ENAME, GENDER, BIRTHDATE, SSN, NATIONALITY, PHONE_NO, EMAIL, ADDR, MARITAL_STATUS, MILITARY_INFO, DISABILITY_YN, EMERGENCY_NAME, EMERGENCY_REL, EMERGENCY_PHONE, CREATED_BY)
+INSERT INTO ZHR_EMP_PRIV (PERNR, ENAME, GENDER, BIRTHDATE, SSN, NATIONALITY, PHONE_NO, EMAIL, ADDR, ADDR_DETAIL, MARITAL_STATUS, MILITARY_INFO, DISABILITY_YN, EMERGENCY_NAME, EMERGENCY_REL, EMERGENCY_PHONE, CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY) VALUES
+('2010001', '김철수', 'M', '1975-03-15', 'dtD4w/8I+pogQP7V9WyPuP5tMgGnlG1BE1F/gu3GeaE=', '대한민국', '010-1111-0001', 'cs.kim@company.com', '서울특별시 강남구 테헤란로 1', '15층', '기혼', '복무완료 / 육군 / 병장 / 1995.03-1997.05', 'N', '김영희', '배우자', '010-1111-0002', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
+('2012011', '박영민', 'M', '1980-11-20', 'S99Yi9BZsTdjoRMZYt2uOtEPUnwmcx0c1sO6UzYAefg=', '대한민국', '010-2222-0011', 'ym.park@company.com', '서울특별시 서초구 서초대로 2', NULL, '기혼', '복무완료 / 공군 / 중위 / 2003.01-2006.01', 'N', '박은지', '배우자', '010-2222-0012', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
+('2015022', '이서연', 'F', '1988-07-01', 'R2QTYgFZenugjW4jja+jQHdJJtmRbnIOH7XJGxaSgGA=', '대한민국', '010-3333-0022', 'sy.lee@company.com', '경기도 성남시 분당구 판교역로 3', 'A동 501호', '미혼', NULL, 'N', '이현우', '부', '010-3333-0023', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
+('2018013', '최민준', 'M', '1990-01-25', 'tMyZOMcN8C3c1ZXvXgNqf4xNGCvKRadN8TREvbMMRxM=', '대한민국', '010-4444-0013', 'mj.choi@company.com', '서울특별시 송파구 올림픽로 4', NULL, '미혼', '복무완료 / 해군 / 하사 / 2010.03-2012.02', 'N', '최경희', '모', '010-4444-0014', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
+('2019101', '황민현', 'M', '1982-08-09', 'Z6s0UINbh8XgAzxiyVcw8xs9oAGMoICyJYUhKCoT9f8=', '대한민국', '010-1122-0101', 'mh.hwang@company.com', '경기도 수원시 영통구 삼성로 15', NULL, '기혼', '복무완료 / 해병대 / 병장 / 2002.09-2004.08', 'N', '강미나', '배우자', '010-1122-0102', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2019112', '송강', 'M', '1994-04-23', 'oJX+7Dt6FAfm9D0PMOwl71aAOWdZtxacENIrC0/kud0=', '대한민국', '010-2233-0112', 'kang.song@company.com', '경기도 화성시 동탄중앙로 16', '1204동 801호', '미혼', '복무완료 / 육군 / 병장 / 2014.07-2016.04', 'N', '송지효', '누나', '010-2233-0113', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2019113', '문가영', 'F', '1996-07-10', '2YAvAfYXUi34LgqIF0yRhkNvAdsiNTvLXhxqfHHDonA=', '대한민국', '010-3344-0113', 'gy.moon@company.com', '경기도 수원시 팔달구 행궁로 17', NULL, '미혼', NULL, 'N', '문상민', '오빠', '010-3344-0114', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2020023', '정수빈', 'F', '1995-09-10', '3YTOL8s32geCgR6S0eC2Hz0fdiCJUnrDXmUhVw4rSeg=', '대한민국', '010-5555-0023', 'sb.jung@company.com', '인천광역시 연수구 컨벤시아대로 5', '101동 1102호', '미혼', NULL, 'N', '정재호', '오빠', '010-5555-0024', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
+('2020121', '안효섭', 'M', '1995-04-17', 'HrNXd6GLQTrk+OyC6SwPPh37znUyj5UpQsY13IEZah0=', '캐나다', '010-4455-0121', 'hs.ahn@company.com', '경기도 수원시 장안구 경수대로 18', NULL, '미혼', NULL, 'N', 'Ahn Dong-il', 'Father', '010-4455-0122', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2021002', '오세훈', 'M', '1978-12-01', 'kI8nkPvOs1NM1CffXXiJ1FMhBKrDUIkJ+3xuQym4RbM=', '대한민국', '010-8888-0002', 'sh.oh@company.com', '경기도 성남시 분당구 대왕판교로 8', NULL, '기혼', '전문연구요원 / 2004.01-2007.01', 'N', '이민정', '배우자', '010-8888-0003', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2021032', '강지훈', 'M', '1993-05-30', 'NSf06uaDd84y75Kj1wshFzkqh4KdBCfuMBCvLFCyhTM=', '대한민국', '010-6666-0032', 'jh.kang@company.com', '서울특별시 강동구 천호대로 6', NULL, '기혼', '복무완료 / 육군 / 병장 / 2013.06-2015.03', 'N', '박서현', '배우자', '010-6666-0033', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
+('2021041', '배현진', 'F', '1992-08-15', 'U9AbUGcrtKj43myjTLY8+d6YxaATRtnSry6Bzjx5FNs=', '대한민국', '010-9999-0041', 'hj.bae@company.com', '경기도 용인시 수지구 포은대로 9', '가동 301호', '미혼', NULL, 'N', '배성철', '부', '010-9999-0042', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2021042', '임도현', 'M', '1994-04-04', 'zfIz7f6YiMnJjoNsA9iy9zSyBXhxfE6e8j5hlKZH1zA=', '대한민국', '010-1234-0042', 'dh.lim@company.com', '경기도 수원시 영통구 광교중앙로 10', NULL, '미혼', '복무완료 / 육군 / 상병 / 2014.05-2016.02', 'N', '임정숙', '모', '010-1234-0043', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2021114', '조유리', 'F', '2001-10-22', '/Yv+4utWGdSIsjUJiUapPhCKunjTeiZNOilhr02okUI=', '대한민국', '010-5566-0114', 'yr.cho@company.com', '경기도 오산시 역광장로 19', '가-101', '미혼', NULL, 'N', '조미연', '언니', '010-5566-0115', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2022043', '장하윤', 'F', '1997-10-22', '5JDpS4yEXe50BgTmWxBcsqXL3zZTl+ewqkssYEKHbzU=', '대한민국', '010-2345-0043', 'hy.jang@company.com', '서울특별시 관악구 신림로 11', '2층', '미혼', NULL, 'Y', '장민철', '오빠', '010-2345-0044', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2022052', '신동민', 'M', '1991-06-12', 'TyJFBpRFcA4Q3SC1LJilwgRuuIv7+gAsWy8yABep3f8=', '대한민국', '010-3456-0052', 'dm.shin@company.com', '경기도 성남시 수정구 수정로 12', NULL, '기혼', '복무완료 / 공군 / 병장 / 2011.08-2013.08', 'N', '최수지', '배우자', '010-3456-0053', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2022055', '윤채원', 'F', '1998-02-18', 'ear4R+iGDvrpUK642QU925QWG8UznObbZm86oHKOSlo=', '대한민국', '010-7777-0055', 'cw.yoon@company.com', '경기도 하남시 미사강변동로 7', '203호', '미혼', NULL, 'N', '윤상현', '부', '010-7777-0056', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
+('2022201', '한소희', 'F', '1994-11-18', 'TQCYtVRHaYKPf5olm2vPVjoMlVIPEzxfYGdrnLSyydk=', '대한민국', '010-1212-0201', 'sh.han@company.com', '인천광역시 중구 공항로 24', NULL, '미혼', NULL, 'N', '한지민', '모', '010-1212-0202', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2022211', '차은우', 'M', '1997-03-30', 'bXwrf5R1HJgUziD/QDABZ+sIyoVhH7iqvmG1PT1vMVg=', '대한민국', '010-2323-0211', 'ew.cha@company.com', '인천광역시 서구 청라라임로 25', '102동 2504호', '미혼', '복무완료 / 육군 / 병장 / 2018.01-2019.10', 'N', '차범근', '부', '010-2323-0212', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2023053', '유지민', 'F', '2000-04-11', 'AcnoTi/NfBAveRovW7+Qp9evha5TyHy2bkoGhGnoqoo=', '대한민국', '010-4567-0053', 'jm.yoo@company.com', '경기도 성남시 분당구 불정로 13', NULL, '미혼', NULL, 'N', '유재석', '부', '010-4567-0054', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2023101', 'John Smith', 'M', '1990-01-01', 'I7rl0aoMA4a4aRIlYw3jj3CDZ/o04rq2SNmISkN7fdk=', '미국', '010-5678-0101', 'john.smith@company.com', '경기도 성남시 분당구 판교로 14', 'Apt 5B', '미혼', NULL, 'N', 'Jane Smith', 'sister', '010-5678-0102', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2023131', '나인우', 'M', '1994-09-17', 'fI+n2CqfyNKM2ouxtIqIUNQidgjDx/hcClrKYaIl+1k=', '대한민국', '010-6677-0131', 'iw.na@company.com', '경기도 평택시 고덕국제대로 20', NULL, '미혼', '복무완료 / 육군 / 병장 / 2015.01-2016.10', 'N', '나철수', '부', '010-6677-0132', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2023133', '김지원', 'F', '1992-10-19', '958RA0Dgac3jUMRXyooIBOusyJux2J7DXPWrebkYA3Y=', '대한민국', '010-7788-0133', 'jw.kim@company.com', '경기도 평택시 중앙로 21', '3층 302호', '미혼', NULL, 'N', '김진경', '모', '010-7788-0134', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2023212', '권나라', 'F', '1991-03-13', 'Yh548yy1KUzCrpZANf8EfdNjR5ik7dFpWoOedBG5hJg=', '대한민국', '010-3434-0212', 'nr.kwon@company.com', '경기도 부천시 길주로 26', NULL, '미혼', NULL, 'N', '권상우', '오빠', '010-3434-0213', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2023213', '위하준', 'M', '1991-08-05', 'fOrr2yBB7wX4StY9m47pWI7zT7V/1Gx0b3psB6sUczs=', '대한민국', '010-4545-0213', 'hj.wi@company.com', '경기도 김포시 김포한강1로 27', 'B동 101호', '기혼', '복무완료 / 경찰청 / 수경 / 2012.02-2013.11', 'N', '김고은', '배우자', '010-4545-0214', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2024132', '이도현', 'M', '1995-04-11', 'iqxVmYw04UIBUdlribydtDOBdSFVQSdk4eDzYOmz1og=', '대한민국', '010-8899-0132', 'dh.lee2@company.com', '충청남도 천안시 서북구 불당대로 22', NULL, '미혼', '복무완료 / 공군 / 병장 / 2017.08-2019.08', 'N', '이병헌', '부', '010-8899-0133', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2024134', '박은빈', 'F', '1992-09-04', '4YrKpGb0f9RLatgjEWAwKyGtxGIQ1WILOiDwqrpVoyc=', '대한민국', '010-9900-0134', 'eb.park@company.com', '경기도 평택시 비전5로 23', NULL, '미혼', NULL, 'N', '박철민', '부', '010-9900-0135', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2025001', '박서준', 'M', '1988-12-16', 'koNR1p18c7GyCEN3kJ7XBtPEJN324EQcLOK5epONMQs=', '대한민국', '010-5656-1001', 'sj.park@company.com', '서울특별시 마포구 월드컵북로 28', '오피스텔 707호', '미혼', '복무완료 / 교정시설 / 2008.07-2010.05', 'N', '박용규', '부', '010-5656-1002', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2025002', '김고은', 'F', '1991-07-02', 'NAsF14MBZzCvId2fLxVo4Bv4SnxlrW/54CUak981RqI=', '대한민국', '010-6767-1002', 'ge.kim@company.com', '서울특별시 성동구 왕십리로 29', NULL, '기혼', NULL, 'N', '위하준', '배우자', '010-4545-0213', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2025003', '변우석', 'M', '1991-10-31', 'lQW2Cz3v7I9XhmTghpNxdorCrKb8Ur0yNA38vTKUh+Y=', '대한민국', '010-7878-1003', 'ws.byun@company.com', '경기도 고양시 일산동구 중앙로 30', '110동 1501호', '미혼', '복무완료 / 육군 / 병장 / 2011.11-2013.08', 'N', '변정수', '누나', '010-7878-1004', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
+('2025004', '김혜윤', 'F', '1996-11-10', 'ginxsQ6DNb4xLbHDH3reEzBu11MkyvnheEA/xvo0VUY=', '대한민국', '010-8989-1004', 'hy.kim@company.com', '서울특별시 광진구 아차산로 31', NULL, '미혼', NULL, 'N', '김철민', '부', '010-8989-1005', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system');
+
+
+-- Emp_Priv 로그 --
+CREATE TABLE ZHR_EMP_PRIV_LOG (
+    -- 기본 키 컬럼 (PK)
+    LOG_ID          BIGINT          NOT NULL AUTO_INCREMENT COMMENT '로그 ID (PK)',
+
+    -- 변경 추적 컬럼
+    PERNR           VARCHAR(10)     NOT NULL COMMENT '대상 사번 (FK)',
+    FIELD_NAME      VARCHAR(50)     NOT NULL COMMENT '변경된 필드명',
+    OLD_VALUE       VARCHAR(500)    NULL     COMMENT '변경 전 값',
+    NEW_VALUE       VARCHAR(500)    NULL     COMMENT '변경 후 값',
+    CHANGE_TYPE     VARCHAR(10)     NOT NULL COMMENT '변경 유형 (INSERT, UPDATE)',
+    
+    -- 감사(Audit) 컬럼 (이름 수정됨)
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '로그 생성자 (수정 행위자)',
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '로그 생성 일시',
+
+    -- 기본 키 설정
+    PRIMARY KEY (LOG_ID),
+
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_LOG_PERNR (PERNR),
+    INDEX IDX_LOG_CREATED_AT (CREATED_AT)
+
+) COMMENT '사원 개인정보 변경 이력 로그 테이블';
+
+-- 사원 인사 정보 --
+CREATE TABLE ZHR_EMP_INFO (
+    -- 기본 키 컬럼 (PK)
+    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번 (PK)',
+
+    -- 인사정보 상세
+    ZHIRE_DATE      DATE            NOT NULL COMMENT '입사일',
+    ZEMP_TYPE       VARCHAR(10)     NOT NULL COMMENT '고용형태 (코드)',
+    ZWORK_TYPE      VARCHAR(10)     NOT NULL COMMENT '근무형태 (코드)',
+    ZBIZ_CD         VARCHAR(10)     NOT NULL COMMENT '소속사업장 (코드)',
+    ZDEPT_CD        VARCHAR(10)     NOT NULL COMMENT '소속부서 (코드)',
+    ZPOS_CD         VARCHAR(10)     NOT NULL COMMENT '직책 (코드)',
+    ZGRADE_CD       VARCHAR(10)     NOT NULL COMMENT '직급 (코드)',
+    ZDEPT_JOIN      DATE            NOT NULL COMMENT '현 부서 입사일',
+    ZEMP_STATUS     VARCHAR(2)      NOT NULL COMMENT '근무상태 (코드: W, L, R 등)',
+    ZLAST_APPT_DATE DATE            NOT NULL COMMENT '최종 발령일자',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+    
+    -- 기본 키 설정
+    PRIMARY KEY (PERNR),
+
+    -- 검색 성능 향상을 위한 인덱스
+    INDEX IDX_EMP_DEPT_CD (ZDEPT_CD),
+    INDEX IDX_EMP_STATUS (ZEMP_STATUS)
+
+) COMMENT '사원 인사정보 마스터 테이블';
+
+
+
+INSERT INTO ZHR_EMP_INFO 
+(PERNR, ZHIRE_DATE, ZEMP_TYPE, ZWORK_TYPE, ZBIZ_CD, ZDEPT_CD, ZPOS_CD, ZGRADE_CD, ZDEPT_JOIN, ZEMP_STATUS, ZLAST_APPT_DATE, CREATED_BY, UPDATED_BY) 
 VALUES
--- 1. 경영진 및 기획/지원부서 (서울 본사)
-('2010001', '김철수', 'M', '1975-03-15', '750315-1******_encrypted', '대한민국', '010-1111-0001', 'cs.kim@company.com', '서울특별시 강남구 테헤란로 1', '기혼', '복무완료 / 육군 / 병장 / 1995.03-1997.05', 'N', '김영희', '배우자', '010-1111-0002', 'system_loader'),
-('2012011', '박영민', 'M', '1980-11-20', '801120-1******_encrypted', '대한민국', '010-2222-0011', 'ym.park@company.com', '서울특별시 서초구 서초대로 2', '기혼', '복무완료 / 공군 / 중위 / 2003.01-2006.01', 'N', '박은지', '배우자', '010-2222-0012', 'system_loader'),
-('2015022', '이서연', 'F', '1988-07-01', '880701-2******_encrypted', '대한민국', '010-3333-0022', 'sy.lee@company.com', '경기도 성남시 분당구 판교역로 3', '미혼', NULL, 'N', '이현우', '부', '010-3333-0023', 'system_loader'),
-('2018013', '최민준', 'M', '1990-01-25', '900125-1******_encrypted', '대한민국', '010-4444-0013', 'mj.choi@company.com', '서울특별시 송파구 올림픽로 4', '미혼', '복무완료 / 해군 / 하사 / 2010.03-2012.02', 'N', '최경희', '모', '010-4444-0014', 'system_loader'),
-('2020023', '정수빈', 'F', '1995-09-10', '950910-2******_encrypted', '대한민국', '010-5555-0023', 'sb.jung@company.com', '인천광역시 연수구 컨벤시아대로 5', '미혼', NULL, 'N', '정재호', '오빠', '010-5555-0024', 'system_loader'),
-('2021032', '강지훈', 'M', '1993-05-30', '930530-1******_encrypted', '대한민국', '010-6666-0032', 'jh.kang@company.com', '서울특별시 강동구 천호대로 6', '기혼', '복무완료 / 육군 / 병장 / 2013.06-2015.03', 'N', '박서현', '배우자', '010-6666-0033', 'system_loader'),
-('2022055', '윤채원', 'F', '1998-02-18', '980218-2******_encrypted', '대한민국', '010-7777-0055', 'cw.yoon@company.com', '경기도 하남시 미사강변동로 7', '미혼', NULL, 'N', '윤상현', '부', '010-7777-0056', 'system_loader'),
+('2010001', '2010-03-15', 'REG', 'FULL', 'HQ01', 'MGMNT', 'TM_LEAD', 'GRD5', '2019-01-10', 'W', '2024-03-01', 'system', NULL),
+('2012011', '2012-01-10', 'REG', 'FULL', 'HQ01', 'FIN', 'PT_LEAD', 'GRD4', '2020-02-01', 'W', '2025-01-15', 'system', NULL),
+('2015022', '2015-02-01', 'REG', 'FULL', 'HQ01', 'MKTG', 'STAFF', 'GRD3', '2021-03-15', 'W', '2024-03-01', 'system', NULL),
+('2018013', '2018-01-08', 'REG', 'FULL', 'RND01', 'RND_A', 'STAFF', 'GRD3', '2018-01-08', 'W', '2023-03-01', 'system', NULL),
+('2019101', '2019-07-01', 'REG', 'FULL', 'HQ01', 'SALE_B', 'STAFF', 'GRD3', '2022-04-01', 'W', '2025-03-01', 'system', NULL),
+('2019112', '2019-11-04', 'REG', 'FULL', 'FC01', 'PROD_A', 'STAFF', 'GRD2', '2019-11-04', 'W', '2024-09-01', 'system', NULL),
+('2019113', '2019-11-04', 'REG', 'FULL', 'HQ01', 'HR', 'STAFF', 'GRD2', '2023-01-01', 'W', '2023-01-01', 'system', NULL),
+('2020023', '2020-03-02', 'REG', 'FULL', 'HQ01', 'MKTG', 'STAFF', 'GRD2', '2020-03-02', 'W', '2025-03-01', 'system', NULL),
+('2020121', '2020-12-01', 'CON', 'FULL', 'HQ01', 'DSGN', 'STAFF', 'GRD2', '2020-12-01', 'W', '2024-12-01', 'system', NULL),
+('2021002', '2021-01-04', 'REG', 'FULL', 'RND01', 'RND_B', 'PT_LEAD', 'GRD4', '2021-01-04', 'W', '2025-03-01', 'system', NULL),
+('2021032', '2021-03-02', 'REG', 'FULL', 'HQ01', 'SALE_A', 'STAFF', 'GRD2', '2021-03-02', 'W', '2024-03-01', 'system', NULL),
+('2021041', '2021-04-05', 'REG', 'FULL', 'HQ01', 'FIN', 'STAFF', 'GRD2', '2024-06-01', 'W', '2024-06-01', 'system', NULL),
+('2021042', '2021-04-05', 'REG', 'FULL', 'FC01', 'QC', 'STAFF', 'GRD1', '2021-04-05', 'W', '2025-09-01', 'system', NULL),
+('2021114', '2021-11-01', 'REG', 'PART', 'HQ01', 'CS', 'STAFF', 'GRD1', '2021-11-01', 'W', '2025-04-01', 'system', NULL),
+('2022043', '2022-04-04', 'REG', 'FULL', 'HQ01', 'HR', 'STAFF', 'GRD1', '2022-04-04', 'L', '2024-08-01', 'system', NULL),
+('2022052', '2022-05-02', 'REG', 'FULL', 'FC01', 'PROD_B', 'STAFF', 'GRD1', '2022-05-02', 'W', '2025-03-01', 'system', NULL),
+('2022055', '2022-05-09', 'REG', 'FULL', 'HQ01', 'SALE_B', 'STAFF', 'GRD1', '2025-01-01', 'W', '2025-01-01', 'system', NULL),
+('2022201', '2022-10-04', 'REG', 'FULL', 'HQ01', 'CS', 'STAFF', 'GRD1', '2022-10-04', 'W', '2024-10-01', 'system', NULL),
+('2022211', '2022-10-17', 'REG', 'FULL', 'RND01', 'RND_A', 'STAFF', 'GRD1', '2022-10-17', 'W', '2025-03-01', 'system', NULL),
+('2023053', '2023-05-01', 'REG', 'FULL', 'HQ01', 'MKTG', 'STAFF', 'GRD1', '2023-05-01', 'W', '2025-03-01', 'system', NULL),
+('2023101', '2023-10-02', 'CON', 'FULL', 'RND01', 'RND_C', 'STAFF', 'GRD1', '2023-10-02', 'W', '2024-10-01', 'system', NULL),
+('2023131', '2023-10-04', 'REG', 'FULL', 'FC01', 'PROD_A', 'STAFF', 'GRD1', '2023-10-04', 'W', '2025-09-01', 'system', NULL),
+('2023133', '2023-10-16', 'REG', 'FULL', 'HQ01', 'FIN', 'STAFF', 'GRD1', '2023-10-16', 'W', '2025-01-15', 'system', NULL),
+('2023212', '2023-11-06', 'REG', 'FULL', 'HQ01', 'HR', 'STAFF', 'GRD1', '2023-11-06', 'W', '2025-03-01', 'system', NULL),
+('2023213', '2023-11-13', 'REG', 'FULL', 'HQ01', 'SALE_A', 'STAFF', 'GRD1', '2023-11-13', 'W', '2024-12-01', 'system', NULL),
+('2024132', '2024-01-02', 'REG', 'FULL', 'RND01', 'RND_B', 'STAFF', 'GRD1', '2024-01-02', 'W', '2025-03-01', 'system', NULL),
+('2024134', '2024-01-02', 'REG', 'FULL', 'HQ01', 'MKTG', 'STAFF', 'GRD1', '2024-01-02', 'W', '2025-03-01', 'system', NULL),
+('2025001', '2025-01-06', 'REG', 'FULL', 'HQ01', 'SALE_A', 'STAFF', 'GRD1', '2025-01-06', 'W', '2025-01-06', 'system', NULL),
+('2025002', '2025-01-06', 'REG', 'FULL', 'HQ01', 'DSGN', 'STAFF', 'GRD1', '2025-01-06', 'W', '2025-01-06', 'system', NULL),
+('2025003', '2025-03-03', 'REG', 'FULL', 'FC01', 'QC', 'STAFF', 'GRD1', '2025-03-03', 'W', '2025-03-03', 'system', NULL),
+('2025004', '2025-03-03', 'REG', 'FULL', 'HQ01', 'CS', 'STAFF', 'GRD1', '2025-03-03', 'W', '2025-03-03', 'system', NULL);
 
--- 2. R&D 센터 (판교)
-('2021002', '오세훈', 'M', '1978-12-01', '781201-1******_encrypted', '대한민국', '010-8888-0002', 'sh.oh@company.com', '경기도 성남시 분당구 대왕판교로 8', '기혼', '전문연구요원 / 2004.01-2007.01', 'N', '이민정', '배우자', '010-8888-0003', 'system_loader'),
-('2021041', '배현진', 'F', '1992-08-15', '920815-2******_encrypted', '대한민국', '010-9999-0041', 'hj.bae@company.com', '경기도 용인시 수지구 포은대로 9', '미혼', NULL, 'N', '배성철', '부', '010-9999-0042', 'system_loader'),
-('2021042', '임도현', 'M', '1994-04-04', '940404-1******_encrypted', '대한민국', '010-1234-0042', 'dh.lim@company.com', '경기도 수원시 영통구 광교중앙로 10', '미혼', '복무완료 / 육군 / 상병 / 2014.05-2016.02', 'N', '임정숙', '모', '010-1234-0043', 'system_loader'),
-('2022043', '장하윤', 'F', '1997-10-22', '971022-2******_encrypted', '대한민국', '010-2345-0043', 'hy.jang@company.com', '서울특별시 관악구 신림로 11', '미혼', NULL, 'Y', '장민철', '오빠', '010-2345-0044', 'system_loader'),
-('2022052', '신동민', 'M', '1991-06-12', '910612-1******_encrypted', '대한민국', '010-3456-0052', 'dm.shin@company.com', '경기도 성남시 수정구 수정로 12', '기혼', '복무완료 / 공군 / 병장 / 2011.08-2013.08', 'N', '최수지', '배우자', '010-3456-0053', 'system_loader'),
-('2023053', '유지민', 'F', '2000-04-11', '000411-4******_encrypted', '대한민국', '010-4567-0053', 'jm.yoo@company.com', '경기도 성남시 분당구 불정로 13', '미혼', NULL, 'N', '유재석', '부', '010-4567-0054', 'system_loader'),
-('2023101', 'John Smith', 'M', '1990-01-01', '900101-5******_encrypted', '미국', '010-5678-0101', 'john.smith@company.com', '경기도 성남시 분당구 판교로 14', '미혼', NULL, 'N', 'Jane Smith', 'sister', '010-5678-0102', 'system_loader'),
+-- 사원 자격증 정보 --
+CREATE TABLE ZHR_EMP_CERT (
+    -- 기본 키 컬럼 (PK)
+    CERT_ID         BIGINT          NOT NULL AUTO_INCREMENT COMMENT '자격증 고유 ID (PK)',
 
--- 3. 생산 및 품질 (수원/평택 공장)
-('2019101', '황민현', 'M', '1982-08-09', '820809-1******_encrypted', '대한민국', '010-1122-0101', 'mh.hwang@company.com', '경기도 수원시 영통구 삼성로 15', '기혼', '복무완료 / 해병대 / 병장 / 2002.09-2004.08', 'N', '강미나', '배우자', '010-1122-0102', 'system_loader'),
-('2019112', '송강', 'M', '1994-04-23', '940423-1******_encrypted', '대한민국', '010-2233-0112', 'kang.song@company.com', '경기도 화성시 동탄중앙로 16', '미혼', '복무완료 / 육군 / 병장 / 2014.07-2016.04', 'N', '송지효', '누나', '010-2233-0113', 'system_loader'),
-('2019113', '문가영', 'F', '1996-07-10', '960710-2******_encrypted', '대한민국', '010-3344-0113', 'gy.moon@company.com', '경기도 수원시 팔달구 행궁로 17', '미혼', NULL, 'N', '문상민', '오빠', '010-3344-0114', 'system_loader'),
-('2020121', '안효섭', 'M', '1995-04-17', '950417-1******_encrypted', '캐나다', '010-4455-0121', 'hs.ahn@company.com', '경기도 수원시 장안구 경수대로 18', '미혼', NULL, 'N', 'Ahn Dong-il', 'Father', '010-4455-0122', 'system_loader'),
-('2021114', '조유리', 'F', '2001-10-22', '011022-4******_encrypted', '대한민국', '010-5566-0114', 'yr.cho@company.com', '경기도 오산시 역광장로 19', '미혼', NULL, 'N', '조미연', '언니', '010-5566-0115', 'system_loader'),
-('2023131', '나인우', 'M', '1994-09-17', '940917-1******_encrypted', '대한민국', '010-6677-0131', 'iw.na@company.com', '경기도 평택시 고덕국제대로 20', '미혼', '복무완료 / 육군 / 병장 / 2015.01-2016.10', 'N', '나철수', '부', '010-6677-0132', 'system_loader'),
-('2023133', '김지원', 'F', '1992-10-19', '921019-2******_encrypted', '대한민국', '010-7788-0133', 'jw.kim@company.com', '경기도 평택시 중앙로 21', '미혼', NULL, 'N', '김진경', '모', '010-7788-0134', 'system_loader'),
-('2024132', '이도현', 'M', '1995-04-11', '950411-1******_encrypted', '대한민국', '010-8899-0132', 'dh.lee2@company.com', '충청남도 천안시 서북구 불당대로 22', '미혼', '복무완료 / 공군 / 병장 / 2017.08-2019.08', 'N', '이병헌', '부', '010-8899-0133', 'system_loader'),
-('2024134', '박은빈', 'F', '1992-09-04', '920904-2******_encrypted', '대한민국', '010-9900-0134', 'eb.park@company.com', '경기도 평택시 비전5로 23', '미혼', NULL, 'N', '박철민', '부', '010-9900-0135', 'system_loader'),
+    -- 사원 및 자격증 정보
+    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번',
+    ZSEQ            INT             NOT NULL COMMENT '자격증 순번',
+    ZCERT_NAME      VARCHAR(100)    NOT NULL COMMENT '자격증명',
+    ZCERT_ORG       VARCHAR(100)    NOT NULL COMMENT '발급기관',
+    ZCERT_NO        VARCHAR(50)     NULL COMMENT '자격증번호',
+    ZGET_DATE       DATE            NOT NULL COMMENT '취득일자',
+    ZEXP_DATE       DATE            NULL COMMENT '유효기간',
+    ZJOB_REL        VARCHAR(1)      NULL COMMENT '직무 연계 여부 (Y/N)',
+    ZREMARK         VARCHAR(200)    NULL COMMENT '비고',
+    ZATTACH_ID      VARCHAR(32)     NULL COMMENT '첨부파일 참조 ID',
 
--- 4. 물류센터 (인천)
-('2022201', '한소희', 'F', '1994-11-18', '941118-2******_encrypted', '대한민국', '010-1212-0201', 'sh.han@company.com', '인천광역시 중구 공항로 24', '미혼', NULL, 'N', '한지민', '모', '010-1212-0202', 'system_loader'),
-('2022211', '차은우', 'M', '1997-03-30', '970330-1******_encrypted', '대한민국', '010-2323-0211', 'ew.cha@company.com', '인천광역시 서구 청라라임로 25', '미혼', '복무완료 / 육군 / 병장 / 2018.01-2019.10', 'N', '차범근', '부', '010-2323-0212', 'system_loader'),
-('2023212', '권나라', 'F', '1991-03-13', '910313-2******_encrypted', '대한민국', '010-3434-0212', 'nr.kwon@company.com', '경기도 부천시 길주로 26', '미혼', NULL, 'N', '권상우', '오빠', '010-3434-0213', 'system_loader'),
-('2023213', '위하준', 'M', '1991-08-05', '910805-1******_encrypted', '대한민국', '010-4545-0213', 'hj.wi@company.com', '경기도 김포시 김포한강1로 27', '기혼', '복무완료 / 경찰청 / 수경 / 2012.02-2013.11', 'N', '김고은', '배우자', '010-4545-0214', 'system_loader'),
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+    
+    -- 기본 키 설정
+    PRIMARY KEY (CERT_ID),
 
--- 5. 신규 입사자
-('2025001', '박서준', 'M', '1988-12-16', '881216-1******_encrypted', '대한민국', '010-5656-1001', 'sj.park@company.com', '서울특별시 마포구 월드컵북로 28', '미혼', '복무완료 / 교정시설 / 2008.07-2010.05', 'N', '박용규', '부', '010-5656-1002', 'system_loader'),
-('2025002', '김고은', 'F', '1991-07-02', '910702-2******_encrypted', '대한민국', '010-6767-1002', 'ge.kim@company.com', '서울특별시 성동구 왕십리로 29', '기혼', NULL, 'N', '위하준', '배우자', '010-4545-0213', 'system_loader'),
-('2025003', '변우석', 'M', '1991-10-31', '911031-1******_encrypted', '대한민국', '010-7878-1003', 'ws.byun@company.com', '경기도 고양시 일산동구 중앙로 30', '미혼', '복무완료 / 육군 / 병장 / 2011.11-2013.08', 'N', '변정수', '누나', '010-7878-1004', 'system_loader'),
-('2025004', '김혜윤', 'F', '1996-11-10', '961110-2******_encrypted', '대한민국', '010-8989-1004', 'hy.kim@company.com', '서울특별시 광진구 아차산로 31', '미혼', NULL, 'N', '김철민', '부', '010-8989-1005', 'system_loader');
+    -- 중복 데이터 방지를 위한 유니크 제약조건
+    UNIQUE KEY UK_EMP_CERT (PERNR, ZSEQ)
+
+) COMMENT '사원 자격증 정보 테이블';
+
+-- 더미데이터 --
+
+INSERT INTO ZHR_EMP_CERT
+(PERNR, ZSEQ, ZCERT_NAME, ZCERT_ORG, ZCERT_NO, ZGET_DATE, ZEXP_DATE, ZJOB_REL, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- 재무팀 (FIN)
+('2012011', 1, '재경관리사', '삼일회계법인', '2015-11-1234', '2015-11-20', NULL, 'Y', NULL, 'system', NULL),
+('2012011', 2, '전산회계운용사 1급', '대한상공회의소', '2013-05-5678', '2013-05-10', NULL, 'Y', NULL, 'system', NULL),
+('2021041', 1, 'FAT 1급', '한국공인회계사회', '21-041-001', '2023-08-25', NULL, 'Y', NULL, 'system', NULL),
+('2023133', 1, 'TOEIC 950', 'ETS', 'T950-23133', '2022-06-12', '2024-06-11', 'N', '어학 점수', 'system', NULL),
+
+-- 마케팅팀 (MKTG)
+('2015022', 1, '검색광고마케터 1급', '한국정보통신진흥협회', '2019-00123', '2019-03-15', NULL, 'Y', NULL, 'system', NULL),
+('2020023', 1, '사회조사분석사 2급', '한국산업인력공단', '20-023-001', '2022-11-05', NULL, 'Y', '데이터 분석 업무에 활용', 'system', NULL),
+('2023053', 1, 'GTQ 1급', '한국생산성본부', 'G-23053-001', '2021-10-22', NULL, 'Y', NULL, 'system', NULL),
+
+-- 연구소 (RND)
+('2018013', 1, '정보처리기사', '한국산업인력공단', '17-18013-001', '2017-08-25', NULL, 'Y', NULL, 'system', NULL),
+('2018013', 2, 'SQL 개발자(SQLD)', '한국데이터산업진흥원', 'SQLD-18013-002', '2019-12-06', NULL, 'Y', NULL, 'system', NULL),
+('2021002', 1, 'PMP (Project Management Professional)', 'PMI', 'PMP-21002', '2023-06-17', '2026-06-16', 'Y', '프로젝트 리딩용', 'system', NULL),
+('2022211', 1, '리눅스마스터 2급', '한국정보통신진흥협회', '22-211-001', '2021-03-20', NULL, 'Y', NULL, 'system', NULL),
+('2023101', 1, 'ADsP (데이터분석 준전문가)', '한국데이터산업진흥원', 'ADSP-23101', '2023-05-19', NULL, 'Y', NULL, 'system', NULL),
+('2024132', 1, '정보보안기사', '한국인터넷진흥원', '24-132-001', '2023-11-10', NULL, 'Y', NULL, 'system', NULL),
+
+-- 생산/품질관리 (PROD/QC)
+('2019112', 1, '산업안전기사', '한국산업인력공단', '19-112-001', '2021-05-15', NULL, 'Y', NULL, 'system', NULL),
+('2021042', 1, '품질경영기사', '한국산업인력공단', '21-042-001', '2023-08-25', NULL, 'Y', NULL, 'system', NULL),
+('2022052', 1, '6시그마 GB', '한국품질재단', 'GB-22052', '2024-02-28', NULL, 'Y', '사내 교육 이수', 'system', NULL),
+('2023131', 1, '지게차운전기능사', '한국산업인력공단', '23-131-001', '2022-09-03', NULL, 'Y', NULL, 'system', NULL),
+('2025003', 1, '위험물산업기사', '한국산업인력공단', '25-003-001', '2024-11-22', NULL, 'Y', NULL, 'system', NULL),
+
+-- 인사팀 (HR)
+('2019113', 1, 'PHR (Professional in Human Resources)', 'HRCI', 'PHR-19113', '2022-07-20', '2025-07-19', 'Y', NULL, 'system', NULL),
+('2022043', 1, '컴퓨터활용능력 1급', '대한상공회의소', '22-043-001', '2020-02-14', NULL, 'N', NULL, 'system', NULL),
+('2023212', 1, 'MOS Master', 'Microsoft', 'MOS-23212', '2022-08-11', NULL, 'N', NULL, 'system', NULL),
+
+-- 영업팀 (SALE)
+('2019101', 1, '유통관리사 2급', '대한상공회의소', '19-101-001', '2021-11-20', NULL, 'Y', NULL, 'system', NULL),
+('2022055', 1, 'OPIc AL', 'ACTFL', 'OPIC-22055', '2024-05-10', '2026-05-09', 'Y', '해외 영업', 'system', NULL),
+('2021032', 1, '운전면허 1종 보통', '경찰청', '12-21032-01', '2015-04-17', '2025-12-31', 'Y', '법인차량 운전', 'system', NULL),
+('2023213', 1, '무역영어 1급', '대한상공회의소', '23-213-001', '2022-06-03', NULL, 'Y', NULL, 'system', NULL),
+('2025001', 1, 'CS Leaders(관리사)', '한국정보평가협회', '25-001-001', '2024-07-12', NULL, 'Y', NULL, 'system', NULL),
+
+-- 디자인팀 (DSGN)
+('2020121', 1, '컬러리스트기사', '한국산업인력공단', '20-121-001', '2019-07-12', NULL, 'Y', NULL, 'system', NULL),
+('2025002', 1, 'ACA Illustrator', 'Adobe', 'ACA-25002', '2023-04-01', NULL, 'Y', NULL, 'system', NULL),
+
+-- 고객서비스팀 (CS)
+('2021114', 1, '텔레마케팅관리사', '한국산업인력공단', '21-114-001', '2023-10-27', NULL, 'Y', NULL, 'system', NULL),
+('2022201', 1, 'SMAT 1급', '한국생산성본부', 'SMAT-22201', '2024-01-19', NULL, 'Y', '서비스경영자격', 'system', NULL),
+
+-- 경영팀 (MGMNT)
+('2010001', 1, '정보시스템감리사', '한국지능정보사회진흥원', '10-001-001', '2018-09-07', NULL, 'Y', NULL, 'system', NULL);

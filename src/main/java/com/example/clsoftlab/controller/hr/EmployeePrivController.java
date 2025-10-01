@@ -1,5 +1,6 @@
 package com.example.clsoftlab.controller.hr;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.hr.EmployeePrivDetailDto;
+import com.example.clsoftlab.dto.hr.EmployeePrivLogDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeePrivRequestDto;
 import com.example.clsoftlab.service.hr.EmployeePrivService;
 
@@ -61,5 +63,17 @@ public class EmployeePrivController {
 		return employeePrivService.findById(pernr)
 				.map(dto -> ResponseEntity.ok(dto))
 				.orElse(ResponseEntity.notFound().build());
+	}
+	
+	// 이력 조회
+	@ResponseBody
+	@GetMapping("/log/{pernr}")
+	public Page<EmployeePrivLogDetailDto> getLogList (@PathVariable String pernr, @RequestParam(required = false) Integer page) {
+		if (page == null) {
+			page = 0;
+		}
+		
+		int size= 1000;
+		return employeePrivService.findByPernr(pernr, page, size);
 	}
 }
