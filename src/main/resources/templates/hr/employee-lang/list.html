@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인사 프로파일 – 어학 능력 관리</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    
+    
+</head>
+
+<body>
+    <div id="global-loader">
+        <div class="page-loader"></div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">사원 정보 조회</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchForm">
+                            <div class="row align-items-end">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사번</label>
+                                        <input type="text" class="form-control" name="pernr" placeholder="사번을 입력하세요">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>이름</label>
+                                        <input type="text" class="form-control" name="name" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>소속 / 직책</label>
+                                        <input type="text" class="form-control" name="deptAndPos" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-flex justify-content-end gap-2">
+                                     <button type="button" class="btn btn-primary w-100" onclick="searchEmployeeLang()"><i class="ti ti-search me-1"></i>조회</button>
+                                     <button type="reset" class="btn btn-outline-secondary w-100" id="searchResetBtn"><i class="ti ti-refresh me-1"></i>초기화</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="editDiv" style="display: none;">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">어학 능력 등록 및 관리</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="langForm">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover datatable" id="lang-table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 50px;" class="text-center">선택</th>
+                                                <th class="text-center">외국어 <span class="text-danger">*</span></th>
+                                                <th class="text-center">시험명 <span class="text-danger">*</span></th>
+                                                <th class="text-center">성적 <span class="text-danger">*</span></th>
+                                                <th class="text-center">취득일자 <span class="text-danger">*</span></th>
+                                                <th class="text-center">유효기간</th>
+                                                <th class="text-center">회화수준</th>
+                                                <th class="text-center">독해수준</th>
+                                                <th class="text-center">비고</th>
+                                                <th class="text-center">첨부파일</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="langTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </form>
+                            <input type="file" id="fileUploadInput" style="display: none;" accept=".pdf,.png,.jpg,.jpeg">
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-primary" onclick="addNewLang()"><i class="ti ti-plus me-1"></i>어학 추가</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="deleteLang()"><i class="ti ti-trash me-1"></i>선택 삭제</button>
+                                <button type="button" class="btn btn-primary" onclick="saveLang()"><i class="ti ti-device-floppy me-1"></i>전체 저장</button>
+                                <button type="button" class="btn btn-info" id="viewExpiringBtn"><i class="ti ti-clock-exclamation me-1"></i>만료 예정 보기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/assets/js/script.js"></script>
+    <script type="text/javascript">
+	    let langDataTable;
+		let currentPernr = null; 
+		let currentRowForUpload = null;
+		let isFilteringExpiring = false;
+		
+		// DataTables 커스텀 필터를 한 번만 등록합니다.
+	    $.fn.dataTable.ext.search.push(
+	        function(settings, data, dataIndex) {
+	            // 이 필터는 'lang-table'에만 적용되도록 합니다.
+	            if (settings.nTable.id !== 'lang-table') {
+	                return true;
+	            }
+	            
+	            // 필터링이 활성화되지 않았으면 모든 행을 보여줍니다.
+	            if (!isFilteringExpiring) {
+	                return true;
+	            }
+
+	            // 필터링이 활성화된 경우, 로직을 실행합니다.
+	            // data 배열 대신 원본 데이터 객체를 가져옵니다.
+	            const rowData = langDataTable.row(dataIndex).data();
+	            const expDateStr = rowData.expDate;
+
+	            console.log(`Row ${dataIndex} | expDate: ${expDateStr}`);
+
+	            if (!expDateStr) return false; // 유효기간 없는 항목은 필터링에서 제외
+
+	            const today = new Date();
+	            const oneYearFromNow = new Date();
+	            today.setHours(0, 0, 0, 0);
+	            oneYearFromNow.setFullYear(today.getFullYear() + 1);
+
+	            const expDate = new Date(expDateStr);
+
+	            // 유효기간이 오늘 이후이고, 1년 이내인 경우 true 반환
+	            return expDate >= today && expDate <= oneYearFromNow;
+	        }
+	    );
+		
+		
+		document.addEventListener('DOMContentLoaded', function () {
+	        // [초기화] 버튼 클릭 시, 페이지 전체 상태를 초기화합니다.
+	        $("#searchResetBtn").on('click', function() {
+	            $("#editDiv").hide();
+	            currentPernr = null; // 작업 사번 초기화
+	            
+	            // 필터링 상태 초기화
+	            if (isFilteringExpiring) {
+	                isFilteringExpiring = false;
+	                $('#viewExpiringBtn').text('만료 예정 보기').removeClass('btn-secondary').addClass('btn-info');
+	            }
+	
+	            if (langDataTable) {
+	                langDataTable.search('').draw(); // DataTables 내부 검색어 및 필터 초기화
+	                langDataTable.clear().draw();
+	            }
+		        });
+	        
+	     	// [만료 예정 보기] 버튼 클릭 이벤트
+	        $('#viewExpiringBtn').on('click', function() {
+	            isFilteringExpiring = !isFilteringExpiring; // 필터 상태 토글
+
+	            if (isFilteringExpiring) {
+	                $(this).text('전체 보기').removeClass('btn-info').addClass('btn-secondary');
+	            } else {
+	                $(this).text('만료 예정 보기').removeClass('btn-secondary').addClass('btn-info');
+	            }
+
+	            langDataTable.draw();
+	        });
+	        
+	        // [첨부파일] 버튼 클릭 시, 파일 업로드
+	        $('#langTableBody').on('click', '.file-upload-btn', function() {
+	            // 현재 클릭된 버튼이 속한 행(tr)을 변수에 저장
+	            currentRowForUpload = $(this).closest('tr');
+	            // 숨겨진 파일 입력창을 클릭하여 파일 선택 대화상자를 띄움
+	            $('#fileUploadInput').click();
+	        });
+	        
+	    	 //파일 입력창의 값이 변경(파일 선택 완료)되었을 때 이벤트
+	        $('#fileUploadInput').on('change', async function() {
+	            if (this.files.length === 0) {
+	                return; // 사용자가 파일 선택을 취소한 경우
+	            }
+
+	            const file = this.files[0];
+	            
+	            //확장자 검사
+	            const allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg'];
+	            const fileExtension = file.name.split('.').pop().toLowerCase();
+	            if (!allowedExtensions.includes(fileExtension)) {
+	                alert('PDF, PNG, JPG, JPEG 파일만 업로드할 수 있습니다.');
+	                $(this).val(''); // 파일 선택 초기화
+	                return;
+	            }
+
+	            // 파일 크기 검사 (예: 10MB로 제한)
+	            const maxSize = 10 * 1024 * 1024; // 10MB
+	            if (file.size > maxSize) {
+	                alert('파일 크기는 10MB를 초과할 수 없습니다.');
+	                $(this).val(''); // 파일 선택 초기화
+	                return;
+	            }
+	            const formData = new FormData();
+	            formData.append('file', file);
+
+	            try {
+	                const response = await fetch('/hr/employee-lang/upload', {
+	                    method: 'POST',
+	                    body: formData
+	                });
+
+	                if (response.ok) {
+	                    const result = await response.json();
+	                    const attachId = result.attachId;
+	                    
+	                    if (currentRowForUpload) {
+	                        currentRowForUpload.find('input[name="attachId"]').val(attachId);
+	                        currentRowForUpload.find('.file-upload-btn')
+	                            .removeClass('btn-outline-secondary')
+	                            .addClass('btn-success');
+	                        alert('파일이 성공적으로 업로드되었습니다.');
+	                    }
+	                } else {
+	                    const errorText = await response.text();
+	                    throw new Error(errorText);
+	                }
+
+	            } catch (error) {
+	                console.error('파일 업로드 오류:', error);
+	                alert('파일 업로드 중 오류가 발생했습니다: ' + error.message);
+	            } finally {
+	                $(this).val('');
+	                currentRowForUpload = null;
+	            }
+	        });
+	    });
+		
+		function showEditDiv() {
+	        $("#editDiv").show();
+	    }
+	    
+	 	// [조회]버튼 클릭시 상세 정보 확인
+		async function searchEmployeeLang() {
+	        const searchForm = document.getElementById('searchForm');
+	        const pernr = searchForm.querySelector('[name="pernr"]').value;
+
+	        // 사번 입력 여부 확인
+	        if (!pernr || !pernr.trim()) {
+	            alert('조회할 사번을 입력해주세요.');
+	            return;
+	        }
+	        
+	        
+	        await findDetail(pernr);
+	        
+	    }
+	 	
+		// 수정 모달창 데이터 불러오기.
+		async function findDetail(pernr) {
+
+	        if (!pernr) {
+	            alert('먼저 조회할 사원를 선택해주세요.');
+	            return;
+	        }
+	        
+	        if (!langDataTable) { 
+		        initializeDataTable(); // 최초 한 번만 DataTables 초기화
+		    }
+
+	        try {
+	            const response = await fetch(`/hr/employee-lang/detail/${pernr}`);
+	            if (!response.ok) {
+	                throw new Error('어학 목록을 불러오는 데 실패했습니다.');
+	            }
+	            const pageData = await response.json();
+	            const items = pageData.content;
+
+	            
+
+	            if (langDataTable) {
+		            langDataTable.clear().rows.add(items).draw();
+		        }
+	            
+	            currentPernr = pernr;
+	            showEditDiv();
+		    } catch (error) {
+		        console.error(error);
+		    }
+		}
+		
+		//  테이블 초기화 함수
+	    function initializeDataTable() {
+	    	$('#langTableBody').empty();
+	    	
+	    	langDataTable = $('#lang-table').DataTable({
+	            destroy: true, // 기존 테이블이 있다면 파괴하고 새로 생성
+	            searching: true,
+	            lengthChange: true,
+	            pageLength: 30,
+	            info: true,
+	            
+	            // 서버에서 받은 JSON 데이터의 키와 테이블 컬럼을 매핑
+	            columns: [
+	                // '선택' 체크박스 컬럼
+	                {
+	                    data: 'id', 
+	                    orderable: false,
+	                    className: 'text-center',
+	                    render: function(data, type, row) {
+	                        return `<input type="hidden" name="id" value="${data || ''}">
+	                                <input class="form-check-input" type="checkbox" name="selectRow">`;
+	                    }
+	                },
+	                {
+	                    data: 'lang',
+	                    render: function(data, type, row) {
+	                        return `<input type="text" class="form-control" name="lang" value="${data || ''}">`;
+	                    }
+	                },
+	                {
+	                    data: 'examName',
+	                    render: function(data, type, row) {
+	                        return `<input type="text" class="form-control" name="examName" value="${data || ''}">`;
+	                    }
+	                },
+	                {
+	                    data: 'score',
+	                    render: function(data, type, row) {
+	                        return `<input type="text" class="form-control" name="score" value="${data || ''}">`;
+	                    }
+	                },
+	                {
+	                    data: 'getDate',
+	                    render: function(data, type, row) {
+	                        return `<input type="date" class="form-control" name="getDate" value="${data || ''}">`;
+	                    }
+	                },
+	                {
+	                    data: 'expDate',
+	                    render: function(data, type, row) {
+	                        return `<input type="date" class="form-control" name="expDate" value="${data || ''}">`;
+	                    }
+	                },	               
+	                {
+	                    data: 'speakLvl',
+	                    render: function(data, type, row) {
+	                        return `<input type="text" class="form-control" name="speakLvl" value="${data || ''}">`;
+	                    }
+	                },	               
+	                {
+	                    data: 'readLvl',
+	                    render: function(data, type, row) {
+	                        return `<input type="text" class="form-control" name="readLvl" value="${data || ''}">`;
+	                    }
+	                },	               
+	                {
+	                    data: 'remark',
+	                    render: function(data, type, row) {
+	                        return `<input type="text" class="form-control" name="remark" value="${data || ''}">`;
+	                    }
+	                },
+	                {
+	                    data: 'attachId',
+	                    orderable: false,
+	                    className: 'text-center',
+	                    render: function(data, type, row) {
+	                        const btnClass = data ? 'btn-success' : 'btn-outline-secondary';
+	                        return `<button type="button" class="btn btn-sm ${btnClass} "><i class="ti ti-file-upload file-upload-btn"></i></button>
+	                        		<input type="hidden" name="attachId">`;
+	                    }
+	                }
+	            ],
+
+	            language: {
+	                emptyTable: "조회된 어학이 없습니다. [어학 추가] 버튼으로 새 항목을 추가할 수 있습니다."
+	            }
+	        });
+	    }
+		
+		// 항목 추가
+		function addNewLang () {
+			
+	        if (!langDataTable) {
+	            alert('먼저 사원을 조회해주세요.');
+	            return;
+	        }
+	        
+	        const newLangRow = {
+	            id: null, // 새 항목이므로 id는 null 입니다.
+	            lang: '',
+	            examName: '',
+	            score: '',
+	            getDate: '',
+	            expDate: '',
+	            speakLvl: '', 
+	            readLvl: '',
+	            remark:'',
+	            attachId: null
+	        };
+	        
+	        langDataTable.row.add(newLangRow).draw(false);
+		}
+		
+		// 선택 삭제
+		function deleteLang () {
+			
+			const checkedRows = $('#langTableBody input[name="selectRow"]:checked');
+	        
+	        if (checkedRows.length === 0) {
+	            alert('삭제할 항목을 먼저 선택해주세요.');
+	            return;
+	        }
+	        
+	        if (confirm(`선택된 ${checkedRows.length}개의 항목을 삭제하시겠습니까?`)) {
+	            
+	            checkedRows.each(function() {
+	                const rowToDelete = $(this).closest('tr');
+	                
+	                langDataTable.row(rowToDelete).remove();
+	            });
+	            
+	            langDataTable.draw(false);
+	        }
+
+		}
+		
+		// 어학 리스트 저장
+		async function saveLang () {
+			 if (!currentPernr) {
+		            alert('먼저 사원을 조회해주세요.');
+		            return;
+		        }
+			 
+			const langDataList = [];
+	        $('#langTableBody tr').each(function(index) {
+	            const row = $(this);
+	            const rowData = {
+	                id: row.find('input[name="id"]').val() || null, 
+	                seq : index + 1 ,
+	                pernr : currentPernr,
+	                lang: row.find('input[name="lang"]').val(),
+	                examName: row.find('input[name="examName"]').val(),
+	                score: row.find('input[name="score"]').val(),
+	                getDate: row.find('input[name="getDate"]').val(),
+	                expDate: row.find('input[name="expDate"]').val() || null,
+	                speakLvl: row.find('input[name="speakLvl"]').val(), 
+	                readLvl: row.find('input[name="readLvl"]').val(), 
+	                remark: row.find('input[name="remark"]').val(),
+	                attachId: row.find('input[name="attachId"]').val()  || null
+	            };
+	            langDataList.push(rowData);
+	        });
+
+	        // 2. 데이터 유효성 검사 (필수 항목 등)
+	        for (let i = 0; i < langDataList.length; i++) {
+	            const item = langDataList[i];
+	            if (!item.lang || !item.examName || !item.score || !item.getDate) {
+	                alert(`${i + 1}번째 행의 필수 항목(외국어명, 시험명, 발급기관, 취득일자)을 모두 입력해주세요.`);
+	                return; 
+	            }
+	        }
+
+	        try {
+	            const response = await fetch(`/hr/employee-lang/${currentPernr}`, {
+	                method: 'PUT',
+	                headers: { 'Content-Type': 'application/json' },
+	                body: JSON.stringify(langDataList)
+	            });
+
+	            if (response.ok) {
+	                alert('성공적으로 저장되었습니다.');
+	                await findDetail(currentPernr);
+
+	            } else {
+	                const errorMessage = await response.text();
+	                alert(`저장에 실패했습니다: ${errorMessage}`);
+	            }
+
+	        } catch (error) {
+	            console.error('저장 중 오류 발생:', error);
+	            alert('저장 중 오류가 발생했습니다.');
+	        }
+		}
+    </script>
+</body>
+</html>

@@ -1847,7 +1847,7 @@ CREATE TABLE ZHR_EMP_CERT (
     ZEXP_DATE       DATE            NULL COMMENT '유효기간',
     ZJOB_REL        VARCHAR(1)      NULL COMMENT '직무 연계 여부 (Y/N)',
     ZREMARK         VARCHAR(200)    NULL COMMENT '비고',
-    ZATTACH_ID      VARCHAR(32)     NULL COMMENT '첨부파일 참조 ID',
+    ZATTACH_ID      VARCHAR(100)     NULL COMMENT '첨부파일 참조 ID',
 
     -- 감사(Audit) 필드
     CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
@@ -1916,3 +1916,92 @@ VALUES
 
 -- 경영팀 (MGMNT)
 ('2010001', 1, '정보시스템감리사', '한국지능정보사회진흥원', '10-001-001', '2018-09-07', NULL, 'Y', NULL, 'system', NULL);
+
+
+CREATE TABLE ZHR_EMP_LANG (
+    -- 기본 키 컬럼 (PK)
+    LANG_ID        BIGINT         NOT NULL AUTO_INCREMENT COMMENT '어학 능력 고유 ID (PK)',
+
+    -- 사원 및 어학 정보
+    PERNR          VARCHAR(10)    NOT NULL COMMENT '사번',
+    ZSEQ           INT            NOT NULL COMMENT '어학 순번',
+    ZLANG          VARCHAR(20)    NOT NULL COMMENT '외국어 명 (영어, 일본어 등)',
+    ZEXAM_NAME     VARCHAR(50)    NOT NULL COMMENT '시험명 (TOEIC, JLPT 등)',
+    ZSCORE         VARCHAR(20)    NOT NULL COMMENT '성적 (문자형으로 통합 저장)',
+    ZGET_DATE      DATE           NOT NULL COMMENT '취득일자',
+    ZEXP_DATE      DATE           NULL COMMENT '유효기간 (선택)',
+    ZSPEAK_LVL     VARCHAR(10)    NULL COMMENT '회화 수준 (하, 중, 상, 원어민 등)',
+    ZREAD_LVL      VARCHAR(10)    NULL COMMENT '독해 수준 (하, 중, 상 등)',
+    ZATTACH_ID     VARCHAR(100)   NULL COMMENT '첨부파일 참조 ID',
+    ZREMARK        VARCHAR(200)   NULL COMMENT '비고',
+
+    -- 감사(Audit) 필드
+    CREATED_AT     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY     VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY     VARCHAR(50)    NULL COMMENT '수정자',
+    
+    -- 기본 키 설정
+    PRIMARY KEY (LANG_ID),
+
+    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 순번)
+    UNIQUE KEY UK_EMP_LANG (PERNR, ZSEQ)
+
+) COMMENT '사원 어학 능력 정보 테이블';
+
+
+INSERT INTO ZHR_EMP_LANG
+(PERNR, ZSEQ, ZLANG, ZEXAM_NAME, ZSCORE, ZGET_DATE, ZEXP_DATE, ZSPEAK_LVL, ZREAD_LVL, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- 재무팀 (FIN)
+('2012011', 1, '영어', 'TOEIC', '880', '2024-03-15', '2026-03-14', '중', '상', 'IR 자료 작성용', 'system', NULL),
+('2012011', 2, '일본어', 'JLPT', 'N2', '2023-12-03', NULL, '중', '상', '일본 투자사 관련 문서 검토', 'system', NULL),
+('2012011', 3, '중국어', 'HSK', '4급', '2025-05-25', '2027-05-24', '하', '중', '기초 회계 용어 가능', 'system', NULL),
+('2023133', 1, '영어', 'TOEIC', '950', '2024-06-12', '2026-06-11', '상', '상', '원래 자격증 테이블에 있던 데이터', 'system', NULL),
+
+-- 마케팅팀 (MKTG)
+('2015022', 1, '영어', 'OPIc', 'IH', '2025-01-20', '2027-01-19', '상', '상', NULL, 'system', NULL),
+('2015022', 2, '일본어', 'JPT', '850', '2024-08-11', NULL, '중', '상', '일본 시장 조사', 'system', NULL),
+('2020023', 1, '영어', 'TOEIC Speaking', 'IM3', '2023-11-05', '2025-11-04', '중', '중', '만료 임박', 'system', NULL),
+('2023053', 1, '중국어', 'HSK', '5급', '2025-02-28', '2027-02-27', '중', '상', NULL, 'system', NULL),
+
+-- 연구소 (RND)
+('2018013', 1, '영어', 'TOEFL iBT', '105', '2023-08-25', '2025-08-24', '상', '상', '만료됨', 'system', NULL),
+('2018013', 2, '일본어', 'JLPT', 'N1', '2022-12-04', NULL, '중', '상', '기술 문서 독해', 'system', NULL),
+('2021002', 1, '영어', 'PMP', 'Pass', '2023-06-17', '2026-06-16', '상', '상', 'PM 자격증 내 어학 증빙', 'system', NULL),
+('2022211', 1, '영어', 'G-TELP Level 2', '75', '2024-03-20', '2026-03-19', '중', '중', NULL, 'system', NULL),
+('2023101', 1, '영어', 'TOEIC', '910', '2025-05-19', '2027-05-18', '상', '상', NULL, 'system', NULL),
+('2024132', 1, '독일어', 'TestDaF', 'TDN 4', '2024-11-10', NULL, '중', '상', '독일 파트너사 협업', 'system', NULL),
+
+-- 생산/품질관리 (PROD/QC)
+('2019112', 1, '영어', '자체평가', 'Level 3', '2023-05-15', NULL, '하', '중', '해외 장비 매뉴얼 독해 가능', 'system', NULL),
+('2021042', 1, '베트남어', 'TCT', 'B2', '2024-08-25', '2026-08-24', '중', '중', '베트남 공장 파견 대비', 'system', NULL),
+('2022052', 1, '영어', 'TOEIC', '750', '2024-02-28', '2026-02-27', '중', '중', NULL, 'system', NULL),
+
+-- 인사팀 (HR)
+('2019113', 1, '영어', 'OPIc', 'IH', '2024-07-20', '2026-07-19', '상', '상', '해외 인력 채용 목적', 'system', NULL),
+('2022043', 1, '일본어', 'JLPT', 'N3', '2025-01-14', NULL, '하', '중', NULL, 'system', NULL),
+('2023212', 1, '영어', 'TOEIC', '800', '2023-08-11', '2025-08-10', '중', '상', '만료됨', 'system', NULL),
+
+-- 영업팀 (SALE)
+('2019101', 1, '영어', 'OPIc', 'IM2', '2024-11-20', '2026-11-19', '중', '중', NULL, 'system', NULL),
+('2019101', 2, '중국어', 'TSC', 'Level 4', '2025-04-10', '2027-04-09', '중', '하', '중화권 영업', 'system', NULL),
+('2022055', 1, '영어', 'OPIc', 'AL', '2024-05-10', '2026-05-09', '원어민', '상', '북미지역 영업 총괄', 'system', NULL),
+('2022055', 2, '스페인어', 'DELE', 'B2', '2023-05-22', NULL, '상', '상', '남미 시장 개척', 'system', NULL),
+('2021032', 1, '영어', '회화', '중급', '2025-04-17', NULL, '중', '중', '자체 회화 능력', 'system', NULL),
+('2023213', 1, '영어', '무역영어 1급', 'Pass', '2024-06-03', NULL, '상', '상', '자격증 연계', 'system', NULL),
+('2023213', 2, '중국어', 'HSK', '6급', '2025-08-01', '2027-07-31', '상', '상', NULL, 'system', NULL),
+('2025001', 1, '일본어', 'BJT', 'J2', '2024-07-12', NULL, '중', '상', '비즈니스 회화 가능', 'system', NULL),
+
+-- 디자인팀 (DSGN)
+('2020121', 1, '영어', 'TOEIC', '920', '2024-07-12', '2026-07-11', '상', '상', '해외 레퍼런스 수집', 'system', NULL),
+('2025002', 1, '프랑스어', 'DELF', 'B1', '2025-04-01', NULL, '중', '중', '유럽 디자인 트렌드 리서치', 'system', NULL),
+
+-- 고객서비스팀 (CS)
+('2021114', 1, '일본어', 'JLPT', 'N2', '2024-10-27', NULL, '중', '상', '일본 고객 응대', 'system', NULL),
+('2022201', 1, '영어', 'OPIc', 'IM1', '2024-01-19', '2026-01-18', '중', '중', NULL, 'system', NULL),
+
+-- 경영팀 (MGMNT)
+('2010001', 1, '영어', 'TOEIC', '985', '2025-09-07', '2027-09-06', '원어민', '원어민', '경영진', 'system', NULL),
+('2010001', 2, '일본어', '회화', '상급', '2025-01-01', NULL, '상', '상', '일본 JV 미팅', 'system', NULL);
+

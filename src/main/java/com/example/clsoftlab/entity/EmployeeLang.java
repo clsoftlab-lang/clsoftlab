@@ -2,7 +2,7 @@ package com.example.clsoftlab.entity;
 
 import java.time.LocalDate;
 
-import com.example.clsoftlab.dto.hr.EmployeeCertRequestDto;
+import com.example.clsoftlab.dto.hr.EmployeeLangRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,12 +20,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ZHR_EMP_CERT")
-public class EmployeeCert extends BaseEntity {
+@Table(name = "ZHR_EMP_LANG")
+public class EmployeeLang extends BaseEntity {
 
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CERT_ID")
+    @Column(name = "LANG_ID")
     private Long id;
 
     @Column(name = "PERNR", nullable = false, length = 10)
@@ -34,14 +34,14 @@ public class EmployeeCert extends BaseEntity {
     @Column(name = "ZSEQ", nullable = false)
     private Integer seq;
 
-    @Column(name = "ZCERT_NAME", nullable = false, length = 100)
-    private String certName;
+    @Column(name = "ZLANG", nullable = false, length = 20)
+    private String lang;
 
-    @Column(name = "ZCERT_ORG", nullable = false, length = 100)
-    private String certOrg;
+    @Column(name = "ZEXAM_NAME", nullable = false, length = 50)
+    private String examName;
 
-    @Column(name = "ZCERT_NO", length = 50)
-    private String certNo;
+    @Column(name = "ZSCORE", nullable = false, length = 20)
+    private String score;
 
     @Column(name = "ZGET_DATE", nullable = false)
     private LocalDate getDate;
@@ -49,24 +49,28 @@ public class EmployeeCert extends BaseEntity {
     @Column(name = "ZEXP_DATE")
     private LocalDate expDate;
 
-    @Column(name = "ZJOB_REL", length = 1)
-    private String jobRel;
+    @Column(name = "ZSPEAK_LVL", length = 10)
+    private String speakLvl;
 
-    @Column(name = "ZREMARK", length = 200)
-    private String remark;
+    @Column(name = "ZREAD_LVL", length = 10)
+    private String readLvl;
 
     @Column(name = "ZATTACH_ID", length = 100)
     private String attachId;
+
+    @Column(name = "ZREMARK", length = 200)
+    private String remark;
     
-    public void update (EmployeeCertRequestDto dto) {
+    public void update (EmployeeLangRequestDto dto) {
     	this.seq = dto.getSeq();
-    	this.certName = dto.getCertName();
-    	this.certOrg = dto.getCertOrg();
-    	this.certNo = dto.getCertNo();
+    	this.lang = dto.getLang();
+    	this.examName = dto.getExamName();
+    	this.score = dto.getScore();
     	this.getDate = dto.getGetDate();
     	this.expDate = dto.getExpDate();
-    	this.jobRel = dto.getJobRel();
-    	this.remark = dto.getRemark();
+    	this.speakLvl = dto.getSpeakLvl();
+    	this.readLvl = dto.getReadLvl();
     	this.attachId = dto.getAttachId();
+    	this.remark = dto.getRemark();
     }
 }

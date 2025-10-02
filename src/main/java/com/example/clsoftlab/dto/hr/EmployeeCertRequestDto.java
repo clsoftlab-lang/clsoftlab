@@ -47,6 +47,6 @@ public class EmployeeCertRequestDto {
     @Size(max = 200, message = "비고는 최대 200자까지 입력 가능합니다.")
     private String remark;
     
-    @Size(max = 32, message = "첨부파일 ID는 최대 32자까지 입력 가능합니다.")
+    @Size(max = 100, message = "첨부파일 ID는 최대 100자까지 입력 가능합니다.")
     private String attachId;
 }

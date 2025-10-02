@@ -5,6 +5,13 @@ spring:
   devtools:
     restart:
       enabled: true
+
+# 용량 제한용
+  servlet:
+    multipart:
+      max-file-size: "10MB"
+      max-request-size: "10MB"
+        
 #  db 생성 전이라면 아래 코드 주석을 해제해서 써주세요.
 #  autoconfigure:
 #    exclude:
@@ -23,3 +30,9 @@ spring:
 encrypt:
   hmac:
     key: "ClSoftLabTestSecretHMACKey!@#$12"
+
+
+# 테스트용 파일 업로드 경로
+file:
+  upload:
+    dir: "${user.dir}/uploads/"
