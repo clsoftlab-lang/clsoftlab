@@ -6,7 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.example.clsoftlab.entity.InsuranceRate;
 
-public interface InsuranceRateSpecs {
+public class InsuranceRateSpecs {
 
 	public static Specification<InsuranceRate> withInsType (String insType) {
 		if (insType == null) {

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.pay.PayItemDetailDto;
@@ -14,6 +15,7 @@ import com.example.clsoftlab.dto.pay.PayItemListDto;
 import com.example.clsoftlab.dto.pay.PayItemRequestDto;
 import com.example.clsoftlab.entity.PayItem;
 import com.example.clsoftlab.repository.pay.PayItemRepository;
+import com.example.clsoftlab.repository.pay.specification.PayItemSpecs;
 
 import jakarta.transaction.Transactional;
 
@@ -33,7 +35,12 @@ public class PayItemService {
 	public Page<PayItemListDto> searchPayItem(String itemName, String itemType, String useYn, int page, int size) {
 	
 		Pageable pageable = PageRequest.of(page, size, Sort.by("itemName"));
-		return payItemRepository.search(itemName, itemType, useYn, pageable).map(i -> modelMapper.map(i, PayItemListDto.class));
+		Specification<PayItem> spec = Specification.not(null);
+		
+		spec = spec.and(PayItemSpecs.withItemName(itemName))
+				.and(PayItemSpecs.withItemType(itemType))
+				.and(PayItemSpecs.withUseYn(useYn));
+		return payItemRepository.findAll(spec,pageable).map(i -> modelMapper.map(i, PayItemListDto.class));
 	}
 	
 	// 항목코드로 검색
@@ -44,6 +51,10 @@ public class PayItemService {
 	// 새로운 급여 항목 추가
 	@Transactional
 	public void addNewPayItem(PayItemRequestDto payItem) {
+		
+		if (payItemRepository.existsById(payItem.getItemCode())) {
+			throw new IllegalStateException("이미 존재하는 itemCode 입니다. itemCode : " + payItem.getItemCode());
+		}
 		
 		payItemRepository.save(modelMapper.map(payItem, PayItem.class));
 		return;
@@ -63,8 +74,18 @@ public class PayItemService {
 	public Page<PayItemListDto> searchDeduct (String itemName, String useYn, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("itemCode"));
 		
-		return payItemRepository.findByItemNameContainingAndUseYnContainingAndItemTypeContaining(itemName, useYn, "DEDUCT", pageable)
+		Specification<PayItem> spec = Specification.not(null);
+		spec = spec.and(PayItemSpecs.withItemName(itemName))
+				.and(PayItemSpecs.withItemType("DEDUCT"))
+				.and(PayItemSpecs.withUseYn(useYn));
+		
+		return payItemRepository.findAll(spec, pageable)
 				.map(i -> modelMapper.map(i, PayItemListDto.class));
 		
+	}
+	
+	// 중복검사
+	public boolean checkOverlap (String itemCode) {
+		return payItemRepository.existsById(itemCode);
 	}
 }

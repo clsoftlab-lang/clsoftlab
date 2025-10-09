@@ -447,9 +447,10 @@
 		    
 		    // --- 서버 작업 시작 ---
 		    try {
-		        const response = await fetch(`/pay/pay-item/detail/${data.itemCode}`);
+		        const response = await fetch(`/pay/pay-item/checkOverlap/${data.itemCode}`);
+						const checkResult = await response.text();
 		        
-		        if (response.ok) {
+		        if (checkResult == 'true') {
 		            alert('이미 사용 중인 항목코드입니다. 다른 코드를 입력해주세요.');
 		            document.querySelector('[name="itemCode"]').focus();
 		            return;
