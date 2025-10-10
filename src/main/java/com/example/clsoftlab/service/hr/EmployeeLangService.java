@@ -18,6 +18,7 @@ import com.example.clsoftlab.dto.hr.EmployeeLangDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeeLangRequestDto;
 import com.example.clsoftlab.entity.EmployeeLang;
 import com.example.clsoftlab.repository.hr.EmployeeLangRepository;
+import com.example.clsoftlab.service.common.FileService;
 
 import jakarta.transaction.Transactional;
 
@@ -27,7 +28,8 @@ public class EmployeeLangService {
 	private final EmployeeLangRepository employeeLangRepository;
 	private final ModelMapper modelMapper;
 	
-	public EmployeeLangService(EmployeeLangRepository employeeLangRepository, ModelMapper modelMapper) {
+	public EmployeeLangService(EmployeeLangRepository employeeLangRepository, ModelMapper modelMapper,
+			FileService fileService) {
 		this.employeeLangRepository = employeeLangRepository;
 		this.modelMapper = modelMapper;
 	}
@@ -89,4 +91,6 @@ public class EmployeeLangService {
 			throw new IllegalArgumentException("순번이 중복되었습니다.");
 		}
 	}
+	
+	
 }

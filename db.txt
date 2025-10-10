@@ -2005,3 +2005,169 @@ VALUES
 ('2010001', 1, '영어', 'TOEIC', '985', '2025-09-07', '2027-09-06', '원어민', '원어민', '경영진', 'system', NULL),
 ('2010001', 2, '일본어', '회화', '상급', '2025-01-01', NULL, '상', '상', '일본 JV 미팅', 'system', NULL);
 
+
+CREATE TABLE ZHR_EMP_CAREER (
+    -- 기본 키 컬럼 (PK)
+    CAREER_ID       BIGINT        NOT NULL AUTO_INCREMENT COMMENT '경력 고유 ID (PK)',
+
+    -- 사원 및 경력 정보
+    PERNR           VARCHAR(10)   NOT NULL COMMENT '사번',
+    ZSEQ            INT           NOT NULL COMMENT '경력 순번',
+    ZCAREER_TYPE    VARCHAR(1)    NOT NULL COMMENT '경력 구분 (I: 사내, E: 사외)',
+    ZCOMP_NAME      VARCHAR(100)  NOT NULL COMMENT '회사명',
+    ZDEPT           VARCHAR(100)  NULL COMMENT '부서명',
+    ZPOSITION       VARCHAR(100)  NOT NULL COMMENT '직무/직책',
+    ZSTART_DATE     DATE          NOT NULL COMMENT '시작일',
+    ZEND_DATE       DATE          NULL COMMENT '종료일',
+    ZPERIOD_MONTH   INT           NULL COMMENT '근무 개월 수 (자동 계산 후 저장)',
+    ZRESIGN_REASON  VARCHAR(100)  NULL COMMENT '퇴사사유',
+    ZATTACH_ID      VARCHAR(100)  NULL COMMENT '첨부파일 참조 ID',
+    ZREMARK         VARCHAR(200)  NULL COMMENT '비고',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)   NULL COMMENT '수정자',
+    
+    -- 기본 키 설정
+    PRIMARY KEY (CAREER_ID),
+
+    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 순번)
+    UNIQUE KEY UK_EMP_CAREER (PERNR, ZSEQ)
+
+) COMMENT '사원 경력 이력 정보 테이블';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_EMP_CAREER
+(PERNR, ZSEQ, ZCAREER_TYPE, ZCOMP_NAME, ZDEPT, ZPOSITION, ZSTART_DATE, ZEND_DATE, ZPERIOD_MONTH, ZRESIGN_REASON, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- 경영팀 (MGMNT)
+('2010001', 1, 'E', '글로벌 컨설팅', '전략컨설팅 본부', '선임 컨설턴트', '2005-03-01', '2009-12-31', 58, '이직', '주요 M&A 프로젝트 수행', 'system', NULL),
+('2010001', 2, 'I', '(주)넥스트코어', '기획조정실', '실장', '2010-01-04', '2015-12-31', 72, NULL, '신사업 기획 총괄', 'system', NULL),
+('2010001', 3, 'I', '(주)넥스트코어', '경영지원본부', '본부장 (상무)', '2016-01-01', '2022-12-31', 84, NULL, '전사 경영관리 총괄', 'system', NULL),
+('2010001', 4, 'I', '(주)넥스트코어', '대표이사', 'CEO', '2023-01-01', NULL, NULL, NULL, '현 재직', 'system', NULL),
+
+-- 재무팀 (FIN)
+('2012011', 1, 'E', '삼정회계법인', '감사 본부', '사원', '2010-01-10', '2011-12-31', 24, '이직', '제조업 회계감사 담당', 'system', NULL),
+('2012011', 2, 'I', '(주)넥스트코어', '재무팀', '대리', '2012-01-02', '2018-12-31', 84, NULL, '결산 및 세무 담당', 'system', NULL),
+('2012011', 3, 'I', '(주)넥스트코어', '재무팀', '과장', '2019-01-01', NULL, NULL, NULL, '팀 리더', 'system', NULL),
+('2023133', 1, 'E', '하나증권', 'IB 사업부', '연구원', '2021-07-01', '2023-05-31', 23, '이직', NULL, 'system', NULL),
+('2023133', 2, 'I', '(주)넥스트코어', '재무팀', '사원', '2023-06-01', NULL, NULL, NULL, 'IR 및 공시 담당', 'system', NULL),
+
+-- 마케팅팀 (MKTG)
+('2015022', 1, 'E', '제일기획', 'AP 2팀', 'AE', '2012-02-01', '2015-01-31', 36, '이직', '디지털 광고 캠페인', 'system', NULL),
+('2015022', 2, 'I', '(주)넥스트코어', '마케팅팀', '대리', '2015-02-02', NULL, NULL, NULL, '글로벌 마케팅 담당', 'system', NULL),
+('2020023', 1, 'I', '(주)넥스트코어', '마케팅팀', '사원', '2020-03-01', NULL, NULL, NULL, '콘텐츠 마케팅', 'system', NULL),
+
+-- 연구소 (RND)
+('2018013', 1, 'E', '네이버랩스', 'AI 연구소', '연구원', '2015-08-01', '2017-12-31', 29, '이직', '자연어 처리 모델 개발', 'system', NULL),
+('2018013', 2, 'I', '(주)넥스트코어', '연구소', '선임연구원', '2018-01-02', '2023-12-31', 72, NULL, '음성인식 기술 개발 리드', 'system', NULL),
+('2018013', 3, 'I', '(주)넥스트코어', '연구소', '책임연구원', '2024-01-01', NULL, NULL, NULL, 'AI 개발 파트장', 'system', NULL),
+('2021002', 1, 'E', 'LG CNS', '솔루션 사업부', '개발자', '2018-07-01', '2021-05-31', 35, '이직', '금융 프로젝트 참여', 'system', NULL),
+('2021002', 2, 'I', '(주)넥스트코어', '연구소', '선임연구원', '2021-06-01', NULL, NULL, NULL, 'PM 역할 수행', 'system', NULL),
+
+-- 인사팀 (HR)
+('2019113', 1, 'E', '사람인 HR', 'HR컨설팅팀', '컨설턴트', '2017-01-15', '2019-10-31', 34, '이직', '조직문화 컨설팅 수행', 'system', NULL),
+('2019113', 2, 'I', '(주)넥스트코어', '인사팀', '대리', '2019-11-01', NULL, NULL, NULL, 'HRD, 교육 담당', 'system', NULL),
+('2023212', 1, 'I', '(주)넥스트코어', '인사팀', '사원', '2023-08-10', NULL, NULL, NULL, '급여 및 평가보상', 'system', NULL),
+
+-- 영업팀 (SALE)
+('2019101', 1, 'E', '코오롱글로벌', '해외영업1팀', '사원', '2017-07-01', '2019-09-30', 27, '이직', '동남아 시장 담당', 'system', NULL),
+('2019101', 2, 'I', '(주)넥스트코어', '영업팀', '대리', '2019-10-01', NULL, NULL, NULL, '중화권 영업 담당', 'system', NULL),
+('2022055', 1, 'E', 'P&G Korea', '영업관리', '매니저', '2018-01-01', '2022-04-30', 52, '이직', '주요 채널 영업 전략 수립', 'system', NULL),
+('2022055', 2, 'I', '(주)넥스트코어', '영업팀', '과장', '2022-05-01', '2025-06-30', 38, NULL, '북미/남미 지역 총괄', 'system', NULL),
+('2022055', 3, 'I', '(주)넥스트코어', '영업본부', '부장', '2025-07-01', NULL, NULL, NULL, '승진', 'system', NULL),
+('2021032', 1, 'I', '(주)넥스트코어', '영업팀', '사원', '2021-03-02', '2024-12-31', 46, NULL, '국내영업 담당', 'system', NULL),
+('2021032', 2, 'I', '(주)넥스트코어', '영업팀', '대리', '2025-01-01', NULL, NULL, NULL, '승진', 'system', NULL),
+
+-- 생산/품질관리 (PROD/QC)
+('2019112', 1, 'I', '(주)넥스트코어', '생산1팀', '사원', '2019-11-01', '2023-04-30', 42, NULL, '공정 관리', 'system', NULL),
+('2019112', 2, 'I', '(주)넥스트코어', '품질관리팀', '대리', '2023-05-01', NULL, NULL, NULL, '부서 이동', 'system', NULL),
+('2021042', 1, 'I', '(주)넥스트코어', '생산2팀', '사원', '2021-04-05', NULL, NULL, NULL, '베트남 공장 파견 예정', 'system', NULL),
+
+-- 디자인팀 (DSGN)
+('2020121', 1, 'E', '코코아 디자인', 'UI/UX팀', '디자이너', '2018-11-01', '2020-11-30', 25, '이직', NULL, 'system', NULL),
+('2020121', 2, 'I', '(주)넥스트코어', '디자인팀', '선임 디자이너', '2020-12-01', NULL, NULL, NULL, 'UI/UX 디자인 리드', 'system', NULL);
+
+
+-- 포상 관리 --
+CREATE TABLE ZHR_EMP_REWARD (
+    -- 기본 키 컬럼 (PK)
+    REWARD_ID       BIGINT         NOT NULL AUTO_INCREMENT COMMENT '포상 고유 ID (PK)',
+
+    -- 사원 및 포상 정보
+    PERNR           VARCHAR(10)    NOT NULL COMMENT '사번',
+    ZSEQ            INT            NOT NULL COMMENT '포상 순번',
+    ZAWARD_DATE     DATE           NOT NULL COMMENT '수여일자',
+    ZAWARD_NAME     VARCHAR(100)   NOT NULL COMMENT '포상명',
+    ZAWARD_TYPE     VARCHAR(1)     NOT NULL COMMENT '포상 종류 (I: 사내, E: 사외)',
+    ZAWARD_ORG      VARCHAR(100)   NOT NULL COMMENT '수여기관',
+    ZREASON         VARCHAR(200)   NOT NULL COMMENT '포상사유',
+    ZCONTENT        VARCHAR(100)   NULL COMMENT '포상내용 (금일봉, 상장 등)',
+    ZATTACH_ID      VARCHAR(100)   NULL COMMENT '첨부파일 참조 ID',
+    ZREMARK         VARCHAR(200)   NULL COMMENT '비고',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)    NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (REWARD_ID),
+
+    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 순번)
+    UNIQUE KEY UK_EMP_REWARD (PERNR, ZSEQ)
+
+) COMMENT '사원 포상 이력 정보 테이블';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_EMP_REWARD
+(PERNR, ZSEQ, ZAWARD_DATE, ZAWARD_NAME, ZAWARD_TYPE, ZAWARD_ORG, ZREASON, ZCONTENT, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- 경영팀 (MGMNT)
+('2010001', 1, '2018-12-15', '올해의 경영인상', 'E', '한국경영인협회', '혁신적인 기업 경영 성과 인정', '상패 및 상금', 'CEO 특별상', 'system', NULL),
+('2010001', 2, '2020-03-03', '창사 10주년 특별 공로상', 'I', '(주)넥스트코어', '회사 발전에 기여한 공로', '상패', NULL, 'system', NULL),
+('2010001', 3, '2023-11-20', '사회공헌상', 'E', '대한상공회의소', '지속적인 사회공헌 및 고용창출 기여', '상장', NULL, 'system', NULL),
+
+-- 재무팀 (FIN)
+('2012011', 1, '2015-07-21', '우수사원', 'I', '(주)넥스트코어', '상반기 재무 결산 조기 완료 및 비용절감 기여', '상장 및 금일봉', NULL, 'system', NULL),
+('2012011', 2, '2022-01-02', '장기근속상 (10년)', 'I', '(주)넥스트코어', '10년 근속 기념', '상패 및 특별휴가 5일', NULL, 'system', NULL),
+('2012011', 3, '2024-01-15', '모범사원', 'I', '(주)넥스트코어', '투철한 주인의식과 성실한 근무태도', '상장', '전사 추천', 'system', NULL),
+('2023133', 1, '2023-12-28', '우수 신입사원', 'I', '(주)넥스트코어', '빠른 업무 습득 및 높은 성장 가능성', '상장 및 상금', NULL, 'system', NULL),
+
+-- 마케팅팀 (MKTG)
+('2015022', 1, '2017-09-05', '프로젝트 성공 포상', 'I', '(주)넥스트코어', '"넥스트 웨이브" 캠페인 성공적 런칭', '상금 200만원', '팀 포상', 'system', NULL),
+('2015022', 2, '2022-11-25', '대한민국 광고대상', 'E', '한국광고총연합회', '디지털 크리에이티브 부문 대상 수상', '트로피', NULL, 'system', NULL),
+('2020023', 1, '2023-05-10', '아이디어 제안상', 'I', '(주)넥스트코어', '콘텐츠 마케팅 효율 개선 방안 제안 채택', '상금 50만원', NULL, 'system', NULL),
+
+-- 연구소 (RND)
+('2018013', 1, '2019-06-30', '특허 등록 포상', 'I', '(주)넥스트코어', '음성인식 관련 핵심 기술 특허 출원', '포상금 500만원', NULL, 'system', NULL),
+('2018013', 2, '2021-12-20', '우수 연구원상', 'I', '(주)넥스트코어', 'AI 기술 개발 성과 기여', '상패 및 금일봉', '연구소장 추천', 'system', NULL),
+('2018013', 3, '2024-05-17', 'IR52 장영실상', 'E', '과학기술정보통신부', 'AI 스피커 기술 상용화 공로', '상장 및 상금', NULL, 'system', NULL),
+('2021002', 1, '2022-04-11', '프로젝트 성공 포상', 'I', '(주)넥스트코어', '차세대 금융 솔루션 프로젝트 조기 완료', '특별 성과급', 'PM 공로 인정', 'system', NULL),
+('2021002', 2, '2024-10-01', '장관 표창', 'E', '산업통상자원부', 'SW 산업 발전 유공', '표창장', NULL, 'system', NULL),
+
+-- 인사팀 (HR)
+('2019113', 1, '2021-08-01', '조직문화 개선 공로상', 'I', '(주)넥스트코어', '리더십 교육 프로그램 성공적 도입 및 운영', '상장 및 금일봉', NULL, 'system', NULL),
+('2019113', 2, '2024-03-25', '강사 경진대회 최우수상', 'I', '(주)넥스트코어', '신입사원 입문 교육 강의 부문', '상장', NULL, 'system', NULL),
+('2023212', 1, '2025-01-20', '업무개선 우수상', 'I', '(주)넥스트코어', '급여 정산 프로세스 자동화 기여', '상금 100만원', NULL, 'system', NULL),
+
+-- 영업팀 (SALE)
+('2019101', 1, '2021-10-08', '이달의 사원', 'I', '(주)넥스트코어', '2021년 3분기 매출 목표 150% 달성', '금일봉', NULL, 'system', NULL),
+('2019101', 2, '2023-01-18', '성과 최우수상', 'I', '(주)넥스트코어', '2022년 연간 개인 매출 실적 1위 달성', '상패 및 특별 성과급', NULL, 'system', NULL),
+('2022055', 1, '2023-07-10', '우수 관리자상', 'I', '(주)넥스트코어', '영업팀 성과 관리 및 팀원 육성 능력 탁월', '상장', '리더십 포상', 'system', NULL),
+('2022055', 2, '2024-12-05', '무역의 날 포상 (100만불 수출의 탑)', 'E', '한국무역협회', '북미 시장 개척 및 수출 증대 기여', '표창장', NULL, 'system', NULL),
+('2021032', 1, '2023-04-14', '고객 만족 최우수상', 'I', '(주)넥스트코어', '2023년 1분기 고객 만족도 조사 1위', '상장 및 상품권', NULL, 'system', NULL),
+('2021032', 2, '2025-04-15', '우수사원', 'I', '(주)넥스트코어', '2025년 1분기 국내영업 목표 초과 달성', '상장 및 금일봉', NULL, 'system', NULL),
+
+-- 생산/품질관리 (PROD/QC)
+('2019112', 1, '2022-10-20', '품질 개선상', 'I', '(주)넥스트코어', '생산 공정 불량률 5% 감소 기여', '상장', NULL, 'system', NULL),
+('2019112', 2, '2024-06-12', '원가절감 아이디어 포상', 'I', '(주)넥스트코어', '자재 관리 프로세스 개선 제안', '상금 50만원', NULL, 'system', NULL),
+('2021042', 1, '2023-06-01', '안전관리 우수사원', 'I', '(주)넥스트코어', '1년간 무재해 달성 및 안전수칙 준수', '상장 및 상품권', NULL, 'system', NULL),
+('2021042', 2, '2025-05-30', '글로벌 인재상', 'I', '(주)넥스트코어', '베트남 공장 성공적 파견 근무 완료', '상패', '해외파견 성과', 'system', NULL),
+
+-- 디자인팀 (DSGN)
+('2020121', 1, '2022-09-01', '우수 디자인상', 'I', '(주)넥스트코어', '신제품 "CORE-X" UI/UX 디자인', '상장 및 금일봉', NULL, 'system', NULL),
+('2020121', 2, '2024-11-11', 'Red Dot Design Award', 'E', 'Red Dot GmbH & Co. KG', '사용자 인터페이스 부문 본상 수상', '트로피', '국제 디자인 어워드', 'system', NULL);
