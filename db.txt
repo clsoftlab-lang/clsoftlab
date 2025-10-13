@@ -2171,3 +2171,255 @@ VALUES
 -- 디자인팀 (DSGN)
 ('2020121', 1, '2022-09-01', '우수 디자인상', 'I', '(주)넥스트코어', '신제품 "CORE-X" UI/UX 디자인', '상장 및 금일봉', NULL, 'system', NULL),
 ('2020121', 2, '2024-11-11', 'Red Dot Design Award', 'E', 'Red Dot GmbH & Co. KG', '사용자 인터페이스 부문 본상 수상', '트로피', '국제 디자인 어워드', 'system', NULL);
+
+
+-- 교육 -- 
+CREATE TABLE ZHR_EMP_EDU (
+    -- 기본 키 컬럼 (PK)
+    EDU_ID          BIGINT          NOT NULL AUTO_INCREMENT COMMENT '교육 이력 고유 ID (PK)',
+
+    -- 사원 및 교육 정보
+    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번',
+    ZSEQ            INT             NOT NULL COMMENT '교육 순번',
+    ZEDU_NAME       VARCHAR(100)    NOT NULL COMMENT '교육과정명',
+    ZEDU_TYPE       VARCHAR(1)      NOT NULL COMMENT '교육유형 (I: 사내, E: 사외)',
+    ZEDU_ORG        VARCHAR(100)    NOT NULL COMMENT '교육기관',
+    ZSTART_DATE     DATE            NOT NULL COMMENT '교육 시작일',
+    ZEND_DATE       DATE            NOT NULL COMMENT '교육 종료일',
+    ZCOMPLETE_YN    VARCHAR(1)      NOT NULL COMMENT '수료 여부 (Y/N)',
+    ZHOUR           INT             NULL COMMENT '총 교육시간',
+    ZCOST           DECIMAL(13, 2)  NULL COMMENT '교육비용',
+    ZATTACH_ID      VARCHAR(100)    NULL COMMENT '첨부파일 참조 ID',
+    ZREMARK         VARCHAR(200)    NULL COMMENT '비고',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (EDU_ID),
+
+    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 순번)
+    UNIQUE KEY UK_EMP_EDU (PERNR, ZSEQ)
+
+) COMMENT '사원 교육 이력 정보 테이블';
+
+INSERT INTO ZHR_EMP_EDU
+(PERNR, ZSEQ, ZEDU_NAME, ZEDU_TYPE, ZEDU_ORG, ZSTART_DATE, ZEND_DATE, ZCOMPLETE_YN, ZHOUR, ZCOST, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- 경영팀 (MGMNT)
+('2010001', 1, '차세대 리더십 아카데미', 'E', '한국리더십센터', '2019-05-10', '2019-05-12', 'Y', 24, 1500000, '임원 추천 과정', 'system', NULL),
+('2010001', 2, 'ESG 경영 전략 과정', 'E', '한국경영인협회', '2022-08-22', '2022-08-24', 'Y', 16, 2000000, NULL, 'system', NULL),
+
+-- 재무팀 (FIN)
+('2012011', 1, 'IFRS 국제회계기준 실무', 'E', '한국공인회계사회', '2016-04-18', '2016-04-20', 'Y', 24, 800000, NULL, 'system', NULL),
+('2012011', 2, '법인세 세무조정 실무', 'E', '삼일회계법인', '2021-02-15', '2021-02-17', 'Y', 24, 950000, '팀장 추천', 'system', NULL),
+('2012011', 3, '데이터 분석을 위한 고급 Excel', 'I', '(주)넥스트코어', '2023-09-04', '2023-09-05', 'Y', 16, NULL, '전사 공통 교육', 'system', NULL),
+('2023133', 1, '신입사원 OJT 교육', 'I', '(주)넥스트코어', '2023-07-01', '2023-09-30', 'Y', 240, NULL, '인턴십 연계', 'system', NULL),
+('2023133', 2, '회계 기초 및 전표처리 실무', 'I', '내부교육센터', '2023-10-16', '2023-10-20', 'Y', 40, NULL, '필수 직무 교육', 'system', NULL),
+
+-- 마케팅팀 (MKTG)
+('2015022', 1, '디지털 마케팅 전문가 과정', 'E', '패스트캠퍼스', '2018-03-12', '2018-03-16', 'Y', 40, 1200000, '국비지원', 'system', NULL),
+('2015022', 2, 'Google Analytics 마스터 과정', 'E', '데이터사이언스스쿨', '2021-10-25', '2021-10-27', 'Y', 24, 700000, NULL, 'system', NULL),
+('2015022', 3, '개인정보보호교육 (온라인)', 'I', '내부교육센터', '2024-05-20', '2024-05-20', 'Y', 2, NULL, '법정의무교육', 'system', NULL),
+('2020023', 1, '콘텐츠 마케팅 기획 및 제작', 'I', '내부교육센터', '2022-02-07', '2022-02-09', 'Y', 24, NULL, NULL, 'system', NULL),
+('2020023', 2, '직장 내 성희롱 예방 교육 (온라인)', 'I', '내부교육센터', '2024-11-01', '2024-11-01', 'N', 1, NULL, '미이수', 'system', NULL),
+
+-- 연구소 (RND)
+('2018013', 1, '머신러닝/딥러닝 입문', 'E', '멀티캠퍼스', '2019-01-14', '2019-01-18', 'Y', 40, 1100000, '직무 역량 강화', 'system', NULL),
+('2018013', 2, '프로젝트 관리 전문가(PMP) 양성 과정', 'E', '한국프로젝트경영협회', '2022-07-11', '2022-07-15', 'Y', 40, 1800000, NULL, 'system', NULL),
+('2018013', 3, '클라우드 아키텍처 설계', 'E', 'AWS 공인 교육센터', '2024-02-19', '2024-02-23', 'Y', 40, 2200000, '팀장 추천', 'system', NULL),
+('2021002', 1, 'Java 고급 프로그래밍', 'I', '내부교육센터', '2021-11-08', '2021-11-12', 'Y', 40, NULL, NULL, 'system', NULL),
+('2021002', 2, '정보보안 전문가 과정', 'E', '한국정보보호교육센터', '2023-08-07', '2023-08-11', 'Y', 40, 1300000, '필수 직무 교육', 'system', NULL),
+
+-- 인사팀 (HR)
+('2019113', 1, '성과관리를 위한 평가 및 보상 실무', 'E', '한국HRD교육센터', '2020-09-21', '2020-09-23', 'Y', 24, 850000, NULL, 'system', NULL),
+('2019113', 2, '핵심인재 발굴 및 육성 전략', 'E', '한국생산성본부', '2023-03-20', '2023-03-22', 'Y', 24, 900000, NULL, 'system', NULL),
+('2023212', 1, '개정 노동법 및 노무관리 실무', 'E', '중앙경제HR교육원', '2024-07-22', '2024-07-23', 'Y', 16, 550000, '필수 역량 교육', 'system', NULL),
+
+-- 영업팀 (SALE)
+('2019101', 1, '전략적 영업 협상 스킬', 'E', '한국세일즈코칭센터', '2020-02-10', '2020-02-11', 'Y', 16, 600000, NULL, 'system', NULL),
+('2019101', 2, '고객관계관리(CRM) 활용 전략', 'I', '내부교육센터', '2022-06-13', '2022-06-14', 'Y', 16, NULL, '전사 공통 교육', 'system', NULL),
+('2022055', 1, '관리자를 위한 코칭 리더십', 'I', '(주)넥스트코어', '2022-11-14', '2022-11-16', 'Y', 24, NULL, '승진자 교육', 'system', NULL),
+('2022055', 2, '해외시장 개척 및 수출 실무', 'E', '한국무역협회', '2024-04-08', '2024-04-10', 'Y', 24, 750000, NULL, 'system', NULL),
+('2021032', 1, '세일즈 프리젠테이션 스킬 향상', 'I', '내부교육센터', '2022-05-16', '2022-05-17', 'N', 16, NULL, '개인사유로 미수료', 'system', NULL),
+('2021032', 2, '고객 불만 응대 및 관리', 'E', '한국서비스진흥협회', '2024-08-19', '2024-08-20', 'Y', 16, 500000, NULL, 'system', NULL),
+
+-- 생산/품질관리 (PROD/QC)
+('2019112', 1, '6시그마 GB(Green Belt) 과정', 'E', '한국표준협회', '2021-06-21', '2021-06-25', 'Y', 40, 1000000, '직무 역량 강화', 'system', NULL),
+('2019112', 2, 'ISO 9001 품질경영시스템 실무', 'E', 'KMA 한국능률협회', '2023-11-27', '2023-11-29', 'Y', 24, 700000, '필수 교육', 'system', NULL),
+('2021042', 1, '산업안전보건교육', 'I', '내부교육센터', '2022-03-07', '2022-03-07', 'Y', 8, NULL, '법정의무교육', 'system', NULL),
+('2021042', 2, '스마트팩토리 구축 및 이해', 'E', '한국인더스트리4.0협회', '2024-09-23', '2024-09-25', 'Y', 24, 880000, NULL, 'system', NULL),
+
+-- 디자인팀 (DSGN)
+('2020121', 1, 'Figma 활용 UI/UX 디자인 실무', 'E', '패스트캠퍼스', '2021-04-05', '2021-04-09', 'Y', 40, 900000, '팀장 추천', 'system', NULL),
+('2020121', 2, '사용자 경험(UX) 리서치 방법론', 'E', '한국HCI학회', '2023-10-10', '2023-10-12', 'Y', 24, 750000, NULL, 'system', NULL);
+
+
+-- 평가 마스터 --
+CREATE TABLE ZHR_EVAL_RESULT (
+    -- 기본 키 컬럼 (PK)
+    EVAL_ID         BIGINT          NOT NULL AUTO_INCREMENT COMMENT '평가 마스터 고유 ID (PK)',
+    
+    -- 평가 식별 정보
+    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번',
+    ZYEAR           VARCHAR(4)      NOT NULL COMMENT '평가 연도',
+    ZSEQ            VARCHAR(2)      NOT NULL COMMENT '차수 (01:상반기, 02:하반기 등)',
+
+    -- 평가 상세 내용
+    ZEV_TYPE        VARCHAR(2)      NOT NULL COMMENT '평가 유형 (RG:정기, SP:수시 등)',
+    ZTOTAL_SCORE    INT             NOT NULL COMMENT '총점',
+    ZGRADE          VARCHAR(2)      NOT NULL COMMENT '등급 (A, B, C 등)',
+    ZREVIEWER       VARCHAR(10)     NOT NULL COMMENT '최종 평가자 사번',
+    ZCOMMENT        VARCHAR(255)    NULL COMMENT '평가 총평',
+    
+	VERSION         BIGINT          NOT NULL DEFAULT 0 COMMENT '낙관적 락을 위한 버전 관리 필드',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (EVAL_ID),
+
+    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 연도 + 차수)
+    UNIQUE KEY UK_EMP_EVAL (PERNR, ZYEAR, ZSEQ)
+
+) COMMENT '사원 평가 마스터 정보 테이블';
+
+-- 항목별 상세 점수 --
+CREATE TABLE ZHR_EVAL_DETAIL (
+    -- 기본 키 컬럼 (PK)
+    DETAIL_ID       BIGINT          NOT NULL AUTO_INCREMENT COMMENT '평가 상세 고유 ID (PK)',
+
+    -- 평가 식별 정보 (FK)
+    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번',
+    ZYEAR           VARCHAR(4)      NOT NULL COMMENT '평가 연도',
+    ZSEQ            VARCHAR(2)      NOT NULL COMMENT '평가 차수',
+    ZEV_TYPE        VARCHAR(2)      NOT NULL COMMENT '평가 유형' ,
+
+    -- 항목별 상세 내용
+    ZITEM_CD        VARCHAR(10)     NOT NULL COMMENT '평가 항목 코드',
+    ZITEM_NM        VARCHAR(100)    NOT NULL COMMENT '평가 항목명',
+    ZPOINT          INT             NOT NULL COMMENT '항목별 점수',
+    ZCOMMENT        VARCHAR(255)    NULL COMMENT '항목별 코멘트',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (DETAIL_ID),
+
+    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 연도 + 차수 + 항목코드)
+    UNIQUE KEY UK_EMP_EVAL_DETAIL (PERNR, ZYEAR, ZSEQ, ZITEM_CD)
+
+) COMMENT '사원 평가 항목별 상세 점수 테이블';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_EVAL_RESULT
+(PERNR, ZYEAR, ZSEQ, ZEV_TYPE, ZTOTAL_SCORE, ZGRADE, ZREVIEWER, ZCOMMENT, CREATED_BY, UPDATED_BY)
+VALUES
+-- 2012011 (재무팀)
+('2012011', '2023', '02', 'RG', 94, 'A', '2010001', '최고 수준의 성과를 달성했으며, 팀에 대한 기여도가 매우 높음.', 'system', NULL),
+('2012011', '2024', '01', 'RG', 91, 'A', '2010001', '지속적으로 탁월한 성과를 보여주고 있어 팀의 귀감이 됨.', 'system', NULL),
+
+-- 2015022 (마케팅팀)
+('2015022', '2023', '02', 'RG', 88, 'B', '2010001', '전반적으로 우수한 성과를 보였으나, 리더십 역량 개발이 필요함.', 'system', NULL),
+('2015022', '2024', '01', 'RG', 92, 'A', '2010001', '마케팅 전략 수립 및 실행 능력이 매우 탁월함.', 'system', NULL),
+
+-- 2018013 (연구소)
+('2018013', '2023', '02', 'RG', 96, 'A', '2010001', '뛰어난 문제 해결 능력으로 핵심 기술 과제를 성공적으로 완수함.', 'system', NULL),
+
+-- 2019101 (영업팀)
+('2019101', '2023', '02', 'RG', 85, 'B', '2022055', '목표 달성률은 우수하나, 팀워크 증진에 더 많은 노력이 필요함.', 'system', NULL),
+('2019101', '2024', '01', 'RG', 78, 'C', '2022055', '성과가 기대에 다소 미치지 못했음. 분발이 요구됨.', 'system', NULL),
+
+-- 2019113 (인사팀)
+('2019113', '2023', '02', 'RG', 90, 'A', '2010001', '인사 제도 개선 프로젝트를 성공적으로 이끌었음.', 'system', NULL),
+
+-- 2020023 (마케팅팀)
+('2020023', '2024', '01', 'RG', 68, 'D', '2015022', '업무 책임감 및 성과 개선이 시급함. 면담 및 코칭 예정.', 'system', NULL),
+
+-- 2021002 (연구소)
+('2021002', '2024', '01', 'RG', 89, 'B', '2018013', '기술 전문성은 뛰어나나, 동료와의 협업에 더 신경 쓸 필요가 있음.', 'system', NULL),
+
+-- 2023133 (재무팀)
+('2023133', '2024', '01', 'RG', 82, 'B', '2012011', '신입사원임에도 불구하고 업무 습득 속도가 빠르고 책임감이 강함.', 'system', NULL);
+
+-- 더미 데이터 --
+INSERT INTO ZHR_EVAL_DETAIL
+(PERNR, ZYEAR, ZSEQ, ZEV_TYPE, ZITEM_CD, ZITEM_NM, ZPOINT, ZCOMMENT, CREATED_BY, UPDATED_BY)
+VALUES
+-- 2012011 (재무팀) / 2023년 하반기 / 총점: 94
+('2012011', '2023', '02', 'RG', 'ATTITUDE', '책임감', 20, '업무 마감 기한을 항상 준수하며, 결과물의 완성도가 높음.', 'system', NULL),
+('2012011', '2023', '02', 'RG', 'PROB_SOLV', '문제해결능력', 29, '복잡한 회계 이슈에 대해 명확한 해결책을 제시함.', 'system', NULL),
+('2012011', '2023', '02', 'RG', 'COOP', '협업', 18, '타 부서와의 협업에 적극적으로 참여함.', 'system', NULL),
+('2012011', '2023', '02', 'RG', 'LEADERSHIP', '리더십', 27, '팀 내 주니어 사원들의 멘토 역할을 훌륭히 수행함.', 'system', NULL),
+
+-- 2012011 (재무팀) / 2024년 상반기 / 총점: 91
+('2012011', '2024', '01', 'RG', 'ATTITUDE', '책임감', 19, '주어진 과업에 대해 높은 책임감을 보임.', 'system', NULL),
+('2012011', '2024', '01', 'RG', 'PROB_SOLV', '문제해결능력', 28, '데이터 기반의 논리적인 문제 해결 능력이 탁월함.', 'system', NULL),
+('2012011', '2024', '01', 'RG', 'COOP', '협업', 18, '원활한 커뮤니케이션으로 팀워크에 기여함.', 'system', NULL),
+('2012011', '2024', '01', 'RG', 'LEADERSHIP', '리더십', 26, '팀의 목표 달성을 위해 주도적인 역할을 함.', 'system', NULL),
+
+-- 2015022 (마케팅팀) / 2023년 하반기 / 총점: 88
+('2015022', '2023', '02', 'RG', 'ATTITUDE', '책임감', 18, '캠페인 결과에 대해 책임감 있는 모습을 보임.', 'system', NULL),
+('2015022', '2023', '02', 'RG', 'PROB_SOLV', '문제해결능력', 27, '데이터 분석을 통해 마케팅 성과 개선점을 도출함.', 'system', NULL),
+('2015022', '2023', '02', 'RG', 'COOP', '협업', 19, '유관부서와의 협업이 원활함.', 'system', NULL),
+('2015022', '2023', '02', 'RG', 'LEADERSHIP', '리더십', 24, '리더십 발휘에 있어 좀 더 적극적인 자세가 필요함.', 'system', NULL),
+
+-- 2015022 (마케팅팀) / 2024년 상반기 / 총점: 92
+('2015022', '2024', '01', 'RG', 'ATTITUDE', '책임감', 20, '담당 프로젝트를 끝까지 책임지고 성공적으로 마무리함.', 'system', NULL),
+('2015022', '2024', '01', 'RG', 'PROB_SOLV', '문제해결능력', 28, '새로운 마케팅 채널을 발굴하여 성과를 창출함.', 'system', NULL),
+('2015022', '2024', '01', 'RG', 'COOP', '협업', 18, '팀원들과의 정보 공유가 활발함.', 'system', NULL),
+('2015022', '2024', '01', 'RG', 'LEADERSHIP', '리더십', 26, '팀 프로젝트에서 리더 역할을 성공적으로 수행함.', 'system', NULL),
+
+-- 2018013 (연구소) / 2023년 하반기 / 총점: 96
+('2018013', '2023', '02', 'RG', 'ATTITUDE', '책임감', 20, '높은 수준의 책임감으로 연구 과제를 완수함.', 'system', NULL),
+('2018013', '2023', '02', 'RG', 'PROB_SOLV', '문제해결능력', 30, '기존에 해결하지 못했던 기술적 난제를 해결함.', 'system', NULL),
+('2018013', '2023', '02', 'RG', 'COOP', '협업', 18, '동료 연구원들과의 기술 공유 및 협력이 우수함.', 'system', NULL),
+('2018013', '2023', '02', 'RG', 'LEADERSHIP', '리더십', 28, '핵심 프로젝트를 리딩하며 뛰어난 역량을 보여줌.', 'system', NULL),
+
+-- 2019101 (영업팀) / 2023년 하반기 / 총점: 85
+('2019101', '2023', '02', 'RG', 'ATTITUDE', '책임감', 18, '영업 목표 달성을 위해 노력하는 자세가 돋보임.', 'system', NULL),
+('2019101', '2023', '02', 'RG', 'PROB_SOLV', '문제해결능력', 26, '고객 불만 사항에 대해 신속하게 대응함.', 'system', NULL),
+('2019101', '2023', '02', 'RG', 'COOP', '협업', 15, '개인 성과에 집중하는 경향이 있어 팀워크 개선이 필요.', 'system', NULL),
+('2019101', '2023', '02', 'RG', 'LEADERSHIP', '리더십', 26, '영업 전략 수립 시 주도적인 의견을 제시함.', 'system', NULL),
+
+-- 2019101 (영업팀) / 2024년 상반기 / 총점: 78
+('2019101', '2024', '01', 'RG', 'ATTITUDE', '책임감', 16, '업무에 대한 주인의식이 다소 부족함.', 'system', NULL),
+('2019101', '2024', '01', 'RG', 'PROB_SOLV', '문제해결능력', 24, '반복되는 문제에 대한 근본적인 해결 노력이 미흡함.', 'system', NULL),
+('2019101', '2024', '01', 'RG', 'COOP', '협업', 15, '팀원과의 커뮤니케이션을 늘릴 필요가 있음.', 'system', NULL),
+('2019101', '2024', '01', 'RG', 'LEADERSHIP', '리더십', 23, '자기주도적인 업무 수행 능력을 키워야 함.', 'system', NULL),
+
+-- 2019113 (인사팀) / 2023년 하반기 / 총점: 90
+('2019113', '2023', '02', 'RG', 'ATTITUDE', '책임감', 19, '맡은 업무는 반드시 기한 내에 완료함.', 'system', NULL),
+('2019113', '2023', '02', 'RG', 'PROB_SOLV', '문제해결능력', 27, '인사 관련 이슈 발생 시 합리적인 대안을 제시함.', 'system', NULL),
+('2019113', '2023', '02', 'RG', 'COOP', '협업', 18, '현업 부서와의 소통 능력이 뛰어남.', 'system', NULL),
+('2019113', '2023', '02', 'RG', 'LEADERSHIP', '리더십', 26, '후배 사원들에게 좋은 멘토가 되어주고 있음.', 'system', NULL),
+
+-- 2020023 (마케팅팀) / 2024년 상반기 / 총점: 68
+('2020023', '2024', '01', 'RG', 'ATTITUDE', '책임감', 12, '업무 지시 사항을 자주 누락하며, 마감 기한을 지키지 못함.', 'system', NULL),
+('2020023', '2024', '01', 'RG', 'PROB_SOLV', '문제해결능력', 20, '문제 발생 시 대처 능력이 미흡함.', 'system', NULL),
+('2020023', '2024', '01', 'RG', 'COOP', '협업', 16, '팀원들과의 협업에 보다 적극적인 태도가 필요함.', 'system', NULL),
+('2020023', '2024', '01', 'RG', 'LEADERSHIP', '리더십', 20, '업무의 주도성이 부족하고 지시에만 의존하는 경향이 있음.', 'system', NULL),
+
+-- 2021002 (연구소) / 2024년 상반기 / 총점: 89
+('2021002', '2024', '01', 'RG', 'ATTITUDE', '책임감', 19, '담당 개발 파트에 대한 책임감이 강함.', 'system', NULL),
+('2021002', '2024', '01', 'RG', 'PROB_SOLV', '문제해결능력', 29, '높은 기술 이해도를 바탕으로 버그 수정 및 성능 개선에 기여.', 'system', NULL),
+('2021002', '2024', '01', 'RG', 'COOP', '협업', 14, '개인 역량은 뛰어나나, 동료와의 소통 방식 개선이 필요함.', 'system', NULL),
+('2021002', '2024', '01', 'RG', 'LEADERSHIP', '리더십', 27, '자신이 맡은 기술 분야에서 리더 역할을 수행함.', 'system', NULL),
+
+-- 2023133 (재무팀) / 2024년 상반기 / 총점: 82
+('2023133', '2024', '01', 'RG', 'ATTITUDE', '책임감', 18, '업무에 대한 열의와 책임감이 높음.', 'system', NULL),
+('2023133', '2024', '01', 'RG', 'PROB_SOLV', '문제해결능력', 24, '아직 경험이 부족하지만 문제를 해결하려는 의지가 강함.', 'system', NULL),
+('2023133', '2024', '01', 'RG', 'COOP', '협업', 17, '선배들의 조언을 잘 경청하고 팀에 적응하려 노력함.', 'system', NULL),
+('2023133', '2024', '01', 'RG', 'LEADERSHIP', '리더십', 23, '향후 성장 가능성이 기대됨.', 'system', NULL);
+
