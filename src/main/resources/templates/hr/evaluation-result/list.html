@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인사 프로파일 – 평가 관리</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+    <div id="global-loader">
+        <div class="page-loader"></div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">사원 정보 조회</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchForm">
+                            <div class="row align-items-end">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사번</label>
+                                        <input type="text" class="form-control" name="pernr" placeholder="사번을 입력하세요">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>이름</label>
+                                        <input type="text" class="form-control" name="name" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>소속 / 직책</label>
+                                        <input type="text" class="form-control" name="deptAndPos" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-flex justify-content-end gap-2">
+                                     <button type="button" class="btn btn-primary w-100" onclick="searchEvaluationResult()"><i class="ti ti-search me-1"></i>조회</button>
+                                     <button type="reset" class="btn btn-outline-secondary w-100" id="searchResetBtn"><i class="ti ti-refresh me-1"></i>초기화</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="editDiv" style="display: none;">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">평가 이력</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover datatable" id="result-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 50px;" class="text-center">선택</th>
+                                            <th class="text-center">평가연도 <span class="text-danger">*</span></th>
+                                            <th class="text-center">평가차수 <span class="text-danger">*</span></th>
+                                            <th class="text-center">평가유형 <span class="text-danger">*</span></th>
+                                            <th class="text-center">총점</th>
+                                            <th class="text-center">등급</th>
+                                            <th class="text-center">평가자 <span class="text-danger">*</span></th>
+                                            <th class="text-center">평가총평 <span class="text-danger">*</span></th>
+                                            <th class="text-center">상세보기</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="resultTableBody">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end">
+		                    <div class="d-flex gap-2">
+	                            <button type="button" class="btn btn-outline-primary" onclick="addNewResult()"><i class="ti ti-plus me-1"></i>평가 추가</button>
+	                            <button type="button" class="btn btn-outline-danger" onclick="deleteResult()"><i class="ti ti-trash me-1"></i>선택 삭제</button>
+	                            <button type="button" class="btn btn-primary" onclick="saveResult()"><i class="ti ti-device-floppy me-1"></i>전체 저장</button>
+		                    </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="evalDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="evalDetailModalLabel">평가 상세 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>항목별 평가</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>평가항목명</th>
+                                    <th style="width: 100px;" class="text-center">배점</th>
+                                    <th style="width: 100px;" class="text-center">점수</th>
+                                    <th>피드백</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                    <hr>
+                    <h6>최종 의견</h6>
+                    <textarea class="form-control" id="finalOpinionText" rows="4" readonly></textarea>
+                </div>
+                <div class="modal-footer">
+                	<div class="d-flex justify-content-end">
+                		<div class="d-flex gap-2">
+		                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+		                    <button type="button" class="btn btn-primary" onclick="saveDetail()">저장</button>
+                		</div>
+                	</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/assets/js/script.js"></script>
+    <script type="text/javascript">
+    let resultDataTable;
+	let currentPernr = null; 
+	let currentResultId = null;
+	
+	 const evalItemDefinitions = {
+		        'ATTITUDE':  { order: 1, name: '책임감',        weight: 20 },
+		        'PROB_SOLV': { order: 2, name: '문제해결능력',    weight: 30 },
+		        'COOP':      { order: 3, name: '협업',          weight: 20 },
+		        'LEADERSHIP':{ order: 4, name: '리더십',        weight: 30 }
+		    };
+    
+    document.addEventListener('DOMContentLoaded', function () {
+    	$("#searchResetBtn").on('click', function() {
+            $("#editDiv").hide();
+            currentPernr = null; // 작업 사번 초기화
+            
+            if (resultDataTable) {
+            	resultDataTable.search('').draw(); // DataTables 내부 검색어 및 필터 초기화
+            	resultDataTable.clear().draw();
+            }
+	        });
+    	
+    	// 상세보기
+    	$('#resultTableBody').on('click', '.detail-btn', function() {
+            const resultId = $(this).data('id');
+            if (resultId) {
+                showDetailModal(resultId);
+            }
+        });
+        
+    });
+    
+    function showEditDiv() {
+        $("#editDiv").show();
+    }
+    
+ 	// [조회]버튼 클릭시 상세 정보 확인
+	async function searchEvaluationResult() {
+        const searchForm = document.getElementById('searchForm');
+        const pernr = searchForm.querySelector('[name="pernr"]').value;
+
+        // 사번 입력 여부 확인
+        if (!pernr || !pernr.trim()) {
+            alert('조회할 사번을 입력해주세요.');
+            return;
+        }
+        
+        await findDetail(pernr);
+        
+    }
+ 	
+	// 수정 모달창 데이터 불러오기.
+	async function findDetail(pernr) {
+
+        if (!pernr) {
+            alert('먼저 조회할 사원를 선택해주세요.');
+            return;
+        }
+        
+        if (!resultDataTable) { 
+	        initializeDataTable(); // 최초 한 번만 DataTables 초기화
+	    }
+
+        try {
+            const response = await fetch(`/hr/evaluation-result/${pernr}`);
+            if (!response.ok) {
+                throw new Error('평가 목록을 불러오는 데 실패했습니다.');
+            }
+            const pageData = await response.json();
+            const items = pageData.content;
+
+
+            if (resultDataTable) {
+	            resultDataTable.clear().rows.add(items).draw();
+	        }
+            
+            currentPernr = pernr;
+            showEditDiv();
+	    } catch (error) {
+	        console.error(error);
+	    }
+	}
+
+	//  테이블 초기화 함수
+	function initializeDataTable() {
+		
+		resultDataTable = $('#result-table').DataTable({
+	        destroy: true, // 기존 테이블이 있다면 파괴하고 새로 생성
+	        searching: true,
+	        lengthChange: true,
+	        pageLength: 30,
+	        info: true,
+	        
+	        // 서버에서 받은 JSON 데이터의 키와 테이블 컬럼을 매핑
+	        columns: [
+	            // '선택' 체크박스 컬럼
+	            {
+	                data: 'id', 
+	                orderable: false,
+	                className: 'text-center',
+	                render: function(data, type, row) {
+	                    return `<input type="hidden" name="id" value="${data || ''}">
+	                            <input class="form-check-input" type="checkbox" name="selectRow">`;
+	                }
+	            },
+	            {
+	                data: 'year',
+	                render: function(data, type, row) {
+	                    return `<input type="text" class="form-control" name="year" value="${data || ''}" >`;
+	                }
+	            },	               
+	            {
+	                data: 'seq',
+	                render: function(data, type, row) {
+	                	const isH1 = data === '01';
+                        const isH2 = data === '02';
+	                    return `
+	                    <select class="form-select" name="seq">
+                        	<option value="01" ${isH1 ? 'selected' : ''}>상반기</option>
+                        	<option value="02" ${isH2 ? 'selected' : ''}>하반기</option>
+                    	</select>`;
+	                }
+	            },	               
+	            {
+	                data: 'evType',
+	                render: function(data, type, row) {
+	                	const isRegular = data === 'RG';
+                        const isSpecial = data === 'SP';
+                        const isExtra = data === 'EX';
+                        return `
+                        <select class="form-select" name="evType">
+                            <option value="RG" ${isRegular ? 'selected' : ''}>정기</option>
+                            <option value="SP" ${isSpecial ? 'selected' : ''}>수시</option>
+                            <option value="EX" ${isExtra ? 'selected' : ''}>특별</option>
+                        </select>`;
+	                }
+	            },
+	            {
+	                data: 'totalScore',
+	                render: function(data, type, row) {
+	                    return `<input type="number" class="form-control" name="totalScore" value="${data}" readonly>`;
+	                }
+	            },
+	            {
+	                data: 'grade',
+	                render: function(data, type, row) {
+	                    return `<input type="text" class="form-control" name="grade" value="${data || ''}" readonly>`;
+	                }
+	            },
+	            {
+	                data: 'reviewer',
+	                render: function(data, type, row) {
+	                    return `<input type="text" class="form-control" name="reviewer" value="${data || ''}" >`;
+	                }
+	            },
+	            {
+	                data: 'comment',
+	                render: function(data, type, row) {
+	                    return `<input type="text" class="form-control" name="comment" value="${data || ''}" >`;
+	                }
+	            },
+	            {
+	                data: 'id',
+	                orderable: false,
+	                className: 'text-center',
+	                render: function(data, type, row) {
+	                    return `<button type="button" class="btn btn-sm btn-primary detail-btn" data-id="${data}">상세보기</button>`;
+	                }
+	            }
+	        ],
+	        language: {
+	            emptyTable: "조회된 평가 목록이 없습니다. [평가 추가] 버튼으로 새 항목을 추가할 수 있습니다."
+	        }
+	    });
+	}
+	
+	// [교육 추가] 버튼 클릭 시, 테이블에 새로운 행을 추가합니다.
+    function addNewResult() {
+        if (!resultDataTable) {
+            alert('먼저 사원을 조회해주세요.');
+            return;
+        }
+        
+        const currentYear = new Date().getFullYear().toString();
+        
+        resultDataTable.row.add({
+            id: null,
+            year: currentYear,
+            seq: '01',      
+            evType: 'RG',
+            totalScore: '0',
+            grade: 'D',
+            reviewer: '',
+            comment: '',
+        }).draw(false); 
+    }
+ 	
+    // [선택 삭제] 버튼 클릭 시, 체크된 행을 테이블에서 삭제합니다.
+    function deleteResult() {
+        const checkedRows = $('#resultTableBody input[name="selectRow"]:checked');
+        
+        if (checkedRows.length === 0) {
+            alert('삭제할 항목을 먼저 선택해주세요.');
+            return;
+        }
+        
+        if (confirm(`선택된 ${checkedRows.length}개의 평가 항목을 삭제하시겠습니까?`)) {
+            checkedRows.each(function() {
+                resultDataTable.row($(this).closest('tr')).remove();
+            });
+            resultDataTable.draw(false); 
+        }
+    }
+    
+ 	// [전체 저장] 버튼 클릭 시, 테이블의 모든 데이터를 서버에 전송합니다.
+	async function saveResult() {
+		 if (!currentPernr) {
+            alert('먼저 사원을 조회해주세요.');
+            return;
+        }
+		 
+		const resultDataList = [];
+		let isValid = true; 
+		
+        $('#resultTableBody tr').each(function(index) {
+        	 if (!isValid) return;
+
+             const row = $(this);
+             
+            const rowData = {
+            		id: row.find('input[name="id"]').val() || null,
+                    pernr: currentPernr,
+                    year: row.find('input[name="year"]').val(),
+                    seq: row.find('select[name="seq"]').val(),
+                    evType: row.find('select[name="evType"]').val(),
+                    totalScore: row.find('input[name="totalScore"]').val(),
+                    grade: row.find('input[name="grade"]').val(),
+                    reviewer: row.find('input[name="reviewer"]').val(),
+                    comment: row.find('input[name="comment"]').val()
+            };
+            
+            // 필수 입력 항목 유효성 검사
+            if (!rowData.year || !rowData.seq || !rowData.evType || !rowData.reviewer || !rowData.comment) {
+                alert(`${index + 1}번째 행의 필수 항목(*)을 모두 입력해주세요.`);
+                isValid = false; 
+                return;
+            }
+
+            resultDataList.push(rowData);
+        });
+
+        if (!isValid) return;
+        
+        try {
+            const response = await fetch(`/hr/evaluation-result/${currentPernr}`, {
+                method: 'PUT', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(resultDataList)
+            });
+
+            if (response.ok) {
+                alert('성공적으로 저장되었습니다.');
+                await findDetail(currentPernr); // 저장 후 데이터 다시 조회
+            } else {
+                const errorMessage = await response.text();
+                alert(`저장에 실패했습니다: ${errorMessage}`);
+            }
+
+        } catch (error) {
+            console.error('저장 중 오류 발생:', error);
+            alert('저장 중 오류가 발생했습니다.');
+        }
+	}
+ 	
+ 	// 모달창 불러오기
+	async function showDetailModal(resultId) {
+        currentResultId = resultId; // 현재 작업 중인 Result ID 저장
+        const detailTableBody = $('#detailTableBody');
+        detailTableBody.empty(); // 기존 데이터 초기화
+
+        try {
+            const response = await fetch(`/hr/evaluation-result/detail/${resultId}`);
+            if (!response.ok) {
+            	const errorData = await response.json();
+                throw new Error(errorData.message || '상세 평가 항목을 불러오는 데 실패했습니다.');
+            }
+            let details = await response.json();
+
+         	// 최종 의견(평가 총평)을 가져와서 textarea에 표시
+            const parentResultRow = resultDataTable.rows().data().filter(row => row.id === resultId)[0];
+            if (parentResultRow) {
+                $('#finalOpinionText').val(parentResultRow.comment || '');
+            }
+            //  Detail이 없는 경우, 4개의 빈 항목 생성
+            if (details.length === 0) {
+                details = Object.keys(evalItemDefinitions).map(code => ({
+                    id: null,
+                    itemCode: code,
+                    point: '',
+                    comment: ''
+                }));
+            }
+
+            //  정의된 순서대로 정렬
+            details.sort((a, b) => evalItemDefinitions[a.itemCode].order - evalItemDefinitions[b.itemCode].order);
+
+            // 테이블 행 생성
+            details.forEach(detail => {
+                const itemDef = evalItemDefinitions[detail.itemCode];
+                const rowHtml = `
+                    <tr>
+                        <td class="align-middle">
+                            <input type="hidden" name="id" value="${detail.id || ''}">
+                            <input type="hidden" name="itemCode" value="${detail.itemCode}">
+                            ${itemDef.name}
+                        </td>
+                        <td class="text-center align-middle">${itemDef.weight}</td>
+                        <td><input type="number" class="form-control" name="point" value="${detail.point || ''}" min="0" max="${itemDef.weight}"></td>
+                        <td><input type="text" class="form-control" name="comment" value="${detail.comment || ''}"></td>
+                    </tr>
+                `;
+                detailTableBody.append(rowHtml);
+            });
+
+            // 모달 표시
+            const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+            detailModal.show();
+
+        } catch (error) {
+            alert(error.message);
+            console.error(error);
+        }
+    }
+ 	
+ 	// detail저장
+	async function saveDetail() {
+        if (!currentResultId) {
+            alert('오류: 현재 작업 중인 평가 ID가 없습니다.');
+            return;
+        }
+
+        const detailDataList = [];
+        let isValid = true;
+
+        $('#detailTableBody tr').each(function(index) {
+            if (!isValid) return;
+            const row = $(this);
+            const itemCode = row.find('input[name="itemCode"]').val();
+            const maxPoint = evalItemDefinitions[itemCode].weight;
+            const point = row.find('input[name="point"]').val();
+
+            if (point === '' || parseInt(point) < 0 || parseInt(point) > maxPoint) {
+                alert(`'${evalItemDefinitions[itemCode].name}' 항목의 점수는 0에서 ${maxPoint} 사이로 입력해야 합니다.`);
+                isValid = false;
+                return;
+            }
+
+            const rowData = {
+                id: row.find('input[name="id"]').val() || null,
+                evaluationResultId: currentResultId,
+                itemCode: itemCode,
+                itemName: evalItemDefinitions[itemCode].name,
+                point: parseInt(point),
+                comment: row.find('input[name="comment"]').val()
+            };
+            detailDataList.push(rowData);
+        });
+
+        if (!isValid) return;
+
+        try {
+            const response = await fetch('/hr/evaluation-result/detail', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(detailDataList)
+            });
+
+            if (response.ok) {
+                alert('상세 평가가 성공적으로 저장되었습니다.');
+                bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+                
+                // 저장 후 메인 테이블 새로고침
+                await findDetail(currentPernr);
+            } else {
+                const errorData = await response.json();
+                alert(`저장에 실패했습니다: ${errorData.message}`);
+            }
+
+        } catch (error) {
+            console.error('상세 평가 저장 중 오류 발생:', error);
+            alert('상세 평가 저장 중 오류가 발생했습니다.');
+        }
+    }
+
+    </script>
+</body>
+</html>

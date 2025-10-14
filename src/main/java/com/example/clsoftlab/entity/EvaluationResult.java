@@ -26,10 +26,6 @@ public class EvaluationResult extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "EVAL_ID")
     private Long id;
-	
-	@Version
-	@Column(name = "VERSION")
-	private Long version;
 
     @Column(name = "PERNR", nullable = false, length = 10)
     private String pernr;
@@ -55,6 +51,10 @@ public class EvaluationResult extends BaseEntity {
     @Column(name = "ZCOMMENT", length = 255)
     private String comment;
 
+    @Version
+    @Column(name = "VERSION")
+    private Long version;
+    
     public void update (EvaluationResultRequestDto dto) {
     	this.year = dto.getYear();
     	this.seq = dto.getSeq();
@@ -63,5 +63,19 @@ public class EvaluationResult extends BaseEntity {
     	this.grade = dto.getGrade();
     	this.reviewer = dto.getReviewer();
     	this.comment = dto.getComment();
+    }
+    
+    // 등급 변경용 (기준은 임의로 선정했음)
+    public void updateTotalScoreAndGrade(int totalScore) {
+    	this.totalScore = totalScore;
+        if (totalScore >= 90) {
+            this.grade = "A";
+        } else if (totalScore >= 80) {
+            this.grade = "B";
+        } else if (totalScore >= 70) {
+            this.grade = "C";
+        } else {
+            this.grade = "D";
+        }
     }
 }

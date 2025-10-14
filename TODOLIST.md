@@ -33,16 +33,8 @@
 
     - 자격증 관리 : 직무 연계 보기 기능?
 
-    - 사원 평가 관리 : service 작업중... (version 추가 한뒤, @controladcvice로 예외처리 따로 만들기 )
-
-    
 
 **기타**
 
     -현재 dataTable로 표시하는 중인데, size가 1000임. 
     size가 0일때, 전체 목록을 표시하는 기능 추가하기.
-
-    repo에서 중복 검사 메서드 countByCalYmAndJobGroup로 바꾸고 적용되면, 모든 repo 바꾸기.
-    -> exists로 바꾸기 (하나만 찾아도 true 반환, 이게 더 논리적으로 맞음.)
-
-    연휴 기간에 그동안 작성했던 코드들 리팩토링 하기.

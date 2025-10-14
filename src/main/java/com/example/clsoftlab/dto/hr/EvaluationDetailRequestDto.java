@@ -16,22 +16,9 @@ import lombok.Setter;
 public class EvaluationDetailRequestDto {
 	
 	private Long id;
-
-	@NotBlank(message = "사번은 필수 입력 항목입니다.")
-    @Size(max = 10, message = "사번은 최대 10자까지 입력 가능합니다.")
-    private String pernr;
-
-    @NotBlank(message = "평가 연도는 필수 입력 항목입니다.")
-    @Size(max = 4, message = "평가 연도는 4자로 입력해야 합니다.")
-    private String year;
-
-    @NotBlank(message = "평가 차수는 필수 입력 항목입니다.")
-    @Size(max = 2, message = "평가 차수는 최대 2자까지 입력 가능합니다.")
-    private String seq;
-    
-    @NotBlank(message = "평가 유형은 필수 입력 항목입니다.")
-    @Size(max = 2, message = "평가 유형은 최대 2자까지 입력 가능합니다.")
-    private String evType;
+	
+	@NotNull(message = "평가 마스터 ID는 필수입니다.")
+    private Long evaluationResultId;
 
     @NotBlank(message = "평가 항목 코드는 필수 입력 항목입니다.")
     @Size(max = 10, message = "평가 항목 코드는 최대 10자까지 입력 가능합니다.")

@@ -1,6 +1,7 @@
 package com.example.clsoftlab.repository.hr;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,7 @@ public interface EvaluationResultRepository extends JpaRepository<EvaluationResu
 	
 	// 사번으로 List 조회
 	public List<EvaluationResult> findByPernr (String pernr);
+	
+	// 조건으로 검색
+	public Optional<EvaluationResult> findByPernrAndYearAndSeqAndEvType (String pernr, String year, String seq, String evType);
 }

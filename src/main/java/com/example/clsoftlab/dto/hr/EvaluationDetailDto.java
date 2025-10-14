@@ -12,10 +12,6 @@ import lombok.Setter;
 public class EvaluationDetailDto {
 
 	private Long id;
-    private String pernr;
-    private String year;
-    private String seq;
-    private String evType;
     private String itemCode;
     private String itemName;
     private Integer point;

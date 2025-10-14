@@ -17,6 +17,7 @@ public class EvaluationResultDetailDto {
     private String seq;
     private String evType;
     private Integer totalScore;
+    private String grade;
     private String reviewer;
     private String comment;
 }

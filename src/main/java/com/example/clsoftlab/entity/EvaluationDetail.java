@@ -1,10 +1,15 @@
 package com.example.clsoftlab.entity;
 
+import com.example.clsoftlab.dto.hr.EvaluationDetailRequestDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,19 +28,11 @@ public class EvaluationDetail extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "DETAIL_ID")
     private Long id;
-
-    @Column(name = "PERNR", nullable = false, length = 10)
-    private String pernr;
-
-    @Column(name = "ZYEAR", nullable = false, length = 4)
-    private String year;
-
-    @Column(name = "ZSEQ", nullable = false, length = 2)
-    private String seq;
+	
+	@ManyToOne(fetch = FetchType.LAZY) 
+	@JoinColumn(name = "EVAL_RESULT_ID") 
+	private EvaluationResult evaluationResult;
     
-    @Column(name = "ZEV_TYPE", nullable = false, length = 2)
-    private String evType;
-
     @Column(name = "ZITEM_CD", nullable = false, length = 10)
     private String itemCode;
 
@@ -47,4 +44,9 @@ public class EvaluationDetail extends BaseEntity {
 
     @Column(name = "ZCOMMENT", length = 255)
     private String comment;
+    
+    public void update(EvaluationDetailRequestDto dto) {
+    	this.point = dto.getPoint();
+    	this.comment = dto.getComment();
+    }
 }

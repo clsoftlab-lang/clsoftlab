@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.example.clsoftlab.dto.hr.EvaluationDetailDto;
+import com.example.clsoftlab.dto.hr.EvaluationDetailRequestDto;
 import com.example.clsoftlab.dto.hr.EvaluationResultDetailDto;
 import com.example.clsoftlab.dto.hr.EvaluationResultRequestDto;
 import com.example.clsoftlab.entity.EvaluationDetail;
@@ -21,6 +23,7 @@ import com.example.clsoftlab.entity.EvaluationResult;
 import com.example.clsoftlab.repository.hr.EvaluationDetailRepository;
 import com.example.clsoftlab.repository.hr.EvaluationResultRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -75,13 +78,7 @@ public class EvaluationResultService {
 					.toList();
 			
 			if (!resultToDelete.isEmpty()) { 
-				for(EvaluationResult result : resultToDelete) { // 결과 삭제시, 상세 평가들도 삭제하기.
-					List<EvaluationDetail> detailToDelete = evaluationDetailRepository.findByPernrAndYearAndSeqAndEvType(result.getPernr(), result.getYear(), result.getSeq(), result.getEvType());
-					if (!detailToDelete.isEmpty()) {
-						evaluationDetailRepository.deleteAllInBatch(detailToDelete);
-					}
-					evaluationResultRepository.delete(result); 
-				}
+				evaluationResultRepository.deleteAllInBatch(resultToDelete); 
 			}
 			
 			for (EvaluationResultRequestDto dto : dtoList) {
@@ -103,5 +100,40 @@ public class EvaluationResultService {
 	// 중복 검사용 key 생성
 	private String generatekey(String year, String seq, String evType) {
 		return year + "-" + seq + "-" + evType;
+	}
+	
+	// 평가 detail 저장
+	@Transactional
+	public void saveDetailList (List<EvaluationDetailRequestDto> dtoList) {
+		if (dtoList == null || dtoList.isEmpty()) {
+	        return; 
+	    }
+		int totalScore = 0;
+		
+	    Long parentResultId = dtoList.get(0).getEvaluationResultId();
+	    EvaluationResult parentResult = evaluationResultRepository.findById(parentResultId)
+	            .orElseThrow(() -> new EntityNotFoundException("해당 평가 마스터를 찾을 수 없습니다. id: " + parentResultId));
+		
+		for (EvaluationDetailRequestDto dto : dtoList) {
+			totalScore += dto.getPoint();
+			if (dto.getId() != null) { // id가 있는 항목은 수정
+				EvaluationDetail evaluationDetail = evaluationDetailRepository.findById(dto.getId())
+						.orElseThrow(() -> new EntityNotFoundException("해당 항목을 찾을 수 없습니다. id : " + dto.getId()));
+				evaluationDetail.update(dto);
+			}  else {
+				EvaluationDetail newDetail = modelMapper.map(dto, EvaluationDetail.class);
+				newDetail.setEvaluationResult(parentResult);
+				evaluationDetailRepository.save(newDetail);
+			}
+		}
+	    
+	    parentResult.updateTotalScoreAndGrade(totalScore);
+	}
+	
+	// resultId로 상세 점수  조회
+	public List<EvaluationDetailDto> findById (Long id) {
+		return evaluationDetailRepository.findByEvaluationResultId(id).stream()
+				.map(i -> modelMapper.map(i, EvaluationDetailDto.class))
+				.toList();
 	}
 }
