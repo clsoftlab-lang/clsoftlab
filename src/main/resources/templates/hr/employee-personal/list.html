@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인사정보 관리</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+    <div id="global-loader">
+        <div class="page-loader"></div>
+    </div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">사원 검색</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchForm">
+                            <div class="row align-items-end">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사번 (PERNR)</label>
+                                        <input type="text" class="form-control" name="pernr">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>이름</label>
+                                        <input type="text" class="form-control" name="name">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 d-flex justify-content-end gap-2">
+                                     <button type="button" class="btn btn-primary"><i class="ti ti-search me-1"></i>검색</button>
+                                     <button type="reset" class="btn btn-outline-secondary"><i class="ti ti-refresh me-1"></i>초기화</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">인사정보 상세</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="detailForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">입사일 <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" name="joinDate" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">고용형태 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="empType" required>
+                                        <option value="01">정규직</option>
+                                        <option value="02">계약직</option>
+                                        <option value="03">인턴</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">소속 사업장 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="locCode" required>
+                                        <option value="LOC1">본사</option>
+                                        <option value="LOC2">연구소</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">부서 <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="deptName" readonly placeholder="조직도에서 부서를 선택하세요.">
+                                        <button class="btn btn-outline-secondary" type="button">조직도</button>
+                                    </div>
+                                    <input type="hidden" name="deptCode">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">직급 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="gradeCode" required>
+                                        <option value="G1">사원</option>
+                                        <option value="G2">대리</option>
+                                        <option value="G3">과장</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">직책</label>
+                                    <select class="form-select" name="posCode">
+                                        <option value="P1">팀원</option>
+                                        <option value="P2">팀장</option>
+                                        <option value="P3">파트장</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">고용구분 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="status" required>
+                                        <option value="01">재직</option>
+                                        <option value="02">휴직</option>
+                                        <option value="03">퇴직</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">발령 기준 ID</label>
+                                    <input type="text" class="form-control" name="ruleId" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">발령일자</label>
+                                    <input type="date" class="form-control" name="effDate" readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">비고</label>
+                                    <textarea class="form-control" name="remark" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-primary">저장</button>
+                            <button type="button" class="btn btn-danger">삭제</button>
+                            <button type="button" class="btn btn-info">발령 반영</button>
+                            <button type="button" class="btn btn-secondary">인사프로파일 보기</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="addDiv" class="card" style="display: none;">
+                    <div class="card-header">
+                        <h5 class="card-title">인사정보 신규 등록</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="addForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">사번 (PERNR) <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="pernr" required placeholder="신규 사번 입력">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">입사일 <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" name="joinDate" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">고용형태 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="empType" required>
+                                        <option value="">-- 선택 --</option>
+                                        <option value="01">정규직</option>
+                                        <option value="02">계약직</option>
+                                        <option value="03">인턴</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">소속 사업장 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="locCode" required>
+                                        <option value="">-- 선택 --</option>
+                                        <option value="LOC1">본사</option>
+                                        <option value="LOC2">연구소</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">부서 <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="deptName" readonly placeholder="조직도에서 부서를 선택하세요.">
+                                        <button class="btn btn-outline-secondary" type="button">조직도</button>
+                                    </div>
+                                    <input type="hidden" name="deptCode">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">직급 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="gradeCode" required>
+                                        <option value="">-- 선택 --</option>
+                                        <option value="G1">사원</option>
+                                        <option value="G2">대리</option>
+                                        <option value="G3">과장</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">직책</label>
+                                    <select class="form-select" name="posCode">
+                                        <option value="">-- 선택 --</option>
+                                        <option value="P1">팀원</option>
+                                        <option value="P2">팀장</option>
+                                        <option value="P3">파트장</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">고용구분 <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="status" required>
+                                        <option value="">-- 선택 --</option>
+                                        <option value="01">재직</option>
+                                        <option value="02">휴직</option>
+                                        <option value="03">퇴직</option>
+                                    </select>
+                                </div>
+                            </div>
+                             <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">비고</label>
+                                    <textarea class="form-control" name="remark" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary">취소</button>
+                            <button type="button" class="btn btn-primary">등록하기</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="addBtnDiv" class="my-3 ">
+	                <div class="d-flex justify-content-end" >
+	                    <button type="button" class="btn btn-primary" onclick="showAddDiv()">신규 등록하기</button>
+	                </div>
+                </div>
+
+            </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="/assets/js/jquery.dataTables.min.js"></script>
+    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/assets/js/script.js"></script>
+    
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        // [초기화] 버튼 클릭 시, 페이지 전체 상태를 초기화합니다.
+        $("#searchResetBtn").on('click', function() {
+            $("#addDiv").hide();
+            $("#editDiv").hide();
+            $("#addBtnDiv").show();
+            $("#searchForm")[0].reset(); 
+        });
+    });
+    </script>
+</body>
+</html>

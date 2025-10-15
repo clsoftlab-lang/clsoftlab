@@ -88,4 +88,5 @@ public class EmployeePriv extends BaseEntity {
     	this.emergencyRel = dto.getEmergencyRel();
     	this.emergencyPhone = dto.getEmergencyPhone();
     }
+    
 }

@@ -2422,3 +2422,197 @@ VALUES
 (11, 'COOP', '협업', 17, '선배들의 조언을 잘 경청하고 팀에 적응하려 노력함.', 'system', NULL),
 (11, 'LEADERSHIP', '리더십', 23, '향후 성장 가능성이 기대됨.', 'system', NULL);
 
+-- 학력 --
+CREATE TABLE ZHR_EMP_EDU_HIST (
+    -- 기본 키 컬럼 (PK)
+    EDU_HIST_ID     BIGINT          NOT NULL AUTO_INCREMENT COMMENT '학력 이력 고유 ID (PK)',
+
+    -- 학력 정보
+    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번',
+    ZSEQ            INT             NOT NULL COMMENT '순번',
+    ZSCHOOL         VARCHAR(100)    NOT NULL COMMENT '학교명',
+    ZCOUNTRY        VARCHAR(10)     NOT NULL COMMENT '국가 코드 (KR, US, JP 등)',
+    ZSTART_DATE     DATE            NOT NULL COMMENT '입학일',
+    ZEND_DATE       DATE            NOT NULL COMMENT '졸업일',
+    ZDEGREE         VARCHAR(20)     NOT NULL COMMENT '학위 (고졸, 학사, 석사, 박사 등)',
+    ZMAJOR          VARCHAR(100)    NOT NULL COMMENT '전공',
+    ZSTATUS         VARCHAR(20)     NOT NULL COMMENT '졸업구분 (졸업, 수료, 중퇴, 재학 등)',
+    ZFINAL_YN       CHAR(1)         NOT NULL DEFAULT 'N' COMMENT '최종학력 여부 (Y/N)',
+    ZREMARK         VARCHAR(255)    NULL COMMENT '비고 (기타 특이사항)',
+
+    -- 낙관적 락(Optimistic Lock) 버전 관리
+    VERSION         BIGINT          NOT NULL DEFAULT 0 COMMENT '데이터 버전 관리 필드',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (EDU_HIST_ID),
+
+    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 순번)
+    UNIQUE KEY UK_EMP_EDU_HIST (PERNR, ZSEQ)
+
+) COMMENT '사원 학력 이력 정보 테이블';
+
+-- 더미데이터 --
+INSERT INTO ZHR_EMP_EDU_HIST
+(PERNR, ZSEQ, ZSCHOOL, ZCOUNTRY, ZSTART_DATE, ZEND_DATE, ZDEGREE, ZMAJOR, ZSTATUS, ZFINAL_YN, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- 2012011 (재무팀) - 학사/석사
+('2012011', 1, '한국대학교', 'KR', '2008-03-01', '2012-02-28', '학사', '회계학', '졸업', 'N', NULL, 'system', NULL),
+('2012011', 2, '한국대학교 대학원', 'KR', '2012-03-01', '2014-02-28', '석사', '재무관리', '졸업', 'Y', '최우수 졸업', 'system', NULL),
+
+-- 2015022 (마케팅팀) - 학사
+('2015022', 1, '글로벌고등학교', 'KR', '2008-03-01', '2011-02-28', '고졸', '인문계', '졸업', 'N', NULL, 'system', NULL),
+('2015022', 2, '세종대학교', 'KR', '2011-03-01', '2015-02-28', '학사', '광고홍보학', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2018013 (연구소) - 학사/석사/박사
+('2018013', 1, 'KAIST', 'KR', '2010-03-01', '2014-02-28', '학사', '컴퓨터공학', '졸업', 'N', '조기 졸업', 'system', NULL),
+('2018013', 2, 'KAIST 대학원', 'KR', '2014-03-01', '2016-02-28', '석사', '인공지능', '졸업', 'N', NULL, 'system', NULL),
+('2018013', 3, 'Stanford University', 'US', '2016-09-01', '2020-08-31', '박사', 'Computer Science', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2019101 (영업팀) - 학사
+('2019101', 1, '부산상업고등학교', 'KR', '2012-03-01', '2015-02-28', '고졸', '상업', '졸업', 'N', NULL, 'system', NULL),
+('2019101', 2, '동국대학교', 'KR', '2015-03-01', '2019-02-28', '학사', '국제통상학', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2019113 (인사팀) - 학사/석사
+('2019113', 1, '한양대학교', 'KR', '2013-03-01', '2017-08-31', '학사', '교육공학', '졸업', 'N', NULL, 'system', NULL),
+('2019113', 2, '고려대학교 교육대학원', 'KR', '2017-09-01', '2019-08-31', '석사', '인적자원개발', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2020023 (마케팅팀) - 전문학사
+('2020023', 1, '서울예술대학교', 'KR', '2018-03-01', '2020-02-28', '전문학사', '시각디자인', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2021002 (연구소) - 학사
+('2021002', 1, '포항공과대학교', 'KR', '2017-03-01', '2021-02-28', '학사', '신소재공학', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2023133 (재무팀) - 재학
+('2023133', 1, '서울대학교', 'KR', '2020-03-01', '2024-08-31', '학사', '경제학', '재학', 'Y', '2024년 8월 졸업 예정', 'system', NULL),
+
+-- 2010001 (관리자) - 학사/석사
+('2010001', 1, '연세대학교', 'KR', '2004-03-01', '2008-02-28', '학사', '경영학', '졸업', 'N', NULL, 'system', NULL),
+('2010001', 2, 'University of Michigan', 'US', '2008-09-01', '2010-05-31', '석사', 'MBA', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2022055 (관리자) - 학사
+('2022055', 1, '성균관대학교', 'KR', '2014-03-01', '2018-02-28', '학사', '시스템경영공학', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2017055 (신규 추가)
+('2017055', 1, '경기과학고등학교', 'KR', '2010-03-01', '2013-02-28', '고졸', '과학', '졸업', 'N', '조기 졸업', 'system', NULL),
+('2017055', 2, '서울대학교', 'KR', '2013-03-01', '2017-02-28', '학사', '컴퓨터공학', '졸업', 'Y', '복수전공: 통계학', 'system', NULL),
+
+-- 2016088 (신규 추가)
+('2016088', 1, '홍익대학교', 'KR', '2012-03-01', '2016-02-28', '학사', '산업디자인', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2014030 (신규 추가)
+('2014030', 1, '대원외국어고등학교', 'KR', '2007-03-01', '2010-02-28', '고졸', '영어과', '졸업', 'N', NULL, 'system', NULL),
+('2014030', 2, '서울대학교', 'KR', '2010-03-01', '2014-02-28', '학사', '법학', '졸업', 'N', NULL, 'system', NULL),
+('2014030', 3, '서울대학교 법학전문대학원', 'KR', '2014-03-01', '2017-02-28', '전문석사', '법학', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2022011 (신규 추가)
+('2022011', 1, '중앙대학교', 'KR', '2018-03-01', '2022-08-31', '학사', '문헌정보학', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2013077 (신규 추가)
+('2013077', 1, '북경대학교', 'CN', '2009-09-01', '2013-06-30', '학사', '중어중문학', '졸업', 'Y', NULL, 'system', NULL),
+('2013077', 2, '외국어고등학교', 'KR', '2006-03-01', '2009-02-28', '고졸', '중국어', '졸업', 'N', NULL, 'system', NULL),
+
+-- 2011042 (신규 추가)
+('2011042', 1, '도쿄대학교', 'JP', '2007-04-01', '2011-03-31', '학사', '경제학', '졸업', 'N', NULL, 'system', NULL),
+('2011042', 2, '도쿄대학교 대학원', 'JP', '2011-04-01', '2013-03-31', '석사', '국제경제학', '졸업', 'Y', NULL, 'system', NULL),
+
+-- 2020100 (신규 추가)
+('2020100', 1, '경희대학교', 'KR', '2015-03-01', '2019-02-28', '학사', '정치외교학', '중퇴', 'N', NULL, 'system', NULL),
+('2020100', 2, '사이버대학교', 'KR', '2019-09-01', '2022-08-31', '학사', '소프트웨어공학', '졸업', 'Y', '학점은행제 연계', 'system', NULL);
+
+
+-- 인사정보 --
+CREATE TABLE ZHR_EMP_PERSONAL (
+    -- 기본 키 컬럼 (PK)
+    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번 (PK)',
+
+    -- 인사 기본 정보
+    ZJOIN_DATE      DATE            NOT NULL COMMENT '입사일',
+    ZEMP_TYPE       VARCHAR(4)      NOT NULL COMMENT '고용형태 코드',
+    ZLOC_CODE       VARCHAR(5)      NOT NULL COMMENT '소속 사업장 코드',
+    ZDEPT_CD        VARCHAR(10)     NOT NULL COMMENT '부서 코드',
+    ZGRADE_CD       VARCHAR(5)      NOT NULL COMMENT '직급 코드',
+    ZPOS_CD         VARCHAR(5)      NULL COMMENT '직책 코드',
+    ZSTATUS         VARCHAR(2)      NOT NULL COMMENT '고용상태 (재직, 휴직, 퇴직 등)',
+
+    -- 발령 정보
+    ZRULE_ID        VARCHAR(10)     NULL COMMENT '최근 발령 기준 ID',
+    ZEFF_DATE       DATE            NULL COMMENT '최근 발령 시행일',
+
+    -- 기타 정보
+    ZREMARK         VARCHAR(255)    NULL COMMENT '비고 (기타 특이사항)',
+
+    -- 낙관적 락(Optimistic Lock) 버전 관리
+    VERSION         BIGINT          NOT NULL DEFAULT 0 COMMENT '데이터 버전 관리 필드',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (PERNR)
+
+) COMMENT '사원 인사정보 마스터 테이블';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_EMP_PERSONAL
+(PERNR, ZJOIN_DATE, ZEMP_TYPE, ZLOC_CODE, ZDEPT_CD, ZGRADE_CD, ZPOS_CD, ZSTATUS, ZRULE_ID, ZEFF_DATE, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- ZSTATUS 값을 'ST01' -> '01', 'ST02' -> '02', 'ST03' -> '03' 으로 수정
+-- 2012011 (재무팀)
+('2012011', '2014-03-03', 'ET01', 'LOC1', 'DEPT01', 'G4', 'P2', '01', 'AP20240101', '2024-01-01', '재무팀 팀장', 'system', NULL),
+
+-- 2015022 (마케팅팀)
+('2015022', '2015-03-02', 'ET01', 'LOC1', 'DEPT02', 'G3', 'P1', '01', 'AP20240101', '2024-01-01', NULL, 'system', NULL),
+
+-- 2018013 (연구소)
+('2018013', '2020-09-07', 'ET01', 'LOC2', 'DEPT03', 'G4', 'P3', '01', 'AP20230701', '2023-07-01', 'AI Lab 파트장, 외부 영입 인재', 'system', NULL),
+
+-- 2019101 (영업팀)
+('2019101', '2019-03-04', 'ET01', 'LOC3', 'DEPT04', 'G3', 'P1', '01', 'AP20240101', '2024-01-01', '부산지사 근무', 'system', NULL),
+
+-- 2019113 (인사팀)
+('2019113', '2019-09-02', 'ET01', 'LOC1', 'DEPT05', 'G3', 'P2', '01', 'AP20220101', '2022-01-01', '인사팀 채용파트 담당', 'system', NULL),
+
+-- 2020023 (마케팅팀)
+('2020023', '2020-03-02', 'ET02', 'LOC1', 'DEPT02', 'G1', NULL, '03', NULL, NULL, '2022-02-28 계약만료 퇴사', 'system', 'system'),
+
+-- 2021002 (연구소)
+('2021002', '2021-03-01', 'ET01', 'LOC2', 'DEPT03', 'G2', 'P1', '01', 'AP20230101', '2023-01-01', '신소재 연구원', 'system', NULL),
+
+-- 2023133 (재무팀) - 재학
+('2023133', '2023-07-01', 'ET03', 'LOC1', 'DEPT01', 'G0', NULL, '01', NULL, NULL, '산학협력 인턴', 'system', NULL),
+
+-- 2010001 (관리자)
+('2010001', '2010-07-01', 'ET01', 'LOC1', 'DEPT06', 'G5', 'P4', '01', 'AP20210101', '2021-01-01', '경영지원실 실장', 'system', NULL),
+
+-- 2022055 (관리자)
+('2022055', '2018-03-05', 'ET01', 'LOC1', 'DEPT06', 'G3', 'P1', '02', NULL, NULL, '육아휴직 (2025.01.01 ~ 2025.12.31)', 'system', 'system'),
+
+-- 2017055 (신규 추가)
+('2017055', '2017-03-02', 'ET01', 'LOC2', 'DEPT03', 'G4', 'P1', '01', 'AP20240101', '2024-01-01', NULL, 'system', NULL),
+
+-- 2016088 (신규 추가)
+('2016088', '2016-03-02', 'ET01', 'LOC1', 'DEPT02', 'G2', 'P1', '01', 'AP20240101', '2024-01-01', '디자인 파트', 'system', NULL),
+
+-- 2014030 (신규 추가)
+('2014030', '2017-03-02', 'ET01', 'LOC1', 'DEPT07', 'G4', 'P2', '01', 'AP20230101', '2023-01-01', '법무팀 팀장', 'system', NULL),
+
+-- 2022011 (신규 추가)
+('2022011', '2022-09-01', 'ET01', 'LOC1', 'DEPT06', 'G1', 'P1', '01', NULL, NULL, '경영지원팀 소속', 'system', NULL),
+
+-- 2013077 (신규 추가)
+('2013077', '2013-08-19', 'ET01', 'LOC4', 'DEPT04', 'G4', 'P2', '01', 'AP20220701', '2022-07-01', '중국 지사장', 'system', NULL),
+
+-- 2011042 (신규 추가)
+('2011042', '2013-04-08', 'ET01', 'LOC5', 'DEPT01', 'G4', NULL, '01', 'AP20220701', '2022-07-01', '일본 지사 파견', 'system', NULL),
+
+-- 2020100 (신규 추가)
+('2020100', '2022-09-01', 'ET01', 'LOC2', 'DEPT03', 'G1', 'P1', '01', NULL, NULL, 'SW 개발자', 'system', NULL);
