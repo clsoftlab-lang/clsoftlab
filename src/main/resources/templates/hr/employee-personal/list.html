@@ -54,20 +54,21 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 d-flex justify-content-end gap-2">
-                                     <button type="button" class="btn btn-primary"><i class="ti ti-search me-1"></i>검색</button>
-                                     <button type="reset" class="btn btn-outline-secondary"><i class="ti ti-refresh me-1"></i>초기화</button>
+                                     <button type="button" class="btn btn-primary" onclick="searchPersonal()"><i class="ti ti-search me-1"></i>검색</button>
+                                     <button type="button" id="searchResetBtn" class="btn btn-outline-secondary"><i class="ti ti-refresh me-1"></i>초기화</button>
                                 </div>
                             </div>
                         </form>
                     </div>
                 </div>
 
-                <div class="card">
+                <div id="editDiv" class="card" style="display: none;">
                     <div class="card-header">
                         <h5 class="card-title">인사정보 상세</h5>
                     </div>
                     <div class="card-body">
-                        <form id="detailForm">
+                        <form id="editForm">
+                        	<input type="hidden" name="pernr">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">입사일 <span class="text-danger">*</span></label>
@@ -93,10 +94,11 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">부서 <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="deptName" readonly placeholder="조직도에서 부서를 선택하세요.">
-                                        <button class="btn btn-outline-secondary" type="button">조직도</button>
+                                        <input type="text" class="form-control selector-input" name="deptName" readonly 
+									           placeholder="클릭하여 부서를 선택하세요."data-modal-title="부서 선택" 
+									           data-api-url="/hr/org-unit/list" data-search-form="#deptSearchForm">
+	                                    <input type="hidden" name="deptCode">
                                     </div>
-                                    <input type="hidden" name="deptCode">
                                 </div>
                             </div>
                             <div class="row">
@@ -148,8 +150,8 @@
 
                     <div class="card-footer">
                         <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-primary">저장</button>
-                            <button type="button" class="btn btn-danger">삭제</button>
+                            <button type="button" class="btn btn-primary" onclick="updatePersonal()">저장</button>
+                            <button type="button" class="btn btn-danger" onclick="deletePersonal()">삭제</button>
                             <button type="button" class="btn btn-info">발령 반영</button>
                             <button type="button" class="btn btn-secondary">인사프로파일 보기</button>
                         </div>
@@ -164,7 +166,7 @@
                         <form id="addForm">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">사번 (PERNR) <span class="text-danger">*</span></label>
+                                    <label class="form-label">사번 <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="pernr" required placeholder="신규 사번 입력">
                                 </div>
                             </div>
@@ -176,7 +178,6 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">고용형태 <span class="text-danger">*</span></label>
                                     <select class="form-select" name="empType" required>
-                                        <option value="">-- 선택 --</option>
                                         <option value="01">정규직</option>
                                         <option value="02">계약직</option>
                                         <option value="03">인턴</option>
@@ -187,7 +188,6 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">소속 사업장 <span class="text-danger">*</span></label>
                                     <select class="form-select" name="locCode" required>
-                                        <option value="">-- 선택 --</option>
                                         <option value="LOC1">본사</option>
                                         <option value="LOC2">연구소</option>
                                     </select>
@@ -195,17 +195,17 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">부서 <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="deptName" readonly placeholder="조직도에서 부서를 선택하세요.">
-                                        <button class="btn btn-outline-secondary" type="button">조직도</button>
+                                        <input type="text" class="form-control selector-input" name="deptName" readonly 
+									           placeholder="클릭하여 부서를 선택하세요."data-modal-title="부서 선택" 
+									           data-api-url="/hr/org-unit/list" data-search-form="#deptSearchForm">
+	                                    <input type="hidden" name="deptCode">
                                     </div>
-                                    <input type="hidden" name="deptCode">
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">직급 <span class="text-danger">*</span></label>
                                     <select class="form-select" name="gradeCode" required>
-                                        <option value="">-- 선택 --</option>
                                         <option value="G1">사원</option>
                                         <option value="G2">대리</option>
                                         <option value="G3">과장</option>
@@ -214,7 +214,6 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">직책</label>
                                     <select class="form-select" name="posCode">
-                                        <option value="">-- 선택 --</option>
                                         <option value="P1">팀원</option>
                                         <option value="P2">팀장</option>
                                         <option value="P3">파트장</option>
@@ -225,7 +224,6 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">고용구분 <span class="text-danger">*</span></label>
                                     <select class="form-select" name="status" required>
-                                        <option value="">-- 선택 --</option>
                                         <option value="01">재직</option>
                                         <option value="02">휴직</option>
                                         <option value="03">퇴직</option>
@@ -242,11 +240,59 @@
                     </div>
                     <div class="card-footer">
                         <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-secondary">취소</button>
-                            <button type="button" class="btn btn-primary">등록하기</button>
+                            <button type="button" class="btn btn-secondary" onclick="hideAddDiv()">취소</button>
+                            <button type="reset" form="addForm" class="btn btn-outline-secondary"><i class="ti ti-refresh me-1"></i>초기화</button>
+                            <button type="button" class="btn btn-primary" onclick="addNewPersonal()">등록하기</button>
                         </div>
                     </div>
                 </div>
+                
+                <div class="modal fade" id="selectModal" tabindex="-1">
+				    <div class="modal-dialog modal-lg modal-dialog-centered">
+				        <div class="modal-content">
+				            <div class="modal-header">
+				                <h5 class="modal-title">부서 선택</h5>
+				                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				            </div>
+				            <div class="modal-body">
+				                
+				                <div id="deptSearchForm" class="card card-body mb-3 modal-search-form">
+							        <form>
+							            <div class="row">
+							                <div class="col-md-4">
+							                    <input type="text" class="form-control" placeholder="부서명 검색" name="deptName">
+							                </div>
+							                <div class="col-md-3">
+							                    <select class="form-select" name="useYn">
+							                        <option value="">사용(전체)</option>
+							                        <option value="Y">Y</option>
+							                        <option value="N">N</option>
+							                    </select>
+							                </div>
+							                <div class="col-md-2">
+							                    <button type="submit" class="btn btn-primary w-100">조회</button>
+							                </div>
+							            </div>
+							        </form>
+							    </div>
+				                
+				                <div class="table-responsive">
+				                    <table class="table table-hover datatable" id="dept-select-table">
+				                        <thead>
+				                            <tr>
+				                                <th>부서코드</th>
+				                                <th>부서명</th>
+				                                <th>사용여부</th>
+				                            </tr>
+				                        </thead>
+				                        <tbody id="item-list-body">
+				                        </tbody>
+				                    </table>
+				                </div>
+				            </div>
+				        </div>
+				    </div>
+				</div>
                 
                 <div id="addBtnDiv" class="my-3 ">
 	                <div class="d-flex justify-content-end" >
@@ -269,6 +315,10 @@
     <script src="/assets/js/script.js"></script>
     
     <script type="text/javascript">
+    let selectModalInstance;
+	let selectDataTable;
+	let currentTargetInput;
+	
     document.addEventListener('DOMContentLoaded', function () {
         // [초기화] 버튼 클릭 시, 페이지 전체 상태를 초기화합니다.
         $("#searchResetBtn").on('click', function() {
@@ -277,7 +327,338 @@
             $("#addBtnDiv").show();
             $("#searchForm")[0].reset(); 
         });
+        
+        const selectModal = document.getElementById('selectModal');
+        if (selectModal) {
+            selectModalInstance = new bootstrap.Modal(selectModal);
+        }
+        
+     	// 급여 선택 항목에서, 검색시 급여 화면으로 넘어가는걸 방지.
+        document.getElementById('deptSearchForm').addEventListener('submit', handleModalSearch);
+        
+        document.querySelectorAll('.selector-input').forEach(input => {
+            input.addEventListener('click', openSelectorModal);
+        });
+        
+        // 모달 테이블의 행 클릭 시 값 입력 및 모달 닫기 
+        document.getElementById('dept-select-table').addEventListener('click', function(event) {
+	            const selectedRow = event.target.closest('.select-item-row');
+	            if (selectedRow && currentTargetInput ) {
+	                const code = selectedRow.dataset.code;
+	                const name = selectedRow.dataset.name;
+	                
+	                currentTargetInput.value = `${name} (${code})`;
+	                
+	                const hiddenInput = currentTargetInput.nextElementSibling;
+	                if (hiddenInput && hiddenInput.type === 'hidden') {
+	                    hiddenInput.value = code;
+	                }
+	                
+	                if (selectModalInstance) selectModalInstance.hide();
+	                currentTargetInput = null; // 사용 후 변수 초기화
+	            }
+	        });
+        
     });
+    
+    function showAddDiv() {
+        $("#addDiv").show();
+        $("#editDiv").hide();
+        $("#addBtnDiv").hide();
+    }
+    
+    function showEditDiv() {
+        $("#addDiv").hide();
+        $("#editDiv").show();
+        $("#addBtnDiv").hide();
+    }
+    
+    function hideAddDiv() {
+    	$("#addDiv").hide();
+    	$("#addBtnDiv").show();
+    	$("#addEmergencyDiv").hide();
+        $("#addForm")[0].reset(); // 등록 폼 내용도 초기화
+    }
+    
+    function hideEditDiv() {
+    	$("#editDiv").hide();
+    	$("#addBtnDiv").show();
+    	$("#editEmergencyDiv").hide();
+    }
+    
+//  input 클릭 시 실행될 공통 함수
+
+	async function openSelectorModal(event) {
+	    currentTargetInput = event.target; 
+	
+	    const title = currentTargetInput.dataset.modalTitle;
+	    const apiUrl = currentTargetInput.dataset.apiUrl;
+	    const searchFormId = currentTargetInput.dataset.searchForm;
+	    
+	 	// 1. 모든 검색 폼을 일단 숨김
+	    document.querySelectorAll('.modal-search-form').forEach(form => {
+	        form.style.display = 'none';
+	    });
+
+	    // 2. 보여줘야 할 폼만 표시
+	    const activeSearchForm = document.querySelector(searchFormId);
+	    if (activeSearchForm) {
+	        activeSearchForm.style.display = 'block';
+	        activeSearchForm.querySelector('form').reset(); // 폼 내용 초기화
+	    }
+	
+	    document.querySelector('#selectModal .modal-title').textContent = title;
+	    
+	    if (!selectDataTable) { 
+	        initializeDataTable(); // 최초 한 번만 DataTables 초기화
+	    }
+	    await loadDataForModal(apiUrl); // API URL을 인자로 전달
+	
+	    // 5. 모달 띄우기
+	    if (selectModalInstance) {
+	        selectModalInstance.show();
+	    }
+	}
+		
+	 // 모달 내 검색 버튼 클릭 시 실행될 핸들러
+    async function handleModalSearch(event) {
+        event.preventDefault(); // 폼 기본 제출 방지
+        
+        const visibleForm = document.querySelector('.modal-search-form[style*="block"] form');
+        if (!visibleForm) return;
+        
+        const formData = new FormData(event.target);
+        const searchParams = new URLSearchParams(formData).toString();
+        
+        
+        if (currentTargetInput) {
+            const apiUrl = currentTargetInput.dataset.apiUrl;
+            await loadDataForModal(apiUrl, searchParams);
+        }
+    }
+	 
+ 	//  선택 테이블 초기화 함수
+    function initializeDataTable() {
+        selectDataTable = $('#dept-select-table').DataTable({
+            // DataTables 옵션 설정
+            destroy: true,
+            searching: true, 
+            lengthChange: true, 
+            pageLength: 15,       // 한 페이지에 15개씩 표시
+            info: true,          // 'Showing 1 to 5 of...' 정보 표시
+            
+            // 서버에서 받은 JSON 데이터의 키와 테이블 컬럼을 매핑
+            columns: [ 
+                { data: 'orgCode' },
+                { data: 'orgName' },
+                { data: 'useYn' }
+            ],
+            
+            // 각 행(row)이 생성될 때 추가 작업을 수행
+            createdRow: function(row, data, dataIndex) {
+                // 클릭 이벤트를 위해 필요한 클래스와 data-* 속성을 추가
+                $(row).addClass('select-item-row').css('cursor', 'pointer');
+                $(row).attr('data-code', data.orgCode);
+                $(row).attr('data-name', data.orgName);
+            }
+        });
+    }
+ 	
+ 	// 모달창 정보 불러오기
+    async function loadDataForModal(apiUrl, searchParams = '') {
+	    try {
+	        const fullUrl = `${apiUrl}?${searchParams}&bizCode=H0001`;
+	        const response = await fetch(fullUrl); 
+	        if (!response.ok) throw new Error('데이터 로딩 실패');
+	        
+	        const pageData = await response.json();
+	        const items = pageData.content; // API 응답 구조에 따라 조정
+	        
+	        if (selectDataTable) {
+	            selectDataTable.clear().rows.add(items).draw();
+	        }
+	    } catch (error) {
+	        console.error(error);
+	    }
+	}
+    
+ 	// 새 항목 등록
+    async function addNewPersonal() {
+		const addForm = document.getElementById('addForm');
+	    const formData = new FormData(addForm);
+	    const data = Object.fromEntries(formData.entries());
+
+	    if (!data.pernr || !data.pernr.trim()) {
+			alert('사번을 입력해 주세요.');
+			return;
+	    }
+	    
+	    
+	    if (!data.joinDate) {
+	        alert('입사일을 입력해 주세요.');
+	        return;
+	    }
+	    
+	    if (!data.deptCode || !data.deptCode.trim()) {
+	    	alert('부서를 선택해주세요.');
+	    	return;
+	    }
+	    
+	    // --- 서버 작업 시작 ---
+	    try {
+	    	
+	        const codeResponse = await fetch(`/hr/employee-personal/checkOverlap/${data.pernr}`);
+	        const codeCheckResult = await codeResponse.text();
+	        
+	        if (codeCheckResult == 'true') { 
+	            alert('이미 사용중인 사번입니다.'); 
+	            return;
+	        }
+
+	        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
+	        const saveResponse = await fetch('/hr/employee-personal', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (saveResponse.ok) {
+	            alert('성공적으로 등록되었습니다.');
+	            await findDetail(data.pernr);
+	        } else {
+	            const errorText = await saveResponse.text();
+	            alert(`등록에 실패했습니다: ${errorText}`);
+	        }
+
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('등록 중 오류가 발생했습니다.');
+	    }
+	};
+	
+	// 수정 모달창 데이터 불러오기.
+	async function findDetail(id) {
+	    try {
+	        const response = await fetch(`/hr/employee-personal/detail/${id}`);
+	        if (!response.ok) {
+	            if (response.status === 404) {
+	                // 404 Not Found 에러이면 등록되지 않은 사번임
+	                alert('등록되지 않은 사번입니다.');
+	            } else {
+	                // 그 외 다른 서버 에러
+	                throw new Error('데이터를 불러오는 데 실패했습니다.');
+	            }
+	            return; // 함수 종료
+	        }
+	        
+	        const data = await response.json();
+	        const editForm = document.getElementById('editForm');
+
+
+	        for (const key in data) {
+	            const field = editForm.querySelector(`[name="${key}"]`);
+	            
+	            if (field) { 
+                    field.value = data[key];
+	            }
+	        }
+	        showEditDiv();
+	        
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert(error.message);
+	    }
+	}
+	
+	// [조회]버튼 클릭시 상세 정보 확인
+	async function searchPersonal() {
+        const searchForm = document.getElementById('searchForm');
+        const pernr = searchForm.querySelector('[name="pernr"]').value;
+
+        // 사번 입력 여부 확인
+        if (!pernr || !pernr.trim()) {
+            alert('조회할 사번을 입력해주세요.');
+            return;
+        }
+        
+        
+        await findDetail(pernr);
+    }
+	
+	//항목 정보 수정
+	async function updatePersonal () {
+	    const editForm = document.getElementById('editForm');
+	    const formData = new FormData(editForm);
+	    const data = Object.fromEntries(formData.entries());
+	    
+	    if (!data.joinDate) {
+	        alert('입사일을 입력해 주세요.');
+	        return;
+	    }
+	    
+	    if (!data.deptCode || !data.deptCode.trim()) {
+	    	alert('부서를 선택해주세요.');
+	    	return;
+	    }
+	    
+	    try {
+	    	
+	        const url = `/hr/employee-personal`;
+	        const response = await fetch(url, {
+	            method: 'PUT', 
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (response.ok) {
+	            alert('성공적으로 수정되었습니다.');
+	            findDetail(data.pernr); // 성공 시 페이지 새로고침
+	        } else {
+	            const errorText = await response.text();
+	            alert(`수정에 실패했습니다: ${errorText}`);
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('수정 중 오류가 발생했습니다.');
+	    }
+	}
+	
+		
+ 	// 항목 삭제
+	async function deletePersonal() {
+		const editForm = document.getElementById('editForm');
+	    const pernr = editForm.querySelector('[name="pernr"]').value;
+
+	    if (!pernr) {
+	        alert('삭제할 사원을 먼저 조회해주세요.');
+	        return;
+	    }
+	    
+	    if (confirm(`사번 [${pernr}] 님의 정보를 정말로 삭제하시겠습니까?`)) {
+	    	
+		    try {
+		        const url = `/hr/employee-personal/${pernr}`;
+		        const response = await fetch(url, {
+		            method: 'DELETE'
+		        });
+	
+		        if (response.ok) {
+		            alert('성공적으로 삭제되었습니다.');
+		            location.reload();
+		        } else {
+		            const errorText = await response.text();
+		            alert(`삭제에 실패했습니다: ${errorText}`);
+		        }
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('삭제 중 오류가 발생했습니다.');
+		    }
+	    }
+	}
     </script>
 </body>
 </html>

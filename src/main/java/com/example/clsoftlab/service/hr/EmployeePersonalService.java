@@ -9,6 +9,7 @@ import com.example.clsoftlab.dto.hr.EmployeePersonalDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeePersonalRequestDto;
 import com.example.clsoftlab.entity.EmployeePersonal;
 import com.example.clsoftlab.repository.hr.EmployeePersonalRepository;
+import com.example.clsoftlab.repository.hr.OrgUnitRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -17,17 +18,27 @@ import jakarta.transaction.Transactional;
 public class EmployeePersonalService {
 
 	private final EmployeePersonalRepository employeePersonalRepository;
+	private final OrgUnitRepository orgUnitRepository;
 	private final ModelMapper modelMapper;
 	
-	public EmployeePersonalService(EmployeePersonalRepository employeePersonalRepository, ModelMapper modelMapper) {
+	public EmployeePersonalService(EmployeePersonalRepository employeePersonalRepository, OrgUnitRepository orgUnitRepository,
+			ModelMapper modelMapper) {
 		this.employeePersonalRepository = employeePersonalRepository;
+		this.orgUnitRepository = orgUnitRepository;
 		this.modelMapper = modelMapper;
 	}
 	
 	// 사번으로 조회
 	public Optional<EmployeePersonalDetailDto> findByPernr (String pernr) {
 		return employeePersonalRepository.findById(pernr)
-				.map(i -> modelMapper.map(i, EmployeePersonalDetailDto.class));
+				.map(entity -> {
+					EmployeePersonalDetailDto dto = modelMapper.map(entity, EmployeePersonalDetailDto.class);
+					
+					orgUnitRepository.findById(dto.getDeptCode())
+					.ifPresent(orgUnit -> dto.setDeptName(orgUnit.getOrgName()));
+					
+					return dto;
+				});
 	}
 	
 	// 새 정보 등록

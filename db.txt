@@ -2616,3 +2616,68 @@ VALUES
 
 -- 2020100 (신규 추가)
 ('2020100', '2022-09-01', 'ET01', 'LOC2', 'DEPT03', 'G1', 'P1', '01', NULL, NULL, 'SW 개발자', 'system', NULL);
+
+
+-- 노조 가입 관리 --
+CREATE TABLE ZHR_UNION_MEMBER (
+    -- 기본 키 컬럼 (PK)
+    UNION_HISTORY_ID BIGINT          NOT NULL AUTO_INCREMENT COMMENT '노조가입이력 ID (PK)',
+
+    -- 사원 및 가입 정보
+    PERNR            VARCHAR(10)     NOT NULL COMMENT '사번 (FK from ZHR_EMP_PERSONAL)',
+    ZJOIN_DATE       DATE            NOT NULL COMMENT '가입일',
+    ZUNION_YN        VARCHAR(1)      NOT NULL COMMENT '가입 여부 (Y/N)',
+    ZLEAVE_DATE      DATE            NULL COMMENT '탈퇴일',
+    ZUNION_TYPE      VARCHAR(5)      NOT NULL COMMENT '노조 유형 코드',
+    ZCLUB_CD         VARCHAR(10)     NOT NULL COMMENT '회비 코드',
+    ZFEE             DECIMAL(15, 2)  NOT NULL COMMENT '회비 금액',
+    ZAUTO_DEDUCT     VARCHAR(1)      NOT NULL COMMENT '자동공제 여부 (Y/N)',
+    ZREMARK          VARCHAR(255)    NULL COMMENT '비고 (탈퇴 사유 등)',
+
+
+	VERSION         BIGINT          NOT NULL DEFAULT 0 COMMENT '낙관적 락을 위한 버전 관리 필드',
+    
+    -- 감사(Audit) 필드
+    CREATED_AT       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY       VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY       VARCHAR(50)     NULL COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (UNION_HISTORY_ID),
+
+    -- 고유 제약 조건 (사번 + 가입일 중복 방지)
+    UNIQUE KEY UK_ZHR_UNION_MEMBER (PERNR, ZJOIN_DATE)
+
+) COMMENT '사원별 노조 가입 이력 및 회비 정보 테이블';
+
+-- 더미 데이터 --
+
+INSERT INTO ZHR_UNION_MEMBER
+(PERNR, ZJOIN_DATE, ZUNION_YN, ZLEAVE_DATE, ZUNION_TYPE, ZCLUB_CD, ZFEE, ZAUTO_DEDUCT, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- 2012011 (재무팀 팀장) : 현재 가입 상태
+('2012011', '2015-04-01', 'Y', NULL, 'UT02', 'UNIONFEE', 50000, 'Y', '사무직 노조 가입', 'system', NULL),
+
+-- 2015022 (마케팅팀) : 과거 가입 이력 (현재 탈퇴)
+('2015022', '2016-01-01', 'N', '2023-12-31', 'UT01', 'UNIONFEE', 30000, 'Y', '개인 사유로 탈퇴', 'system', 'system'),
+
+-- 2018013 (연구소 파트장) : 현재 가입 상태
+('2018013', '2021-01-01', 'Y', NULL, 'UT02', 'UNIONFEE', 50000, 'Y', '연구직 노조 가입', 'system', NULL),
+
+-- 2019101 (영업팀) : 탈퇴 후 재가입한 케이스
+('2019101', '2019-06-01', 'N', '2021-05-31', 'UT01', 'UNIONFEE', 30000, 'Y', '일시 탈퇴', 'system', 'system'),
+('2019101', '2023-01-01', 'Y', NULL, 'UT01', 'UNIONFEE', 35000, 'Y', '재가입 (회비 인상분 반영)', 'system', NULL),
+
+-- 2021002 (연구소 연구원) : 현재 가입 상태
+('2021002', '2021-04-01', 'Y', NULL, 'UT01', 'UNIONFEE', 30000, 'Y', '정기 가입', 'system', NULL),
+
+-- 2016088 (마케팅팀 디자인 파트) : 현재 가입 상태
+('2016088', '2016-09-01', 'Y', NULL, 'UT01', 'UNIONFEE', 30000, 'Y', NULL, 'system', NULL),
+
+-- 2014030 (법무팀 팀장) : 과거 가입 이력 (현재 탈퇴)
+('2014030', '2018-01-01', 'N', '2024-03-31', 'UT02', 'UNIONFEE', 45000, 'N', '팀장 보직 변경으로 인한 탈퇴', 'system', 'system'),
+
+-- 2013077 (중국 지사장) : 현재 가입 상태
+('2013077', '2014-01-01', 'Y', NULL, 'UT02', 'UNIONFEE', 50000, 'Y', '해외 지사 노조 가입', 'system', NULL);
+

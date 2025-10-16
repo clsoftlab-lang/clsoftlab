@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.example.clsoftlab.dto.hr.EmployeePersonalDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeePersonalRequestDto;
 import com.example.clsoftlab.service.hr.EmployeePersonalService;
 
@@ -57,5 +58,13 @@ public class EmployeePersonalController {
 	public ResponseEntity<Boolean> checkOverlap (@PathVariable String pernr) {
 		boolean check = employeePersonalService.checkOverlap(pernr);
 		return ResponseEntity.ok(check);
+	}
+	
+	// 사번으로 조회
+	@GetMapping("/detail/{pernr}")
+	public ResponseEntity<EmployeePersonalDetailDto> findByPernr (@PathVariable String pernr) {
+		return employeePersonalService.findByPernr(pernr)
+				.map(dto -> ResponseEntity.ok(dto))
+				.orElse(ResponseEntity.notFound().build());
 	}
 }

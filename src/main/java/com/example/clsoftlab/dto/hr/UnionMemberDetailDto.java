@@ -1,5 +1,6 @@
 package com.example.clsoftlab.dto.hr;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -11,18 +12,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmployeePersonalDetailDto {
+public class UnionMemberDetailDto {
 
+	private Long id;
     private String pernr;
     private LocalDate joinDate;
-    private String empType;
-    private String locCode;
-    private String deptName;
-    private String deptCode;
-    private String gradeCode;
-    private String posCode;
-    private String status;
-    private String ruleId;
-    private LocalDate effDate;
+    private String unionYn;
+    private LocalDate leaveDate;
+    private String unionType;
+    private String clubCode;
+    private BigDecimal fee;
+    private String autoDeduct;
     private String remark;
 }
