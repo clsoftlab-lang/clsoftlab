@@ -141,4 +141,35 @@ public class BizPlaceController {
         //   response의 OutputStream에 직접 파일을 씁니다.
         bizPlaceExcelService.generateBizPlaceExcel(list, response.getOutputStream());
 	}
+	
+	// 검색어로 page 조회
+		@GetMapping("/list")
+		public ResponseEntity<Page<BizPlaceListDto>> getBizPlacePage (@ModelAttribute BizPlaceSearchDto search, @RequestParam(required = false) Integer page,
+				Model model) {
+			if (page == null) {
+				page = 0;
+			}
+			
+			int size = 1000;
+			
+			if (!StringUtils.hasText(search.getBizCode())) {
+				search.setBizCode(null);
+			}
+			
+			if (!StringUtils.hasText(search.getBizName())) {
+				search.setBizName(null);
+			}
+			
+			if (!StringUtils.hasText(search.getAddress())) {
+				search.setAddress(null);
+			}
+			
+			if (!StringUtils.hasText(search.getUseYn())) {
+				search.setUseYn(null);
+			}
+			
+			Page<BizPlaceListDto> bizPlacePage = bizPlaceService.searchBizPlace(search, page, size);
+			
+			return ResponseEntity.ok(bizPlacePage);
+		}
 }

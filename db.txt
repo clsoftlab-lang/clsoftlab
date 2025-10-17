@@ -2681,3 +2681,188 @@ VALUES
 -- 2013077 (중국 지사장) : 현재 가입 상태
 ('2013077', '2014-01-01', 'Y', NULL, 'UT02', 'UNIONFEE', 50000, 'Y', '해외 지사 노조 가입', 'system', NULL);
 
+-- 근무지 관리 --
+CREATE TABLE ZHR_EMP_WORKPLACE (
+    -- 기본 키 컬럼 (PK)
+    WORKPLACE_HISTORY_ID BIGINT        NOT NULL AUTO_INCREMENT COMMENT '근무지이력 ID (PK)',
+
+    -- 사원 및 근무지 정보
+    PERNR                VARCHAR(10)   NOT NULL COMMENT '사번 (FK from ZHR_EMP_PERSONAL)',
+    ZWORK_LOC_CD         VARCHAR(10)   NOT NULL COMMENT '근무지 코드 (FK from ZHR_BIZPLACE)', -- 주석 변경
+    ZSTART_DATE          DATE          NOT NULL COMMENT '시작일자',
+    ZEND_DATE            DATE          NULL     COMMENT '종료일자',
+    ZCURRENT_YN          VARCHAR(1)    NOT NULL COMMENT '현재 근무지 여부 (Y/N)',
+    ZREMARK              VARCHAR(255)  NULL     COMMENT '비고 (프로젝트 근무, 파견 등)',
+
+    -- 기술 필드
+    VERSION              BIGINT        NOT NULL DEFAULT 0 COMMENT '낙관적 락을 위한 버전 관리 필드',
+
+    -- 감사(Audit) 필드
+    CREATED_AT           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY           VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY           VARCHAR(50)   NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (WORKPLACE_HISTORY_ID),
+
+    -- 고유 제약 조건 (사번 + 시작일자 중복 방지)
+    UNIQUE KEY UK_ZHR_EMP_WORKPLACE (PERNR, ZSTART_DATE),
+
+    -- 외래 키(Foreign Key) 제약 조건 추가
+    CONSTRAINT FK_WORKPLACE_BIZPLACE
+    FOREIGN KEY (ZWORK_LOC_CD) REFERENCES ZHR_BIZPLACE (ZBIZ_CD)
+
+) COMMENT '사원 근무지 이력 테이블';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_EMP_WORKPLACE
+(PERNR, ZWORK_LOC_CD, ZSTART_DATE, ZEND_DATE, ZCURRENT_YN, ZREMARK, CREATED_BY, UPDATED_BY)
+VALUES
+-- 2012011 (재무팀 팀장) : 근무지 이동 이력 3건 (기능 테스트용)
+('2012011', 'B0101', '2015-04-01', '2019-12-31', 'N', '부산 지사 발령', 'system_loader', 'system_loader'),
+('2012011', 'F0301', '2020-01-01', '2022-12-31', 'N', '평택 반도체 캠퍼스 파견 근무', 'system_loader', 'system_loader'),
+('2012011', 'H0001', '2023-01-01', NULL, 'Y', '서울 본사 복귀', 'system_loader', NULL),
+
+-- 2015022 (마케팅팀) : 입사 후 본사 계속 근무
+('2015022', 'H0001', '2016-01-01', NULL, 'Y', '신입 입사 배치', 'system_loader', NULL),
+
+-- 2018013 (연구소 파트장) : 판교 R&D 센터 계속 근무
+('2018013', 'R0001', '2018-01-01', NULL, 'Y', '연구소 배치', 'system_loader', NULL),
+
+-- 2019101 (영업팀) : 지사 이동 이력이 있는 케이스
+('2019101', 'B0401', '2019-06-01', '2022-05-31', 'N', '대구 지사 발령', 'system_loader', 'system_loader'),
+('2019101', 'S0101', '2022-06-01', NULL, 'Y', '강남 영업소 이동', 'system_loader', NULL),
+
+-- 2021002 (연구소 연구원) : 송도 R&D 캠퍼스로 발령
+('2021002', 'R0001', '2021-04-01', '2024-06-30', 'N', '판교 R&D 센터 신입 배치', 'system_loader', 'system_loader'),
+('2021002', 'T0002', '2024-07-01', NULL, 'Y', '송도 바이오 R&D 캠퍼스 이동', 'system_loader', NULL),
+
+-- 2016088 (마케팅팀 디자인 파트) : 본사 계속 근무
+('2016088', 'H0001', '2016-09-01', NULL, 'Y', '본사 배치', 'system_loader', NULL),
+
+-- 2014030 (법무팀 팀장) : 본사 계속 근무
+('2014030', 'H0001', '2014-03-01', NULL, 'Y', '본사 배치', 'system_loader', NULL),
+
+-- 2013077 (중국 지사장) : 해외 지사 발령 이력
+('2013077', 'H0001', '2013-07-01', '2020-12-31', 'N', '본사 근무', 'system_loader', 'system_loader'),
+('2013077', 'B9301', '2021-01-01', NULL, 'Y', '상하이 지사장 발령', 'system_loader', NULL);
+
+
+-- 인사카드 마스터 --
+CREATE TABLE ZHR_EMP_CARD (
+    -- 기본 키 컬럼 (PK)
+    PERNR               VARCHAR(10)  NOT NULL COMMENT '사번 (PK)',
+
+    -- 1. 기본 정보 (탭 1)
+    ENAME               VARCHAR(50)  NOT NULL COMMENT '성명',
+    ZBIRTH              DATE         NOT NULL COMMENT '생년월일',
+    ZSEX                CHAR(1)      NOT NULL COMMENT '성별 (M/F)',
+    ZNATION             VARCHAR(50)  NOT NULL COMMENT '국적',
+    ZRRN                VARCHAR(255) NOT NULL COMMENT '주민등록번호 (암호화 저장)',
+    ZPHONE              VARCHAR(20)  NOT NULL COMMENT '휴대전화',
+    ZEMAIL              VARCHAR(100) NOT NULL COMMENT '이메일',
+    ZADDR               VARCHAR(255) NULL     COMMENT '주소 및 상세주소',
+    ZEMER_PHONE         VARCHAR(20)  NULL     COMMENT '비상연락처',
+    
+    -- 2. 입사 정보 (탭 2) & 상단 공통
+    ZJOIN_DATE          DATE         NOT NULL COMMENT '입사일',
+    ZFIRST_JOIN_DATE    DATE         NULL     COMMENT '최초입사일',
+    ZJOIN_TYPE          VARCHAR(3)   NOT NULL COMMENT '입사유형 (코드: 신입/경력)',
+    ZJOIN_PATH          VARCHAR(3)   NULL     COMMENT '입사경로 (코드: 공채/추천)',
+    ZCONTRACT_TYPE      VARCHAR(3)   NOT NULL COMMENT '고용형태/계약구분 (코드: 정규직/계약직)',
+    ZPROBATION_PERIOD   VARCHAR(50)  NULL     COMMENT '수습기간',
+    ZJOIN_CATEGORY      VARCHAR(3)   NULL     COMMENT '입사형태 (코드: 일반/장애인)',
+    ZWORK_STATUS        VARCHAR(3)   NOT NULL COMMENT '재직상태 (코드: 재직/휴직/퇴직)',
+
+    -- 3. 보호자 정보 (탭 3)
+    ZPROTECT_NAME       VARCHAR(50)  NOT NULL COMMENT '보호자 성명',
+    ZPROTECT_REL        VARCHAR(20)  NOT NULL COMMENT '보호자 관계',
+    ZPROTECT_PHONE      VARCHAR(20)  NOT NULL COMMENT '보호자 연락처',
+    ZPROTECT_ADDR       VARCHAR(255) NULL     COMMENT '보호자 주소',
+
+    -- 4. 병역/보훈 정보 (탭 4)
+    ZMIL_SERVICE_STATUS VARCHAR(3)   NULL     COMMENT '병역구분 (코드: 필/면제/미필)',
+    ZMIL_TYPE           VARCHAR(20)  NULL     COMMENT '병역종류 (예: 육군)',
+    ZMIL_PERIOD_START   DATE         NULL     COMMENT '병역 시작일',
+    ZMIL_PERIOD_END     DATE         NULL     COMMENT '병역 종료일',
+    ZVET_YN             CHAR(1)      NULL     DEFAULT 'N' COMMENT '보훈대상여부 (Y/N)',
+    ZDISABILITY_YN      CHAR(1)      NULL     DEFAULT 'N' COMMENT '장애등록여부 (Y/N)',
+
+    -- 기술 필드
+    VERSION             BIGINT       NOT NULL DEFAULT 0 COMMENT '낙관적 락을 위한 버전 관리 필드',
+
+    -- 감사(Audit) 필드
+    CREATED_AT          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY          VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY          VARCHAR(50)  NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (PERNR)
+
+) COMMENT '사원 인사카드 마스터 테이블';
+
+-- 더미데이터 --
+INSERT INTO ZHR_EMP_CARD
+(PERNR, ENAME, ZBIRTH, ZSEX, ZNATION, ZRRN, ZPHONE, ZEMAIL, ZADDR, ZEMER_PHONE, 
+ ZJOIN_DATE, ZFIRST_JOIN_DATE, ZJOIN_TYPE, ZJOIN_PATH, ZCONTRACT_TYPE, ZPROBATION_PERIOD, ZJOIN_CATEGORY, ZWORK_STATUS, 
+ ZPROTECT_NAME, ZPROTECT_REL, ZPROTECT_PHONE, ZPROTECT_ADDR, 
+ ZMIL_SERVICE_STATUS, ZMIL_TYPE, ZMIL_PERIOD_START, ZMIL_PERIOD_END, ZVET_YN, ZDISABILITY_YN, 
+ CREATED_BY, UPDATED_BY)
+VALUES
+-- 2012011 (재무팀 팀장) : 경력직 남성, 병역필
+('2012011', '김철수', '1980-05-15', 'M', '대한민국', 'oaBnm2z3JfH5rldPPauxlyFElj9QEsDwB3nxVHZzKmI=', '010-1111-2222', 'cs.kim@company.com', '서울시 강남구 테헤란로 123, 101동 501호', '010-1111-3333',
+ '2012-01-10', '2008-03-01', 'EXP', 'REC', 'REG', NULL, 'GEN', 'ACV',
+ '박영희', 'SPOUSE', '010-2222-3333', '서울시 강남구 테헤란로 123, 101동 501호',
+ 'FIN', 'ARMY', '2000-03-10', '2002-05-09', 'N', 'N', -- ZMIL_SERVICE_STATUS 값 변경
+ 'system_loader', NULL),
+
+-- 2015022 (마케팅팀) : 신입 여성
+('2015022', '이유진', '1992-11-20', 'F', '대한민국', 'jUy8ePDJfrKTzDWcBdakj6zJh/IcHahMhGyVeF9Ak8g=', '010-3333-4444', 'yj.lee@company.com', '경기도 성남시 분당구 판교역로 235', '010-3333-5555',
+ '2016-01-01', '2016-01-01', 'NEW', 'PUB', 'REG', '3개월', 'GEN', 'ACV',
+ '이정국', 'FATHER', '010-4444-5555', '경기도 성남시 분당구 판교역로 235',
+ 'NA', NULL, NULL, NULL, 'N', 'N', -- ZMIL_SERVICE_STATUS 값 변경
+ 'system_loader', NULL),
+
+-- 2018013 (연구소 파트장) : 경력직 남성, 전문연구요원
+('2018013', '박서준', '1988-02-18', 'M', '대한민국', '/9QGeTWoPCZJhUyJrQAzZp0tl/6qRm6E3ljfIAVNo8o=', '010-5555-6666', 'sj.park@company.com', '경기도 수원시 영통구 삼성로 129', '010-5555-7777',
+ '2018-01-01', '2014-01-02', 'EXP', 'REC', 'REG', NULL, 'GEN', 'ACV',
+ '박현식', 'FATHER', '010-6666-7777', '경기도 수원시 영통구 삼성로 129',
+ 'FIN', 'OTHER', '2014-01-02', '2017-01-01', 'N', 'N', -- ZMIL_SERVICE_STATUS 값 변경
+ 'system_loader', NULL),
+
+-- 2019101 (영업팀) : 신입 남성, 병역필
+('2019101', '최민준', '1994-08-30', 'M', '대한민국', 'e4I7OPoYoOz3LL5IGTVACNFE3dHdqXV8tXOsKmHZTcQ=', '010-7777-8888', 'mj.choi@company.com', '대구시 수성구 달구벌대로 2424', '010-7777-9999',
+ '2019-06-01', '2019-06-01', 'NEW', 'PUB', 'REG', '3개월', 'GEN', 'ACV',
+ '최경환', 'FATHER', '010-8888-9999', '대구시 수성구 달구벌대로 2424',
+ 'FIN', 'MARINE', '2014-03-01', '2016-01-31', 'N', 'N', -- ZMIL_SERVICE_STATUS 값 변경
+ 'system_loader', NULL),
+
+-- 2021002 (연구소 연구원) : 신입 여성, 장애/보훈 케이스
+('2021002', '정다은', '1996-03-12', 'F', '대한민국', 'zAFql1ICPBpAA0KcoOfrdp+dT6A7i+fNeKuMnqA4Pbo=', '010-9999-0000', 'de.jung@company.com', '인천시 연수구 송도과학로 32', '010-9999-1111',
+ '2021-04-01', '2021-04-01', 'NEW', 'REC', 'REG', '3개월', 'DIS', 'ACV',
+ '한미숙', 'MOTHER', '010-0000-1111', '인천시 연수구 송도과학로 32',
+ 'NA', NULL, NULL, NULL, 'Y', 'Y', -- ZMIL_SERVICE_STATUS 값 변경
+ 'system_loader', NULL),
+
+-- 2016088 (마케팅팀 디자인 파트) : 경력직 여성
+('2016088', '윤지수', '1990-07-07', 'F', '대한민국', 'v6/ehyI51ooGdB/Y+21402daNmQMn0EyS1e9stsxj50=', '010-1234-5678', 'js.yoon@company.com', '서울시 서초구 서초대로 77길 54', '010-1234-9999',
+ '2016-09-01', '2013-02-01', 'EXP', 'REC', 'REG', NULL, 'GEN', 'ACV',
+ '윤태영', 'FATHER', '010-5678-1234', '서울시 서초구 서초대로 77길 54',
+ 'NA', NULL, NULL, NULL, 'N', 'N', -- ZMIL_SERVICE_STATUS 값 변경
+ 'system_loader', NULL),
+
+-- 2014030 (법무팀 팀장) : 경력직 남성, 병역 면제
+('2014030', '강태현', '1985-12-25', 'M', '대한민국', 'gtQiFIFSXxGf7NpxDEKssXZu1olS1rinJs/sFWnoIKU=', '010-8765-4321', 'th.kang@company.com', '서울시 종로구 종로3길 17', '010-8765-1111',
+ '2014-03-01', '2011-01-15', 'EXP', 'REC', 'REG', NULL, 'GEN', 'ACV',
+ '강신일', 'FATHER', '010-4321-8765', '서울시 종로구 종로3길 17',
+ 'EXM', NULL, NULL, NULL, 'N', 'N', -- ZMIL_SERVICE_STATUS 값 변경
+ 'system_loader', NULL),
+ 
+-- 2013077 (중국 지사장) : 외국인 케이스
+('2013077', '왕웨이', '1978-10-01', 'M', '중국', 'fOca9m6k+fnIJoEs/GuEJYUVLZPc3+NJ0Tmd23WnSNc=' , '010-5555-1234', 'wei.wang@company.com', '중국 상하이시 푸동신구 세기대도 88', '010-5555-4321',
+ '2013-07-01', '2013-07-01', 'EXP', 'REC', 'REG', NULL, 'GEN', 'ACV',
+ 'CHEN LI', 'SPOUSE', '010-1111-4321', '중국 상하이시 푸동신구 세기대도 88',
+ 'NA', NULL, NULL, NULL, 'N', 'N', -- ZMIL_SERVICE_STATUS 값 변경
+ 'system_loader', NULL);
