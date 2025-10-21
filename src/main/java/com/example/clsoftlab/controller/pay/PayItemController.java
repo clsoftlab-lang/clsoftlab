@@ -1,6 +1,8 @@
 package com.example.clsoftlab.controller.pay;
 
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -34,7 +36,7 @@ public class PayItemController {
 	
 	//전체 목록 조회
 	@GetMapping("")
-	public String payItemList(@RequestParam(defaultValue = "") String itemName, @RequestParam(defaultValue = "") String itemType,
+	public String payItemList(@RequestParam(defaultValue = "") String itemName, @RequestParam(required = false) List<String> itemTypes,
 			@RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page,
 			Model model) { 
 		
@@ -47,10 +49,6 @@ public class PayItemController {
 			itemName = null;
 		}
 		
-		if (!StringUtils.hasText(itemType)) {
-			itemType = null;
-		}
-		
 		if (!StringUtils.hasText(useYn)) {
 			useYn = null;
 		}
@@ -58,11 +56,11 @@ public class PayItemController {
 		
 		int size= 1000;
 		
-		Page<PayItemListDto> itemPage = payItemService.searchPayItem(itemName, itemType, useYn, page, size);
+		Page<PayItemListDto> itemPage = payItemService.searchPayItem(itemName, itemTypes, useYn, page, size);
 		
 		model.addAttribute("payItem", itemPage.getContent());
 		model.addAttribute("itemName", itemName);
-		model.addAttribute("itemType", itemType);
+		model.addAttribute("itemTypes", itemTypes);
 		model.addAttribute("useYn", useYn);
 		model.addAttribute("itemPage", itemPage);
 		
@@ -104,7 +102,7 @@ public class PayItemController {
 	// 급여 항목 검색 
 	@ResponseBody
 	@GetMapping("/list")
-	public Page<PayItemListDto> getPayItemList(@RequestParam(defaultValue = "") String itemName, @RequestParam(defaultValue = "") String itemType,
+	public Page<PayItemListDto> getPayItemList(@RequestParam(defaultValue = "") String itemName, @RequestParam(defaultValue = "") List<String> itemTypes,
 			@RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page) { 
 		
 		
@@ -113,7 +111,19 @@ public class PayItemController {
 		}
 		int size= 1000;
 		
-		Page<PayItemListDto> itemPage = payItemService.searchPayItem(itemName, itemType, useYn, page, size);
+		if (!StringUtils.hasText(itemName)) {
+			itemName = null;
+		}
+		
+		if (itemTypes.isEmpty()) {
+			itemTypes = null;
+		}
+		
+		if (!StringUtils.hasText(useYn)) {
+			useYn = null;
+		}
+		
+		Page<PayItemListDto> itemPage = payItemService.searchPayItem(itemName, itemTypes, useYn, page, size);
 		
 		
 		return itemPage;
@@ -131,31 +141,39 @@ public class PayItemController {
 			}
 			int size= 1000;
 			
+			if (!StringUtils.hasText(itemName)) {
+				itemName = null;
+			}
+			
+			if (!StringUtils.hasText(useYn)) {
+				useYn = null;
+			}
+			
 			Page<PayItemListDto> itemPage = payItemService.searchDeduct(itemName, useYn, page, size);
 			
 			
 			return itemPage;
 		}
 
-    @GetMapping("test")
-    public String payItemTestList(@RequestParam(defaultValue = "") String itemName, @RequestParam(defaultValue = "") String itemType,
-                              @RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page,
-                              Model model) {
-
-
-        if (page == null) {
-            page = 0;
-        }
-        int size= 1000; //필요한 경우만 사용 가능하도록 변경 필요 size가 0일때는 전체 나오도록 개선 필요.
-
-        Page<PayItemListDto> itemPage = payItemService.searchPayItem(itemName, itemType, useYn, page, size);
-
-        model.addAttribute("payItem", itemPage.getContent());
-        model.addAttribute("itemName", itemName);
-        model.addAttribute("itemType", itemType);
-        model.addAttribute("useYn", useYn);
-        model.addAttribute("itemPage", itemPage);
-
-        return "pay/pay-item/list_backup";
-    }
+		/*
+		 * @GetMapping("test") public String payItemTestList(@RequestParam(defaultValue
+		 * = "") String itemName, @RequestParam(defaultValue = "") String itemType,
+		 * 
+		 * @RequestParam(defaultValue = "") String useYn, @RequestParam(required =
+		 * false) Integer page, Model model) {
+		 * 
+		 * 
+		 * if (page == null) { page = 0; } int size= 1000; //필요한 경우만 사용 가능하도록 변경 필요
+		 * size가 0일때는 전체 나오도록 개선 필요.
+		 * 
+		 * Page<PayItemListDto> itemPage = payItemService.searchPayItem(itemName,
+		 * itemType, useYn, page, size);
+		 * 
+		 * model.addAttribute("payItem", itemPage.getContent());
+		 * model.addAttribute("itemName", itemName); model.addAttribute("itemType",
+		 * itemType); model.addAttribute("useYn", useYn); model.addAttribute("itemPage",
+		 * itemPage);
+		 * 
+		 * return "pay/pay-item/list_backup"; }
+		 */
 }

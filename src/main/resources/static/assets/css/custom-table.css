@@ -1,0 +1,38 @@
+.datatable-resizable.dataTable th {
+	position: relative; 
+}
+
+/*  <th>와 <td>에 구분선 및 정렬 적용 */
+.datatable-resizable.dataTable th,
+.datatable-resizable.dataTable td {
+	border-right: 1px solid #dee2e6; 
+	text-align: center;     
+	vertical-align: middle; 
+}
+
+/* 마지막 컬럼은 오른쪽 선 제거 */
+.datatable-resizable.dataTable th:last-child,
+.datatable-resizable.dataTable td:last-child {
+	border-right: none;
+}
+
+/* colResizable 플러그인 'Grip' 스타일 */
+.datatable-resizable.dataTable .JColResizerGrip {
+	position: absolute;
+	top: 0;
+	right: 0px;
+	width: 8px; 
+	height: 100%;
+	cursor: col-resize;
+	z-index: 10;
+}
+
+/*  Grip 마우스오버 시 하이라이트 */
+.datatable-resizable.dataTable .JColResizerGrip:hover {
+	background-color: rgba(13, 110, 253, 0.15); 
+}
+
+/*  드래그 중 표시되는 선 스타일 */
+.datatable-resizable.dataTable .JColResizerDragging {
+	border-left: 2px dashed #0d6efd;
+}

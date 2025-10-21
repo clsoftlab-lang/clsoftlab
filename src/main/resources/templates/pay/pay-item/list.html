@@ -12,6 +12,9 @@
 	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
 	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" th:href="@{/assets/plugins/@simonwep/pickr/themes/nano.min.css}">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
 </head>
 
 <body>
@@ -52,26 +55,25 @@
 									<div class="col-md-3">
 										<div class="form-group">
 											<label>항목명</label>
-											<input type="text" class="form-control" placeholder="항목명 검색" name="itemName">
+											<input type="text" class="form-control" placeholder="항목명 검색" name="itemName" th:value="${itemName}">
 										</div>
 									</div>
 									<div class="col-md-3">
-										<div class="form-group">
-											<label>항목 유형</label>
-											<select class="form-select" name="itemType">
-												<option value="" >전체</option>
-												<option value="PAY" th:selected="${itemType} == PAY">PAY</option>
-												<option value="DEDUCT" th:selected="${itemType} == DEDUCT">DEDUCT</option>
-												<option value="TAX" th:selected="${itemType} == TAX">TAX</option>
-												<option value="INSURANCE" th:selected="${itemType} == INSURANCE">INSURANCE</option>
-												<option value="BACKPAY" th:selected="${itemType} == BACKPAY">BACKPAY</option>
-											</select>
-										</div>
+									    <div class="form-group">
+									        <label for="itemTypeSelect">항목 유형</label>
+									        <select class="form-select multiple-select" name="itemTypes" id="itemTypeSelect" multiple="multiple">
+									            <option value="PAY" th:selected="${itemTypes != null && #lists.contains(itemTypes, 'PAY')}">PAY</option>
+									            <option value="DEDUCT" th:selected="${itemTypes != null && #lists.contains(itemTypes, 'DEDUCT')}">DEDUCT</option>
+									            <option value="TAX" th:selected="${itemTypes != null && #lists.contains(itemTypes, 'TAX')}">TAX</option>
+									            <option value="INSURANCE" th:selected="${itemTypes != null && #lists.contains(itemTypes, 'INSURANCE')}">INSURANCE</option>
+									            <option value="BACKPAY" th:selected="${itemTypes != null && #lists.contains(itemTypes, 'BACKPAY')}">BACKPAY</option>
+									        </select>
+									    </div>
 									</div>
 									<div class="col-md-3">
 										<div class="form-group">
-											<label>사용 여부</label>
-											<select class="form-select" name="useYn">
+											<label for="search_useYn">사용 여부</label>
+											<select class="form-select" name="useYn" id="search_useYn">
 												<option value="">전체</option>
 												<option value="Y" th:selected="${useYn == 'Y'} ">Y</option>
 												<option value="N" th:selected="${useYn == 'N'}">N</option>
@@ -95,7 +97,7 @@
 					</div>
 					<div class="card-body">
 						<div class="table-responsive">
-							<table class="table table-striped table-hover datatable">
+							<table class="table table-striped table-hover datatable-resizable" id="payTable">
 								<thead class="table-light">
 									<tr>
 										<th>항목코드</th>
@@ -402,16 +404,19 @@
 		</div>
 	</div>
 	<script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
 	<script src="/assets/js/bootstrap.bundle.min.js"></script>
 	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
 	<script src="https://unpkg.com/feather-icons"></script>
 	<script src="/assets/js/jquery.dataTables.min.js"></script>
 	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
 	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
 	<script type="text/javascript">
 	
 	const addPayItemForm = document.getElementById('addPayItem');
-		
+	
 			async function addNewPayItem() {
 		    const formData = new FormData(addPayItemForm);
 		    const data = Object.fromEntries(formData.entries());
@@ -497,7 +502,7 @@
 		
 		//
 		document.addEventListener('DOMContentLoaded', function() {
-		    const tableBody = document.querySelector('.datatable tbody');
+		    const tableBody = document.querySelector('#payTable tbody');
 		
 		    if (tableBody) {
 		        tableBody.addEventListener('click', function(event) {
@@ -511,6 +516,24 @@
 		            }
 		        });
 		    }
+		    
+		 	// Select2 초기화
+		    $('#itemTypeSelect').select2();
+		    
+		    const payTableSpecificOptions = {
+			        'columns': [
+			            null,                // 1. 항목코드
+			            { "width": "30%" }, // 2. 항목명
+			            null,                // 3. 유형
+			            null,                // 4. 과세
+			            null,                // 5. 절사방식
+			            null,                // 6. 사용여부
+			            { "width": "80px" }  // 7. 수정
+			        ],
+			    };
+		    
+		    initializeResizableDataTable('#payTable',payTableSpecificOptions);
+		    
 		});
 		
 		async function findPayItemDetail(itemCode) {

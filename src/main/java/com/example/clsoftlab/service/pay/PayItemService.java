@@ -1,5 +1,6 @@
 package com.example.clsoftlab.service.pay;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -32,13 +33,13 @@ public class PayItemService {
 	
 	
 	// 급여 항목 목록 검색
-	public Page<PayItemListDto> searchPayItem(String itemName, String itemType, String useYn, int page, int size) {
+	public Page<PayItemListDto> searchPayItem(String itemName, List<String> itemType, String useYn, int page, int size) {
 	
 		Pageable pageable = PageRequest.of(page, size, Sort.by("itemName"));
 		Specification<PayItem> spec = Specification.not(null);
 		
 		spec = spec.and(PayItemSpecs.withItemName(itemName))
-				.and(PayItemSpecs.withItemType(itemType))
+				.and(PayItemSpecs.withItemTypes(itemType))
 				.and(PayItemSpecs.withUseYn(useYn));
 		return payItemRepository.findAll(spec,pageable).map(i -> modelMapper.map(i, PayItemListDto.class));
 	}
@@ -76,7 +77,7 @@ public class PayItemService {
 		
 		Specification<PayItem> spec = Specification.not(null);
 		spec = spec.and(PayItemSpecs.withItemName(itemName))
-				.and(PayItemSpecs.withItemType("DEDUCT"))
+				.and(PayItemSpecs.withItemTypes(List.of("DEDUCT")))
 				.and(PayItemSpecs.withUseYn(useYn));
 		
 		return payItemRepository.findAll(spec, pageable)

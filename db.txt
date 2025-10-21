@@ -2,6 +2,65 @@ create database clsoftlabnew default character set utf8mb4 collate utf8mb4_unico
 
 use clsoftlabnew;
 
+-- 사원 마스터 (개발용 임시) --
+CREATE TABLE ZHR_EMP_MASTER (
+    -- 기본 키 컬럼 (PK)
+    PERNR           VARCHAR(10)  NOT NULL COMMENT '사번 (PK)',
+
+    -- 기본 정보 (필수)
+    ENAME           VARCHAR(50)  NOT NULL COMMENT '성명',
+
+    -- 감사(Audit) 필드 (요청하신 DDL 형식을 따름)
+    CREATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)  NULL     COMMENT '수정자',
+
+    -- 기본 키 설정
+    PRIMARY KEY (PERNR)
+
+) COMMENT '사원 마스터 (급여 개발용 임시 테이블)';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_EMP_MASTER
+(PERNR, ENAME, CREATED_BY)
+VALUES
+-- 2022년 입사자 (10명)
+('2201001', '김철수', 'system_admin'),
+('2201002', '이영희', 'system_admin'),
+('2203003', '박민준', 'system_admin'),
+('2203004', '최서연', 'system_admin'),
+('2207005', '정지훈', 'system_admin'),
+('2207006', '윤서아', 'system_admin'),
+('2209007', '강도윤', 'system_admin'),
+('2210008', '임하윤', 'system_admin'),
+('2210009', '한지우', 'system_admin'),
+('2211010', '오시우', 'system_admin'),
+
+-- 2023년 입사자 (10명)
+('2301011', '신유나', 'system_admin'),
+('2301012', '장은우', 'system_admin'),
+('2302013', '송지아', 'system_admin'),
+('2304014', '권혁준', 'system_admin'),
+('2305015', '황수빈', 'system_admin'),
+('2305016', '안태현', 'system_admin'),
+('2308017', '문채원', 'system_admin'),
+('2309018', '고은별', 'system_admin'),
+('2310019', '배준호', 'system_admin'),
+('2312020', '조민서', 'system_admin'),
+
+-- 2024년 입사자 (10명)
+('2401021', '유정민', 'system_admin'),
+('2401022', '홍예준', 'system_admin'),
+('2402023', '나소율', 'system_admin'),
+('2402024', '백시원', 'system_admin'),
+('2403025', '노하린', 'system_admin'),
+('2404026', '차유진', 'system_admin'),
+('2404027', '표지성', 'system_admin'),
+('2405028', '기태영', 'system_admin'),
+('2405029', '선우진', 'system_admin'),
+('2406030', '왕지현', 'system_admin');
+
 -- 급여 --
 -- 급여 항목 관리 --
 CREATE TABLE ZHR_PAY_ITEM (  
@@ -59,6 +118,95 @@ VALUES
 ('DED005', '복지기금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '동호회비/복지기금', 'system_admin'),
 ('DED006', '개인연금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '개인연금(회사 대납 후 공제)', 'system_admin');
 
+
+-- 월별 급여 항목 내역 (대리 키 PK + 고유 키 UNIQUE) --
+CREATE TABLE ZHR_PAY_DETAIL (
+    -- 1. 기본 키 컬럼 (PK) - 대리 키
+    DETAIL_ID   BIGINT         NOT NULL AUTO_INCREMENT COMMENT '급여상세 고유ID (PK)',
+
+    -- 2. 비즈니스 키 컬럼 (UNIQUE)
+    ZPAY_YM     CHAR(6)        NOT NULL COMMENT '지급월',
+    ZSEQ_NO     SMALLINT       NOT NULL COMMENT '차수',
+    ZEMP_NO     VARCHAR(10)    NOT NULL COMMENT '사번 (FK to ZHR_EMP_MASTER.PERNR)',
+    ZITEM_CD    VARCHAR(20)    NOT NULL COMMENT '항목 코드 (FK to ZHR_PAY_ITEM.ZITEM_CD)',
+
+    -- 3. 급여 데이터 필드
+    ZAMOUNT     DECIMAL(18, 2) NOT NULL COMMENT '지급/공제액 (공제는 음수 가능)',
+    ZBACK_YM    CHAR(6)        NULL     COMMENT '소급월 (소급 항목일 때만 사용)',
+    ZORIG_AMT   DECIMAL(18, 2) NULL     COMMENT '원금 (소급 항목일 때 차액 계산용)',
+    ZNOTE       VARCHAR(500)   NULL     COMMENT '비고 (수동 조정 사유 등)',
+    
+    -- 4. 감사(Audit) 필드
+    CREATED_AT  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY  VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT  DATETIME       NULL     COMMENT '수정 일시',
+    UPDATED_BY  VARCHAR(50)    NULL     COMMENT '수정자',
+
+    -- 5. 기본 키 설정
+    PRIMARY KEY (DETAIL_ID),
+
+    -- 6. 고유 키(UNIQUE) 설정 (중복 체크용)
+    UNIQUE KEY UK_ZHR_PAY_DETAIL_01 (ZPAY_YM, ZSEQ_NO, ZEMP_NO, ZITEM_CD),
+
+    -- 7. 외래 키 (FK) 설정
+    FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_MASTER(PERNR),
+    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD),
+
+    -- 8. 인덱스 설정
+    INDEX IX_ZHR_PAY_DETAIL_01 (ZEMP_NO),
+    INDEX IX_ZHR_PAY_DETAIL_02 (ZITEM_CD)
+
+) COMMENT '월별 사원별 급여 항목 지급/공제 내역';
+
+
+-- 더미데이터 --
+
+INSERT INTO ZHR_PAY_DETAIL
+(ZPAY_YM, ZSEQ_NO, ZEMP_NO, ZITEM_CD, ZAMOUNT, ZBACK_YM, ZORIG_AMT, ZNOTE, CREATED_BY)
+VALUES
+-- '2201001', '김철수' (10개 항목)
+('202410', 1, '2201001', 'PAY001', 5000000.00, NULL, NULL, NULL, 'system_admin'), -- 기본급
+('202410', 1, '2201001', 'PAY003', 200000.00, NULL, NULL, '비과세 식대', 'system_admin'), -- 식대(비과세)
+('202410', 1, '2201001', 'PAY004', 300000.00, NULL, NULL, '팀장 직책수당', 'system_admin'), -- 직책수당
+('202410', 1, '2201001', 'PAY008', 200000.00, NULL, NULL, '차량유지비', 'system_admin'), -- 차량유지비
+('202410', 1, '2201001', 'TAX001', -420000.00, NULL, NULL, NULL, 'system_admin'), -- 소득세
+('202410', 1, '2201001', 'TAX002', -42000.00, NULL, NULL, NULL, 'system_admin'), -- 지방소득세
+('202410', 1, '2201001', 'INS001', -225000.00, NULL, NULL, NULL, 'system_admin'), -- 국민연금
+('202410', 1, '2201001', 'INS002', -178000.00, NULL, NULL, NULL, 'system_admin'), -- 건강보험
+('202410', 1, '2201001', 'INS003', -22800.00, NULL, NULL, NULL, 'system_admin'), -- 장기요양보험
+('202410', 1, '2201001', 'INS004', -45000.00, NULL, NULL, NULL, 'system_admin'), -- 고용보험
+
+-- '2301011', '신유나' (9개 항목)
+('202410', 1, '2301011', 'PAY001', 3500000.00, NULL, NULL, NULL, 'system_admin'), -- 기본급
+('202410', 1, '2301011', 'PAY003', 200000.00, NULL, NULL, '비과세 식대', 'system_admin'), -- 식대(비과세)
+('202410', 1, '2301011', 'PAY007', 150000.00, NULL, NULL, '10월 연장근로 5시간', 'system_admin'), -- 연장근로수당
+('202410', 1, '2301011', 'TAX001', -180000.00, NULL, NULL, NULL, 'system_admin'), -- 소득세
+('202410', 1, '2301011', 'TAX002', -18000.00, NULL, NULL, NULL, 'system_admin'), -- 지방소득세
+('202410', 1, '2301011', 'INS001', -157500.00, NULL, NULL, NULL, 'system_admin'), -- 국민연금
+('202410', 1, '2301011', 'INS002', -124600.00, NULL, NULL, NULL, 'system_admin'), -- 건강보험
+('202410', 1, '2301011', 'INS003', -15900.00, NULL, NULL, NULL, 'system_admin'), -- 장기요양보험
+('202410', 1, '2301011', 'DED002', -35000.00, NULL, NULL, '노조 조합비', 'system_admin'), -- 노조비
+
+-- '2401021', '유정민' (9개 항목)
+('202410', 1, '2401021', 'PAY001', 3000000.00, NULL, NULL, NULL, 'system_admin'), -- 기본급
+('202410', 1, '2401021', 'PAY003', 200000.00, NULL, NULL, '비과세 식대', 'system_admin'), -- 식대(비과세)
+('202410', 1, '2401021', 'TAX001', -110000.00, NULL, NULL, NULL, 'system_admin'), -- 소득세
+('202410', 1, '2401021', 'TAX002', -11000.00, NULL, NULL, NULL, 'system_admin'), -- 지방소득세
+('202410', 1, '2401021', 'INS001', -135000.00, NULL, NULL, NULL, 'system_admin'), -- 국민연금
+('202410', 1, '2401021', 'INS002', -106800.00, NULL, NULL, NULL, 'system_admin'), -- 건강보험
+('202410', 1, '2401021', 'INS003', -13700.00, NULL, NULL, NULL, 'system_admin'), -- 장기요양보험
+('202410', 1, '2401021', 'INS004', -27000.00, NULL, NULL, NULL, 'system_admin'), -- 고용보험
+('202410', 1, '2401021', 'DED003', -250000.00, NULL, NULL, '사내대출 상환 (3/12)', 'system_admin'), -- 사내대출상환
+
+-- '2211010', '오시우' (8개 항목 - 10월분 + 9월 소급분 *병합*)
+('202410', 1, '2211010', 'PAY001', 4500000.00, '202409', 3500000.00, '10월분(400) + 9월 인상소급(50)', 'system_admin'), -- 기본급
+('202410', 1, '2211010', 'PAY003', 200000.00, NULL, NULL, '비과세 식대', 'system_admin'), -- 식대(비과세)
+('202410', 1, '2211010', 'TAX001', -280000.00, '202409', -180000.00, '10월분 + 9월 소급분', 'system_admin'), -- 소득세
+('202410', 1, '2211010', 'TAX002', -28000.00, '202409', -18000.00, '10월분 + 9월 소급분', 'system_admin'), -- 지방소득세
+('202410', 1, '2211010', 'INS001', -202500.00, '202409', -157500.00, '10월분 + 9월 소급분', 'system_admin'), -- 국민연금
+('202410', 1, '2211010', 'INS002', -160200.00, '202409', -124600.00, '10월분 + 9월 소급분', 'system_admin'), -- 건강보험
+('202410', 1, '2211010', 'INS003', -20480.00, '202409', -15900.00, '10월분 + 9월 소급분', 'system_admin'), -- 장기요양보험
+('202410', 1, '2211010', 'INS004', -40500.00, '202409', -31500.00, '10월분 + 9월 소급분', 'system_admin'); -- 고용보험
 
 -- 계산 규칙 관리 --
 CREATE TABLE ZHR_PAY_RULE (
@@ -2866,3 +3014,4 @@ VALUES
  'CHEN LI', 'SPOUSE', '010-1111-4321', '중국 상하이시 푸동신구 세기대도 88',
  'NA', NULL, NULL, NULL, 'N', 'N', -- ZMIL_SERVICE_STATUS 값 변경
  'system_loader', NULL);
+
