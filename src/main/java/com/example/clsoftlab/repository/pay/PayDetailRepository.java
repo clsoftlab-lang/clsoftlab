@@ -9,5 +9,7 @@ import com.example.clsoftlab.entity.PayDetail;
 @Repository
 public interface PayDetailRepository extends JpaRepository<PayDetail, Long> , JpaSpecificationExecutor<PayDetail> {
 
+	// 중복 검사
+	public boolean existsByPayYmAndEmployeeMaster_PernrAndPayItem_ItemCodeAndSeqNo (String payYm, String empNo, String itemCode, Integer seqNo);
 	
 }

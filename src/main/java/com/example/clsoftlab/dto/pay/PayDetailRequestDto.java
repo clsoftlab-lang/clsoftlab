@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +18,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PayDetailRequestDto {
 
+	private Long id;
+	
 	@NotBlank(message = "지급월은 필수입니다.")
-    @Size(min = 6, max = 6, message = "지급월은 6자리(YYYYMM)여야 합니다.")
+	@Pattern(regexp = "^\\d{4}-\\d{2}$", message = "지급월 형식이 올바르지 않습니다. (YYYY-MM)")
     private String payYm;
 
     @NotNull(message = "차수는 필수입니다.")
@@ -34,7 +37,7 @@ public class PayDetailRequestDto {
     @Digits(integer = 16, fraction = 2, message = "지급액이 형식(정수 16, 소수 2)에 맞지 않습니다.")
     private BigDecimal amount;
 
-    @Size(min = 6, max = 6, message = "소급월은 6자리(YYYYMM)여야 합니다.")
+    @Pattern(regexp = "^(\\d{4}-\\d{2})?$", message = "소급월 형식이 올바르지 않습니다. (YYYY-MM)")
     private String backYm;
 
     @Digits(integer = 16, fraction = 2, message = "원금이 형식(정수 16, 소수 2)에 맞지 않습니다.")

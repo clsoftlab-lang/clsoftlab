@@ -45,30 +45,46 @@
 						<h5 class="card-title">검색 조건</h5>
 					</div>
 					<div class="card-body">
-						<form action="/pay/detail" method="get">
+						<form action="/pay/pay-detail" method="get">
 							<div class="row">
 								<div class="col-md-3">
 									<div class="form-group">
-										<label>지급월</label>
-										<input type="month" class="form-control" name="zpayYm">
+										<label>지급월 (From)</label>
+										<input type="month" class="form-control" name="payYmFrom" th:value="${payYmFrom}">
 									</div>
 								</div>
 								<div class="col-md-3">
+									<div class="form-group">
+										<label>지급월 (To)</label>
+										<input type="month" class="form-control" name="payYmTo" th:value="${payYmTo}">
+									</div>
+								</div>
+								<div class="col-md-2">
 									<div class="form-group">
 										<label>차수</label>
-										<input type="number" class="form-control" placeholder="차수" name="zseqNo">
+										<input type="number" class="form-control" placeholder="차수" name="seqNo">
 									</div>
 								</div>
-								<div class="col-md-3">
+								<div class="col-md-2">
 									<div class="form-group">
 										<label>사번</label>
-										<input type="text" class="form-control" placeholder="사번" name="zempNo">
+										<select name="empNo" multiple="multiple" class="form-control">
+											<option th:each = "e : ${empList}" th:value="${e.pernr}" th:text=|${e.name}(${e.pernr})|>
+										</select>
 									</div>
 								</div>
-								<div class="col-md-3 d-flex align-items-end">
-									<div class="form-group w-100">
-										<button type="submit" class="btn btn-primary w-100">조회</button>
+								<div class="col-md-2">
+									<div class="form-group">
+										<label>항목코드</label>
+										<select  name="itemCode" multiple="multiple" class="form-control">
+											<option th:each = "i : ${payItemList}" th:value="${i.itemCode}" th:text=|${i.itemName}(${i.itemCode})|>
+										</select>
 									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12 text-end">
+									<button type="submit" class="btn btn-primary">조회</button>
 								</div>
 							</div>
 						</form>
@@ -84,6 +100,8 @@
 								<thead class="table-light">
 									<tr>
 										<th>사번</th>
+										<th>지급월</th>
+										<th>차수</th>
 										<th>항목코드</th>
 										<th>항목명</th>
 										<th>지급액</th>
@@ -94,13 +112,16 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr th:each= "detail : ${payDetails}">
-										<td th:text="${detail.zempNo}"></td>
-										<td th:text="${detail.zitemCd}"></td>
-										<td th:text="${detail.zitemName}"></td> <td th:text="${detail.zamount}"></td>
-										<td th:text="${detail.zbackYm}"></td>
-										<td th:text="${detail.zorigAmt}"></td>
-										<td th:text="${detail.znote}"></td>
+									<tr th:each= "detail : ${payDetail}">
+										<td th:text=|${detail.employeeMasterPernr}(${detail.employeeMasterName})|></td>
+										<td th:text="${detail.payYm}"></td>
+										<td th:text="${detail.seqNo}"></td>
+										<td th:text="${detail.itemCode}"></td>
+										<td th:text="${detail.itemName}"></td>
+										<td th:text="${detail.amount}"></td>
+										<td th:text="${detail.backYm}"></td>
+										<td th:text="${detail.origAmt}"></td>
+										<td th:text="${detail.note}"></td>
 										<td>
 											<button class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" th:data-id="${detail.id}">수정</button>
 										</td>
@@ -122,60 +143,79 @@
 				                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				            </div>
 				            <div class="modal-body">
-				                <form id="addPayDetailForm">
+								<form id="addForm">
 				                    <div class="row">
-										<div class="col-md-4 mb-3">
+										<div class="col-md-3 mb-3">
 											<div class="form-group">
-												<label>사번</label>
-												<input type="text" class="form-control" name="zempNo" required>
+												<label>지급월 <span class="text-danger">*</span></label>
+												<input type="month" class="form-control" name="payYm" required>
 											</div>
 										</div>
-										<div class="col-md-4 mb-3">
+										<div class="col-md-3 mb-3">
 											<div class="form-group">
-												<label>항목코드</label>
-												<input type="text" class="form-control" name="zitemCd" required>
+												<label>차수 <span class="text-danger">*</span></label>
+												<input type="number" class="form-control" name="seqNo" required min="1">
 											</div>
 										</div>
-										<div class="col-md-4 mb-3">
+										<div class="col-md-3 mb-3">
 											<div class="form-group">
-												<label>항목명</label>
-												<input type="text" class="form-control" name="zitemName" readonly>
+												<label>사번 <span class="text-danger">*</span></label>
+												<select class="form-control" name="empNo" required>
+													<option value="">-- 사번 선택 --</option>
+													<option th:each="e : ${empList}" 
+															th:value="${e.pernr}" 
+															th:text="|${e.name}(${e.pernr})|"></option>
+												</select>
 											</div>
 										</div>
+										<div class="col-md-3 mb-3">
+											<div class="form-group">
+												<label>항목코드 <span class="text-danger">*</span></label>
+												<select class="form-control" name="itemCode" required>
+													<option value="">-- 항목 선택 --</option>
+													<option th:each="i : ${payItemList}" 
+															th:value="${i.itemCode}" 
+															th:text="|${i.itemName}(${i.itemCode})|"></option>
+												</select>
+											</div>
+										</div>
+										
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>지급액</label>
-												<input type="number" class="form-control" name="zamount" required>
+												<label>지급액 <span class="text-danger">*</span></label>
+												<input type="number" class="form-control" name="amount" required>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
 												<label>소급월</label>
-												<input type="month" class="form-control" name="zbackYm">
+												<input type="month" class="form-control" name="backYm">
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
 												<label>원금</label>
-												<input type="number" class="form-control" name="zorigAmt">
+												<input type="number" class="form-control" name="origAmt">
 											</div>
 										</div>
+
 										<div class="col-md-12 mb-3">
 				                            <div class="form-group">
 				                                <label>비고</label>
-				                                <textarea class="form-control" rows="3" name="znote" maxlength="500"></textarea>
+				                                <textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
 				                            </div>
 				                        </div>
 				                    </div>
 				                </form>
 				            </div>
 				            <div class="modal-footer">
-				                <button type="reset" form="addPayDetailForm" class="btn btn-outline-secondary">초기화</button>
+				                <button type="reset" form="addForm" class="btn btn-outline-secondary">초기화</button>
 				                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
-				                <button type="button" class="btn btn-primary" onclick="">저장</button> </div>
+				                <button type="button" class="btn btn-primary" onclick="addNewDetail()">저장</button> </div>
 				        </div>
 				    </div>
 				</div>
+				
 				<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
 				    <div class="modal-dialog modal-xl modal-dialog-centered">
 				        <div class="modal-content">
@@ -184,61 +224,77 @@
 				                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				            </div>
 				            <div class="modal-body">
-				                <form id="editPayDetailForm">
+								<form id="editPayDetailForm">
 									<input type="hidden" name="id">
 				                    <div class="row">
-										<div class="col-md-4 mb-3">
+										<div class="col-md-3 mb-3">
+											<div class="form-group">
+												<label>지급월</label>
+												<input type="month" class="form-control" name="payYm" readonly>
+											</div>
+										</div>
+										<div class="col-md-3 mb-3">
+											<div class="form-group">
+												<label>차수</label>
+												<input type="number" class="form-control" name="seqNo" readonly>
+											</div>
+										</div>
+										<div class="col-md-3 mb-3">
 											<div class="form-group">
 												<label>사번</label>
-												<input type="text" class="form-control" name="zempNo" readonly>
+												<input type="text" class="form-control" name="empNo" readonly>
 											</div>
 										</div>
-										<div class="col-md-4 mb-3">
+										<div class="col-md-3 mb-3">
 											<div class="form-group">
 												<label>항목코드</label>
-												<input type="text" class="form-control" name="zitemCd" readonly>
+												<input type="text" class="form-control" name="itemCd" readonly>
 											</div>
 										</div>
-										<div class="col-md-4 mb-3">
+
+										<div class="col-md-12 mb-3">
 											<div class="form-group">
 												<label>항목명</label>
-												<input type="text" class="form-control" name="zitemName" readonly>
+												<input type="text" class="form-control" name="itemName" readonly>
 											</div>
 										</div>
+
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
 												<label>지급액</label>
-												<input type="number" class="form-control" name="zamount" required>
+												<input type="number" class="form-control" name="amount" required>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
 												<label>소급월</label>
-												<input type="month" class="form-control" name="zbackYm">
+												<input type="month" class="form-control" name="backYm">
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
 												<label>원금</label>
-												<input type="number" class="form-control" name="zorigAmt">
+												<input type="number" class="form-control" name="origAmt">
 											</div>
 										</div>
+										
 										<div class="col-md-12 mb-3">
 											<div class="form-group">
 												<label>비고</label>
-												<textarea class="form-control" rows="3" name="znote" maxlength="500"></textarea>
+												<textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
 											</div>
 										</div>
+
 										<div class="col-md-6 mb-3">
 											<div class="form-group">
 												<label>생성일시</label>
-												<input type="text" class="form-control" name="erdat" readonly>
+												<input type="text" class="form-control" name="createdAt" readonly>
 											</div>
 										</div>
 										<div class="col-md-6 mb-3">
 											<div class="form-group">
 												<label>생성자</label>
-												<input type="text" class="form-control" name="ernam" readonly>
+												<input type="text" class="form-control" name="createdBy" readonly>
 											</div>
 										</div>
 				                    </div>
@@ -246,10 +302,10 @@
 				            </div>
 				            <div class="modal-footer">
 				                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-				                <button type="button" class="btn btn-primary" onclick="">변경사항 저장</button> </div>
+				                <button type="button" class="btn-primary" onclick="">변경사항 저장</button> </div>
 				        </div>
 				    </div>
-				</div>
+			    </div>
 				</div>
 
 			<div th:replace= "~{common/footer :: footer}" ></div>
@@ -263,5 +319,181 @@
 	<script src="/assets/js/jquery.dataTables.min.js"></script>
 	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
 	<script src="/assets/js/script.js"></script>
+	<script type="text/javascript">
+	 document.addEventListener('DOMContentLoaded', function () {
+	  		// 수정 모달창을 열 때, 불러오기.
+	       const tableBody = document.querySelector('.table tbody');
+		    if (tableBody) {
+		        tableBody.addEventListener('click', function(event) {
+		            const editButton = event.target.closest('.edit-btn');
+		            if (editButton) {
+		                const id = editButton.dataset.id; 
+		                findDetail(id);
+		            }
+		        });
+		    }
+		});
+	 
+	// 새 항목 등록
+	    async function addNewDetail() {
+			const addForm = document.getElementById('addForm');
+		    const formData = new FormData(addForm);
+		    const data = Object.fromEntries(formData.entries());
+
+		    if (!data.payYm) {
+		        alert('지급월을 선택해주세요.');
+		        return;
+		    }
+		    if (!data.seqNo) {
+		        alert('차수를 입력해주세요.');
+		        return;
+		    }
+	        if (!data.empNo) {
+		        alert('사번을 선택해주세요.');
+		        return;
+		    }
+	        if (!data.itemCode) {
+		        alert('항목코드를 선택해주세요.');
+		        return;
+		    }
+	        if (!data.amount) {
+		        alert('지급액을 입력해주세요.');
+		        return;
+		    }
+		    
+		    // --- 서버 작업 시작 ---
+		    try {
+		    	
+		        const codeResponse = await fetch(`/pay/pay-detail/checkOverlap?payYm=${data.payYm}&empNo=${data.empNo}&itemCode=${data.itemCode}&seqNo=${data.seqNo}`);
+		        const codeCheckResult = await codeResponse.text();
+		        
+		        	
+		        if (codeCheckResult == 'true') { 
+		            alert('해당 지급월/차수에 동일한 사번과 항목코드가 이미 존재합니다.'); 
+		            return;
+		        }
+
+		        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
+		        const saveResponse = await fetch('/pay/pay-detail', {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (saveResponse.ok) {
+		            alert('성공적으로 등록되었습니다.');
+		            location.reload();
+		        } else {
+		            const errorText = await saveResponse.text();
+		            alert(`등록에 실패했습니다: ${errorText}`);
+		        }
+
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('등록 중 오류가 발생했습니다.');
+		    }
+		};
+		
+		// 수정 모달창 데이터 불러오기.
+		async function findDetail(id) {
+		    try {
+		        const response = await fetch(`/hr/biz-place/detail/${id}`);
+		        if (!response.ok) {
+		            throw new Error('데이터를 불러오는 데 실패했습니다.');
+		        }
+		        const data = await response.json();
+		        const editForm = document.getElementById('editForm')
+
+
+		        for (const key in data) {
+		            const field = editForm.querySelector(`[name="${key}"]`);
+		            
+		            if (field) { 
+	                    field.value = data[key];
+		            }
+		        }
+		        
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert(error.message);
+		    }
+		}
+		
+		//항목 정보 수정
+		async function updateBizPlace () {
+		    const editForm = document.getElementById('editForm');
+		    const formData = new FormData(editForm);
+		    const data = Object.fromEntries(formData.entries());
+		    
+		    if (!data.bizName || !data.bizName.trim()) {
+		    	alert('사업장명을 입력해주세요.');
+		    	return;
+		    }
+		    
+		    if (!data.address || !data.address.trim()) {
+		    	alert('주소를 입력해주세요.');
+		    	return;
+		    }
+		    
+		    try {
+		    	
+		        const url = `/hr/biz-place`;
+		        const response = await fetch(url, {
+		            method: 'PUT', 
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (response.ok) {
+		            alert('성공적으로 수정되었습니다.');
+		            location.reload(); // 성공 시 페이지 새로고침
+		        } else {
+		            const errorText = await response.text();
+		            alert(`수정에 실패했습니다: ${errorText}`);
+		        }
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('수정 중 오류가 발생했습니다.');
+		    }
+		}
+		
+		// 비활성화
+		async function deleteBizPlace() {
+		    if (!confirm('정말로 이 사업장을 비활성화(삭제)하시겠습니까?')) {
+		        return;
+		    }
+
+		    const editForm = document.getElementById('editForm');
+		    const formData = new FormData(editForm);
+		    const data = Object.fromEntries(formData.entries());
+		    
+		    data.useYn = 'N';
+
+		    try {
+		        const url = `/hr/biz-place`;
+		        const response = await fetch(url, {
+		            method: 'PUT', // 비활성화도 수정(PUT)으로 처리
+		            headers: { 'Content-Type': 'application/json' },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (response.ok) {
+		            alert('사업장이 비활성화 처리되었습니다.');
+		            location.reload();
+		        } else {
+		            const errorText = await response.text();
+		            alert(`처리 중 오류가 발생했습니다: ${errorText}`);
+		        }
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('처리 중 오류가 발생했습니다.');
+		    }
+		}
+	
+	</script>
 	</body>
 </html>

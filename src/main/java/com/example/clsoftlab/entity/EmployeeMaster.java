@@ -22,6 +22,6 @@ public class EmployeeMaster extends BaseEntity {
     private String pernr;
 
     @Column(name = "ENAME", length = 50, nullable = false)
-    private String ename;
+    private String name;
     
 }

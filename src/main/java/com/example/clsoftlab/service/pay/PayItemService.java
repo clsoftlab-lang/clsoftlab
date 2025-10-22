@@ -89,4 +89,12 @@ public class PayItemService {
 	public boolean checkOverlap (String itemCode) {
 		return payItemRepository.existsById(itemCode);
 	}
+	
+	
+	// 전체 list 조회
+	public List<PayItemListDto> findAll () { 
+		return payItemRepository.findAll().stream()
+				.map(i -> modelMapper.map(i, PayItemListDto.class))
+				.toList();
+	}
 }

@@ -2,6 +2,8 @@ package com.example.clsoftlab.entity;
 
 import java.math.BigDecimal;
 
+import com.example.clsoftlab.dto.pay.PayDetailRequestDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +23,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PayDetail {
+@Table(name = "ZHR_PAY_DETAIL")
+public class PayDetail extends BaseEntity {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,4 +56,11 @@ public class PayDetail {
 
     @Column(name = "ZNOTE", length = 500)
     private String note;
+    
+    public void update(PayDetailRequestDto dto) {
+    	this.amount = dto.getAmount();
+    	this.backYm = dto.getBackYm();
+    	this.origAmt = dto.getOrigAmt();
+    	this.note = dto.getNote();
+    }
 }
