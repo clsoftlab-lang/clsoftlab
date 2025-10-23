@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.clsoftlab.dto.pay.PayDetailDto;
 import com.example.clsoftlab.dto.pay.PayDetailRequestDto;
+import com.example.clsoftlab.dto.pay.PayDetailUpdateDto;
 import com.example.clsoftlab.service.common.EmployeeMasterService;
 import com.example.clsoftlab.service.pay.PayDetailService;
 import com.example.clsoftlab.service.pay.PayItemService;
@@ -75,8 +77,15 @@ public class PayDetailController {
 	
 	// 기존 항목 수정
 	@PutMapping("")
-	public ResponseEntity<Void> updateDetail (@Valid @RequestBody PayDetailRequestDto dto) {
+	public ResponseEntity<Void> updateDetail (@Valid @RequestBody PayDetailUpdateDto dto) {
 		payDetailService.updateDetail(dto);
+		return ResponseEntity.ok().build();
+	}
+	
+	// 기존 항목 삭제
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteDetail (@PathVariable Long id) {
+		payDetailService.deleteDetail(id);
 		return ResponseEntity.ok().build();
 	}
 	

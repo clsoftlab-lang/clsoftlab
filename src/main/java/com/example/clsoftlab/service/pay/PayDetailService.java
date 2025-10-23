@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 
 import com.example.clsoftlab.dto.pay.PayDetailDto;
 import com.example.clsoftlab.dto.pay.PayDetailRequestDto;
+import com.example.clsoftlab.dto.pay.PayDetailUpdateDto;
 import com.example.clsoftlab.entity.PayDetail;
 import com.example.clsoftlab.repository.common.EmployeeMasterRepository;
 import com.example.clsoftlab.repository.pay.PayDetailRepository;
@@ -70,7 +71,7 @@ public class PayDetailService {
 	
 	// 항목 수정
 	@Transactional
-	public void updateDetail (PayDetailRequestDto dto) {
+	public void updateDetail (PayDetailUpdateDto dto) {
 		if (dto.getId() == null) {
 			throw new IllegalAccessError(".");
 		}

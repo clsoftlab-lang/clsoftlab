@@ -12,6 +12,9 @@
 	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
 	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" th:href="@{/assets/plugins/@simonwep/pickr/themes/nano.min.css}">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
 </head>
 
 <body>
@@ -42,19 +45,22 @@
 								<div class="col-md-4">
 									<div class="form-group">
 										<label>적용 항목</label>
-										<input class="form-control" name="appliedItemCode" readonly th:value ="${appliedItemCode}" >
+										<select  name="appliedItemCode" multiple="multiple" class="form-control" id="appliedItemSelect">
+											<option th:each = "i : ${payItemList}" th:value="${i.itemCode}" th:text=|${i.itemName}(${i.itemCode})| th:selected="${appliedItemCode != null && #lists.contains(appliedItemCode, i.itemCode)}">
+										</select>
 									</div>
 								</div>
 								<div class="col-md-4">
 									<div class="form-group">
 										<label>기준 항목</label>
-										<input class="form-control" name="baseItemCode" readonly th:value ="${baseItemCode}">
+										<select  name="baseItemCode" multiple="multiple" class="form-control" id="baseItemSelect">
+											<option th:each = "i : ${payItemList}" th:value="${i.itemCode}" th:text=|${i.itemName}(${i.itemCode})| th:selected="${baseItemCode != null && #lists.contains(baseItemCode, i.itemCode)}">
+										</select>
 									</div>
 								</div>
 								<div class="col-md-4 d-flex align-items-end">
 									<div class="form-group w-100 position-relative">
 										<button type="submit" class="btn btn-primary w-100">조회</button>
-						                <button type="button" id="searchResetBtn" class="btn btn-sm btn-outline-secondary position-absolute" style="top: -30px; right: 0;">초기화</button>
 									</div>
 								</div>
 							</div>
@@ -68,7 +74,7 @@
 					</div>
 					<div class="card-body">
 						<div class="table-responsive">
-							<table class="table table-striped table-hover datatable">
+							<table class="table table-striped table-hover datatable-resizable" id="ruleTable">
 								<thead class="table-light">
 									<tr>
 										<th>적용 항목</th>
@@ -81,8 +87,8 @@
 								</thead>
 								<tbody>
 									<tr th:each="b : ${backpayRule}">
-										<td th:text="${b.appliedItemCode}"></td>
-										<td th:text="${b.baseItemCode}"></td>
+										<td th:text= |${b.appliedItemName}(${b.appliedItemCode})|></td>
+										<td th:text=|${b.baseItemName}(${b.baseItemCode})|></td>
 										<td th:text="${b.ruleType}"></td>
 										<td th:text="${b.backPercent}"></td>
 										<td th:text="${b.useYn}"></td>
@@ -112,12 +118,18 @@
 				                <form id="addBackpayRule">
 				                    <div class="row">
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">적용 항목</label>
-				                            <input class="form-control" name="appliedItemCode" required readonly>
+				                            <label class="form-label">적용 항목 <span class="text-danger">*</span></label>
+				                            <select  name="appliedItemCode" class="form-control" >
+				                            	<option value="" selected>---- 선택해주세요 ----</option>
+												<option th:each = "i : ${payItemList}" th:value="${i.itemCode}" th:text=|${i.itemName}(${i.itemCode})| >
+											</select>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">기준 항목</label>
-				                            <input class="form-control" name="baseItemCode" required readonly>
+				                            <label class="form-label">기준 항목 <span class="text-danger">*</span></label>
+				                            <select  name="baseItemCode" class="form-control" >
+				                            	<option value="" selected>---- 선택해주세요 ----</option>
+												<option th:each = "i : ${payItemList}" th:value="${i.itemCode}" th:text=|${i.itemName}(${i.itemCode})| >
+											</select>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
 				                            <label class="form-label">소급 방식</label>
@@ -145,7 +157,7 @@
 				                        </div>
 				                        <div class="col-md-12 mb-3">
 				                            <label class="form-label">비고</label>
-				                            <textarea class="form-control" rows="2" name="note"></textarea>
+				                            <textarea class="form-control" rows="2" name="note" maxlength="500"></textarea>
 				                        </div>
 				                    </div>
 				                </form>
@@ -217,64 +229,6 @@
 				    </div>
 				</div>
 				
-				<div class="modal fade" id="itemSelectModal" tabindex="-1">
-				    <div class="modal-dialog modal-lg modal-dialog-centered">
-				        <div class="modal-content">
-				            <div class="modal-header">
-				                <h5 class="modal-title">급여 항목 선택</h5>
-				                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				            </div>
-				            <div class="modal-body">
-				                
-				                <div class="card card-body mb-3">
-				                    <form id="modalSearchForm">
-				                        <div class="row">
-				                            <div class="col-md-4">
-				                                <input type="text" class="form-control" placeholder="항목명 검색" name="itemName">
-				                            </div>
-				                            <div class="col-md-3">
-				                                <select class="form-select" name="itemType">
-				                                    <option value="">유형(전체)</option>
-				                                    <option value="PAY">PAY</option>
-				                                    <option value="DEDUCT">DEDUCT</option>
-				                                    <option value="TAX">TAX</option>
-				                                    <option value="INSURANCE">INSURANCE</option>
-				                                    <option value="BACKPAY">BACKPAY</option>
-				                                </select>
-				                            </div>
-				                            <div class="col-md-3">
-				                                <select class="form-select" name="useYn">
-				                                    <option value="">사용(전체)</option>
-				                                    <option value="Y">Y</option>
-				                                    <option value="N">N</option>
-				                                </select>
-				                            </div>
-				                            <div class="col-md-2">
-				                                <button type="submit" class="btn btn-primary w-100">조회</button>
-				                            </div>
-				                        </div>
-				                    </form>
-				                </div>
-				                
-				                <div class="table-responsive">
-				                    <table class="table table-hover datatable" id="item-select-table">
-				                        <thead>
-				                            <tr>
-				                                <th>항목코드</th>
-				                                <th>항목명</th>
-				                                <th>유형</th>
-				                                <th>사용여부</th>
-				                            </tr>
-				                        </thead>
-				                        <tbody id="item-list-body">
-				                            </tbody>
-				                    </table>
-				                </div>
-				
-				            </div>
-				        </div>
-				    </div>
-				</div>
 			</div>
 
 			<div th:replace="~{common/footer :: footer}"></div>
@@ -282,76 +236,24 @@
 	</div>
 
 	<script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
 	<script src="/assets/js/bootstrap.bundle.min.js"></script>
 	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
 	<script src="https://unpkg.com/feather-icons"></script>
 	<script src="/assets/js/jquery.dataTables.min.js"></script>
 	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
 	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
 	
 	<script type="text/javascript">
 	
-		let itemSelectModalInstance;
-		let itemSelectDataTable;
-		let targetInputForSelectItem; 
-		
 		const addBackpayRuleForm = document.getElementById('addBackpayRule');
 	
 		document.addEventListener('DOMContentLoaded', function () {
-	        const itemSelectModal = document.getElementById('itemSelectModal');
-	        if (itemSelectModal) {
-	            itemSelectModalInstance = new bootstrap.Modal(itemSelectModal);
-	            
-	         // 모달이 처음 표시될 때 DataTables를 딱 한 번만 초기화하도록 이벤트 추가
-	            itemSelectModal.addEventListener('shown.bs.modal', async function () {
-	            	 // DataTables가 초기화되지 않았다면 초기화
-	                if (!itemSelectDataTable) { 
-	                    initializeDataTable();
-	                }
-	                // 모달이 열릴 때마다 검색창을 초기화하고 데이터를 로드
-	                document.getElementById('modalSearchForm').reset();
-	                await loadPayItems();
-	            });
-	        }
 	        
-	        // 검색창 초기화.
-	        const searchResetBtn = document.getElementById('searchResetBtn');
-	        if (searchResetBtn) {
-	            searchResetBtn.addEventListener('click', function() {
-	                const searchForm = document.getElementById('searchForm');
-	                if (searchForm) {
-	                    searchForm.querySelector('input[name="appliedItemCode"]').value = '';
-	                    searchForm.querySelector('input[name="baseItemCode"]').value = '';
-	                }
-	            });
-	        }
-	        
-	        // 급여 선택 항목에서, 검색시 급여 화면으로 넘어가는걸 방지.
-	        const modalSearchForm = document.getElementById('modalSearchForm');
-	        if (modalSearchForm) {
-	            modalSearchForm.addEventListener('submit', handleModalSearch);
-	        }
-	        
-	        // '적용 항목' 또는 '기준 항목' input 클릭 시 공통 함수 호출 (수정 폼은 제외.)
-	        document.querySelectorAll('#searchForm input[name="appliedItemCode"], #addBackpayRule input[name="appliedItemCode"], '
-	        		+'#searchForm input[name="baseItemCode"], #addBackpayRule input[name="baseItemCode"]').forEach(input => {
-    				input.addEventListener('click', openItemSelector);
-			});
-	        
-		    	 // 모달 테이블의 행 클릭 시 값 입력 및 모달 닫기 
-		        document.getElementById('item-select-table').addEventListener('click', function(event) {
-			            const selectedRow = event.target.closest('.select-item-row');
-			            if (selectedRow && targetInputForSelectItem) {
-			                const itemCode = selectedRow.dataset.code;
-			                targetInputForSelectItem.value = itemCode; // 저장해둔 input에 값을 직접 넣음
-			                
-			                if (itemSelectModalInstance) itemSelectModalInstance.hide();
-			                targetInputForSelectItem = null; // 사용 후 변수 초기화
-			            }
-			        });
-	    	 
 	     		// 수정 모달창을 열 때, 불러오기.
-		        const tableBody = document.querySelector('.datatable tbody');
+		        const tableBody = document.querySelector('.table tbody');
 			    if (tableBody) {
 			        tableBody.addEventListener('click', function(event) {
 			        	
@@ -364,80 +266,49 @@
 			            }
 			        });
 			    }
+			    
+			 	// Select2 초기화
+			    $('#appliedItemSelect').select2();
+			    $('#baseItemSelect').select2();
+			    
+			    const tableSpecificOptions = {
+				        'columns': [
+				            null,                 // 1. 적용 항목
+				            null,                 // 2. 기준 항목
+				            { "width": "100px" }, // 3. 소급 방식
+				            { "width": "100px" }, // 4. 소급 비율(%)
+				            { "width": "80px" },  // 5. 사용 여부
+				            // 6. 수정 (버튼) - 검색 및 정렬 비활성화
+				            { "width": "80px", "searchable": false, "orderable": false } 
+				        ],
+	                    // DataTables 한글화 및 기본 설정 (유지)
+	                    "language": {
+	                        "emptyTable": "데이터가 없습니다.",
+	                        "info": "_START_ - _END_ / _TOTAL_ 항목",
+	                        "infoEmpty": "0 항목",
+	                        "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+	                        "lengthMenu": "_MENU_ 개씩 보기",
+	                        "loadingRecords": "로딩중...",
+	                        "processing": "처리중...",
+	                        "search": "검색: ",
+	                        "zeroRecords": "일치하는 항목이 없습니다.",
+	                        "paginate": {
+	                            "first": "처음",
+	                            "last": "마지막",
+	                            "next": "다음",
+	                            "previous": "이전"
+	                        }
+	                    },
+	                    "pageLength": 10, 
+	                    "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+				    };
+			    
+			    
+			    initializeResizableDataTable('#ruleTable',tableSpecificOptions);
 			});
 		
 		
-			// '적용 항목', '기준 항목' input 클릭 시 실행될 공통 함수
-		    function openItemSelector(event) {
-		        // 클릭된 input 요소를 targetInputForSelectItem 변수에 저장
-		        targetInputForSelectItem = event.target;
-		        if (itemSelectModalInstance) {
-		            itemSelectModalInstance.show();
-		        }
-		    }
 		
-	        
-	     	// 모달 내 검색 버튼 클릭 시 실행될 핸들러
-		    async function handleModalSearch(event) {
-		        event.preventDefault(); // 폼 기본 제출 방지
-		        const formData = new FormData(event.target);
-		        const searchParams = new URLSearchParams(formData).toString();
-		        await loadPayItems(searchParams);
-		    }
-	     	
-		 	// 급여 항목 선택 테이블 초기화 함수
-		    function initializeDataTable() {
-		        itemSelectDataTable = $('#item-select-table').DataTable({
-		            // DataTables 옵션 설정
-		            destroy: true,
-		            searching: true, 
-		            lengthChange: true, 
-		            pageLength: 25,       // 한 페이지에 25개씩 표시
-		            info: true,          // 'Showing 1 to 5 of...' 정보 표시
-		            
-		            // 서버에서 받은 JSON 데이터의 키와 테이블 컬럼을 매핑
-		            columns: [ 
-		                { data: 'itemCode' },
-		                { data: 'itemName' },
-		                { data: 'itemType' },
-		                { data: 'useYn' }
-		            ],
-		            
-		            // 각 행(row)이 생성될 때 추가 작업을 수행
-		            createdRow: function(row, data, dataIndex) {
-		                // 클릭 이벤트를 위해 필요한 클래스와 data-* 속성을 추가
-		                $(row).addClass('select-item-row').css('cursor', 'pointer');
-		                $(row).attr('data-code', data.itemCode);
-		                $(row).attr('data-name', data.itemName);
-		            }
-		        });
-		    }
-	     	
-		    // fetch를 이용해 PayItem 리스트를 불러오는 함수
-		    async function loadPayItems(searchParams = '') {
-		        const itemListBody = document.getElementById('item-list-body');
-
-		        try {
-		            const apiUrl = `/pay/pay-item/list?${searchParams}`;
-		            const response = await fetch(apiUrl); 
-		            if (!response.ok) throw new Error('데이터 로딩 실패');
-		            
-		            const pageData = await response.json();
-		            const items = pageData.content;
-		            
-		            if (itemSelectDataTable) {
-		            	itemSelectDataTable.clear();	// 1. 기존 데이터 삭제
-		            	itemSelectDataTable.rows.add(items); // 2. 새 데이터 추가
-		                itemSelectDataTable.draw();       // 3. 테이블 다시 그리기
-		            }
-		            
-		        } catch (error) {
-		            console.error(error);
-		            itemListBody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
-		        }
-		    }
-		    
-
 		 	// 새 소급 규칙 등록
 		    async function addNewBackpayRule() {
 			    const formData = new FormData(addBackpayRuleForm);
@@ -465,9 +336,9 @@
 			    try {
 			        const response = await fetch(`/pay/backpay-rule/checkOverlap?appliedItemCode=${data.appliedItemCode}&baseItemCode=${data.baseItemCode}`);
 			        
-			        const checkResult = Number(await response.text());
+			        const checkResult = await response.text();
 			        
-			        if (checkResult > 0) { 
+			        if (checkResult == 'true') { 
 			            alert('선택하신 적용항목, 기준 항목이 포함된 규칙이 이미 존재합니다.'); 
 			            return;
 			        }

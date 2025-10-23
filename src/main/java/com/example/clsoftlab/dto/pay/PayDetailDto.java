@@ -1,7 +1,7 @@
 package com.example.clsoftlab.dto.pay;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,5 +26,5 @@ public class PayDetailDto {
     private BigDecimal origAmt; 
     private String note;
     private String createdBy;
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 }

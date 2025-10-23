@@ -1,7 +1,7 @@
 function initializeResizableDataTable(tableSelector, datatableOptions) {
 
 	const defaultOptions = {
-	        'autoWidth': false,
+	        'autoWidth': true,
 			'searching' : false,
 
 	        'layout': {

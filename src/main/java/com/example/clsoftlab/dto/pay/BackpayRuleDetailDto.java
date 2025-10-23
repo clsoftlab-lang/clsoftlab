@@ -15,7 +15,9 @@ public class BackpayRuleDetailDto {
 
 	private long ruleId;
     private String appliedItemCode;
+    private String appliedItemName;
     private String baseItemCode;
+    private String baseItemName;
     private String ruleType;
     private BigDecimal backPercent;
     private String useYn;

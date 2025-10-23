@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.example.clsoftlab.entity.PayRule;
 
 @Repository
-public interface PayRuleRepository extends JpaRepository<PayRule, Long> {
+public interface PayRuleRepository extends JpaRepository<PayRule, Long>, JpaSpecificationExecutor<PayRule> {
 
 	
 	// 계산 규칙 목록 검색

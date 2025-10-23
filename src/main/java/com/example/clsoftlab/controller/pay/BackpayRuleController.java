@@ -1,5 +1,7 @@
 package com.example.clsoftlab.controller.pay;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.example.clsoftlab.dto.pay.BackpayRuleDetailDto;
 import com.example.clsoftlab.dto.pay.BackpayRuleRequestDto;
 import com.example.clsoftlab.service.pay.BackpayRuleService;
+import com.example.clsoftlab.service.pay.PayItemService;
 
 import jakarta.validation.Valid;
 
@@ -24,14 +27,16 @@ import jakarta.validation.Valid;
 public class BackpayRuleController {
 
 	private final BackpayRuleService backpayRuleService;
+	private final PayItemService payItemService;
 	
-	public BackpayRuleController(BackpayRuleService backpayRuleService) {
+	public BackpayRuleController(BackpayRuleService backpayRuleService, PayItemService payItemService) {
 		this.backpayRuleService = backpayRuleService;
+		this.payItemService = payItemService;
 	}
 	
 	// 전체 목록
 	@GetMapping("")
-	public String getBackpayRuleList(@RequestParam(defaultValue = "") String appliedItemCode, @RequestParam(defaultValue = "") String baseItemCode,
+	public String getBackpayRuleList(@RequestParam(required = false) List<String> appliedItemCode, @RequestParam(required = false) List<String> baseItemCode,
 			@RequestParam(required = false) Integer page, Model model) {
 		
 		if(page == null) {
@@ -46,6 +51,7 @@ public class BackpayRuleController {
 		model.addAttribute("appliedItemCode", appliedItemCode);
 		model.addAttribute("baseItemCode", baseItemCode);
 		model.addAttribute("backpayRulePage", backpayRulePage);
+		model.addAttribute("payItemList", payItemService.findAll());
 		
 		return "pay/backpay-rule/list";
 	}
@@ -69,9 +75,11 @@ public class BackpayRuleController {
 	// 중복 검사용
 	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public long checkOverlappingbackpayRule (@RequestParam String appliedItemCode, @RequestParam String baseItemCode) {
+	public ResponseEntity<Boolean> checkOverlappingbackpayRule (@RequestParam String appliedItemCode, @RequestParam String baseItemCode) {
 		
-		return backpayRuleService.countOverlappingbackpayRule(appliedItemCode, baseItemCode);
+		boolean result = backpayRuleService.countOverlappingbackpayRule(appliedItemCode, baseItemCode);
+		
+		return ResponseEntity.ok(result);
 	}
 	
 	// detail 조회용

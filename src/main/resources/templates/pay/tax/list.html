@@ -12,6 +12,7 @@
 	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
 	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
 </head>
 
 <body>
@@ -87,7 +88,7 @@
 					</div>
 					<div class="card-body">
 						<div class="table-responsive">
-							<table class="table table-striped table-hover datatable">
+							<table class="table table-striped table-hover datatable-resizable" id="taxTable">
 								<thead class="table-light">
 									<tr>
 										<th>연도</th>
@@ -260,12 +261,14 @@
 	</div>
 
 	<script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
 	<script src="/assets/js/bootstrap.bundle.min.js"></script>
 	<script src="/assets/js/jquery.slimscroll.min.js"></script>
 	<script src="https://unpkg.com/feather-icons"></script>
 	<script src="/assets/js/jquery.dataTables.min.js"></script>
 	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
 	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
 	
 	<script type="text/javascript">
 	
@@ -286,6 +289,21 @@
 		            }
 		        });
 		    }
+		    
+		    const taxTableSpecificOptions = {
+			        'columns': [
+			            null,                 // 1. 연도
+			            null,                 // 2. 과세소득(시작)
+			            { "width": "80px" },  // 3. 가족수
+			            null,                 // 4. 근로소득세율(%)
+			            null,                 // 5. 지방세율(%)
+			            null,                 // 6. 총세액(원)
+			            { "width": "80px" },  // 7. 사용여부
+			            { "width": "80px", "orderable": false }  
+			        ],
+			    };
+		    
+		    initializeResizableDataTable('#taxTable',taxTableSpecificOptions);
 		});
 	
 		// 새 계산 규칙 등록

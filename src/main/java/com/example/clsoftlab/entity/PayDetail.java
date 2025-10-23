@@ -2,7 +2,7 @@ package com.example.clsoftlab.entity;
 
 import java.math.BigDecimal;
 
-import com.example.clsoftlab.dto.pay.PayDetailRequestDto;
+import com.example.clsoftlab.dto.pay.PayDetailUpdateDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -57,7 +57,7 @@ public class PayDetail extends BaseEntity {
     @Column(name = "ZNOTE", length = 500)
     private String note;
     
-    public void update(PayDetailRequestDto dto) {
+    public void update(PayDetailUpdateDto dto) {
     	this.amount = dto.getAmount();
     	this.backYm = dto.getBackYm();
     	this.origAmt = dto.getOrigAmt();

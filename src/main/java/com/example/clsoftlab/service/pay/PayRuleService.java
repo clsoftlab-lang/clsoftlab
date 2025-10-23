@@ -1,6 +1,7 @@
 package com.example.clsoftlab.service.pay;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.pay.PayRuleDetailDto;
@@ -15,6 +17,7 @@ import com.example.clsoftlab.dto.pay.PayRuleListDto;
 import com.example.clsoftlab.dto.pay.PayRuleRequestDto;
 import com.example.clsoftlab.entity.PayRule;
 import com.example.clsoftlab.repository.pay.PayRuleRepository;
+import com.example.clsoftlab.repository.pay.specification.PayRuleSpecs;
 
 import jakarta.transaction.Transactional;
 
@@ -30,10 +33,16 @@ public class PayRuleService {
 	}
 	
 	// 계산 규칙 목록 검색
-	public Page<PayRuleListDto> searchPayRule (String itemCode, String ruleType, String useYn, int page, int size) {
+	public Page<PayRuleListDto> searchPayRule (List<String> itemCode, List<String> ruleType, String useYn, int page, int size) {
 		
 		Pageable pageable = PageRequest.of(page, size, Sort.by("itemCode"));
-		return payRuleRepository.search(itemCode, ruleType, useYn, pageable).map(i -> modelMapper.map(i, PayRuleListDto.class));
+		Specification<PayRule> spec = Specification.not(null);
+		
+		spec = spec.and(PayRuleSpecs.withItemCode(itemCode))
+				.and(PayRuleSpecs.withRuleType(ruleType))
+				.and(PayRuleSpecs.withUseYn(useYn));
+		return payRuleRepository.findAll(spec, pageable)
+				.map(i -> modelMapper.map(i, PayRuleListDto.class));
 	}
 	
 	// 계산 규칙 중복 검사

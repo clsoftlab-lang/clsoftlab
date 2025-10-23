@@ -12,6 +12,8 @@
 	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
 	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
 </head>
 
 <body>
@@ -52,18 +54,19 @@
 								<div class="col-md-3">
 									<div class="form-group">
 										<label>항목코드</label>
-										<input type="text" class="form-control" placeholder="항목코드 검색" name="itemCode" th:value="${itemCode}">
+										<select  name="itemCode" multiple="multiple" class="form-control" id="itemSelect">
+											<option th:each = "i : ${payItemList}" th:value="${i.itemCode}" th:text=|${i.itemName}(${i.itemCode})| th:selected="${itemCode != null && #lists.contains(itemCode, i.itemCode)}">
+										</select>
 									</div>
 								</div>
 								<div class="col-md-3">
 									<div class="form-group">
 										<label>계산 방식</label>
-										<select class="form-select" name="ruleType">
-											<option value="">전체</option>
-											<option value="FORMULA" th:selected="${ruleType == 'FORMULA'}">FORMULA</option>
-											<option value="FIXED" th:selected="${ruleType == 'FIXED'}">FIXED</option>
-											<option value="TABLE" th:selected="${ruleType == 'TABLE'}">TABLE</option>
-											<option value="SQL" th:selected="${ruleType == 'SQL'}">SQL</option>
+										<select class="form-select" name="ruleType" multiple="multiple" id="ruleSelect">
+											<option value="FORMULA" th:selected="${ruleType != null && #lists.contains(ruleType, 'FORMULA')}">FORMULA</option>
+											<option value="FIXED" th:selected="${ruleType != null && #lists.contains(ruleType, 'FIXED')}">FIXED</option>
+											<option value="TABLE" th:selected="${ruleType != null && #lists.contains(ruleType, 'TABLE')}">TABLE</option>
+											<option value="SQL" th:selected="${ruleType != null && #lists.contains(ruleType, 'SQL')}">SQL</option>
 										</select>
 									</div>
 								</div>
@@ -93,12 +96,12 @@
 					</div>
 					<div class="card-body">
 						<div class="table-responsive">
-							<table class="table table-striped table-hover datatable">
+							<table class="table table-striped table-hover datatable-resizable" id="ruleTable">
 								<thead class="table-light">
 									<tr>
 										<th>항목코드</th>
 										<th>계산방식</th>
-										<th style="width: 40%;">수식/쿼리</th>
+										<th>수식/쿼리</th>
 										<th>시작일</th>
 										<th>종료일</th>
 										<th>사용여부</th>
@@ -140,13 +143,9 @@
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
 												<label>항목코드</label>
-												<input type="text" class="form-control" onclick="selectItemCode()" name="itemCode" readonly="readonly">
-											</div>
-										</div>
-										<div class="col-md-4 mb-3">
-											<div class="form-group">
-												<label>항목명</label>
-												<input type="text" class="form-control" name="itemName" readonly placeholder="항목코드 입력 시 자동 완성">
+												<select  name="itemCode"  class="form-control" id="itemSelect">
+													<option th:each = "i : ${payItemList}" th:value="${i.itemCode}" th:text=|${i.itemName}(${i.itemCode})| >
+												</select>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
@@ -196,7 +195,7 @@
 										<div class="col-md-12 mb-3">
 				                            <div class="form-group">
 				                                <label>비고</label>
-				                                <textarea class="form-control" rows="2" name="znote" maxlength="500"></textarea>
+				                                <textarea class="form-control" rows="2" name="note" maxlength="500"></textarea>
 				                            </div>
 				                        </div>
 				                    </div>
@@ -297,64 +296,6 @@
 				    </div>
 				</div>
 				
-				<div class="modal fade" id="itemSelectModal" tabindex="-1">
-				    <div class="modal-dialog modal-lg modal-dialog-centered">
-				        <div class="modal-content">
-				            <div class="modal-header">
-				                <h5 class="modal-title">급여 항목 선택</h5>
-				                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				            </div>
-				            <div class="modal-body">
-				                
-				                <div class="card card-body mb-3">
-				                    <form id="modalSearchForm">
-				                        <div class="row">
-				                            <div class="col-md-4">
-				                                <input type="text" class="form-control" placeholder="항목명 검색" name="itemName">
-				                            </div>
-				                            <div class="col-md-3">
-				                                <select class="form-select" name="itemType">
-				                                    <option value="">유형(전체)</option>
-				                                    <option value="PAY">PAY</option>
-				                                    <option value="DEDUCT">DEDUCT</option>
-				                                    <option value="TAX">TAX</option>
-				                                    <option value="INSURANCE">INSURANCE</option>
-				                                    <option value="BACKPAY">BACKPAY</option>
-				                                </select>
-				                            </div>
-				                            <div class="col-md-3">
-				                                <select class="form-select" name="useYn">
-				                                    <option value="">사용(전체)</option>
-				                                    <option value="Y">Y</option>
-				                                    <option value="N">N</option>
-				                                </select>
-				                            </div>
-				                            <div class="col-md-2">
-				                                <button type="submit" class="btn btn-primary w-100">조회</button>
-				                            </div>
-				                        </div>
-				                    </form>
-				                </div>
-				                
-				                <div class="table-responsive">
-				                    <table class="table table-hover datatable" id="item-select-table">
-				                        <thead>
-				                            <tr>
-				                                <th>항목코드</th>
-				                                <th>항목명</th>
-				                                <th>유형</th>
-				                                <th>사용여부</th>
-				                            </tr>
-				                        </thead>
-				                        <tbody id="item-list-body">
-				                            </tbody>
-				                    </table>
-				                </div>
-				
-				            </div>
-				        </div>
-				    </div>
-				</div>
 			</div>
 
 			<div th:replace="~{common/footer :: footer}"></div>
@@ -363,44 +304,23 @@
 	</div>
 
 	<script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
 	<script src="/assets/js/bootstrap.bundle.min.js"></script>
 	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
 	<script src="https://unpkg.com/feather-icons"></script>
 	<script src="/assets/js/jquery.dataTables.min.js"></script>
 	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
 	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
 	<script type="text/javascript">
 	
-	 let itemSelectModalInstance;
-	 let itemSelectDataTable;
 	 const addPayRuleForm = document.getElementById('addPayRule');
 	    
 	    document.addEventListener('DOMContentLoaded', function () {
-	        const itemSelectModal = document.getElementById('itemSelectModal');
-	        if (itemSelectModal) {
-	            itemSelectModalInstance = new bootstrap.Modal(itemSelectModal);
-	            
-	         // 모달이 처음 표시될 때 DataTables를 딱 한 번만 초기화하도록 이벤트 추가
-	            itemSelectModal.addEventListener('shown.bs.modal', async function () {
-	            	 // DataTables가 초기화되지 않았다면 초기화
-	                if (!itemSelectDataTable) { 
-	                    initializeDataTable();
-	                }
-	                // 모달이 열릴 때마다 검색창을 초기화하고 데이터를 로드
-	                document.getElementById('modalSearchForm').reset();
-	                await loadPayItems();
-	            });
-	        }
-	        
-	        // 급여 선택 항목에서, 검색시 급여 화면으로 넘어가는걸 방지.
-	        const modalSearchForm = document.getElementById('modalSearchForm');
-	        if (modalSearchForm) {
-	            modalSearchForm.addEventListener('submit', handleModalSearch);
-	        }
-	        
 
 	        // 수정 모달창을 열 때, 불러오기.
-	        const tableBody = document.querySelector('.datatable tbody');
+	        const tableBody = document.querySelector('.table tbody');
 		    if (tableBody) {
 		        tableBody.addEventListener('click', function(event) {
 		        	
@@ -413,92 +333,26 @@
 		            }
 		        });
 		    }
+		    
+		 	// Select2 초기화
+		    $('#itemSelect').select2();
+		    $('#ruleSelect').select2();
+		
+		    
+		    const ruleTableSpecificOptions = {
+			        'columns': [
+			            null,                // 1. 항목코드
+			            null,                // 2. 계산방식
+			            { "width": "30%" }, // 3. 수식/쿼리
+			            null,                // 4. 시작일
+			            null,                // 5. 종료일
+			            null,                // 6. 사용여부
+			            { "width": "80px" }  // 7. 수정
+			        ],
+			    };
+		    
+		    initializeResizableDataTable('#ruleTable',ruleTableSpecificOptions);
 	        
-	    });
-	    
-	    // 급여 항목 선택 테이블 초기화 함수
-	    function initializeDataTable() {
-	        itemSelectDataTable = $('#item-select-table').DataTable({
-	            // DataTables 옵션 설정
-	            destroy: true,
-	            searching: true, 
-	            lengthChange: true, 
-	            pageLength: 25,       // 한 페이지에 25개씩 표시
-	            info: true,          // 'Showing 1 to 5 of...' 정보 표시
-	            
-	            // 서버에서 받은 JSON 데이터의 키와 테이블 컬럼을 매핑
-	            columns: [ 
-	                { data: 'itemCode' },
-	                { data: 'itemName' },
-	                { data: 'itemType' },
-	                { data: 'useYn' }
-	            ],
-	            
-	            // 각 행(row)이 생성될 때 추가 작업을 수행
-	            createdRow: function(row, data, dataIndex) {
-	                // 클릭 이벤트를 위해 필요한 클래스와 data-* 속성을 추가
-	                $(row).addClass('select-item-row').css('cursor', 'pointer');
-	                $(row).attr('data-code', data.itemCode);
-	                $(row).attr('data-name', data.itemName);
-	            }
-	        });
-	    }
-
-	    // 항목코드 input창 클릭 시 실행될 함수
-	    async function selectItemCode() {
-	        if (itemSelectModalInstance) {
-	        	
-	        	document.getElementById('modalSearchForm').reset();
-	        	
-	            itemSelectModalInstance.show();
-	            await loadPayItems();     // 초기 데이터 로드
-	        }
-	    }
-	    
-	    
-	    // 모달 내 검색 버튼 클릭 시 실행될 핸들러
-	    async function handleModalSearch(event) {
-	        event.preventDefault(); // 폼 기본 제출 방지
-	        const formData = new FormData(event.target);
-	        const searchParams = new URLSearchParams(formData).toString();
-	        await loadPayItems(searchParams);
-	    }
-	    
-	    // fetch를 이용해 PayItem 리스트를 불러오는 함수
-	    async function loadPayItems(searchParams = '') {
-	        const itemListBody = document.getElementById('item-list-body');
-
-	        try {
-	            const apiUrl = `/pay/pay-item/list?${searchParams}`;
-	            const response = await fetch(apiUrl); 
-	            if (!response.ok) throw new Error('데이터 로딩 실패');
-	            
-	            const pageData = await response.json();
-	            const items = pageData.content;
-	            
-	            if (itemSelectDataTable) {
-	            	itemSelectDataTable.clear();	// 1. 기존 데이터 삭제
-	            	itemSelectDataTable.rows.add(items); // 2. 새 데이터 추가
-	                itemSelectDataTable.draw();       // 3. 테이블 다시 그리기
-	            }
-	            
-	        } catch (error) {
-	            console.error(error);
-	            itemListBody.innerHTML = `<tr><td colspan="4">${error.message}</td></tr>`;
-	        }
-	    }
-
-	    // 모달 항목 클릭 시 값 입력 및 모달 닫기
-	    document.addEventListener('click', function(event) {
-	        const selectedRow = event.target.closest('.select-item-row');
-	        if (selectedRow) {
-	            const itemCode = selectedRow.dataset.code;
-	            const itemName = selectedRow.dataset.name;
-	            const addForm = document.getElementById('addPayRule');
-	            addForm.querySelector('input[name="itemCode"]').value = itemCode;
-	            addForm.querySelector('input[name="itemName"]').value = itemName;
-	            if (itemSelectModalInstance) itemSelectModalInstance.hide();
-	        }
 	    });
 	    
 	    // 새 계산 규칙 등록
