@@ -159,6 +159,7 @@ CREATE TABLE ZHR_PAY_DETAIL (
 ) COMMENT '월별 사원별 급여 항목 지급/공제 내역';
 
 
+
 -- 더미데이터 --
 
 INSERT INTO ZHR_PAY_DETAIL
@@ -500,18 +501,18 @@ VALUES
 
 -- 기준급여 마스터 테이블 (숫자 ID를 기본 키로 사용) --
 CREATE TABLE ZHR_BASE_PAY (
-    PAY_ID  		BIGINT         NOT NULL AUTO_INCREMENT COMMENT '급여이력 ID (PK)',
-    ZEMP_NO         VARCHAR(20)    NOT NULL COMMENT '사원번호',
-    ZFROM_DT        DATE           NOT NULL COMMENT '적용 시작일',
-    ZTO_DT          DATE           NOT NULL COMMENT '적용 종료일',
-    ZBASE_PAY       DECIMAL(18, 2) NOT NULL COMMENT '기준급여',
-    ZBASE_UNIT      VARCHAR(10)    NOT NULL COMMENT '급여 단위 (YEARLY, MONTHLY, DAILY, HOURLY)',
-    ZSTD_HOURS      SMALLINT       NOT NULL COMMENT '월 소정 근로시간',
-    ZNOTE           VARCHAR(500)   NULL     COMMENT '비고',
-    CREATED_AT      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY      VARCHAR(50)    NOT NULL COMMENT '생성자',
-    UPDATED_AT      DATETIME       NULL     COMMENT '수정 일시',
-    UPDATED_BY      VARCHAR(50)    NULL     COMMENT '수정자',
+    PAY_ID BIGINT NOT NULL AUTO_INCREMENT COMMENT '급여이력 ID (PK)',
+    ZEMP_NO VARCHAR(10) NOT NULL COMMENT '사원번호 (FK -> ZHR_EMP_MASTER.PERNR)',
+    ZFROM_DT DATE NOT NULL COMMENT '적용 시작일',
+    ZTO_DT DATE NOT NULL COMMENT '적용 종료일',
+    ZBASE_PAY DECIMAL(18, 2) NOT NULL COMMENT '기준급여',
+    ZBASE_UNIT VARCHAR(10) NOT NULL COMMENT '급여 단위 (YEARLY, MONTHLY, DAILY, HOURLY)',
+    ZSTD_HOURS SMALLINT NOT NULL COMMENT '월 소정 근로시간',
+    ZNOTE VARCHAR(500) NULL COMMENT '비고',
+    CREATED_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY VARCHAR(50) NOT NULL COMMENT '생성자',
+    UPDATED_AT DATETIME NULL COMMENT '수정 일시',
+    UPDATED_BY VARCHAR(50) NULL COMMENT '수정자',
 
     -- 기본 키 설정
     PRIMARY KEY (PAY_ID),
@@ -519,48 +520,69 @@ CREATE TABLE ZHR_BASE_PAY (
     -- 비즈니스 규칙을 위한 UNIQUE KEY 설정 (사번 + 시작일 중복 방지)
     UNIQUE KEY UK_ZHR_BASE_PAY (ZEMP_NO, ZFROM_DT),
 
+    -- [추가] 사원 마스터(PERNR)를 참조하는 외래 키 설정
+    CONSTRAINT FK_ZHR_BASE_PAY_ZEMP_NO
+      FOREIGN KEY (ZEMP_NO)
+      REFERENCES ZHR_EMP_MASTER(PERNR)
+      ON DELETE RESTRICT
+      ON UPDATE CASCADE,
+
     -- 데이터 무결성을 위한 제약 조건
-    CONSTRAINT CHK_ZBASE_PAY   CHECK (ZBASE_PAY >= 0),
-    CONSTRAINT CHK_ZBASE_UNIT  CHECK (ZBASE_UNIT IN ('YEARLY', 'MONTHLY', 'DAILY', 'HOURLY')),
-    CONSTRAINT CHK_ZSTD_HOURS  CHECK (ZSTD_HOURS > 0)
+    CONSTRAINT CHK_ZBASE_PAY CHECK (ZBASE_PAY >= 0),
+    CONSTRAINT CHK_ZBASE_UNIT CHECK (ZBASE_UNIT IN ('YEARLY', 'MONTHLY', 'DAILY', 'HOURLY')),
+    CONSTRAINT CHK_ZSTD_HOURS CHECK (ZSTD_HOURS > 0)
 ) COMMENT '사원별 기준급여 및 이력 관리 테이블 (ID 기준)';
 
-INSERT INTO ZHR_BASE_PAY 
+-- 더미 데이터 --
+INSERT INTO ZHR_BASE_PAY
 (ZEMP_NO, ZFROM_DT, ZTO_DT, ZBASE_PAY, ZBASE_UNIT, ZSTD_HOURS, ZNOTE, CREATED_BY)
 VALUES
--- 기존 데이터 --
-('EMP001', '2023-03-02', '2023-12-31', 48000000.00, 'YEARLY', 209, '신입사원 초임 연봉', 'HR_Admin'),
-('EMP001', '2024-01-01', '2024-12-31', 53000000.00, 'YEARLY', 209, '2024년 정기 급여 인상', 'HR_Admin'),
-('EMP001', '2025-01-01', '9999-12-31', 62000000.00, 'YEARLY', 209, '대리 승진에 따른 연봉 인상', 'HR_Admin'),
-('EMP002', '2024-07-01', '2024-12-31', 68000000.00, 'YEARLY', 209, '과장 직급 경력 입사', 'HR_Admin'),
-('EMP002', '2025-01-01', '9999-12-31', 72000000.00, 'YEARLY', 209, '2025년 정기 급여 인상', 'HR_Admin'),
-('EMP003', '2025-01-15', '9999-12-31', 4000000.00, 'MONTHLY', 209, '전문 계약직 (월급)', 'HR_Admin'),
-('EMP004', '2024-11-01', '9999-12-31', 50000000.00, 'YEARLY', 209, '신입사원', 'HR_Admin'),
-('EMP005', '2021-09-01', '2022-12-31', 58000000.00, 'YEARLY', 209, '경력 입사 (선임)', 'HR_Admin'),
-('EMP005', '2023-01-01', '2023-12-31', 61500000.00, 'YEARLY', 209, '2023년 정기 인상', 'HR_Admin'),
-('EMP005', '2024-01-01', '2024-12-31', 65000000.00, 'YEARLY', 209, '2024년 정기 인상', 'HR_Admin'),
-('EMP005', '2025-01-01', '9999-12-31', 71000000.00, 'YEARLY', 209, '책임(팀장) 승진', 'HR_Admin'),
-('EMP006', '2024-03-04', '2024-12-31', 55000000.00, 'YEARLY', 209, '신규 입사 (우수 인재)', 'HR_Admin'),
-('EMP006', '2025-01-01', '9999-12-31', 65000000.00, 'YEARLY', 209, '2025년 특별 성과 인상', 'HR_Admin'),
-('EMP007', '2023-07-10', '2024-06-30', 75000000.00, 'YEARLY', 209, '프로젝트 리더로 입사', 'system_manager'),
-('EMP007', '2024-07-01', '9999-12-31', 70000000.00, 'YEARLY', 209, '본사 스태프 직무로 변경', 'system_manager'),
-('EMP008', '2024-09-02', '2025-03-31', 12000.00, 'HOURLY', 209, '마케팅팀 아르바이트', 'payroll_specialist'),
-('EMP008', '2025-04-01', '9999-12-31', 13500.00, 'HOURLY', 209, '시급 인상', 'payroll_specialist'),
-('EMP009', '2023-11-01', '2024-10-31', 3800000.00, 'MONTHLY', 209, '1년 계약직 (IT지원)', 'HR_Admin'),
-('EMP009', '2024-11-01', '9999-12-31', 51000000.00, 'YEARLY', 209, '정규직 전환', 'HR_Admin'),
-('EMP010', '2025-02-17', '9999-12-31', 250000.00, 'DAILY', 209, '설비 기술지원 전문가 (일급)', 'system_manager'),
-('EMP011', '2022-08-16', '2023-12-31', 47000000.00, 'YEARLY', 209, '디자이너 신규 입사', 'HR_Admin'),
-('EMP011', '2024-01-01', '2024-12-31', 52000000.00, 'YEARLY', 209, '2024년 정기 인상', 'HR_Admin'),
-('EMP011', '2025-01-01', '9999-12-31', 56500000.00, 'YEARLY', 209, '2025년 정기 인상', 'HR_Admin'),
-('EMP012', '2023-01-10', '2024-12-31', 45000000.00, 'YEARLY', 209, '영업팀 신입', 'HR_Admin'),
-('EMP012', '2025-01-01', '9999-12-31', 48000000.00, 'YEARLY', 209, '영업관리 직무 이동', 'HR_Admin'),
-('EMP013', '2023-04-01', '2023-12-31', 11000.00, 'HOURLY', 209, '사무보조 아르바이트', 'payroll_specialist'),
-('EMP013', '2024-01-01', '2024-12-31', 11500.00, 'HOURLY', 209, '2024년 시급 인상', 'payroll_specialist'),
-('EMP013', '2025-01-01', '9999-12-31', 12500.00, 'HOURLY', 209, '2025년 시급 인상', 'payroll_specialist'),
-('EMP014', '2024-02-01', '2024-12-31', 95000000.00, 'YEARLY', 209, '부장급 경력 입사', 'system_manager'),
-('EMP014', '2025-01-01', '9999-12-31', 102000000.00, 'YEARLY', 209, '2025년 임원 승진', 'system_manager'),
-('EMP015', '2025-09-01', '9999-12-31', 49000000.00, 'YEARLY', 209, '2025년 하반기 공채 신입', 'HR_Admin'),
-('EMP016', '2025-08-19', '9999-12-31', 3500000.00, 'MONTHLY', 209, '인사팀 계약직 (1년)', 'HR_Admin');
+-- 2022년 입사자 (10명) - 각 2건 (과거 1 + 현재 1) = 20건
+('2201001', '2022-01-01', '2023-12-31', 50000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2201001', '2024-01-01', '9999-12-31', 55000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2201002', '2022-01-01', '2023-12-31', 52000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2201002', '2024-01-01', '9999-12-31', 57000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2203003', '2022-03-01', '2023-12-31', 48000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2203003', '2024-01-01', '9999-12-31', 52000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2203004', '2022-03-01', '2023-12-31', 49000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2203004', '2024-01-01', '9999-12-31', 53000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2207005', '2022-07-01', '2023-12-31', 51000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2207005', '2024-01-01', '9999-12-31', 55000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2207006', '2022-07-01', '2023-12-31', 53000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2207006', '2024-01-01', '9999-12-31', 57000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2209007', '2022-09-01', '2023-12-31', 50000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2209007', '2024-01-01', '9999-12-31', 54000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2210008', '2022-10-01', '2023-12-31', 47000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2210008', '2024-01-01', '9999-12-31', 51000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2210009', '2022-10-01', '2023-12-31', 48000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2210009', '2024-01-01', '9999-12-31', 52000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2211010', '2022-11-01', '2023-12-31', 46000000.00, 'YEARLY', 209, '2022년 신규 입사', 'system_admin'),
+('2211010', '2024-01-01', '9999-12-31', 50000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+
+-- 2023년 입사자 (10명) - 1명 2건, 9명 1건 = 11건
+('2301011', '2023-01-01', '2023-12-31', 45000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+('2301011', '2024-01-01', '9999-12-31', 48000000.00, 'YEARLY', 209, '2024년 정기 급여조정', 'system_admin'),
+('2301012', '2023-01-01', '9999-12-31', 47000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+('2302013', '2023-02-01', '9999-12-31', 46000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+('2304014', '2023-04-01', '9999-12-31', 48000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+('2305015', '2023-05-01', '9999-12-31', 50000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+('2305016', '2023-05-01', '9999-12-31', 4000000.00, 'MONTHLY', 209, '2023년 신규 입사 (월급)', 'system_admin'),
+('2308017', '2023-08-01', '9999-12-31', 49000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+('2309018', '2023-09-01', '9999-12-31', 47000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+('2310019', '2023-10-01', '9999-12-31', 48000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+('2312020', '2023-12-01', '9999-12-31', 46000000.00, 'YEARLY', 209, '2023년 신규 입사', 'system_admin'),
+
+-- 2024년 입사자 (10명) - 각 1건 (현재) = 10건
+('2401021', '2024-01-01', '9999-12-31', 45000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2401022', '2024-01-01', '9999-12-31', 46000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2402023', '2024-02-01', '9999-12-31', 47000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2402024', '2024-02-01', '9999-12-31', 48000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2403025', '2024-03-01', '9999-12-31', 45000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2404026', '2024-04-01', '9999-12-31', 46000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2404027', '2024-04-01', '9999-12-31', 47000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2405028', '2024-05-01', '9999-12-31', 48000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2405029', '2024-05-01', '9999-12-31', 49000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin'),
+('2406030', '2024-06-01', '9999-12-31', 50000000.00, 'YEARLY', 209, '2024년 신규 입사', 'system_admin');
 
 -- 월별/직군별 소정 근로시간 관리 테이블 --
 CREATE TABLE ZHR_STD_HOURS (

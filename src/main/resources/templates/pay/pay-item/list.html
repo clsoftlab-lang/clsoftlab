@@ -114,9 +114,13 @@
 										<td th:text="${z.itemCode}"></td>
 										<td th:text="${z.itemName}"></td>
 										<td th:text="${z.itemType}"></td>
-										<td th:text="${z.taxYn}"></td>
+										<td>
+										    <input type="checkbox" class="form-check-input" th:checked="${z.taxYn == 'Y'}" onclick="return false;">
+										</td>
 										<td th:text="${z.roundType}"></td>
-										<td th:text="${z.useYn}"></td>
+										<td>
+										    <input type="checkbox" class="form-check-input" th:checked="${z.useYn == 'Y'}" onclick="return false;">
+										</td>
 										<td><button class="btn btn-primary edit-btn"  data-bs-toggle="modal" data-bs-target="#editModal" th:data-value="${z.itemCode}">수정</button></td>
 									</tr>
 								</tbody>
@@ -137,13 +141,13 @@
 				                    <div class="row">
 				                        <div class="col-md-4 mb-3">
 				                            <div class="form-group">
-				                                <label>항목코드</label>
+				                                <label>항목코드 <span class="text-danger">*</span></label>
 				                                <input type="text" class="form-control" name="itemCode" required="required" maxlength="20">
 				                            </div>
 				                        </div>
 				                        <div class="col-md-4 mb-3">
 				                            <div class="form-group">
-				                                <label>항목명</label>
+				                                <label>항목명 <span class="text-danger">*</span></label>
 				                                <input type="text" class="form-control" name="itemName" required="required" maxlength="100">
 				                            </div>
 				                        </div>
@@ -162,16 +166,11 @@
 				                        <div class="col-md-4 mb-3">
 				                            <div class="form-group">
 				                                <label>과세여부</label>
-				                                <div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="Y" checked name="taxYn">
-				                                        <label class="form-check-label">Y (과세)</label>
-				                                    </div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="N" name="taxYn">
-				                                        <label class="form-check-label">N (비과세)</label>
-				                                    </div>
-				                                </div>
+				                                <div class="form-check">
+										            <input type="hidden" value="N" name="taxYn"> 
+										
+										            <input class="form-check-input" type="checkbox" value="Y" name="taxYn"  checked>
+										        </div>
 				                            </div>
 				                        </div>
 				                        <div class="col-md-4 mb-3">
@@ -203,46 +202,31 @@
 				                        <div class="col-md-4 mb-3">
 				                            <div class="form-group">
 				                                <label>소급여부</label>
-				                                <div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="Y" name="backPayYn">
-				                                        <label class="form-check-label">Y</label>
-				                                    </div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="N" checked name="backPayYn">
-				                                        <label class="form-check-label">N</label>
-				                                    </div>
-				                                </div>
+				                                <div class="form-check">
+										            <input type="hidden" value="N" name="backPayYn"> 
+										
+										            <input class="form-check-input" type="checkbox" value="Y" name="backPayYn" >
+										        </div>
 				                            </div>
 				                        </div>
 				                        <div class="col-md-4 mb-3">
 				                            <div class="form-group">
 				                                <label>4대보험 대상여부</label>
-				                                <div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="Y" checked name="insuranceYn">
-				                                        <label class="form-check-label">Y</label>
-				                                    </div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="N" name="insuranceYn">
-				                                        <label class="form-check-label">N</label>
-				                                    </div>
-				                                </div>
+				                                <div class="form-check">
+										            <input type="hidden" value="N" name="insuranceYn"> 
+										
+										            <input class="form-check-input" type="checkbox" value="Y" name="insuranceYn"  checked>
+										        </div>
 				                            </div>
 				                        </div>
 				                        <div class="col-md-4 mb-3">
 				                            <div class="form-group">
 				                                <label>사용여부</label>
-				                                <div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="Y" checked name="useYn">
-				                                        <label class="form-check-label">Y</label>
-				                                    </div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="N" name="useYn">
-				                                        <label class="form-check-label">N</label>
-				                                    </div>
-				                                </div>
+				                                <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+										        </div>
 				                            </div>
 				                        </div>
 				                        <div class="col-md-8 mb-3">
@@ -298,16 +282,11 @@
 				                        <div class="col-md-4 mb-3">
 				                            <div class="form-group">
 				                                <label>과세여부</label>
-				                                <div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="Y" name="taxYn">
-				                                        <label class="form-check-label">Y (과세)</label>
-				                                    </div>
-				                                    <div class="form-check form-check-inline">
-				                                        <input class="form-check-input" type="radio" value="N" name="taxYn">
-				                                        <label class="form-check-label">N (비과세)</label>
-				                                    </div>
-				                                </div>
+				                                <div class="form-check">
+										            <input type="hidden" value="N" name="taxYn"> 
+										
+										            <input class="form-check-input" type="checkbox" value="Y" name="taxYn"  >
+										        </div>
 				                            </div>
 				                        </div>
 				                        <div class="col-md-4 mb-3">
@@ -339,47 +318,32 @@
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
 												<label>소급여부</label>
-												<div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio"  value="Y" name="backPayYn">
-														<label class="form-check-label" for="backY">Y</label>
-													</div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio"  value="N" checked name="backPayYn">
-														<label class="form-check-label" for="backN">N</label>
-													</div>
-												</div>
+												<div class="form-check">
+										            <input type="hidden" value="N" name="backPayYn"> 
+										
+										            <input class="form-check-input" type="checkbox" value="Y" name="backPayYn"  >
+										        </div>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
 												<label>4대보험 대상여부</label>
-												<div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio"  value="Y" checked name="insuranceYn">
-														<label class="form-check-label" for="insrY">Y</label>
-													</div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio"  value="N" name="insuranceYn">
-														<label class="form-check-label" for="insrN">N</label>
-													</div>
-												</div>
+												<div class="form-check">
+										            <input type="hidden" value="N" name="insuranceYn"> 
+										
+										            <input class="form-check-input" type="checkbox" value="Y" name="insuranceYn"  >
+										        </div>
 											</div>
 										</div>
 				                        </div>
 				                        <div class="col-md-4 mb-3">
 										<div class="form-group">
 											<label>사용여부</label>
-											<div>
-												<div class="form-check form-check-inline">
-													<input class="form-check-input" type="radio" value="Y" checked name="useYn">
-													<label class="form-check-label" for="useY">Y</label>
-												</div>
-												<div class="form-check form-check-inline">
-													<input class="form-check-input" type="radio"  value="N" name="useYn">
-													<label class="form-check-label" for="useN">N</label>
-												</div>
-											</div>
+											<div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  >
+										        </div>
 											</div>
 										</div>
 										<div class="col-md-8 mb-3">
@@ -547,14 +511,13 @@
 		        const editForm = document.getElementById('editPayItemForm');
 
 		        for (const key in data) {
-		            const field = editForm.querySelector(`[name="${key}"]`);
-		            if (field) {
-		                if (field.type === 'radio') {
-		                    // 라디오 버튼의 경우, 값(value)이 일치하는 것을 찾아 체크합니다.
-		                    editForm.querySelector(`[name="${key}"][value="${data[key]}"]`).checked = true;
-		                } else {
-		                    field.value = data[key];
-		                }
+		        	const field = editForm.querySelector(`[name="${key}"]`); // hidden 또는 일반 input
+		            const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+
+		            if (checkbox && field && field.type === 'hidden') {
+		                checkbox.checked = (data[key] === 'Y');
+		            } else if (field) {
+		                field.value = data[key];
 		            }
 		        }
 		        

@@ -12,6 +12,8 @@
 	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
 	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
 </head>
 
 <body>
@@ -42,7 +44,9 @@
 								<div class="col-md-4">
 									<div class="form-group">
 										<label>직군 코드</label>
-										<input class="form-control" name="jobGroup" placeholder="직군 코드로 검색" th:value="${jobGroup}">
+										<select  name="jobGroup" multiple="multiple" class="form-control" id="jobGroupSelect">
+											<option th:each = "p : ${payCycleList}" th:value="${p.jobGroup}" th:text="${p.jobGroup}" th:selected="${jobGroup != null && #lists.contains(jobGroup, p.jobGroup)}">
+										</select>
 									</div>
 								</div>
 								<div class="col-md-4">
@@ -71,7 +75,7 @@
 					</div>
 					<div class="card-body">
 						<div class="table-responsive">
-							<table class="table table-striped table-hover datatable">
+							<table class="table table-striped table-hover datatable-resizable" id="dataTable">
 								<thead class="table-light">
 									<tr>
 										<th>직군코드</th>
@@ -89,7 +93,9 @@
 										<td th:text="${p.startDay}"></td>
 										<td th:text="${p.endDay}"></td>
 										<td th:text="${p.payDay}"></td>
-										<td th:text="${p.useYn}"></td>
+										<td>
+										    <input type="checkbox" class="form-check-input" th:checked="${p.useYn == 'Y'}" onclick="return false;">
+										</td>
 										<td th:text="${#strings.abbreviate(p.note, 50)}"></td>
 										<td>
 											<button class="btn btn-primary btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" 
@@ -117,33 +123,27 @@
 				                <form id="addPayCycleForm">
 				                    <div class="row">
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">직군 코드</label>
+				                            <label class="form-label">직군 코드 <span class="text-danger">*</span></label>
 				                            <input type="text" class="form-control" name="jobGroup" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">기준 시작일</label>
+				                            <label class="form-label">기준 시작일 <span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="startDay" min="1" max="31" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">기준 종료일</label>
+				                            <label class="form-label">기준 종료일 <span class="text-danger">*</span></label>
 											<input type="number" class="form-control" name="endDay" min="1" max="31" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">실지급일</label>
+				                            <label class="form-label">실지급일 <span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="payDay" min="1" max="31" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">사용 여부</label>
-				                            <div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="Y" checked name="useYn">
-				                                    <label class="form-check-label">Y (사용)</label>
-				                                </div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="N" name="useYn">
-				                                    <label class="form-check-label">N (미사용)</label>
-				                                </div>
-				                            </div>
+				                            <label class="form-label">사용 여부 <span class="text-danger">*</span></label>
+				                            <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+									        </div>
 				                        </div>
 				                        <div class="col-md-12 mb-3">
 				                            <label class="form-label">설명 (비고)</label>
@@ -176,29 +176,23 @@
 				                            <input type="text" class="form-control" name="jobGroup" readonly>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">기준 시작일</label>
+				                            <label class="form-label">기준 시작일 <span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="startDay" min="1" max="31" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">기준 종료일</label>
+				                            <label class="form-label">기준 종료일 <span class="text-danger">*</span></label>
 											<input type="number" class="form-control" name="endDay" min="1" max="31" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">실지급일</label>
+				                            <label class="form-label">실지급일 <span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="payDay" min="1" max="31" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">사용 여부</label>
-				                            <div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="Y" name="useYn">
-				                                    <label class="form-check-label">Y (사용)</label>
-				                                </div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="N" name="useYn">
-				                                    <label class="form-check-label">N (미사용)</label>
-				                                </div>
-				                            </div>
+				                            <label class="form-label">사용 여부 <span class="text-danger">*</span></label>
+				                            <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+									        </div>
 				                        </div>
 				                        <div class="col-md-12 mb-3">
 				                            <label class="form-label">설명 (비고)</label>
@@ -222,12 +216,15 @@
 	</div>
 
 	<script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
 	<script src="/assets/js/bootstrap.bundle.min.js"></script>
 	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
 	<script src="https://unpkg.com/feather-icons"></script>
 	<script src="/assets/js/jquery.dataTables.min.js"></script>
 	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
 	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
 	
 	<script type="text/javascript">
 	
@@ -247,6 +244,46 @@
 		            }
 		        });
 		    }
+		    
+		    
+		 	// Select2 초기화
+		    $('#jobGroupSelect').select2();
+		    
+		    const tableSpecificOptions = {
+			        'columns': [
+			            null,                 // 0. 직군코드 (기본값)
+			            { "width": "90px" },  // 1. 기준시작일
+			            { "width": "90px" },  // 2. 기준종료일
+			            { "width": "80px" },  // 3. 실지급일
+			            { "width": "80px" },  // 4. 사용여부
+			            null,                 // 5. 비고 (너비 자동, 검색/정렬 가능)
+			            // 6. 수정 (버튼) - 검색 및 정렬 비활성화
+			            { "width": "70px", "searchable": false, "orderable": false } 
+			        ],
+                    // DataTables 한글화 및 기본 설정 (유지)
+                    "language": {
+                        "emptyTable": "데이터가 없습니다.",
+                        "info": "_START_ - _END_ / _TOTAL_ 항목",
+                        "infoEmpty": "0 항목",
+                        "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+                        "lengthMenu": "_MENU_ 개씩 보기",
+                        "loadingRecords": "로딩중...",
+                        "processing": "처리중...",
+                        "search": "검색: ",
+                        "zeroRecords": "일치하는 항목이 없습니다.",
+                        "paginate": {
+                            "first": "처음",
+                            "last": "마지막",
+                            "next": "다음",
+                            "previous": "이전"
+                        }
+                    },
+                    "pageLength": 10, 
+                    "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+			    };
+		    
+		    
+		    initializeResizableDataTable('#dataTable',tableSpecificOptions);
 		});
 	
 	// 새 지급 주기 등록
@@ -271,9 +308,9 @@
 	    try {
 	        const response = await fetch(`/pay/pay-cycle/checkOverlap/${data.jobGroup}`);
 	        
-	        const checkResult = Number(await response.text());
+	        const checkResult = await response.text();
 	        
-	        if (checkResult > 0) { 
+	        if (checkResult == 'true') { 
 	            alert('입력하신 직군 코드는 이미 존재합니다. 다른 코드를 사용해주세요.'); 
 	            return;
 	        }
@@ -314,15 +351,12 @@
 
 	        for (const key in data) {
 	            const field = editForm.querySelector(`[name="${key}"]`);
-	            
-	            if(field) {
-	            	
-	            	if (field.type === 'radio') {
-	            		
-	            		editForm.querySelector(`[name="${key}"][value="${data[key]}"]`).checked = true;
-	            	} else {
-			            field.value = data[key];
-	            	}
+	            const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+
+	            if (checkbox && field && field.type === 'hidden') {
+	                checkbox.checked = (data[key] === 'Y');
+	            } else if (field) {
+	                field.value = data[key];
 	            }
 	        }
 

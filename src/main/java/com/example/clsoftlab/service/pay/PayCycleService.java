@@ -1,5 +1,6 @@
 package com.example.clsoftlab.service.pay;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -7,12 +8,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.pay.PayCycleDetailDto;
+import com.example.clsoftlab.dto.pay.PayCycleListDto;
 import com.example.clsoftlab.dto.pay.PayCycleRequestDto;
 import com.example.clsoftlab.entity.PayCycle;
 import com.example.clsoftlab.repository.pay.PayCycleRepository;
+import com.example.clsoftlab.repository.pay.specification.PayCycleSpecs;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -29,18 +33,23 @@ public class PayCycleService {
 	}
 	
 	// 검색어로 조회
-	public Page<PayCycleDetailDto> searchPayCycle (String jobGroup, String useYn, int page, int size) {
+	public Page<PayCycleDetailDto> searchPayCycle (List<String> jobGroup, String useYn, int page, int size) {
 		
 		Pageable pageable = PageRequest.of(page, size, Sort.by("jobGroup"));
 		
-		return payCycleRepository.searchPayCycle(jobGroup, useYn, pageable).
-				map(i -> modelMapper.map(i, PayCycleDetailDto.class));
+		Specification<PayCycle> spec = Specification.not(null);
+		
+		spec = spec.and(PayCycleSpecs.withJobGroup(jobGroup))
+				.and(PayCycleSpecs.withUseYn(useYn));
+		
+		return payCycleRepository.findAll(spec, pageable)
+				.map(i -> modelMapper.map(i, PayCycleDetailDto.class));
 		
 	}
 	
 	// 코드 중복 검사
-	public long countOverlappingPayCycle (String jobGroup) {
-		return payCycleRepository.countOverlappingPayCycle(jobGroup);
+	public boolean checkOverlap (String jobGroup) {
+		return payCycleRepository.existsById(jobGroup);
 	}
 	
 	// 새 지급 주기 등록
@@ -61,5 +70,10 @@ public class PayCycleService {
 				.orElseThrow(() -> new EntityNotFoundException("해당 코드를 찾을 수 없습니다: " + jobGroup));
 		
 		payCycle.update(dto);
+	}
+	
+	// 검색용 list 조회
+	public List<PayCycleListDto> getPayCycleList () {
+		return payCycleRepository.getPayCycleList();
 	}
 }

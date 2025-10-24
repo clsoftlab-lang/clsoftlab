@@ -1,6 +1,7 @@
 package com.example.clsoftlab.controller.pay;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +14,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.pay.BasePayDetailDto;
 import com.example.clsoftlab.dto.pay.BasePayRequestDto;
+import com.example.clsoftlab.service.common.EmployeeMasterService;
 import com.example.clsoftlab.service.pay.BasePayService;
 
 import jakarta.validation.Valid;
@@ -26,14 +27,16 @@ import jakarta.validation.Valid;
 public class BasePayController {
 
 	private final BasePayService basePayService;
+	private final EmployeeMasterService employeeMasterService;
 	
-	public BasePayController(BasePayService basePayService) {
+	public BasePayController(BasePayService basePayService, EmployeeMasterService employeeMasterService) {
 		this.basePayService = basePayService;
+		this.employeeMasterService = employeeMasterService;
 	}
 	
 	// 전체 목록 조회
 	@GetMapping("")
-	public String getBasePayList (@RequestParam(defaultValue = "") String empNo, @RequestParam(defaultValue = "") String baseUnit,
+	public String getBasePayList (@RequestParam(required = false) List<String> empNo, @RequestParam(required = false) List<String> baseUnit,
 			@RequestParam(required = false) Integer page, Model model) {
 		
 		if (page == null) {
@@ -47,6 +50,8 @@ public class BasePayController {
 		model.addAttribute("empNo", empNo);
 		model.addAttribute("baseUnit", baseUnit);
 		model.addAttribute("basePayPage", basePayPage);
+		model.addAttribute("employeeList", employeeMasterService.findAll());
+		model.addAttribute("basePayEmployeeList", basePayService.getEmployeeList());
 		
 		return "/pay/base-pay/list";
 	}
@@ -68,21 +73,21 @@ public class BasePayController {
 	}
 	
 	// 기간 중복 검사
-	@ResponseBody
 	@GetMapping("/checkOverlap") 
-	public long checkOverlappingBasePay (@RequestParam String empNo, @RequestParam LocalDate fromDate,
+	public ResponseEntity<Boolean> checkOverlappingBasePay (@RequestParam String empNo, @RequestParam LocalDate fromDate,
 			@RequestParam LocalDate toDate) {
 		
-		return basePayService.countOverlappingBasePay(empNo, fromDate, toDate);
+		boolean result = basePayService.countOverlappingBasePay(empNo, fromDate, toDate);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 기간 중복 검사 (수정용) 
-	@ResponseBody
 	@GetMapping("/checkOverlap/update") 
-	public long checkOverlappingBasePayForUpdate (@RequestParam String empNo, @RequestParam long payId, 
+	public ResponseEntity<Boolean> checkOverlappingBasePayForUpdate (@RequestParam String empNo, @RequestParam long payId, 
 			@RequestParam LocalDate fromDate, @RequestParam LocalDate toDate) {
 		
-		return basePayService.countOverlappingBasePay(empNo, payId, fromDate, toDate);
+		boolean result = basePayService.countOverlappingBasePay(empNo, payId, fromDate, toDate);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 기준 급여 디테일 정보

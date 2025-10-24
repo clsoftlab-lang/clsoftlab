@@ -15,7 +15,8 @@ import lombok.Setter;
 public class BasePayDetailDto {
 
 	private long payId;
-    private String empNo;
+    private String pernr;
+    private String name;
     private LocalDate fromDate;
     private LocalDate toDate;
     private BigDecimal basePay;

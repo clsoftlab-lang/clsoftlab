@@ -91,7 +91,9 @@
 										<td th:text=|${b.baseItemName}(${b.baseItemCode})|></td>
 										<td th:text="${b.ruleType}"></td>
 										<td th:text="${b.backPercent}"></td>
-										<td th:text="${b.useYn}"></td>
+										<td>
+										    <input type="checkbox" class="form-check-input" th:checked="${b.useYn == 'Y'}" onclick="return false;">
+										</td>
 										<td>
 											<button class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" 
 												th:data-rule-id="${b.ruleId}">수정</button>
@@ -143,17 +145,11 @@
 				                            <input type="number" class="form-control" step="0.01" name="backPercent" placeholder="FIXED 방식일 때만 입력" min="-999.99" max="999.99">
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">사용 여부</label>
-				                            <div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="Y" checked name="useYn">
-				                                    <label class="form-check-label">Y (사용)</label>
-				                                </div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="N" name="useYn">
-				                                    <label class="form-check-label">N (미사용)</label>
-				                                </div>
-				                            </div>
+				                            <label class="form-label">사용 여부 <span class="text-danger">*</span></label>
+				                            <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+									        </div>
 				                        </div>
 				                        <div class="col-md-12 mb-3">
 				                            <label class="form-label">비고</label>
@@ -202,17 +198,11 @@
 				                            <input type="number" class="form-control" step="0.01" name="backPercent" placeholder="FIXED 방식일 때만 입력" min="-999.99" max="999.99">
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">사용 여부</label>
-				                            <div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="Y" name="useYn">
-				                                    <label class="form-check-label">Y (사용)</label>
-				                                </div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="N" name="useYn">
-				                                    <label class="form-check-label">N (미사용)</label>
-				                                </div>
-				                            </div>
+				                            <label class="form-label">사용 여부 <span class="text-danger">*</span></label>
+				                            <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+									        </div>
 				                        </div>
 				                        <div class="col-md-12 mb-3">
 				                            <label class="form-label">비고</label>
@@ -378,15 +368,12 @@
 
 			        for (const key in data) {
 			            const field = editForm.querySelector(`[name="${key}"]`);
-			            
-			            if(field) {
-			            	
-			            	if (field.type === 'radio') {
-			            		
-			            		editForm.querySelector(`[name="${key}"][value="${data[key]}"]`).checked = true;
-			            	} else {
-					            field.value = data[key];
-			            	}
+			            const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+
+			            if (checkbox && field && field.type === 'hidden') {
+			                checkbox.checked = (data[key] === 'Y');
+			            } else if (field) {
+			                field.value = data[key];
 			            }
 			        }
 

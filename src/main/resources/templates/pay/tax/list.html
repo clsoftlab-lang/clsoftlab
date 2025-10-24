@@ -109,7 +109,9 @@
 										<td th:text="${t.taxPercent}"></td>
 										<td th:text="${t.localPercent}"></td>
 										<td th:text="${#numbers.formatInteger(t.totalTax, 0, 'COMMA')}"></td>
-										<td th:text="${t.useYn}"></td>
+										<td>
+										    <input type="checkbox" class="form-check-input" th:checked="${t.useYn == 'Y'}" onclick="return false;">
+										</td>
 										<td>
 											<button class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" 
 												th:data-year="${t.id.year}" 
@@ -138,15 +140,15 @@
 				                <form id="addTaxTable">
 				                    <div class="row">
 				                        <div class="col-md-4 mb-3">
-				                            <label class="form-label">적용 연도</label>
+				                            <label class="form-label">적용 연도 <span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="year" placeholder="YYYY" required min="1000" max="9999">
 				                        </div>
 				                        <div class="col-md-4 mb-3">
-				                            <label class="form-label">과세 기준 소득 (시작 금액)</label>
+				                            <label class="form-label">과세 기준 소득 (시작 금액) <span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="incomeAmount" required min="0">
 				                        </div>
 				                        <div class="col-md-4 mb-3">
-				                            <label class="form-label">가족 수</label>
+				                            <label class="form-label">가족 수 <span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="familyCount" min="1" required>
 				                        </div>
 				                        <div class="col-md-4 mb-3">
@@ -162,17 +164,11 @@
 				                            <input type="number" class="form-control" name="totalTax">
 				                        </div>
 				                        <div class="col-md-4 mb-3">
-				                            <label class="form-label">사용여부</label>
-				                            <div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="Y" checked name="useYn">
-				                                    <label class="form-check-label">Y (사용)</label>
-				                                </div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="N" name="useYn">
-				                                    <label class="form-check-label">N (미사용)</label>
-				                                </div>
-				                            </div>
+				                            <label class="form-label">사용여부 <span class="text-danger">*</span></label>
+				                            <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+									        </div>
 				                        </div>
 				                        <div class="col-md-8 mb-3">
 				                            <label class="form-label">비고</label>
@@ -204,15 +200,15 @@
 									<input hidden="" name="originalincomeAmount">
 				                    <div class="row">
 				                        <div class="col-md-4 mb-3">
-				                            <label class="form-label">적용 연도</label>
+				                            <label class="form-label">적용 연도<span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="year" placeholder="YYYY" required min="1000" max="9999">
 				                        </div>
 				                        <div class="col-md-4 mb-3">
-				                            <label class="form-label">과세 기준 소득 (시작 금액)</label>
+				                            <label class="form-label">과세 기준 소득 (시작 금액)<span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="incomeAmount" required min="0">
 				                        </div>
 				                        <div class="col-md-4 mb-3">
-				                            <label class="form-label">가족 수</label>
+				                            <label class="form-label">가족 수<span class="text-danger">*</span></label>
 				                            <input type="number" class="form-control" name="familyCount" min="1" required>
 				                        </div>
 				                        <div class="col-md-4 mb-3">
@@ -228,17 +224,11 @@
 				                            <input type="number" class="form-control" name="totalTax">
 				                        </div>
 				                        <div class="col-md-4 mb-3">
-				                            <label class="form-label">사용여부</label>
-				                            <div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="Y" checked name="useYn">
-				                                    <label class="form-check-label">Y (사용)</label>
-				                                </div>
-				                                <div class="form-check form-check-inline">
-				                                    <input class="form-check-input" type="radio" value="N" name="useYn">
-				                                    <label class="form-check-label">N (미사용)</label>
-				                                </div>
-				                            </div>
+				                            <label class="form-label">사용여부<span class="text-danger">*</span></label>
+				                            <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn" >
+										        </div>
 				                        </div>
 				                        <div class="col-md-8 mb-3">
 				                            <label class="form-label">비고</label>
@@ -276,7 +266,7 @@
 		
 		// 수정 모달 열기 및 상세 정보 조회
 		document.addEventListener('DOMContentLoaded', function() {
-		    const tableBody = document.querySelector('.datatable tbody');
+		    const tableBody = document.querySelector('.table tbody');
 		    if (tableBody) {
 		        tableBody.addEventListener('click', function(event) {
 		            const editButton = event.target.closest('.edit-btn');
@@ -398,15 +388,13 @@
 
 		            } else { // 3. 'id'가 아닌 다른 모든 키의 경우 (예: "taxPercent", "useYn" 등)
 		                const field = editForm.querySelector(`[name="${key}"]`);
-		                if (field) {
-		                    // 라디오 버튼일 경우 값에 맞는 버튼을 checked 처리
-		                    if (field.type === 'radio') {
-		                        const radioToSelect = editForm.querySelector(`[name="${key}"][value="${data[key]}"]`);
-		                        if(radioToSelect) radioToSelect.checked = true;
-		                    } else { // 그 외 input, textarea 등은 그냥 값만 할당
-		                        field.value = data[key];
-		                    }
-		                }
+		                const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+
+			            if (checkbox && field && field.type === 'hidden') {
+			                checkbox.checked = (data[key] === 'Y');
+			            } else if (field) {
+			                field.value = data[key];
+			            }
 		            }
 		            
 		        }

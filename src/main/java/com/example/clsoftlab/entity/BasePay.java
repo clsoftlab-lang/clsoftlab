@@ -7,9 +7,12 @@ import com.example.clsoftlab.dto.pay.BasePayRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,8 +32,9 @@ public class BasePay extends BaseEntity {
     @Column(name = "PAY_ID")
     private Long payId; // 급여이력 ID (PK)
 
-    @Column(name = "ZEMP_NO", nullable = false, length = 20)
-    private String empNo; // 사원번호
+	@ManyToOne(fetch = FetchType.LAZY) 
+	@JoinColumn(name = "ZEMP_NO", nullable = false) 
+	private EmployeeMaster employeeMaster; // 사원 엔티티 참조
 
     @Column(name = "ZFROM_DT", nullable = false)
     private LocalDate fromDate; // 적용 시작일

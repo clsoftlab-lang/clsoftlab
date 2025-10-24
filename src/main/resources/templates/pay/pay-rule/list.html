@@ -115,7 +115,9 @@
 										<td th:text="${r.ruleType == 'FIXED' ? r.fixedValue : r.formula}"></td>
 										<td th:text="${r.fromDate}"></td>
 										<td th:text="${r.toDate}"></td>
-										<td th:text="${r.useYn}"></td>
+										<td>
+										    <input type="checkbox" class="form-check-input" th:checked="${r.useYn == 'Y'}" onclick="return false;">
+										</td>
 										<td>
 											<button class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" th:data-value="${r.ruleId}">수정</button>
 										</td>
@@ -142,15 +144,16 @@
 				                    <div class="row">
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>항목코드</label>
+												<label>항목코드 <span class="text-danger">*</span></label>
 												<select  name="itemCode"  class="form-control" id="itemSelect">
+													<option value="" selected disabled>---- 선택해주세요 ----</option>
 													<option th:each = "i : ${payItemList}" th:value="${i.itemCode}" th:text=|${i.itemName}(${i.itemCode})| >
 												</select>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>계산 방식</label>
+												<label>계산 방식 <span class="text-danger">*</span></label>
 												<select class="form-select" name="ruleType">
 													<option value="FORMULA">FORMULA (수식)</option>
 													<option value="FIXED">FIXED (고정값)</option>
@@ -167,29 +170,23 @@
 				                        </div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>시작일</label>
+												<label>시작일 <span class="text-danger">*</span></label>
 												<input type="date" class="form-control" name="fromDate" required>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>종료일</label>
+												<label>종료일 <span class="text-danger">*</span></label>
 												<input type="date" class="form-control" name="toDate" required>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>사용여부</label>
-												<div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio" value="Y" checked name="useYn">
-														<label class="form-check-label">Y (사용)</label>
-													</div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio" value="N" name="useYn">
-														<label class="form-check-label">N (미사용)</label>
-													</div>
-												</div>
+												<label>사용여부 <span class="text-danger">*</span></label>
+												<div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+										        </div>
 											</div>
 										</div>
 										<div class="col-md-12 mb-3">
@@ -253,29 +250,23 @@
 				                        </div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>시작일</label>
+												<label>시작일 <span class="text-danger">*</span></label>
 												<input type="date" class="form-control" name="fromDate" required>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>종료일</label>
+												<label>종료일 <span class="text-danger">*</span></label>
 												<input type="date" class="form-control" name="toDate" required>
 											</div>
 										</div>
 										<div class="col-md-4 mb-3">
 											<div class="form-group">
-												<label>사용여부</label>
-												<div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio" value="Y" checked name="useYn">
-														<label class="form-check-label">Y (사용)</label>
-													</div>
-													<div class="form-check form-check-inline">
-														<input class="form-check-input" type="radio" value="N" name="useYn">
-														<label class="form-check-label">N (미사용)</label>
-													</div>
-												</div>
+												<label>사용여부 <span class="text-danger">*</span></label>
+												<div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn" >
+										        </div>
 											</div>
 										</div>
 										<div class="col-md-12 mb-3">
@@ -442,14 +433,12 @@
 		        for (const key in data) {
 		            const field = editForm.querySelector(`[name="${key}"]`);
 		            
-		            if(field) {
-		            	
-		            	if (field.type === 'radio') {
-		            		
-		            		editForm.querySelector(`[name="${key}"][value="${data[key]}"]`).checked = true;
-		            	} else {
-				            field.value = data[key];
-		            	}
+		            const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+
+		            if (checkbox && field && field.type === 'hidden') {
+		                checkbox.checked = (data[key] === 'Y');
+		            } else if (field) {
+		                field.value = data[key];
 		            }
 		            
 		        }
