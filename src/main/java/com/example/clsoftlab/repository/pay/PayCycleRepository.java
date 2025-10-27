@@ -18,4 +18,5 @@ public interface PayCycleRepository extends JpaRepository<PayCycle, String>, Jpa
 	@Query ("SELECT new com.example.clsoftlab.dto.pay.PayCycleListDto(p.jobGroup) "
 			+ "FROM PayCycle p ")	
 	public List<PayCycleListDto> getPayCycleList ();
+	
 }

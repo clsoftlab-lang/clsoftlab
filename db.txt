@@ -499,6 +499,117 @@ VALUES
 ('DISPATCH_ACCOUNT', 1, 31, 10, 'Y', '회계 파견직: 당월 1일~말일 기준, 익월 10일 지급', 'hr_admin'),
 ('COLLEGE_TRAINEE', 1, 31, 10, 'Y', '산학협력 연수생: 당월 1일~말일 기준, 익월 10일 지급', 'hr_admin');
 
+-- 사원별 정기 수당 설정 --
+CREATE TABLE ZHR_EMP_ALLOW (
+    -- === 기본 키 컬럼 (PK) ===
+    ALLOW_ID  BIGINT      NOT NULL AUTO_INCREMENT COMMENT '정기수당 ID (PK)',
+
+    -- === 비즈니스 키 및 데이터 컬럼 ===
+    ZEMP_NO   VARCHAR(10) NOT NULL COMMENT '사번 (FK: ZHR_EMP_MASTER.PERNR)',
+    ZITEM_CD  VARCHAR(20) NOT NULL COMMENT '항목 코드 (FK: ZHR_PAY_ITEM.ZITEM_CD)',
+    ZFROM_DT  DATE        NOT NULL COMMENT '적용 시작일',
+
+    -- === 데이터 컬럼 ===
+    ZTO_DT      DATE        NOT NULL COMMENT '적용 종료일',
+    ZALLOW_AMT  BIGINT      NOT NULL DEFAULT 0 COMMENT '정기 수당 금액',
+    ZUSE_YN     CHAR(1)     NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZNOTE       VARCHAR(500) NULL COMMENT '비고 또는 주석',
+
+    -- === 동시성 제어 (낙관적 락) ===
+    VERSION     INT         NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 락용)',
+
+    -- === 감사(Audit) 필드 ===
+    CREATED_AT  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY  VARCHAR(50) NOT NULL COMMENT '생성자',
+    UPDATED_AT  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY  VARCHAR(50) NULL COMMENT '수정자',
+
+    -- === 제약 조건 ===
+    PRIMARY KEY (ALLOW_ID),
+
+    -- 고유 키(Unique Key) 설정 (비즈니스 룰)
+    CONSTRAINT UK_EMP_ITEM_FROM UNIQUE (ZEMP_NO, ZITEM_CD, ZFROM_DT),
+
+    -- 외래 키 (FK) 설정
+    CONSTRAINT FK_ALLOW_TO_EMP    FOREIGN KEY (ZEMP_NO)  REFERENCES ZHR_EMP_MASTER (PERNR),
+    CONSTRAINT FK_ALLOW_TO_ITEM   FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM (ZITEM_CD),
+
+    -- CHECK 제약 조건
+    CONSTRAINT CHK_ALLOW_AMT_POSITIVE CHECK (ZALLOW_AMT >= 0),
+    CONSTRAINT CHK_ALLOW_USE_YN     CHECK (ZUSE_YN IN ('Y', 'N')),
+    CONSTRAINT CHK_ALLOW_DATES      CHECK (ZTO_DT >= ZFROM_DT)
+    
+) COMMENT '사원별 정기 수당 이력';
+
+-- ZHR_EMP_ALLOW 테이블 더미 데이터 (37건)
+INSERT INTO ZHR_EMP_ALLOW 
+(ZEMP_NO, ZITEM_CD, ZFROM_DT, ZTO_DT, ZALLOW_AMT, ZUSE_YN, ZNOTE, CREATED_BY)
+VALUES
+-- '2201001', '김철수' (이력 발생: 기본급 인상, 직책수당)
+('2201001', 'PAY001', '2022-01-01', '2023-12-31', 3000000, 'Y', '2022-2023년 기본급', 'system_admin'),
+('2201001', 'PAY001', '2024-01-01', '9999-12-31', 3200000, 'Y', '2024년 연봉인상 반영', 'system_admin'),
+('2201001', 'PAY003', '2022-01-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+('2201001', 'PAY004', '2023-01-01', '9999-12-31', 500000, 'Y', '팀장 직책수당', 'system_admin'),
+
+-- '2201002', '이영희' (자격수당)
+('2201002', 'PAY001', '2022-01-01', '9999-12-31', 2900000, 'Y', '기본급', 'system_admin'),
+('2201002', 'PAY003', '2022-01-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+('2201002', 'PAY005', '2022-06-01', '9999-12-31', 150000, 'Y', '정보처리기사 자격수당', 'system_admin'),
+
+-- '2203003', '박민준' (사용 중지 이력)
+('2203003', 'PAY001', '2022-03-01', '9999-12-31', 3100000, 'Y', '기본급', 'system_admin'),
+('2203003', 'PAY003', '2022-03-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+('2203003', 'PAY008', '2022-03-01', '2023-12-31', 200000, 'N', '영업직 차량유지비(종료)', 'system_admin'),
+
+-- '2203004', '최서연' (기본)
+('2203004', 'PAY001', '2022-03-01', '9999-12-31', 3000000, 'Y', '기본급', 'system_admin'),
+('2203004', 'PAY003', '2022-03-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+
+-- '2207005', '정지훈' (복수 수당)
+('2207005', 'PAY001', '2022-07-01', '9999-12-31', 3500000, 'Y', '기본급', 'system_admin'),
+('2207005', 'PAY003', '2022-07-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+('2207005', 'PAY004', '2024-01-01', '9999-12-31', 500000, 'Y', '파트장 직책수당', 'system_admin'),
+('2207005', 'PAY008', '2022-07-01', '9999-12-31', 200000, 'Y', '법인차량 지원', 'system_admin'),
+
+-- '2207006', '윤서아' (기본)
+('2207006', 'PAY001', '2022-07-01', '9999-12-31', 2800000, 'Y', '기본급', 'system_admin'),
+('2207006', 'PAY003', '2022-07-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+
+-- '2209007', '강도윤' (기본)
+('2209007', 'PAY001', '2022-09-01', '9999-12-31', 2850000, 'Y', '기본급', 'system_admin'),
+('2209007', 'PAY003', '2022-09-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+
+-- '2210008', '임하윤' (자격수당)
+('2210008', 'PAY001', '2022-10-01', '9999-12-31', 2950000, 'Y', '기본급', 'system_admin'),
+('2210008', 'PAY003', '2022-10-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+('2210008', 'PAY005', '2023-01-01', '9999-12-31', 100000, 'Y', 'AWS 자격수당', 'system_admin'),
+
+-- '2301011', '신유나' (23년 입사자)
+('2301011', 'PAY001', '2023-01-01', '9999-12-31', 2700000, 'Y', '기본급', 'system_admin'),
+('2301011', 'PAY003', '2023-01-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+
+-- '2301012', '장은우' (23년 입사자)
+('2301012', 'PAY001', '2023-01-01', '9999-12-31', 2700000, 'Y', '기본급', 'system_admin'),
+('2301012', 'PAY003', '2023-01-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+
+-- '2302013', '송지아' (23년 입사자, 자격수당)
+('2302013', 'PAY001', '2023-02-01', '9999-12-31', 2600000, 'Y', '기본급', 'system_admin'),
+('2302013', 'PAY003', '2023-02-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+('2302013', 'PAY005', '2023-02-01', '9999-12-31', 100000, 'Y', 'SQLD 자격수당', 'system_admin'),
+
+-- '2401021', '유정민' (24년 입사자)
+('2401021', 'PAY001', '2024-01-01', '9999-12-31', 2500000, 'Y', '기본급', 'system_admin'),
+('2401021', 'PAY003', '2024-01-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+
+-- '2401022', '홍예준' (24년 입사자)
+('2401022', 'PAY001', '2024-01-01', '9999-12-31', 2500000, 'Y', '기본급', 'system_admin'),
+('2401022', 'PAY003', '2024-01-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+
+-- '2403025', '노하린' (24년 입사자, 차량유지비)
+('2403025', 'PAY001', '2024-03-01', '9999-12-31', 2550000, 'Y', '기본급', 'system_admin'),
+('2403025', 'PAY003', '2024-03-01', '9999-12-31', 200000, 'Y', '비과세 식대', 'system_admin'),
+('2403025', 'PAY008', '2024-03-01', '9999-12-31', 200000, 'Y', '외근직 차량유지비', 'system_admin');
+
 -- 기준급여 마스터 테이블 (숫자 ID를 기본 키로 사용) --
 CREATE TABLE ZHR_BASE_PAY (
     PAY_ID BIGINT NOT NULL AUTO_INCREMENT COMMENT '급여이력 ID (PK)',

@@ -19,9 +19,9 @@ public class EmployeeMasterService {
 		this.modelMapper = modelMapper;
 	}
 	
-	// 전체 List 조회
+	// 전체 List 조회 (검색용)
 	public List<EmployeeMasterDto> findAll () {
-		return employeeMasterRepository.findAll().stream()
+		return employeeMasterRepository.findAllByOrderByName().stream()
 				.map(i -> modelMapper.map(i, EmployeeMasterDto.class))
 				.toList();
 	}

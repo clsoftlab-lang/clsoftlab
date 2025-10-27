@@ -28,6 +28,7 @@
 						<li><a th:href="@{/pay/tax}" th:classappend="${currentUrl != null && (currentUrl == '/pay/tax' || currentUrl.startsWith('/pay/tax?'))} ? 'active' : ''">세율/구간 관리</a></li>
 						<li><a th:href="@{/pay/backpay-rule}" th:classappend="${currentUrl != null && (currentUrl == '/pay/backpay-rule' || currentUrl.startsWith('/pay/backpay-rule?'))} ? 'active' : ''">소급 규칙 관리</a></li>
 						<li><a th:href="@{/pay/pay-cycle}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-cycle' || currentUrl.startsWith('/pay/pay-cycle?'))} ? 'active' : ''">직군별 급여 주기 관리</a></li>
+						<li><a th:href="@{/pay/employee-allow}" th:classappend="${currentUrl != null && (currentUrl == '/pay/employee-allow' || currentUrl.startsWith('/pay/employee-allow?'))} ? 'active' : ''">사원별 정기 수당 설정</a></li>
 						<li><a th:href="@{/pay/base-pay}" th:classappend="${currentUrl != null && (currentUrl == '/pay/base-pay' || currentUrl.startsWith('/pay/base-pay?'))} ? 'active' : ''">기준 급여 관리</a></li>
 						<li><a th:href="@{/pay/standard-hours}" th:classappend="${currentUrl != null && (currentUrl == '/pay/standard-hours' || currentUrl.startsWith('/pay/standard-hours?'))} ? 'active' : ''">월별 소정 근로시간 관리</a></li>
 						<li><a th:href="@{/pay/standard-hours-employee}" th:classappend="${currentUrl != null && (currentUrl == '/pay/standard-hours-employee' || currentUrl.startsWith('/pay/standard-hours-employee?'))} ? 'active' : ''">사원별 예외 근로시간 관리</a></li>

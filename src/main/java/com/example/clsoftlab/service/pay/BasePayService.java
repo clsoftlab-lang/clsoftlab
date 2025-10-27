@@ -40,7 +40,7 @@ public class BasePayService {
 	// 검색어로 목록 조회
 	public Page<BasePayDetailDto> searchBasePay (List<String> empNo, List<String> baseUnit, int page, int size) {
 		
-		Pageable pageable = PageRequest.of(page, size, Sort.by("empNo"));
+		Pageable pageable = PageRequest.of(page, size, Sort.by("employeeMaster.name"));
 		Specification<BasePay> spec = Specification.not(null);
 		
 		spec = spec.and(BasePaySpecs.withEmpNo(empNo))
@@ -65,7 +65,7 @@ public class BasePayService {
 	public void addNewBasePay (BasePayRequestDto dto) {
 		BasePay basePay = modelMapper.map(dto, BasePay.class);
 		basePay.setEmployeeMaster(employeeMasterRepository.getReferenceById(dto.getEmpNo()));
-		basePayRepository.save(modelMapper.map(dto, BasePay.class));
+		basePayRepository.save(basePay);
 	}
 	
 	// 기준급여 수정

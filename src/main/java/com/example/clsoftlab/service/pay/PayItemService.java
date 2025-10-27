@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.example.clsoftlab.dto.pay.PayItemDetailDto;
 import com.example.clsoftlab.dto.pay.PayItemListDto;
 import com.example.clsoftlab.dto.pay.PayItemRequestDto;
+import com.example.clsoftlab.dto.pay.PayItemSearchDto;
 import com.example.clsoftlab.entity.PayItem;
 import com.example.clsoftlab.repository.pay.PayItemRepository;
 import com.example.clsoftlab.repository.pay.specification.PayItemSpecs;
@@ -95,6 +96,13 @@ public class PayItemService {
 	public List<PayItemListDto> findAll () { 
 		return payItemRepository.findAll().stream()
 				.map(i -> modelMapper.map(i, PayItemListDto.class))
+				.toList();
+	}
+	
+	// 전체 list 조회 (검색용)
+	public List<PayItemSearchDto> findAllForSearch () { 
+		return payItemRepository.findAllByOrderByItemCode().stream()
+				.map(i -> modelMapper.map(i, PayItemSearchDto.class))
 				.toList();
 	}
 }

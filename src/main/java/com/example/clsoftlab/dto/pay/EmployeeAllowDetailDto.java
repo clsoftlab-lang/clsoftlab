@@ -1,6 +1,5 @@
 package com.example.clsoftlab.dto.pay;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -12,15 +11,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BasePayDetailDto {
+public class EmployeeAllowDetailDto {
 
-	private long payId;
+	private Long id;
     private String employeeMasterPernr;
     private String employeeMasterName;
+    private String PayItemCode; 
+    private String PayItemName; 
     private LocalDate fromDate;
     private LocalDate toDate;
-    private BigDecimal basePay;
-    private String baseUnit;
-    private Integer standardHours;
+    private Long allowAmt;
+    private String useYn;
     private String note;
 }

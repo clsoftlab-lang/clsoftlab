@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>기준급여 마스터 관리</title>
+	<title>사원별 정기수당 관리</title>
 
 	<link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
 	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
@@ -39,28 +39,35 @@
 						<h5 class="card-title">검색 조건</h5>
 					</div>
 					<div class="card-body">
-						<form action="/pay/base-pay" method="get" id="searchForm">
+						<form action="/pay/employee-allow" method="get" id="searchForm">
 							<div class="row">
 								<div class="col-md-4">
 									<div class="form-group">
 										<label>사번</label>
-										<select  name="empNo" multiple="multiple" class="form-control" id="employeeSelect">
-											<option th:each = "b : ${basePayEmployeeList}" th:value="${b.pernr}" th:text=|${b.name}(${b.pernr})| th:selected="${empNo != null && #lists.contains(empNo, b.pernr)}">
+										<select name="empNo" multiple="multiple" class="form-control" id="employeeSelect">
+											<option th:each="emp : ${searchEmployeeList}" th:value="${emp.pernr}" th:text=|${emp.name}(${emp.pernr})| th:selected="${empNo != null && #lists.contains(empNo, emp.pernr)}">
 										</select>
 									</div>
 								</div>
 								<div class="col-md-4">
 									<div class="form-group">
-										<label>기준 단위</label>
-										<select class="form-select" name="baseUnit" multiple="multiple" id="baseSelect">
-											<option value="YEARLY" th:selected="${baseUnit != null && #lists.contains(baseUnit, 'YEARLY')}">YEARLY (연봉)</option>
-											<option value="MONTHLY" th:selected="${baseUnit != null && #lists.contains(baseUnit, 'MONTHLY')}">MONTHLY (월급)</option>
-											<option value="DAILY" th:selected="${baseUnit != null && #lists.contains(baseUnit, 'DAILY')}">DAILY (일급)</option>
-											<option value="HOURLY" th:selected="${baseUnit != null && #lists.contains(baseUnit, 'HOURLY')}">HOURLY (시급)</option>
+										<label>항목코드</label>
+										<select class="form-select" name="itemCode" multiple="multiple" id="itemSelect">
+											<option th:each="item : ${payItemList}" th:value="${item.itemCode}" th:text=|${item.itemName}(${item.itemCode})| th:selected="${itemCode != null && #lists.contains(itemCode, item.itemCode)}">
 										</select>
 									</div>
 								</div>
-								<div class="col-md-4 d-flex align-items-end">
+								<div class="col-md-2">
+									<div class="form-group">
+										<label>사용여부</label>
+										<select class="form-select" name="useYn">
+											<option value="">-- 전체 --</option>
+											<option value="Y" th:selected="${useYn == 'Y'}">Y (사용)</option>
+											<option value="N" th:selected="${useYn == 'N'}">N (미사용)</option>
+										</select>
+									</div>
+								</div>
+								<div class="col-md-2 d-flex align-items-end">
 									<div class="form-group w-100 position-relative">
 										<button type="submit" class="btn btn-primary w-100">조회</button>
 									</div>
@@ -72,7 +79,7 @@
 
 				<div class="card">
 					<div class="card-header">
-						<h5 class="card-title">기준급여 목록</h5>
+						<h5 class="card-title">정기수당 목록</h5>
 					</div>
 					<div class="card-body">
 						<div class="table-responsive">
@@ -80,27 +87,29 @@
 								<thead class="table-light">
 									<tr>
 										<th>사번</th>
-										<th>기준급여</th>
-										<th>단위</th>
-										<th>월 소정시간</th>
+										<th>항목명(코드)</th>
+										<th>수당금액</th>
 										<th>적용시작일</th>
 										<th>적용종료일</th>
+										<th>사용여부</th>
 										<th>비고</th>
 										<th>수정</th>
 									</tr>
 								</thead>
 								<tbody>
-									<tr th:each="b : ${basePay}">
-										<td th:text=|${b.employeeMasterName}(${b.employeeMasterPernr})|></td>
-										<td th:text="${#numbers.formatDecimal(b.basePay, 1, 'COMMA', 0, 'POINT')}"></td>
-										<td th:text="${b.baseUnit}"></td>
-										<td th:text="${b.standardHours}"></td>
-										<td th:text="${#temporals.format(b.fromDate, 'yyyy-MM-dd')}"></td>
-										<td th:text="${#temporals.format(b.toDate, 'yyyy-MM-dd')}"></td>
-										<td th:text="${#strings.abbreviate(b.note, 50)}"></td>
+									<tr th:each="allow : ${employeeAllow}">
+										<td th:text=|${allow.employeeMasterName}(${allow.employeeMasterPernr})|></td>
+										<td th:text=|${allow.payItemName}(${allow.payItemCode})|></td>
+										<td th:text="${#numbers.formatDecimal(allow.allowAmt, 1, 'COMMA', 0, 'POINT')}"></td>
+										<td th:text="${#temporals.format(allow.fromDate, 'yyyy-MM-dd')}"></td>
+										<td th:text="${#temporals.format(allow.toDate, 'yyyy-MM-dd')}"></td>
+										<td>
+										    <input type="checkbox" class="form-check-input" th:checked="${allow.useYn == 'Y'}" onclick="return false;">
+										</td>
+										<td th:text="${#strings.abbreviate(allow.note, 50)}"></td>
 										<td>
 											<button class="btn btn-sm btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" 
-												th:data-pay-id="${b.payId}">수정</button>
+												th:data-id="${allow.id}">수정</button>
 										</td>
 									</tr>
 								</tbody>
@@ -117,55 +126,56 @@
 				    <div class="modal-dialog modal-lg modal-dialog-centered">
 				        <div class="modal-content">
 				            <div class="modal-header">
-				                <h5 class="modal-title">신규 기준급여 등록</h5>
+				                <h5 class="modal-title">신규 정기수당 등록</h5>
 				                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				            </div>
 				            <div class="modal-body">
-				                <form id="addBasePayForm">
+				                <form id="addForm">
 				                    <div class="row">
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">사번 <span class="text-danger">*</span></label>
-				                            <select  name="empNo"  class="form-control" >
-				                            <option value="" disabled selected>-- 사원 선택 --</option>
-											<option th:each = "e : ${employeeList}" th:value="${e.pernr}" th:text=|${e.name}(${e.pernr})| >
-										</select>
-				                        </div>
-				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">기준급여 <span class="text-danger">*</span></label>
-				                            <input type="number" class="form-control" name="basePay" required min="0">
-				                        </div>
-				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">단위 <span class="text-danger">*</span></label>
-				                            <select class="form-select" name="baseUnit" required>
-												<option value="YEARLY" >YEARLY (연봉)</option>
-												<option value="MONTHLY">MONTHLY (월급)</option>
-												<option value="DAILY">DAILY (일급)</option>
-												<option value="HOURLY">HOURLY (시급)</option>
+				                            <label class="form-label">사번<span class="text-danger">*</span></label>
+				                            <select name="empNo" class="form-control" required>
+				                            	<option value="" disabled selected>-- 사원 선택 --</option>
+												<option th:each="e : ${employeeList}" th:value="${e.pernr}" th:text=|${e.name}(${e.pernr})| >
 											</select>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">월 소정 근로시간 <span class="text-danger">*</span></label>
-				                            <input type="number" class="form-control" name="standardHours" required min="1" maxlength="744">
+				                            <label class="form-label">수당 항목<span class="text-danger">*</span></label>
+				                            <select name="itemCode" class="form-select" required>
+				                            	<option value="" disabled selected>-- 항목 선택 --</option>
+												<option th:each="item : ${payItemList}" th:value="${item.itemCode}" th:text=|${item.itemName}(${item.itemCode})| >
+											</select>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">적용 시작일 <span class="text-danger">*</span></label>
+				                            <label class="form-label">정기 수당 금액<span class="text-danger">*</span></label>
+				                            <input type="number" class="form-control" name="allowAmt" required min="0" >
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">사용 여부<span class="text-danger">*</span></label>
+				                            <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+									        </div>
+				                        </div>
+				                        <div class="col-md-6 mb-3">
+				                            <label class="form-label">적용 시작일<span class="text-danger">*</span></label>
 				                            <input type="date" class="form-control" name="fromDate" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">적용 종료일 <span class="text-danger">*</span></label>
-				                            <input type="date" class="form-control" name="toDate" required>
+				                            <label class="form-label">적용 종료일<span class="text-danger">*</span></label>
+				                            <input type="date" class="form-control" name="toDate" required value="9999-12-31">
 				                        </div>
 				                        <div class="col-md-12 mb-3">
-				                            <label class="form-label">비고 <span class="text-danger">*</span></label>
+				                            <label class="form-label">비고</label>
 				                            <textarea class="form-control" rows="2" name="note" maxlength="500"></textarea>
 				                        </div>
 				                    </div>
 				                </form>
 				            </div>
 				            <div class="modal-footer gap-2">
-				                <button type="reset" form="addForm" class="btn btn-outline-secondary">초기화</button>
+				                <button type="reset" form="addAllowanceForm" class="btn btn-outline-secondary">초기화</button>
 				                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
-				                <button type="button" class="btn btn-primary" onclick="addNewBasePay()">저장</button>
+				                <button type="button" class="btn btn-primary" onclick="addNewAllow()">저장</button>
 				            </div>
 				        </div>
 				    </div>
@@ -175,45 +185,44 @@
 				    <div class="modal-dialog modal-lg modal-dialog-centered">
 				        <div class="modal-content">
 				            <div class="modal-header">
-				                <h5 class="modal-title">기준급여 수정</h5>
+				                <h5 class="modal-title">정기수당 수정</h5>
 				                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				            </div>
 				            <div class="modal-body">
-				                <form id="editBasePayForm">
-									<input type="hidden" name="payId"> 
+				                <form id="editForm">
+									<input type="hidden" name="id"> 
 									<div class="row">
 				                         <div class="col-md-6 mb-3">
 				                            <label class="form-label">사번</label>
-				                            <input class="form-control" name="employeeMasterPernr" required readonly >
-				                            <input class="form-control" name="empNo" hidden="" >
+				                            <input class="form-control" name="employeeMasterPernr" readonly >
+				                            <input name="empNo" hidden>
+				                        </div>
+				                         <div class="col-md-6 mb-3">
+				                            <label class="form-label">수당 항목</label>
+				                            <input class="form-control" name="payItemName" readonly>
+				                            <input name="itemCode" hidden>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">기준급여 <span class="text-danger">*</span></label>
-				                            <input type="number" class="form-control" name="basePay" required min="0">
+				                            <label class="form-label">정기 수당 금액<span class="text-danger">*</span></label>
+				                            <input type="number" class="form-control" name="allowAmt" required min="0">
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">단위 <span class="text-danger">*</span></label>
-				                            <select class="form-select" name="baseUnit" required>
-												<option value="YEARLY">YEARLY (연봉)</option>
-												<option value="MONTHLY">MONTHLY (월급)</option>
-												<option value="DAILY">DAILY (일급)</option>
-												<option value="HOURLY">HOURLY (시급)</option>
-											</select>
+				                            <label class="form-label">사용 여부<span class="text-danger">*</span></label>
+				                            <div class="form-check">
+										            <input type="hidden" value="N" name="useYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="useYn"  checked>
+									        </div>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">월 소정 근로시간 <span class="text-danger">*</span></label>
-				                            <input type="number" class="form-control" name="standardHours" required min="1">
-				                        </div>
-				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">적용 시작일 <span class="text-danger">*</span></label>
+				                            <label class="form-label">적용 시작일<span class="text-danger">*</span></label>
 				                            <input type="date" class="form-control" name="fromDate" required>
 				                        </div>
 				                        <div class="col-md-6 mb-3">
-				                            <label class="form-label">적용 종료일 <span class="text-danger">*</span></label>
+				                            <label class="form-label">적용 종료일<span class="text-danger">*</span></label>
 				                            <input type="date" class="form-control" name="toDate" required>
 				                        </div>
 				                        <div class="col-md-12 mb-3">
-				                            <label class="form-label">비고 <span class="text-danger">*</span></label>
+				                            <label class="form-label">비고</label>
 				                            <textarea class="form-control" rows="2" name="note" maxlength="500"></textarea>
 				                        </div>
 				                    </div>
@@ -221,7 +230,7 @@
 				            </div>
 				            <div class="modal-footer gap-2">
 				                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-				                <button type="button" class="btn btn-primary" onclick="updateBasePay()">변경사항 저장</button>
+				                <button type="button" class="btn btn-primary" onclick="updateAllow()">변경사항 저장</button>
 				            </div>
 				        </div>
 				    </div>
@@ -243,12 +252,11 @@
 	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
 	<script src="/assets/js/script.js"></script>
 	<script src="/assets/js/common-datatable-init.js"></script>
-	<script type="text/javascript">
 	
+	<script type="text/javascript">
 		document.addEventListener('DOMContentLoaded', function () {
-	   	 
-	 		// 수정 모달창을 열 때, 불러오기.
-	        const tableBody = document.querySelector('.table tbody');
+			
+			const tableBody = document.querySelector('.table tbody');
 		    if (tableBody) {
 		        tableBody.addEventListener('click', function(event) {
 		        	
@@ -256,26 +264,26 @@
 		
 		            
 		            if (editButton) {
-		                const payId = editButton.dataset.payId; 
-		                findBasePayDetail(payId);
+		                const id = editButton.dataset.id; 
+		                findDetail(id);
 		            }
 		        });
 		    }
 		    
 		 	// Select2 초기화
 		    $('#employeeSelect').select2();
-		    $('#baseSelect').select2();
+		    $('#itemSelect').select2();
 		    
 		    const tableSpecificOptions = {
 			        'columns': [
-			            { "width": "120px" }, // 0. 사번
-			            { "width": "100px" }, // 1. 기준급여
-			            { "width": "80px" },  // 2. 단위
-			            { "width": "80px" },  // 3. 월 소정시간
-			            { "width": "100px" }, // 4. 적용시작일
-			            { "width": "100px" }, // 5. 적용종료일
-			            null,                 // 6. 비고 (나머지 공간 자동)
-			            // 7. 수정 (버튼) - 검색 및 정렬 비활성화
+			            null, // 0. 사번 (자동)
+			            null, // 1. 항목명(코드) (자동)
+			            null, // 2. 수당금액 (자동)
+			            null, // 3. 적용시작일 (자동)
+			            null, // 4. 적용종료일 (자동)
+			            null, // 5. 사용여부 (자동)
+			            { "width": "400px" }, // 6. 비고 (고정)
+			            // 7. 수정 (버튼) - 고정, 검색/정렬 비활성화
 			            { "width": "70px", "searchable": false, "orderable": false } 
 			        ],
                     // DataTables 한글화 및 기본 설정 (유지)
@@ -304,24 +312,24 @@
 		    initializeResizableDataTable('#dataTable',tableSpecificOptions);
 		});
 		
-		// 새 기준 급여 등록
-	    async function addNewBasePay() {
-			const addBasePayForm = document.getElementById('addBasePayForm');
-		    const formData = new FormData(addBasePayForm);
+		// 새 항목 등록
+	    async function addNewAllow() {
+			const addForm = document.getElementById('addForm');
+		    const formData = new FormData(addForm);
 		    const data = Object.fromEntries(formData.entries());
 
 		    if (!data.empNo || !data.empNo.trim()) {
-		        alert('사번을 입력해주세요.');
+		        alert('사번을 선택해주세요.');
 		        return;
 		    }
 		    
-		    if (!data.basePay) {
-		    	alert('기준급여를 입력해주세요.');
+		    if (!data.itemCode || !data.itemCode.trim()) {
+		    	alert('수당 항목을 선택해주세요.');
 		    	return;
 		    }
 		    
-		    if (!data.standardHours) {
-		    	alert('월 소정 근로시간을 입력해주세요.');
+		    if (data.allowAmt === null || data.allowAmt === '') { 
+		    	alert('정기 수당 금액을 입력해주세요.');
 		    	return;
 		    }
 		    
@@ -337,7 +345,7 @@
 		    
 		    // --- 서버 작업 시작 ---
 		    try {
-		        const response = await fetch(`/pay/base-pay/checkOverlap?empNo=${data.empNo}&fromDate=${data.fromDate}&toDate=${data.toDate}`);
+		        const response = await fetch(`/pay/employee-allow/checkOverlap?empNo=${data.empNo}&itemCode=${data.itemCode}&fromDate=${data.fromDate}&toDate=${data.toDate}`);
 		        
 		        const checkResult = await response.text();
 		        
@@ -347,7 +355,7 @@
 		        }
 
 		        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
-		        const saveResponse = await fetch('/pay/base-pay', {
+		        const saveResponse = await fetch('/pay/employee-allow', {
 		            method: 'POST',
 		            headers: {
 		                'Content-Type': 'application/json',
@@ -370,21 +378,24 @@
 		};
 		
 		// 수정 모달창 데이터 불러오기.
-		async function findBasePayDetail(payId) {
+		async function findDetail(id) {
 		    try {
-		        const response = await fetch(`/pay/base-pay/detail/${payId}`);
+		        const response = await fetch(`/pay/employee-allow/detail/${id}`);
 		        if (!response.ok) {
 		            throw new Error('데이터를 불러오는 데 실패했습니다.');
 		        }
 		        const data = await response.json();
-		        const editForm = document.getElementById('editBasePayForm')
+		        const editForm = document.getElementById('editForm')
 
 
 		        for (const key in data) {
 		            const field = editForm.querySelector(`[name="${key}"]`);
-		            
-		            if(field) {
-			            field.value = data[key];
+		            const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+
+		            if (checkbox && field && field.type === 'hidden') {
+		                checkbox.checked = (data[key] === 'Y');
+		            } else if (field) {
+		                field.value = data[key];
 		            }
 		        }
 		        
@@ -397,27 +408,33 @@
 		        if (empNoField && data.employeeMasterPernr) {
 		            empNoField.value = `${data.employeeMasterPernr}`;
 		        }
+		        
+		        const itemField = editForm.querySelector('[name="payItemName"]');
+		        if (itemField && data.payItemCode && data.payItemName) {
+		            itemField.value = `${data.payItemName}(${data.payItemCode})`;
+		        }
+		        
+		        const itemCodeField = editForm.querySelector('[name="itemCode"]');
+		        if (itemCodeField && data.payItemCode) {
+		            itemCodeField.value = `${data.payItemCode}`;
+		        }
 
 		    } catch (error) {
 		        console.error('Error:', error);
 		        alert(error.message);
 		    }
 		}
+
 		
-		//지급 주기 수정
-		async function updateBasePay() {
-		    const editForm = document.getElementById('editBasePayForm');
+		//항목
+		async function updateAllow() {
+		    const editForm = document.getElementById('editForm');
 		    const formData = new FormData(editForm);
 		    const data = Object.fromEntries(formData.entries());
 
 
-		    if (!data.basePay) {
-		    	alert('기준급여를 입력해주세요.');
-		    	return;
-		    }
-		    
-		    if (!data.standardHours) {
-		    	alert('월 소정 근로시간을 입력해주세요.');
+		    if (data.allowAmt === null || data.allowAmt === '') { 
+		    	alert('정기 수당 금액을 입력해주세요.');
 		    	return;
 		    }
 		    
@@ -433,7 +450,7 @@
 		    
 		    try {
 		    	
-		    	const checkResponse = await fetch(`/pay/base-pay/checkOverlap/update?empNo=${data.empNo}&payId=${data.payId}&fromDate=${data.fromDate}&toDate=${data.toDate}`);
+		        const checkResponse = await fetch(`/pay/employee-allow/checkOverlap?empNo=${data.empNo}&itemCode=${data.itemCode}&fromDate=${data.fromDate}&toDate=${data.toDate}&id=${data.id}`);
 		    	
 				const checkResult = await checkResponse.text();
 		        
@@ -442,7 +459,7 @@
 		            return;
 		        }
 		        
-		        const url = `/pay/base-pay/${data.payId}`;
+		        const url = `/pay/employee-allow/${data.id}`;
 		        const response = await fetch(url, {
 		            method: 'PUT', 
 		            headers: {
