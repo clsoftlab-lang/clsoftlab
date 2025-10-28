@@ -1,5 +1,6 @@
 package com.example.clsoftlab.service.pay;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -7,12 +8,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.pay.StandardHoursDetailDto;
 import com.example.clsoftlab.dto.pay.StandardHoursRequestDto;
+import com.example.clsoftlab.dto.pay.StandardHoursSearchDto;
 import com.example.clsoftlab.entity.StandardHours;
 import com.example.clsoftlab.repository.pay.StandardHoursRepository;
+import com.example.clsoftlab.repository.pay.specification.StandardHoursSpecs;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -29,10 +33,14 @@ public class StandardHoursService {
 	}
 	
 	// 검색으로 조회
-	public Page<StandardHoursDetailDto> searchStandardHours (String calYm, String jobGroup, int page, int size) {
+	public Page<StandardHoursDetailDto> searchStandardHours (String calYm, List<String> jobGroup, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("calYm").descending());
+		Specification<StandardHours> spec = Specification.not(null);
 		
-		return standardHoursRepository.searchStandardHours(calYm, jobGroup, pageable)
+		spec = spec.and(StandardHoursSpecs.withCalYm(calYm))
+				.and(StandardHoursSpecs.withJobGroup(jobGroup));
+		
+		return standardHoursRepository.findAll(spec, pageable)
 				.map(i -> modelMapper.map(i, StandardHoursDetailDto.class));
 	}
 	
@@ -53,13 +61,17 @@ public class StandardHoursService {
 	}
 	
 	// 중복 검사
-	public long checkOverlappingStandardHours (String calYm, String jobGroup) {
-	    	return standardHoursRepository.countOverlappingStandardHours(calYm, jobGroup);
+	public boolean checkOverlappingStandardHours (String calYm, String jobGroup) {
+	    	return standardHoursRepository.existsByCalYmAndJobGroup(calYm, jobGroup);
 	}
 	
 	// 세부 정보 찾기
 	public Optional<StandardHoursDetailDto> findById (long id) {
-		
 		return standardHoursRepository.findById(id).map(i -> modelMapper.map(i, StandardHoursDetailDto.class));
+	}
+	
+	// jobGroup list 조회
+	public List<StandardHoursSearchDto> getJobGroupList () {
+		return standardHoursRepository.getJobGroupList();
 	}
 }

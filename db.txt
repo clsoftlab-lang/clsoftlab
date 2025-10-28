@@ -1,4 +1,5 @@
 create database clsoftlabnew default character set utf8mb4 collate utf8mb4_unicode_ci;
+create database clsoftlabnew default character set utf8mb4 collate utf8mb4_unicode_ci;
 
 use clsoftlabnew;
 
@@ -762,14 +763,17 @@ VALUES
 CREATE TABLE ZHR_STD_HOURS_EMP (
     STD_HOURS_EMP_ID BIGINT       NOT NULL AUTO_INCREMENT COMMENT '소정근로시간 예외 ID (PK)',
     ZCAL_YM          VARCHAR(6)   NOT NULL COMMENT '기준연월 (YYYYMM)',
-    ZEMP_NO          VARCHAR(20)  NOT NULL COMMENT '사번',
+    ZEMP_NO          VARCHAR(10)  NOT NULL COMMENT '사번 (FK from ZHR_EMP_MASTER.PERNR)',
     ZSTD_HOURS       SMALLINT     NOT NULL COMMENT '월 소정 근로시간',
     ZREASON_CD       VARCHAR(20)  NULL     COMMENT '예외 사유코드',
     ZNOTE            VARCHAR(500) NULL     COMMENT '비고 (예외 원인 주석)',
+    
+    -- 감사(Audit) 및 버전(Version) 필드
     CREATED_AT       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
     CREATED_BY       VARCHAR(50)  NOT NULL COMMENT '생성자',
     UPDATED_AT       DATETIME     NULL     COMMENT '수정 일시',
     UPDATED_BY       VARCHAR(50)  NULL     COMMENT '수정자',
+    VERSION          BIGINT       NOT NULL DEFAULT 0 COMMENT '버전 (낙관적 락)',
 
     -- 기본 키 설정
     PRIMARY KEY (STD_HOURS_EMP_ID),
@@ -778,7 +782,13 @@ CREATE TABLE ZHR_STD_HOURS_EMP (
     UNIQUE KEY UK_ZHR_STD_HOURS_EMP (ZEMP_NO, ZCAL_YM),
 
     -- 데이터 무결성을 위한 제약 조건
-    CONSTRAINT CHK_ZSTD_HOURS_EMP_POSITIVE CHECK (ZSTD_HOURS >= 0)
+    CONSTRAINT CHK_ZSTD_HOURS_EMP_POSITIVE CHECK (ZSTD_HOURS >= 0),
+    
+    -- 외래 키(FK) 제약 조건 추가
+    CONSTRAINT FK_ZHR_STD_HOURS_EMP_ZEMP_NO 
+        FOREIGN KEY (ZEMP_NO) 
+        REFERENCES ZHR_EMP_MASTER (PERNR)
+        
 ) COMMENT '사원별 소정 근로시간 예외 관리';
 
 
@@ -786,41 +796,148 @@ CREATE TABLE ZHR_STD_HOURS_EMP (
 INSERT INTO ZHR_STD_HOURS_EMP
 (ZCAL_YM, ZEMP_NO, ZSTD_HOURS, ZREASON_CD, ZNOTE, CREATED_BY)
 VALUES
--- 2024년 데이터 --
-('202401', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
-('202402', 'EMP001', 152, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
-('202403', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
-('202404', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
-('202401', 'EMP002', 104, 'E02', '주 20시간 계약직', 'HR_Admin'),
-('202402', 'EMP002', 96, 'E02', '주 20시간 계약직', 'HR_Admin'),
-('202403', 'EMP002', 104, 'E02', '주 20시간 계약직', 'HR_Admin'),
-('202404', 'EMP002', 104, 'E02', '주 20시간 계약직', 'HR_Admin'),
-('202410', 'EMP003', 120, 'E03', '건강상 사유로 한시적 단축 근무 (3개월)', 'HR_Admin'),
-('202411', 'EMP003', 120, 'E03', '건강상 사유로 한시적 단축 근무 (3개월)', 'HR_Admin'),
-('202412', 'EMP003', 120, 'E03', '건강상 사유로 한시적 단축 근무 (3개월)', 'HR_Admin'),
-('202412', 'EMP004', 180, 'E04', '미주 파견 복귀 후 1주간 시차 적응', 'HR_Admin'),
-('202411', 'EMP005', 168, 'E05', '임신기 근로시간 단축 신청', 'HR_Admin'),
-('202412', 'EMP005', 168, 'E05', '임신기 근로시간 단축 신청', 'HR_Admin'),
+-- 시나리오 1: '김철수' (2201001), 3개월간 육아기 단축 (160시간)
+('202401', '2201001', 160, 'REDUCE_CHILD', '육아기 근로시간 단축 (주 32시간)', 'system_loader'),
+('202402', '2201001', 160, 'REDUCE_CHILD', '육아기 근로시간 단축 (주 32시간)', 'system_loader'),
+('202403', '2201001', 160, 'REDUCE_CHILD', '육아기 근로시간 단축 (주 32시간)', 'system_loader'),
 
--- 2025년 데이터 --
-('202501', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
-('202502', 'EMP001', 160, 'E01', '육아기 근로시간 단축 (일 6시간)', 'HR_Admin'),
-('202501', 'EMP002', 104, 'E02', '주 20시간 계약직 연장', 'HR_Admin'),
-('202502', 'EMP002', 100, 'E02', '주 20시간 계약직 연장', 'HR_Admin'),
-('202503', 'EMP002', 104, 'E02', '주 20시간 계약직 연장', 'HR_Admin'),
-('202501', 'EMP101', 180, 'E06', '수습기간 중 교육으로 인한 근로시간 조정', 'system_manager'),
-('202502', 'EMP102', 230, 'E07', '2월 긴급 프로젝트 투입', 'payroll_specialist'),
-('202503', 'EMP102', 230, 'E07', '3월 긴급 프로젝트 투입', 'payroll_specialist'),
-('202504', 'EMP103', 80, 'E08', '월 80시간 자문 계약', 'HR_Admin'),
-('202505', 'EMP103', 80, 'E08', '월 80시간 자문 계약', 'HR_Admin'),
-('202506', 'EMP103', 90, 'E08', '월 80시간 자문 계약 (10시간 추가 정산)', 'HR_Admin'),
-('202503', 'EMP007', 120, 'E09', '석사 학위 과정 이수를 위한 단축 근무', 'HR_Admin'),
-('202504', 'EMP007', 120, 'E09', '석사 학위 과정 이수를 위한 단축 근무', 'HR_Admin'),
-('202505', 'EMP007', 120, 'E09', '석사 학위 과정 이수를 위한 단축 근무', 'HR_Admin'),
-('202506', 'EMP007', 120, 'E09', '석사 학위 과정 이수를 위한 단축 근무', 'HR_Admin'),
-('202509', 'EMP009', 168, 'E11', '1년간의 휴직 후 복귀, 적응 프로그램', 'HR_Admin'),
-('202510', 'EMP009', 168, 'E11', '1년간의 휴직 후 복귀, 적응 프로그램', 'HR_Admin'),
-('202511', 'EMP010', 190, 'E99', '가족 간병을 위한 일시적 근무시간 조정', 'system_manager');
+-- 시나리오 2: '이영희' (2201002), 2024년 1월부터 파트타임 (100시간)
+('202401', '2201002', 100, 'PARTTIME', '파트타임 전환 (주 20시간)', 'system_loader'),
+('202402', '2201002', 100, 'PARTTIME', '파트타임 전환 (주 20시간)', 'system_loader'),
+
+-- 시나리오 3: 2024년 입사자 (중도 입사로 인한 일할 계산)
+('202401', '2401021', 104, 'PRORATE_JOIN', '1월 15일 입사 (104시간)', 'system_loader'),
+('202401', '2401022', 80, 'PRORATE_JOIN', '1월 20일 입사 (80시간)', 'system_loader'),
+('202402', '2402023', 96, 'PRORATE_JOIN', '2월 14일 입사 (96시간)', 'system_loader'),
+('202402', '2402024', 80, 'PRORATE_JOIN', '2월 19일 입사 (80시간)', 'system_loader'),
+('202403', '2403025', 112, 'PRORATE_JOIN', '3월 11일 입사 (112시간)', 'system_loader'),
+('202404', '2404026', 104, 'PRORATE_JOIN', '4월 15일 입사 (104시간)', 'system_loader'),
+('202404', '2404027', 80, 'PRORATE_JOIN', '4월 22일 입사 (80시간)', 'system_loader'),
+('202405', '2405028', 120, 'PRORATE_JOIN', '5월 13일 입사 (120시간)', 'system_loader'),
+('202405', '2405029', 88, 'PRORATE_JOIN', '5월 20일 입사 (88시간)', 'system_loader'),
+('202406', '2406030', 104, 'PRORATE_JOIN', '6월 10일 입사 (104시간)', 'system_loader'),
+
+-- 시나리오 4: 건강상 사유 및 기타 단축
+('202403', '2203003', 120, 'REDUCE_HEALTH', '건강상 사유 (주 24시간)', 'system_loader'),
+('202404', '2203003', 120, 'REDUCE_HEALTH', '건강상 사유 (주 24시간)', 'system_loader'),
+('202405', '2301011', 160, 'REDUCE_CHILD', '육아기 단축', 'system_loader'),
+('202405', '2301012', 180, 'CONTRACT_36H', '특수 계약 (주 36시간)', 'system_loader'),
+('202405', '2302013', 100, 'PARTTIME', '학업 병행 (주 20시간)', 'system_loader'),
+
+-- 시나리오 5: 중도 퇴사자
+('202406', '2207005', 80, 'PRORATE_LEAVE', '6월 15일 퇴사 (80시간)', 'system_loader'),
+('202406', '2207006', 120, 'PRORATE_LEAVE', '6월 20일 퇴사 (120시간)', 'system_loader'),
+
+-- 시나리오 6: 2023년 입사자들의 산발적 단축
+('202407', '2304014', 160, 'REDUCE_CHILD', '육아기 단축', 'system_loader'),
+('202407', '2305015', 160, 'REDUCE_CHILD', '육아기 단축', 'system_loader'),
+('202407', '2305016', 120, 'REDUCE_HEALTH', '질병 휴직 후 단축 복귀', 'system_loader'),
+('202408', '2305016', 120, 'REDUCE_HEALTH', '질병 휴직 후 단축 복귀', 'system_loader'),
+('202408', '2308017', 100, 'PARTTIME', '대학원 진학 (주 20시간)', 'system_loader'),
+('202408', '2309018', 160, 'CONTRACT_32H', '계약 변경 (주 32시간)', 'system_loader'),
+('202408', '2310019', 160, 'REDUCE_CHILD', '배우자 출산 관련 단축', 'system_loader'),
+('202408', '2312020', 160, 'REDUCE_CHILD', '육아기 단축', 'system_loader');
+
+-- 정산 메인 --
+CREATE TABLE ZHR_PAY_SUMMARY_MAIN (
+    -- 1. 기본 키 컬럼 (PK) - 신규 요청
+    ID              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '고유 식별자 (PK)',
+
+    -- 2. 비즈니스 식별자 (Unique)
+    -- 기존 PK -> Unique Index로 변경 (비즈니스 룰 6.2)
+    ZEMP_NO         VARCHAR(10) NOT NULL COMMENT '사번 (FK)',
+    ZPAY_YM         CHAR(6)     NOT NULL COMMENT '정산월 (YYYYMM)',
+    ZSEQ_NO         INT         NOT NULL COMMENT '정산차수',
+
+    -- 3. 정산 요약 정보 (기능 2.2)
+    ZTOTAL_PAY      BIGINT      NOT NULL DEFAULT 0 COMMENT '총지급액',
+    ZTOTAL_DEDUCT   BIGINT      NOT NULL DEFAULT 0 COMMENT '총공제액',
+    ZTOTAL_REAL     BIGINT      NOT NULL DEFAULT 0 COMMENT '실지급액',
+
+    -- 4. 관리 필드 (기능 2.3, 2.4)
+    ZIS_FINAL       CHAR(1)     NOT NULL DEFAULT 'N' COMMENT '확정여부 (Y/N)',
+    ZNOTE           VARCHAR(500) NULL COMMENT '정산 메모 (특이사항)',
+
+    -- 5. 버전 관리 (Optimistic Locking) - 신규 요청
+    VERSION         INT         NOT NULL DEFAULT 0 COMMENT '버전 (낙관적 잠금용)',
+
+    -- 6. 감사(Audit) 필드
+    CREATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)  NULL COMMENT '수정자',
+
+    -- 7. 제약 조건 설정
+    -- 7-1. 기본 키 (신규)
+    PRIMARY KEY (ID),
+
+    -- 7-2. 고유 키 (기존 PK -> UK)
+    -- 비즈니스 룰 6.2 (동일 차수 중복 방지)
+    UNIQUE KEY UK_ZHR_PAY_SUMMARY_BIZ (ZEMP_NO, ZPAY_YM, ZSEQ_NO),
+
+    -- 7-3. 외래 키 (검증 5.1)
+    CONSTRAINT FK_PAY_SUMMARY_TO_EMP_MASTER
+        FOREIGN KEY (ZEMP_NO) 
+        REFERENCES ZHR_EMP_MASTER (PERNR),
+
+    -- 7-4. 체크 제약 (기능 2.3)
+    CHECK (ZIS_FINAL IN ('Y', 'N'))
+
+) COMMENT '정산 차수별 급여 요약 정보 (중심 테이블)';
+
+-- ZHR_PAY_SUMMARY_MAIN 더미 데이터 (총 43건)
+
+INSERT INTO ZHR_PAY_SUMMARY_MAIN
+(ZEMP_NO, ZPAY_YM, ZSEQ_NO, ZTOTAL_PAY, ZTOTAL_DEDUCT, ZTOTAL_REAL, ZIS_FINAL, ZNOTE, CREATED_BY)
+VALUES
+-- 시나리오 1: 2024년 6월 정기 급여 (ZSEQ_NO=1), 확정 전 (N) - 30명 전체
+('2201001', '202406', 1, 5200000, 810000, 4390000, 'N', '6월 정기급여', 'hr_admin'),
+('2201002', '202406', 1, 5100000, 790000, 4310000, 'N', '6월 정기급여', 'hr_admin'),
+('2203003', '202406', 1, 5000000, 750000, 4250000, 'N', '6월 정기급여', 'hr_admin'),
+('2203004', '202406', 1, 4900000, 730000, 4170000, 'N', '6월 정기급여', 'hr_admin'),
+('2207005', '202406', 1, 4800000, 710000, 4090000, 'N', '6월 정기급여', 'hr_admin'),
+('2207006', '202406', 1, 4850000, 720000, 4130000, 'N', '6월 정기급여', 'hr_admin'),
+('2209007', '202406', 1, 4700000, 680000, 4020000, 'N', '6월 정기급여', 'hr_admin'),
+('2210008', '202406', 1, 4600000, 660000, 3940000, 'N', '6월 정기급여', 'hr_admin'),
+('2210009', '202406', 1, 4650000, 670000, 3980000, 'N', '6월 정기급여', 'hr_admin'),
+('2211010', '202406', 1, 4500000, 640000, 3860000, 'N', '6월 정기급여', 'hr_admin'),
+('2301011', '202406', 1, 4000000, 510000, 3490000, 'N', '6월 정기급여', 'hr_admin'),
+('2301012', '202406', 1, 3900000, 490000, 3410000, 'N', '6월 정기급여', 'hr_admin'),
+('2302013', '202406', 1, 3950000, 500000, 3450000, 'N', '6월 정기급여', 'hr_admin'),
+('2304014', '202406', 1, 3800000, 470000, 3330000, 'N', '6월 정기급여', 'hr_admin'),
+('2305015', '202406', 1, 3700000, 450000, 3250000, 'N', '6월 정기급여', 'hr_admin'),
+('2305016', '202406', 1, 3750000, 460000, 3290000, 'N', '6월 정기급여', 'hr_admin'),
+('2308017', '202406', 1, 3600000, 430000, 3170000, 'N', '6월 정기급여', 'hr_admin'),
+('2309018', '202406', 1, 3500000, 410000, 3090000, 'N', '6월 정기급여', 'hr_admin'),
+('2310019', '202406', 1, 3400000, 390000, 3010000, 'N', '6월 정기급여', 'hr_admin'),
+('2312020', '202406', 1, 3300000, 370000, 2930000, 'N', '6월 정기급여', 'hr_admin'),
+('2401021', '202406', 1, 3200000, 350000, 2850000, 'N', '6월 정기급여', 'hr_admin'),
+('2401022', '202406', 1, 3200000, 350000, 2850000, 'N', '6월 정기급여', 'hr_admin'),
+('2402023', '202406', 1, 3100000, 330000, 2770000, 'N', '6월 정기급여', 'hr_admin'),
+('2402024', '202406', 1, 3100000, 330000, 2770000, 'N', '6월 정기급여', 'hr_admin'),
+('2403025', '202406', 1, 3000000, 310000, 2690000, 'N', '6월 정기급여', 'hr_admin'),
+('2404026', '202406', 1, 3000000, 310000, 2690000, 'N', '6월 정기급여', 'hr_admin'),
+('2404027', '202406', 1, 3000000, 310000, 2690000, 'N', '6월 정기급여', 'hr_admin'),
+('2405028', '202406', 1, 2900000, 290000, 2610000, 'N', '6월 정기급여', 'hr_admin'),
+('2405029', '202406', 1, 2900000, 290000, 2610000, 'N', '6월 정기급여', 'hr_admin'),
+('2406030', '202406', 1, 2800000, 270000, 2530000, 'N', '6월 신규입사자', 'hr_admin'),
+
+-- 시나리오 2: 2024년 5월 정기 급여 (ZSEQ_NO=1), 확정 (Y) - 22년 입사자 10명
+('2201001', '202405', 1, 5200000, 810000, 4390000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2201002', '202405', 1, 5100000, 790000, 4310000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2203003', '202405', 1, 5000000, 750000, 4250000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2203004', '202405', 1, 4900000, 730000, 4170000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2207005', '202405', 1, 4800000, 710000, 4090000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2207006', '202405', 1, 4850000, 720000, 4130000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2209007', '202405', 1, 4700000, 680000, 4020000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2210008', '202405', 1, 4600000, 660000, 3940000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2210009', '202405', 1, 4650000, 670000, 3980000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+('2211010', '202405', 1, 4500000, 640000, 3860000, 'Y', '5월 정기급여 (확정)', 'system_batch'),
+
+-- 시나리오 3: 2024년 5월 특별 상여 (ZSEQ_NO=2), 확정 (Y) - 3명
+('2201001', '202405', 2, 2000000, 250000, 1750000, 'Y', '1분기 우수사원 포상', 'hr_manager'),
+('2207005', '202405', 2, 1500000, 180000, 1320000, 'Y', '프로젝트 기여 인센티브', 'hr_manager'),
+('2301011', '202405', 2, 1000000, 100000, 900000, 'Y', '신규 입사자 추천 포상', 'hr_manager');
 
 CREATE TABLE ZHR_PAY_DEDUCT_REASON (
     PAY_DEDUCT_REASON_ID BIGINT       NOT NULL AUTO_INCREMENT COMMENT '징계/병가 공제 ID (PK)',

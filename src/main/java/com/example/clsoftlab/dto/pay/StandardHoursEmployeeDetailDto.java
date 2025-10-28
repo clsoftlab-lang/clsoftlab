@@ -13,7 +13,8 @@ public class StandardHoursEmployeeDetailDto {
 
 	private long id;
 	private String calYm;
-	private String empNo;
+	private String employeePernr;
+	private String employeeName;
 	private Integer standardHours;
 	private String reasonCode;
 	private String note;

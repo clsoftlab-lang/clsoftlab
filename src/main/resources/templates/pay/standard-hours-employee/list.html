@@ -6,12 +6,14 @@
     <title>사원별 소정 근로시간 예외 관리</title>
 
     <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
 </head>
 
 <body>
@@ -42,13 +44,15 @@
                                 <div class="col-md-5">
                                     <div class="form-group">
                                         <label>기준연월</label>
-                                        <input class="form-control" name="calYm" placeholder="YYYYMM 형식으로 입력" th:value="${calYm}" maxlength="6">
+                                        <input class="form-control" name="calYm" th:value="${calYm}" type="month">
                                     </div>
                                 </div>
                                 <div class="col-md-5">
                                     <div class="form-group">
                                         <label>사번</label>
-                                        <input class="form-control" name="empNo" placeholder="사번 입력" th:value="${empNo}">
+                                        <select  name="empNo" multiple="multiple" class="form-control" id="employeeSelect">
+											<option th:each = "e : ${standardEmployeeList}" th:value="${e.pernr}" th:text=|${e.name}(${e.pernr})| th:selected="${empNo != null && #lists.contains(empNo, e.pernr)}">
+										</select>
                                     </div>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end">
@@ -67,7 +71,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover" id="standardHoursEmployeeTable">
+                            <table class="table table-striped table-hover datatable-resizable" id="dataTable">
                                 <thead class="table-light">
                                     <tr>
                                         <th>사번</th>
@@ -80,7 +84,7 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="s : ${standardHoursEmployee}">
-                                        <td th:text="${s.empNo}"></td>
+                                        <td th:text=|${s.employeeName}(${s.employeePernr})|></td>
                                         <td th:text="${s.calYm}"></td>
                                         <td th:text="${s.standardHours}"></td>
                                         <td th:text="${s.reasonCode}"></td>
@@ -111,15 +115,17 @@
                                 <form id="addForm">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">기준연월</label>
-                                            <input type="text" class="form-control" name="calYm" required pattern="\d{6}" maxlength="6" placeholder="예: 202509">
+                                            <label class="form-label">기준연월<span class="text-danger">*</span></label>
+                                            <input type="month" class="form-control" name="calYm" required="required">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">사번</label>
-                                            <input type="text" class="form-control" name="empNo" required maxlength="20">
+                                            <label class="form-label">사번<span class="text-danger">*</span></label>
+                                            <select  name="empNo" class="form-control" >
+											<option th:each = "e : ${employeeList}" th:value="${e.pernr}" th:text=|${e.name}(${e.pernr})| >
+										</select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">소정 근로시간</label>
+                                            <label class="form-label">소정 근로시간<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="standardHours" required min="0" max="744">
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -155,14 +161,14 @@
                                     <div class="row">
                                          <div class="col-md-6 mb-3">
                                             <label class="form-label">기준연월</label>
-                                            <input type="text" class="form-control" name="calYm" readonly>
+                                            <input type="month" class="form-control" name="calYm" readonly>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">사번</label>
                                             <input type="text" class="form-control" name="empNo" readonly>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">소정 근로시간</label>
+                                            <label class="form-label">소정 근로시간<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="standardHours" required min="0" max="744">
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -191,16 +197,16 @@
     </div>
 
     <script src="/assets/js/jquery-3.7.1.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.slimscroll.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="/assets/js/jquery.dataTables.min.js"></script>
-    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
-    <script src="/assets/js/script.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
+	<script src="/assets/js/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
+	<script src="https://unpkg.com/feather-icons"></script>
+	<script src="/assets/js/jquery.dataTables.min.js"></script>
+	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
     <script type="text/javascript" th:inline="none">
-	    new DataTable('#standardHoursEmployeeTable', {
-	        order: [[1, 'desc']] 
-	    });
 	    
 	    document.addEventListener('DOMContentLoaded', function () {
 		   	 
@@ -218,6 +224,46 @@
 		            }
 		        });
 		    }
+		    
+		 	// Select2 초기화
+		    $('#employeeSelect').select2();
+		    
+		    const tableSpecificOptions = {
+			        'columns': [
+			            null,                 // 0. 사번
+			            null,                 // 1. 기준연월
+			            null,                 // 2. 소정근로시간
+			            null,                 // 3. 예외 사유코드
+			            { "width": "40%" },   // 4. 비고 (이 컬럼이 넓어야 함)
+			            // 5. 수정 (고정 너비, 검색/정렬 비활성화)
+			            { "width": "70px", "searchable": false, "orderable": false } 
+			        ], 
+			        
+			        "order": [[ 1, "desc" ], [0, "asc"]], 
+			        
+	                // DataTables 한글화 및 기본 설정 (유지)
+	                "language": {
+	                    "emptyTable": "데이터가 없습니다.",
+	                    "info": "_START_ - _END_ / _TOTAL_ 항목",
+	                    "infoEmpty": "0 항목",
+	                    "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+	                    "lengthMenu": "_MENU_ 개씩 보기",
+	                    "loadingRecords": "로딩중...",
+	                    "processing": "처리중...",
+	                    "search": "검색: ",
+	                    "zeroRecords": "일치하는 항목이 없습니다.",
+	                    "paginate": {
+	                        "first": "처음",
+	                        "last": "마지막",
+	                        "next": "다음",
+	                        "previous": "이전"
+	                    }
+	                },
+	                "pageLength": 10, 
+	                "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+			    };
+		    
+		    initializeResizableDataTable('#dataTable',tableSpecificOptions);
 		});
 	    
 	 	// 새 근로시간 등록
@@ -231,17 +277,13 @@
 		        return;
 		    }
 		    
+		    data.calYm = data.calYm.replace(/-/g, '');
+		    
 		    if (!data.empNo || !data.empNo.trim()) {
 		        alert('사번을 입력해주세요.');
 		        return;
 		    }
 
-		    // 정규식을 이용한 'YYYYMM' 형식 검사
-		    const yyyymmRegex = /^\d{6}$/;
-		    if (!yyyymmRegex.test(data.calYm)) {
-		        alert('기준연월은 YYYYMM 형식(예: 202509)으로 입력해야 합니다.');
-		        return;
-		    }
 		    
 		    if (!data.standardHours) {
 		    	alert('월 소정 근로시간을 입력해주세요.');
@@ -252,9 +294,9 @@
 		    try {
 		    	
 		        const response = await fetch(`/pay/standard-hours-employee/checkOverlap?calYm=${data.calYm}&empNo=${data.empNo}`);
-		        const checkResult = Number(await response.text());
+		        const checkResult = await response.text();
 		        
-		        if (checkResult > 0) { 
+		        if (checkResult == 'true') { 
 		            alert('이미 등록된 기준연월과 사번입니다.\n다른 값을 입력해 주세요.'); 
 		            return;
 		        }
@@ -300,6 +342,17 @@
 			            field.value = data[key];
 		            }
 		        }
+		        
+		        const calYmField = editForm.querySelector('[name="calYm"]');
+		        const formmatedCalYm = data.calYm.substring(0, 4) + '-' + data.calYm.substring(4, 6);
+		        if (calYmField && formmatedCalYm) {
+		            calYmField.value = formmatedCalYm;
+		        }
+		        
+		        const empNoField = editForm.querySelector('[name="empNo"]');
+		        if (empNoField && data.employeeName && data.employeePernr) {
+		            empNoField.value = `${data.employeeName}(${data.employeePernr})`;
+		        }
 
 		    } catch (error) {
 		        console.error('Error:', error);
@@ -312,7 +365,7 @@
 		    const editForm = document.getElementById('editForm');
 		    const formData = new FormData(editForm);
 		    const data = Object.fromEntries(formData.entries());
-		    
+		    data.calYm = data.calYm.replace(/-/g, '');  
 		    if (!data.standardHours) {
 		    	alert('월 소정 근로시간을 입력해주세요.');
 		    	return;

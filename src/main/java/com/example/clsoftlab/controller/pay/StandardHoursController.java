@@ -1,5 +1,7 @@
 package com.example.clsoftlab.controller.pay;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,7 +33,7 @@ public class StandardHoursController {
 	
 	// 검색으로 전체 목록 조회
 	@GetMapping("")
-	public String getStandardHoursList (@RequestParam(defaultValue = "") String calYm, @RequestParam(defaultValue = "") String jobGroup,
+	public String getStandardHoursList (@RequestParam(required = false) String calYm, @RequestParam(required = false) List<String> jobGroup,
 			@RequestParam(required = false) Integer page, Model model) {
 		if (page == null) {
 			page = 0;
@@ -45,6 +47,8 @@ public class StandardHoursController {
 		model.addAttribute("calYm", calYm);
 		model.addAttribute("jobGroup", jobGroup);
 		model.addAttribute("standardHoursPage", standardHoursPage);
+		model.addAttribute("jobGroupList", standardHoursService.getJobGroupList());
+		
 		return "pay/standard-hours/list";
 	}
 	
@@ -65,9 +69,10 @@ public class StandardHoursController {
 	// 중복 검사
 	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public long checkOverlappingStandardHours (@RequestParam String calYm, @RequestParam(required = false) String jobGroup) {
+	public ResponseEntity<Boolean> checkOverlappingStandardHours (@RequestParam String calYm, @RequestParam(required = false) String jobGroup) {
 
-		return standardHoursService.checkOverlappingStandardHours(calYm, jobGroup);
+		boolean result = standardHoursService.checkOverlappingStandardHours(calYm, jobGroup);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 디테일 정보
