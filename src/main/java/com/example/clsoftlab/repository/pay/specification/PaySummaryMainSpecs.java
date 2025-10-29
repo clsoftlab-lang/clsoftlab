@@ -23,7 +23,9 @@ public class PaySummaryMainSpecs {
 			return null;
 		}
 		
-		return (root, query, builder) -> builder.equal(root.get("payYm"), payYm);
+		String formattedPayYm = payYm.replace("-", "");
+		
+		return (root, query, builder) -> builder.equal(root.get("payYm"), formattedPayYm);
 	}
 	
 	public static Specification<PaySummaryMain> withIsFinal (String isFinal) {

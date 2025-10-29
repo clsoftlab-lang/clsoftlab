@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.clsoftlab.dto.common.EmployeeMasterDto;
 import com.example.clsoftlab.dto.pay.PaySummaryMainDetailDto;
@@ -19,15 +21,19 @@ import com.example.clsoftlab.repository.pay.specification.PaySummaryMainSpecs;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
+@Service
 public class PaySummaryMainService {
 
 	private final PaySummaryMainRepository paySummaryMainRepository;
+	private final EmployeeMasterRepository employeeMasterRepository;
 	private final ModelMapper modelMapper;
 	
 	public PaySummaryMainService(PaySummaryMainRepository paySummaryMainRepository, EmployeeMasterRepository employeeMasterRepository,
 			ModelMapper modelMapper) {
 		this.paySummaryMainRepository = paySummaryMainRepository;
+		this.employeeMasterRepository = employeeMasterRepository;
 		this.modelMapper = modelMapper;
 	}
 	
@@ -42,6 +48,15 @@ public class PaySummaryMainService {
 		
 		return paySummaryMainRepository.findAll(spec, pageable)
 				.map(i -> modelMapper.map(i, PaySummaryMainDetailDto.class));
+	}
+	
+	// 새 항목 등록
+	@Transactional
+	public void addNewPaySummary (@Valid @RequestBody PaySummaryMainRequestDto dto) {
+		PaySummaryMain paySummaryMain = modelMapper.map(dto, PaySummaryMain.class);
+		paySummaryMain.setEmployee(employeeMasterRepository.getReferenceById(dto.getEmpNo()));
+		
+		paySummaryMainRepository.save(paySummaryMain);
 	}
 	
 	// 기존 항목 수정
@@ -64,6 +79,19 @@ public class PaySummaryMainService {
 		return paySummaryMainRepository.getEmployeeList().stream()
 				.map(i -> modelMapper.map(i, EmployeeMasterDto.class))
 				.toList();
+	}
+	
+	// 중복 검사
+	public boolean checkOverlap (String payYm, String empNo, Integer seqNo, Long id) {
+		
+		boolean result;
+		if (id == null) {
+			result = paySummaryMainRepository.existsByEmployee_PernrAndPayYmAndSeqNo(empNo, payYm, seqNo);
+		} else {
+			result = paySummaryMainRepository.existsByEmployee_PernrAndPayYmAndSeqNoAndIdNot(empNo, payYm, seqNo, id);
+		}
+		
+		return result;
 	}
 	
 }

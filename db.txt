@@ -1,5 +1,5 @@
 create database clsoftlabnew default character set utf8mb4 collate utf8mb4_unicode_ci;
-create database clsoftlabnew default character set utf8mb4 collate utf8mb4_unicode_ci;
+
 
 use clsoftlabnew;
 
@@ -10,6 +10,8 @@ CREATE TABLE ZHR_EMP_MASTER (
 
     -- 기본 정보 (필수)
     ENAME           VARCHAR(50)  NOT NULL COMMENT '성명',
+    ENTRY_DT      DATE         NOT NULL COMMENT '입사일자 (근속년수 계산 근거)',
+    RETIRE_DT     DATE         NULL     COMMENT '퇴직일자 (정산 대상 식별 및 근속년수 계산 근거)',
 
     -- 감사(Audit) 필드 (요청하신 DDL 형식을 따름)
     CREATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
@@ -24,43 +26,72 @@ CREATE TABLE ZHR_EMP_MASTER (
 
 -- 더미 데이터 --
 INSERT INTO ZHR_EMP_MASTER
-(PERNR, ENAME, CREATED_BY)
+(PERNR, ENAME, ENTRY_DT, RETIRE_DT, CREATED_BY)
 VALUES
--- 2022년 입사자 (10명)
-('2201001', '김철수', 'system_admin'),
-('2201002', '이영희', 'system_admin'),
-('2203003', '박민준', 'system_admin'),
-('2203004', '최서연', 'system_admin'),
-('2207005', '정지훈', 'system_admin'),
-('2207006', '윤서아', 'system_admin'),
-('2209007', '강도윤', 'system_admin'),
-('2210008', '임하윤', 'system_admin'),
-('2210009', '한지우', 'system_admin'),
-('2211010', '오시우', 'system_admin'),
+-- 2022년 입사자 (10명) --
+-- 10명 중 5명 퇴직
+('2201001', '김철수', '2022-01-01', '2025-09-30', 'system_admin'), -- 퇴직자 1
+('2201002', '이영희', '2022-01-01', '2025-01-31', 'system_admin'), -- 퇴직자 2
+('2203003', '박민준', '2022-03-01', '2025-10-29', 'system_admin'), -- 퇴직자 3
+('2203004', '최서연', '2022-03-01', NULL, 'system_admin'),
+('2207005', '정지훈', '2022-07-01', '2025-02-28', 'system_admin'), -- 퇴직자 4
+('2207006', '윤서아', '2022-07-01', NULL, 'system_admin'),
+('2209007', '강도윤', '2022-09-01', NULL, 'system_admin'),
+('2210008', '임하윤', '2022-10-01', '2025-03-31', 'system_admin'), -- 퇴직자 5
+('2210009', '한지우', '2022-10-01', NULL, 'system_admin'),
+('2211010', '오시우', '2022-11-01', NULL, 'system_admin'),
 
--- 2023년 입사자 (10명)
-('2301011', '신유나', 'system_admin'),
-('2301012', '장은우', 'system_admin'),
-('2302013', '송지아', 'system_admin'),
-('2304014', '권혁준', 'system_admin'),
-('2305015', '황수빈', 'system_admin'),
-('2305016', '안태현', 'system_admin'),
-('2308017', '문채원', 'system_admin'),
-('2309018', '고은별', 'system_admin'),
-('2310019', '배준호', 'system_admin'),
-('2312020', '조민서', 'system_admin'),
+-- 2023년 입사자 (10명) --
+-- 10명 중 4명 퇴직
+('2301011', '신유나', '2023-01-01', '2025-06-30', 'system_admin'), -- 퇴직자 6
+('2301012', '장은우', '2023-01-01', '2025-04-30', 'system_admin'), -- 퇴직자 7
+('2302013', '송지아', '2023-02-01', NULL, 'system_admin'),
+('2304014', '권혁준', '2023-04-01', '2025-07-31', 'system_admin'), -- 퇴직자 8
+('2305015', '황수빈', '2023-05-01', NULL, 'system_admin'),
+('2305016', '안태현', '2023-05-01', NULL, 'system_admin'),
+('2308017', '문채원', '2023-08-01', '2025-08-31', 'system_admin'), -- 퇴직자 9
+('2309018', '고은별', '2023-09-01', NULL, 'system_admin'),
+('2310019', '배준호', '2023-10-01', NULL, 'system_admin'),
+('2312020', '조민서', '2023-12-01', NULL, 'system_admin'),
 
--- 2024년 입사자 (10명)
-('2401021', '유정민', 'system_admin'),
-('2401022', '홍예준', 'system_admin'),
-('2402023', '나소율', 'system_admin'),
-('2402024', '백시원', 'system_admin'),
-('2403025', '노하린', 'system_admin'),
-('2404026', '차유진', 'system_admin'),
-('2404027', '표지성', 'system_admin'),
-('2405028', '기태영', 'system_admin'),
-('2405029', '선우진', 'system_admin'),
-('2406030', '왕지현', 'system_admin');
+-- 2024년 입사자 (20명) --
+-- 20명 중 1명 퇴직
+('2401021', '유정민', '2024-01-01', '2025-10-15', 'system_admin'), -- 퇴직자 10
+('2401022', '홍예준', '2024-01-01', NULL, 'system_admin'),
+('2402023', '나소율', '2024-02-01', NULL, 'system_admin'),
+('2402024', '백시원', '2024-02-01', NULL, 'system_admin'),
+('2403025', '노하린', '2024-03-01', NULL, 'system_admin'),
+('2404026', '차유진', '2024-04-01', NULL, 'system_admin'),
+('2404027', '표지성', '2024-04-01', NULL, 'system_admin'),
+('2405028', '기태영', '2024-05-01', NULL, 'system_admin'),
+('2405029', '선우진', '2024-05-01', NULL, 'system_admin'),
+('2406030', '왕지현', '2024-06-01', NULL, 'system_admin'),
+-- 10명 추가 --
+('2407031', '서재윤', '2024-07-01', NULL, 'system_admin'),
+('2407032', '방민호', '2024-07-01', NULL, 'system_admin'),
+('2408033', '편지후', '2024-08-01', NULL, 'system_admin'),
+('2409034', '성주원', '2024-09-01', NULL, 'system_admin'),
+('2409035', '위하늘', '2024-09-01', NULL, 'system_admin'),
+('2410036', '명지안', '2024-10-01', NULL, 'system_admin'),
+('2411037', '금예서', '2024-11-01', NULL, 'system_admin'),
+('2411038', '도윤재', '2024-11-01', NULL, 'system_admin'),
+('2412039', '채수현', '2024-12-01', NULL, 'system_admin'),
+('2412040', '하동균', '2024-12-01', NULL, 'system_admin'),
+
+-- 2025년 입사자 (10명) --
+-- 10명 추가 (모두 재직자)
+('2501041', '진세아', '2025-01-01', NULL, 'system_admin'),
+('2501042', '원태준', '2025-01-01', NULL, 'system_admin'),
+('2502043', '라희선', '2025-02-01', NULL, 'system_admin'),
+('2503044', '설강민', '2025-03-01', NULL, 'system_admin'),
+('2503045', '옥다은', '2025-03-01', NULL, 'system_admin'),
+('2504046', '경수호', '2025-04-01', NULL, 'system_admin'),
+('2505047', '봉준서', '2025-05-01', NULL, 'system_admin'),
+('2506048', '마동욱', '2025-06-01', NULL, 'system_admin'),
+('2507049', '엄지아', '2025-07-01', NULL, 'system_admin'),
+('2508050', '함유주', '2025-08-01', NULL, 'system_admin');
+
+
 
 -- 급여 --
 -- 급여 항목 관리 --
@@ -939,6 +970,107 @@ VALUES
 ('2207005', '202405', 2, 1500000, 180000, 1320000, 'Y', '프로젝트 기여 인센티브', 'hr_manager'),
 ('2301011', '202405', 2, 1000000, 100000, 900000, 'Y', '신규 입사자 추천 포상', 'hr_manager');
 
+-- 퇴직 정산용 보조 --
+CREATE TABLE ZHR_RETIRE_SUMMARY (
+    -- 1. Key Columns
+    id             BIGINT       NOT NULL AUTO_INCREMENT COMMENT '고유 식별 ID (Surrogate Key, PK)',
+    PERNR          VARCHAR(10)  NOT NULL COMMENT '사번 (Unique, FK from ZHR_EMP_MASTER)',
+
+    -- 2. Snapshot Data (from Master)
+    ENTRY_DT       DATE         NOT NULL COMMENT '입사일자 (계산 시점의 마스터 데이터)',
+    RETIRE_DT      DATE         NOT NULL COMMENT '퇴직일자 (계산 시점의 마스터 데이터)',
+
+    -- 3. Calculated Data (from Business Rules)
+    ZSERVICE_YRS   DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '근속년수 (룰: 자동계산, 소수점 2자리)',
+    ZAVG_SALARY    DECIMAL(18, 2) NOT NULL DEFAULT 0.00 COMMENT '평균임금 (룰: 최근 3개월 총액/3)',
+    ZRETIRE_PAY    DECIMAL(18, 2) NOT NULL DEFAULT 0.00 COMMENT '퇴직금 (ZAVG_SALARY * ZSERVICE_YRS 등)',
+    ZTAX_AMOUNT    DECIMAL(18, 2) NOT NULL DEFAULT 0.00 COMMENT '소득세 (룰: 퇴직소득세율표 적용)',
+    ZFINAL_PAY     DECIMAL(18, 2) NOT NULL DEFAULT 0.00 COMMENT '실지급액 (ZRETIRE_PAY - ZTAX_AMOUNT)',
+
+    -- 4. Note Field
+    ZNOTE          VARCHAR(1000) NULL COMMENT '설명 (계산근거, 특이사항 로그)',
+
+    -- 5. Version & Audit Fields
+    version        INT          NOT NULL DEFAULT 0 COMMENT '데이터 버전 (Optimistic Lock용)',
+    CREATED_AT     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY     VARCHAR(50)  NOT NULL COMMENT '생성자 (정산 실행자)',
+    UPDATED_AT     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY     VARCHAR(50)  NULL     COMMENT '수정자',
+
+    -- 6. Constraints
+    PRIMARY KEY (id),
+    UNIQUE KEY UK_PERNR (PERNR) COMMENT '사번은 유일해야 함',
+    FOREIGN KEY (PERNR) REFERENCES ZHR_EMP_MASTER(PERNR)
+        ON DELETE RESTRICT  -- 마스터 사원이 삭제되면 정산 내역도 삭제될 수 없음 (안전장치)
+        ON UPDATE CASCADE   -- 마스터 사번이 변경되면 같이 변경
+
+) COMMENT '퇴직 정산 내역 요약 (스토리보드 중심 테이블)';
+
+
+-- 더미데이터 --
+INSERT INTO ZHR_RETIRE_SUMMARY
+(PERNR, ENTRY_DT, RETIRE_DT, ZSERVICE_YRS, ZAVG_SALARY, ZRETIRE_PAY, ZTAX_AMOUNT, ZFINAL_PAY, ZNOTE, CREATED_BY)
+VALUES
+-- '2201001', '김철수', '2022-01-01', '2025-09-30'
+(
+    '2201001', '2022-01-01', '2025-09-30', 
+    3.75, 4500000.00, 16875000.00, 1181250.00, 15693750.00,
+    '근속 3.75년 (1368일). 평균임금 4,500,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2201002', '이영희', '2022-01-01', '2025-01-31'
+(
+    '2201002', '2022-01-01', '2025-01-31', 
+    3.08, 4200000.00, 12936000.00, 776160.00, 12159840.00,
+    '근속 3.08년 (1126일). 평균임금 4,200,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2203003', '박민준', '2022-03-01', '2025-10-29'
+(
+    '2203003', '2022-03-01', '2025-10-29', 
+    3.67, 4800000.00, 17616000.00, 1409280.00, 16206720.00,
+    '근속 3.67년 (1338일). 평균임금 4,800,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2207005', '정지훈', '2022-07-01', '2025-02-28'
+(
+    '2207005', '2022-07-01', '2025-02-28', 
+    2.67, 4000000.00, 10680000.00, 534000.00, 10146000.00,
+    '근속 2.67년 (973일). 평균임금 4,000,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2210008', '임하윤', '2022-10-01', '2025-03-31'
+(
+    '2210008', '2022-10-01', '2025-03-31', 
+    2.50, 4100000.00, 10250000.00, 512500.00, 9737500.00,
+    '근속 2.50년 (912일). 평균임금 4,100,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2301011', '신유나', '2023-01-01', '2025-06-30'
+(
+    '2301011', '2023-01-01', '2025-06-30', 
+    2.50, 3800000.00, 9500000.00, 380000.00, 9120000.00,
+    '근속 2.50년 (911일). 평균임금 3,800,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2301012', '장은우', '2023-01-01', '2025-04-30'
+(
+    '2301012', '2023-01-01', '2025-04-30', 
+    2.33, 3900000.00, 9087000.00, 363480.00, 8723520.00,
+    '근속 2.33년 (850일). 평균임금 3,900,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2304014', '권혁준', '2023-04-01', '2025-07-31'
+(
+    '2304014', '2023-04-01', '2025-07-31', 
+    2.33, 3700000.00, 8621000.00, 344840.00, 8276160.00,
+    '근속 2.33년 (852일). 평균임금 3,700,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2308017', '문채원', '2023-08-01', '2025-08-31'
+(
+    '2308017', '2023-08-01', '2025-08-31', 
+    2.08, 3600000.00, 7488000.00, 224640.00, 7263360.00,
+    '근속 2.08년 (761일). 평균임금 3,600,000. 정산 실행: system_admin', 'system_admin'
+),
+-- '2401021', '유정민', '2024-01-01', '2025-10-15'
+(
+    '2401021', '2024-01-01', '2025-10-15', 
+    1.79, 3500000.00, 6265000.00, 187950.00, 6077050.00,
+    '근속 1.79년 (653일). 평균임금 3,500,000. 정산 실행: system_admin', 'system_admin'
+);
 CREATE TABLE ZHR_PAY_DEDUCT_REASON (
     PAY_DEDUCT_REASON_ID BIGINT       NOT NULL AUTO_INCREMENT COMMENT '징계/병가 공제 ID (PK)',
     ZEMP_NO              VARCHAR(20)  NOT NULL COMMENT '사번',

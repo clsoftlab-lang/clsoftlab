@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정산 메인 관리 화면</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
+</head>
+
+<body>
+    <div id="global-loader"><div class="page-loader"></div></div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">검색 조건</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/pay/pay-summary" method="get">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>급여월</label>
+                                        <input class="form-control" name="payYm" th:value="${payYm}" type="month">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>사번</label>
+                                        <select name="empNo" multiple="multiple" class="form-control" id="employeeSelect">
+											<option th:each="e : ${searchEmployeeList}" th:value="${e.pernr}" th:text=|${e.name}(${e.pernr})| th:selected="${empNo != null && #lists.contains(empNo, e.pernr)}">
+										</select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>정산차수</label>
+                                        <input class="form-control" name="seqNo" th:value="${seqNo}" type="number" min="1">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>확정여부</label>
+                                        <select name="isFinal" class="form-control">
+											<option value="">전체</option>
+											<option value="Y" th:selected="${isFinal == 'Y'}">Y (확정)</option>
+											<option value="N" th:selected="${isFinal == 'N'}">N (미확정)</option>
+										</select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <div class="form-group w-100 position-relative">
+                                        <button type="submit" class="btn btn-primary w-100">조회</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">정산 요약 목록</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover datatable-resizable" id="dataTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>사번</th>
+                                        <th>급여월</th>
+                                        <th>정산차수</th>
+                                        <th>총지급</th>
+                                        <th>총공제</th>
+                                        <th>실지급</th>
+                                        <th>확정여부</th>
+                                        <th>메모</th>
+                                        <th>수정</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="s : ${paySummaryMain}">
+                                        <td th:text="|${s.employeeName}(${s.employeePernr})|"></td>
+                                        <td th:text="${s.payYm}"></td>
+                                        <td th:text="${s.seqNo}"></td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(s.totalPay, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(s.totalDeduct, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td class="text-end" th:text="${#numbers.formatDecimal(s.totalReal, 0, 'COMMA', 0, 'POINT')}"></td>
+                                        <td>
+										    <input type="checkbox" class="form-check-input" th:checked="${s.isFinal == 'Y'}" onclick="return false;">
+										</td>
+                                        <td th:text="${#strings.abbreviate(s.note, 50)}"></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary edit-btn" th:data-id="${s.id}">수정</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-3 text-end">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">신규 등록</button>
+                </div>
+
+                <div class="modal fade" id="addModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">신규 정산 요약 등록</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">급여월<span class="text-danger">*</span></label>
+                                            <input type="month" class="form-control" name="payYm" required="required">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사번<span class="text-danger">*</span></label>
+                                            <select name="empNo" class="form-control" required="required" style="width: 100%;">
+                                                <option value="">선택...</option>
+											    <option th:each="e : ${employeeList}" th:value="${e.pernr}" th:text=|${e.name}(${e.pernr})|></option>
+										    </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">정산차수<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="seqNo" required min="1" placeholder="예: 1">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">확정여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+										            <input type="hidden" value="N" name="isFinal"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="isFinal">
+									        </div>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">총지급액<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="totalPay" required="required" value="0" max="999999999999999999">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">총공제액<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="totalDeduct" required="required" value="0" max="999999999999999999">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">실지급액<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="totalReal" required="required" value="0" max="999999999999999999">
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">정산 메모</label>
+                                            <textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
+                                        </div>
+                                    </div>
+                                    </form>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="reset" form="addForm" class="btn btn-outline-secondary">초기화</button>
+                                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-primary" onclick="addNewPaySummary()">저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="editModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">정산 요약 수정</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editForm">
+                                    <input type="hidden" name="id"> 
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">급여월</label>
+                                            <input type="month" class="form-control" name="payYm" readonly>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">사번</label>
+                                            <input type="text" class="form-control" name="employeePernr" readonly>
+                                            <input type="hidden" name="empNo">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">정산차수 <span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="seqNo" >
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">총지급액<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="totalPay" max="999999999999999999" >
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">총공제액<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="totalDeduct" max="999999999999999999">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label">실지급액<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="totalReal" max="999999999999999999">
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">확정여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+										            <input type="hidden" value="N" name="isFinal"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="isFinal">
+									        </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">정산 메모</label>
+                                            <textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-primary" onclick="updatePaySummary()">변경사항 저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
+	<script src="/assets/js/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
+	<script src="https://unpkg.com/feather-icons"></script>
+	<script src="/assets/js/jquery.dataTables.min.js"></script>
+	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
+    
+    <script type="text/javascript" th:inline="none">
+	    
+	    document.addEventListener('DOMContentLoaded', function () {
+            
+		    // (수정 모달창을 열 때, 불러오기 로직 필요)
+	        const tableBody = document.querySelector('.table tbody');
+		    if (tableBody) {
+		    	tableBody.addEventListener('click', function(event) {
+		    	    const editButton = event.target.closest('.edit-btn');
+		    	    if (!editButton) return;
+
+		    	    const row = editButton.closest('tr');
+		    	    if (!row) return;
+
+		    	    const isFinalCheckbox = row.querySelector('input[type="checkbox"]');
+
+		    	    if (isFinalCheckbox && isFinalCheckbox.checked) {
+		    	        const confirmation = confirm('이 항목은 "확정" 상태입니다.\n수정 시 정산에 영향을 줄 수 있습니다. 정말 수정하시겠습니까?');
+		    	        if (!confirmation) {
+		    	            return; // 여기서 완전히 중단됨 (모달 안 뜸)
+		    	        }
+		    	    }
+
+		    	    const id = editButton.dataset.id;
+		    	    findDetail(id).then(() => {
+		    	        const modal = new bootstrap.Modal(document.getElementById('editModal'));
+		    	        modal.show();
+		    	    });
+		    	    
+		        }); 
+		        
+		    }
+		    
+		 	// Select2 초기화
+		    $('#employeeSelect').select2();
+		    
+		    const tableSpecificOptions = {
+			        'columns': [
+			            null,                 // 0. 사번
+			            null,                 // 1. 급여월
+			            null,                 // 2. 정산차수
+			            null,                 // 3. 총지급
+			            null,                 // 4. 총공제
+			            null,                 // 5. 실지급
+			            null,                 // 6. 확정여부
+			            { "width": "30%" },   // 7. 메모 (너비 할당)
+			            // 8. 수정 (고정 너비, 검색/정렬 비활성화)
+			            { "width": "70px", "searchable": false, "orderable": false } 
+			        ], 
+			        
+                    // 1번 열(급여월) 내림차순, 0번 열(사번) 오름차순
+			        "order": [[ 1, "desc" ], [0, "asc"]], 
+			        
+	                "language": {
+	                    "emptyTable": "데이터가 없습니다.",
+	                    "info": "_START_ - _END_ / _TOTAL_ 항목",
+	                    "infoEmpty": "0 항목",
+	                    "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+	                    "lengthMenu": "_MENU_ 개씩 보기",
+	                    "loadingRecords": "로딩중...",
+	                    "processing": "처리중...",
+	                    "search": "검색: ",
+	                    "zeroRecords": "일치하는 항목이 없습니다.",
+	                    "paginate": {
+	                        "first": "처음",
+	                        "last": "마지막",
+	                        "next": "다음",
+	                        "previous": "이전"
+	                    }
+	                },
+	                "pageLength": 10, 
+	                "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ]
+			    };
+		    
+		    initializeResizableDataTable('#dataTable',tableSpecificOptions);
+		});
+	    
+	 	// 새 항목 등록
+	    async function addNewPaySummary() {
+			const addForm = document.getElementById('addForm');
+		    const formData = new FormData(addForm);
+		    const data = Object.fromEntries(formData.entries());
+
+		    if (!data.payYm || !data.payYm.trim()) {
+		        alert('급여월을 입력해주세요.');
+		        return;
+		    }
+		    data.payYm = data.payYm.replace(/-/g, ''); // YYYYMM 형식으로 변경
+		    
+		    if (!data.empNo || data.empNo.trim() === '') {
+		        alert('사번을 선택해주세요.');
+		        return;
+		    }
+		    
+		    if (!data.seqNo || data.seqNo.trim() === '' || parseInt(data.seqNo) < 1) {
+		    	alert('정산차수를 1 이상 입력해주세요.');
+		    	return;
+		    }
+
+            if (data.totalPay == null || data.totalPay.trim() === '') {
+		    	alert('총지급액을 입력해주세요.');
+		    	return;
+		    }
+            if (data.totalDeduct == null || data.totalDeduct.trim() === '') {
+		    	alert('총공제액을 입력해주세요.');
+		    	return;
+		    }
+            if (data.totalReal == null || data.totalReal.trim() === '') {
+		    	alert('실지급액을 입력해주세요.');
+		    	return;
+		    }
+		    
+		    // --- 서버 작업 시작 ---
+		    try {
+		    	
+		        const response = await fetch(`/pay/pay-summary/checkOverlap?payYm=${data.payYm}&empNo=${data.empNo}&seqNo=${data.seqNo}`);
+		        const checkResult = await response.text();
+		        
+		        if (checkResult == 'true') { 
+		            alert('이미 등록된 급여월, 사번, 정산차수 조합입니다.\n다른 값을 입력해 주세요.'); 
+		            return;
+		        }
+
+		        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
+		        const saveResponse = await fetch('/pay/pay-summary', {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (saveResponse.ok) {
+		            alert('성공적으로 등록되었습니다.');
+		            location.reload();
+		        } else {
+		            const errorText = await saveResponse.text();
+		            alert(`등록에 실패했습니다: ${errorText}`);
+		        }
+
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('등록 중 오류가 발생했습니다.');
+		    }
+		};
+		
+		async function findDetail(id) {
+		    try {
+		        const response = await fetch(`/pay/pay-summary/detail/${id}`);
+		        if (!response.ok) {
+		            throw new Error('데이터를 불러오는 데 실패했습니다.');
+		        }
+		        const data = await response.json();
+		        const editForm = document.getElementById('editForm')
+
+
+		        for (const key in data) {
+		            const field = editForm.querySelector(`[name="${key}"]`);
+		            const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+
+		            if (checkbox && field && field.type === 'hidden') {
+		                checkbox.checked = (data[key] === 'Y');
+		            } else if (field) {
+		                field.value = data[key];
+		            }
+		            
+		            const payYmField = editForm.querySelector('[name="payYm"]');
+			        const formmatedPayYm = data.payYm.substring(0, 4) + '-' + data.payYm.substring(4, 6);
+			        if (payYmField && formmatedPayYm) {
+			            payYmField.value = formmatedPayYm;
+			        }
+		            
+		            const empNoField = editForm.querySelector('[name="empNo"]');
+		            const empField = editForm.querySelector('[name="employeePernr"]');
+			        if (empNoField && empField && data.employeeName && data.employeePernr) {
+			            empNoField.value = `${data.employeePernr}`;
+			            empField.value = `${data.employeeName}(${data.employeePernr})`;
+			            
+			        }
+		        }
+
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert(error.message);
+		    }
+		}
+		
+		//근로 시간 수정
+		async function updatePaySummary() {
+		    const editForm = document.getElementById('editForm');
+		    const formData = new FormData(editForm);
+		    const data = Object.fromEntries(formData.entries());
+		    
+		    data.payYm = data.payYm.replace(/-/g, '');  
+		    
+		    if (!data.seqNo || data.seqNo.trim() === '' || parseInt(data.seqNo) < 1) {
+		    	alert('정산차수를 1 이상 입력해주세요.');
+		    	return;
+		    }
+
+            if (data.totalPay == null || data.totalPay.trim() === '') {
+		    	alert('총지급액을 입력해주세요.');
+		    	return;
+		    }
+            if (data.totalDeduct == null || data.totalDeduct.trim() === '') {
+		    	alert('총공제액을 입력해주세요.');
+		    	return;
+		    }
+            if (data.totalReal == null || data.totalReal.trim() === '') {
+		    	alert('실지급액을 입력해주세요.');
+		    	return;
+		    }
+		    
+		    try {
+		    	const checkResponse = await fetch(`/pay/pay-summary/checkOverlap?payYm=${data.payYm}&empNo=${data.empNo}&seqNo=${data.seqNo}&id=${data.id}`);
+		        const checkResult = await checkResponse.text();
+		        
+		        if (checkResult == 'true') { 
+		            alert('이미 등록된 급여월, 사번, 정산차수 조합입니다.\n다른 값을 입력해 주세요.'); 
+		            return;
+		        }
+		        
+		        const url = `/pay/pay-summary`;
+		        const response = await fetch(url, {
+		            method: 'PUT', 
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (response.ok) {
+		            alert('성공적으로 수정되었습니다.');
+		            location.reload(); // 성공 시 페이지 새로고침
+		        } else {
+		            const errorText = await response.text();
+		            alert(`수정에 실패했습니다: ${errorText}`);
+		        }
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('수정 중 오류가 발생했습니다.');
+		    }
+		}
+	    
+    </script>
+</body>
+</html>

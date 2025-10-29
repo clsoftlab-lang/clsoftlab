@@ -21,4 +21,7 @@ public interface PaySummaryMainRepository extends JpaRepository<PaySummaryMain, 
 	
 	// 중복 검사
 	public boolean existsByEmployee_PernrAndPayYmAndSeqNo (String empNo, String payYm, Integer seqNo);
+	
+	// 중복 검사 (수정용)
+	public boolean existsByEmployee_PernrAndPayYmAndSeqNoAndIdNot (String empNo, String payYm, Integer seqNo, Long id);
 }
