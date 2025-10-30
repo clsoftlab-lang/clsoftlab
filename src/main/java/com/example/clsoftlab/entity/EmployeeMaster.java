@@ -1,5 +1,7 @@
 package com.example.clsoftlab.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -23,5 +25,12 @@ public class EmployeeMaster extends BaseEntity {
 
     @Column(name = "ENAME", length = 50, nullable = false)
     private String name;
+    
+    @Column(name = "ENTRY_DT", nullable = false)
+    private LocalDate entryDate;
+    
+    @Column(name = "RETIRE_DT")
+    private LocalDate retireDate;
+    
     
 }

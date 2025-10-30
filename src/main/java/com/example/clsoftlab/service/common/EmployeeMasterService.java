@@ -1,6 +1,7 @@
 package com.example.clsoftlab.service.common;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -24,5 +25,18 @@ public class EmployeeMasterService {
 		return employeeMasterRepository.findAllByOrderByName().stream()
 				.map(i -> modelMapper.map(i, EmployeeMasterDto.class))
 				.toList();
+	}
+	
+	// retire List 조회
+	public List<EmployeeMasterDto> getRetireList () {
+		return employeeMasterRepository.findByRetireDateIsNotNull().stream()
+				.map(i -> modelMapper.map(i, EmployeeMasterDto.class))
+				.toList();
+	}
+	
+	// 상세 정보 조회
+	public Optional<EmployeeMasterDto> findByPernr (String pernr) {
+		return employeeMasterRepository.findById(pernr)
+				.map(i -> modelMapper.map(i, EmployeeMasterDto.class));
 	}
 }

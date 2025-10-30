@@ -1071,6 +1071,49 @@ VALUES
     1.79, 3500000.00, 6265000.00, 187950.00, 6077050.00,
     '근속 1.79년 (653일). 평균임금 3,500,000. 정산 실행: system_admin', 'system_admin'
 );
+
+-- 퇴직금 가감 --
+CREATE TABLE ZHR_RETIRE_ADJUST (
+    -- 1. Key Columns
+    id                  BIGINT       NOT NULL AUTO_INCREMENT COMMENT '고유 식별 ID (PK)',
+    ZRETIRE_SUMMARY_ID  BIGINT       NOT NULL COMMENT '퇴직 정산 ID (FK from ZHR_RETIRE_SUMMARY.id)',
+    version             INT          NOT NULL DEFAULT 0 COMMENT '데이터 버전 (Optimistic Lock용)',
+
+    -- 2. Adjustment Details (from Storyboard [C])
+    ZADJ_TY             VARCHAR(10)  NOT NULL COMMENT '가감 유형 (EXTRA: 가산, DEDUCT: 감산)',
+    ZADJ_REASON         VARCHAR(100) NOT NULL COMMENT '가감 사유 코드 또는 사유',
+    ZADJ_AMOUNT         DECIMAL(18, 2) NULL COMMENT '가감 금액 (EXPR과 둘 중 하나 필수)',
+    ZADJ_EXPR           VARCHAR(500)   NULL COMMENT '계산 공식/비율 (AMOUNT와 둘 중 하나 필수)',
+    ZNOTE               VARCHAR(1000)  NULL COMMENT '비고 (상세 사유 등)',
+
+    -- 3. Audit Fields (Matching other tables)
+    CREATED_AT          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY          VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY          VARCHAR(50)  NULL COMMENT '수정자',
+
+    -- 4. Constraints
+    PRIMARY KEY (id),
+    
+    -- ZHR_RETIRE_SUMMARY(id)를 참조하는 외래키
+    FOREIGN KEY (ZRETIRE_SUMMARY_ID) 
+        REFERENCES ZHR_RETIRE_SUMMARY(id)
+        ON DELETE CASCADE  -- 정산 요약(Summary)이 삭제되면, 관련 가감 항목도 함께 자동 삭제
+        ON UPDATE CASCADE,
+
+    -- 5. Business Rule Validation (from Storyboard 5, 6)
+    
+    -- ZADJ_TY는 'EXTRA' 또는 'DEDUCT'만 허용
+    CONSTRAINT CHK_ZADJ_TY CHECK (ZADJ_TY IN ('EXTRA', 'DEDUCT')),
+    
+    -- ZADJ_AMOUNT는 양수만 허용 (NULL은 허용)
+    CONSTRAINT CHK_ZADJ_AMOUNT_POSITIVE CHECK (ZADJ_AMOUNT IS NULL OR ZADJ_AMOUNT >= 0),
+    
+    -- ZADJ_AMOUNT와 ZADJ_EXPR 둘 중 하나는 필수
+    CONSTRAINT CHK_AMOUNT_OR_EXPR_REQUIRED 
+        CHECK (ZADJ_AMOUNT IS NOT NULL OR ZADJ_EXPR IS NOT NULL)
+
+) COMMENT '퇴직금 가감 항목 관리 (스토리보드: ZHR_RETIRE_ADJUST)';
 CREATE TABLE ZHR_PAY_DEDUCT_REASON (
     PAY_DEDUCT_REASON_ID BIGINT       NOT NULL AUTO_INCREMENT COMMENT '징계/병가 공제 ID (PK)',
     ZEMP_NO              VARCHAR(20)  NOT NULL COMMENT '사번',

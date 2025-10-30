@@ -229,42 +229,47 @@
 		    $('#employeeSelect').select2();
 		    
 		    const tableSpecificOptions = {
-			        'columns': [
-			            null,                 // 0. 사번
-			            null,                 // 1. 기준연월
-			            null,                 // 2. 소정근로시간
-			            null,                 // 3. 예외 사유코드
-			            { "width": "40%" },   // 4. 비고 (이 컬럼이 넓어야 함)
-			            // 5. 수정 (고정 너비, 검색/정렬 비활성화)
-			            { "width": "70px", "searchable": false, "orderable": false } 
-			        ], 
-			        
-			        "order": [[ 1, "desc" ], [0, "asc"]], 
-			        
-	                // DataTables 한글화 및 기본 설정 (유지)
-	                "language": {
-	                    "emptyTable": "데이터가 없습니다.",
-	                    "info": "_START_ - _END_ / _TOTAL_ 항목",
-	                    "infoEmpty": "0 항목",
-	                    "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
-	                    "lengthMenu": "_MENU_ 개씩 보기",
-	                    "loadingRecords": "로딩중...",
-	                    "processing": "처리중...",
-	                    "search": "검색: ",
-	                    "zeroRecords": "일치하는 항목이 없습니다.",
-	                    "paginate": {
-	                        "first": "처음",
-	                        "last": "마지막",
-	                        "next": "다음",
-	                        "previous": "이전"
-	                    }
-	                },
-	                "pageLength": 10, 
-	                "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
-			    };
-		    
-		    initializeResizableDataTable('#dataTable',tableSpecificOptions);
-		});
+	                
+	                'columns': [
+				        null,                 // 0. 사번
+				        null,                 // 1. 입사일자
+				        null,                 // 2. 퇴직일자
+				        null,                 // 3. 근속년수
+				        null,                 // 4. 평균임금
+	                    null,                 // 5. 퇴직금
+	                    null,                 // 6. 소득세
+	                    null,                 // 7. 실지급액
+				        // 8. 관리 (고정 너비, 검색/정렬 비활성화)
+				        { "width": "70px", "searchable": false, "orderable": false } 
+				    ], 
+				        
+	                // 초기 정렬: 퇴직일자(2) 내림차순, 사번(0) 오름차순
+				    "order": [[ 2, "desc" ], [0, "asc"]], 
+				        
+		            // DataTables 한글화 및 기본 설정 (유지)
+		            "language": {
+		                "emptyTable": "데이터가 없습니다.",
+		                "info": "_START_ - _END_ / _TOTAL_ 항목",
+		                "infoEmpty": "0 항목",
+		                "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+		                "lengthMenu": "_MENU_ 개씩 보기",
+		                "loadingRecords": "로딩중...",
+		                "processing": "처리중...",
+		                "search": "검색: ",
+		                "zeroRecords": "일치하는 항목이 없습니다.",
+		                "paginate": {
+		                    "first": "처음",
+		                    "last": "마지막",
+		                    "next": "다음",
+		                    "previous": "이전"
+		                }
+		            },
+		            "pageLength": 10, 
+		            "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+				};
+			    
+			    initializeResizableDataTable('#dataTable',tableSpecificOptions);
+			});
 	    
 	 	// 새 근로시간 등록
 	    async function addNewStandardHoursEmployee() {

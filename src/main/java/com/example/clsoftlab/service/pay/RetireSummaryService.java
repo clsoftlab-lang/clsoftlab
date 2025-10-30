@@ -1,6 +1,7 @@
 package com.example.clsoftlab.service.pay;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.example.clsoftlab.dto.common.EmployeeMasterDto;
 import com.example.clsoftlab.dto.pay.RetireSummaryDetailDto;
 import com.example.clsoftlab.dto.pay.RetireSummaryRequestDto;
 import com.example.clsoftlab.entity.RetireSummary;
@@ -60,5 +62,24 @@ public class RetireSummaryService {
 				.orElseThrow(() -> new EntityNotFoundException("해당 항목을 찾을 수 없습니다. id : " + dto.getId()));
 		
 		retireSummary.update(dto);
+	}
+	
+	// 중복 검사
+	public boolean checkOverlap (String pernr) {
+		return retireSummaryRepository.existsByEmployee_Pernr(pernr);
+	}
+	
+	// 디테일 정보 조회
+	public Optional<RetireSummaryDetailDto> findById (Long id) {
+		return retireSummaryRepository.findById(id)
+				.map(i -> modelMapper.map(i, RetireSummaryDetailDto.class));
+	}
+	
+	
+	// 검색용 사번 list 조회
+	public List<EmployeeMasterDto> getEmployeeList () {
+		return retireSummaryRepository.getEmployeeList().stream()
+				.map(i -> modelMapper.map(i, EmployeeMasterDto.class))
+				.toList();
 	}
 }

@@ -2,8 +2,8 @@ package com.example.clsoftlab.repository.pay.specification;
 
 import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
 
 import com.example.clsoftlab.entity.RetireSummary;
 

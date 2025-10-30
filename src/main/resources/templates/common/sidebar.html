@@ -33,6 +33,8 @@
 						<li><a th:href="@{/pay/standard-hours}" th:classappend="${currentUrl != null && (currentUrl == '/pay/standard-hours' || currentUrl.startsWith('/pay/standard-hours?'))} ? 'active' : ''">월별 소정 근로시간 관리</a></li>
 						<li><a th:href="@{/pay/standard-hours-employee}" th:classappend="${currentUrl != null && (currentUrl == '/pay/standard-hours-employee' || currentUrl.startsWith('/pay/standard-hours-employee?'))} ? 'active' : ''">사원별 예외 근로시간 관리</a></li>
 						<li><a th:href="@{/pay/pay-summary}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-summary' || currentUrl.startsWith('/pay/pay-summary?'))} ? 'active' : ''">정산 메인 관리</a></li>
+						<li><a th:href="@{/pay/retire-summary}" th:classappend="${currentUrl != null && (currentUrl == '/pay/retire-summary' || currentUrl.startsWith('/pay/retire-summary?'))} ? 'active' : ''">퇴직 정산 보조 화면</a></li>
+						<li><a th:href="@{/pay/retire-adjust}" th:classappend="${currentUrl != null && (currentUrl == '/pay/retire-adjust' || currentUrl.startsWith('/pay/retire-adjust?'))} ? 'active' : ''">퇴직금 가감</a></li>
 						<li><a th:href="@{/pay/pay-deduct}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-deduct' || currentUrl.startsWith('/pay/pay-deduct?'))} ? 'active' : ''">징계/병가 공제 항목 관리</a></li>
 						<li><a th:href="@{/pay/step-base}" th:classappend="${currentUrl != null && (currentUrl == '/pay/step-base' || currentUrl.startsWith('/pay/step-base?'))} ? 'active' : ''">호봉 기준 관리</a></li>
 						<li><a th:href="@{/pay/bank-account}" th:classappend="${currentUrl != null && (currentUrl == '/pay/bank-account' || currentUrl.startsWith('/pay/bank-account?'))} ? 'active' : ''">급여 계좌 관리</a></li>

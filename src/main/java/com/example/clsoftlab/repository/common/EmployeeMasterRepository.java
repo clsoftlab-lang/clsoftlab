@@ -14,4 +14,7 @@ public interface EmployeeMasterRepository extends JpaRepository<EmployeeMaster, 
 	// 전체 목록 조회
 	public List<EmployeeMaster> findAllByOrderByName();
 
+	
+	// retire List 조회
+	public List<EmployeeMaster> findByRetireDateIsNotNull();
 }

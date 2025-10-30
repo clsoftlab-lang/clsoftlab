@@ -1,5 +1,7 @@
 package com.example.clsoftlab.dto.common;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,4 +15,6 @@ public class EmployeeMasterDto {
 
 	private String pernr;
 	private String name;
+	private LocalDate entryDate;
+    private LocalDate retireDate;
 }
