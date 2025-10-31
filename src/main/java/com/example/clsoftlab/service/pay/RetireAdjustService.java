@@ -1,7 +1,6 @@
 package com.example.clsoftlab.service.pay;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.pay.RetireAdjustDetailDto;
 import com.example.clsoftlab.dto.pay.RetireAdjustRequestDto;
-import com.example.clsoftlab.dto.pay.RetireSummaryDetailDto;
 import com.example.clsoftlab.entity.RetireAdjust;
 import com.example.clsoftlab.entity.RetireSummary;
 import com.example.clsoftlab.repository.pay.RetireAdjustRepository;
@@ -79,20 +77,23 @@ public class RetireAdjustService {
 	    retireAdjust.getRetireSummary().recalculatePayments();
 	}
 	
+	// 기존 항목 삭제
+	@Transactional
+	public void deleteAdjust(Long id) {
+	    
+	    RetireAdjust retireAdjust = retireAdjustRepository.findById(id)
+	            .orElseThrow(() -> new EntityNotFoundException("해당 가감 항목을 찾을 수 없습니다. id: " + id));
+
+	    RetireSummary retireSummary = retireAdjust.getRetireSummary();
+
+	    retireSummary.getAdjustments().remove(retireAdjust);
+	    retireSummary.recalculatePayments();
+	}
+	
 	// 상세 정보 조회
 	public Optional<RetireAdjustDetailDto> findById (Long id) {
 		return retireAdjustRepository.findById(id)
 				.map(i -> modelMapper.map(i, RetireAdjustDetailDto.class));
 	}
 	
-	 // 검색용 리스트 조회
-	public List<RetireSummaryDetailDto> getRetireSummaryList () {
-		
-		List<RetireSummary> list = retireAdjustRepository.getRetireSummaryList();
-		list.sort(Comparator.comparing(i -> i.getEmployee().getName()));
-		
-		return list.stream()
-	            .map(i -> modelMapper.map(i, RetireSummaryDetailDto.class))
-	            .toList();
-	}
 }

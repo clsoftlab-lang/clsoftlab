@@ -15,6 +15,7 @@ import lombok.Setter;
 public class RetireAdjustDetailDto {
 
 	private Long id;
+	private Long retireSummaryId;
 	private String retireSummaryEmployeePernr;
 	private String retireSummaryEmployeeName;
 	private LocalDate retireSummaryRetireDate;

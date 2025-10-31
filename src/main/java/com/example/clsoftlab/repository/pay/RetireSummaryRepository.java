@@ -21,4 +21,10 @@ public interface RetireSummaryRepository extends JpaRepository<RetireSummary, Lo
 			+ "FROM RetireSummary r "
 			+ "ORDER BY r.employee.name ")
 	public List<EmployeeMaster> getEmployeeList ();
+	
+	// 모달 목록용: 모든 RetireSummary를 직원 이름순으로 정렬
+    @Query("SELECT s "
+    		+ "FROM RetireSummary s "
+    		+ "ORDER BY s.employee.name ")
+    List<RetireSummary> getRetireSummaryList();
 }

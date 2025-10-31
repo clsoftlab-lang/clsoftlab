@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import com.example.clsoftlab.dto.pay.RetireAdjustDetailDto;
 import com.example.clsoftlab.dto.pay.RetireAdjustRequestDto;
 import com.example.clsoftlab.service.common.EmployeeMasterService;
 import com.example.clsoftlab.service.pay.RetireAdjustService;
+import com.example.clsoftlab.service.pay.RetireSummaryService;
 
 import jakarta.validation.Valid;
 
@@ -28,10 +30,13 @@ public class RetireAdjustController {
 
 
 	private final RetireAdjustService retireAdjustService;
+	private final RetireSummaryService retireSummaryService;
 	private final EmployeeMasterService employeeMasterService;
 	
-	public RetireAdjustController(RetireAdjustService retireAdjustService, EmployeeMasterService employeeMasterService) {
+	public RetireAdjustController(RetireAdjustService retireAdjustService, RetireSummaryService retireSummaryService,
+			EmployeeMasterService employeeMasterService) {
 		this.retireAdjustService = retireAdjustService;
+		this.retireSummaryService = retireSummaryService;
 		this.employeeMasterService = employeeMasterService;
 	}
 	
@@ -50,7 +55,7 @@ public class RetireAdjustController {
 		model.addAttribute("adjType", adjType);
 		model.addAttribute("retireAdjustPage", retireAdjustPage);
 		model.addAttribute("employeeList", employeeMasterService.getRetireList());
-		model.addAttribute("retireSummaryList", retireAdjustService.getRetireSummaryList());
+		model.addAttribute("retireSummaryList", retireSummaryService.getRetireSummaryList());
 		
 		return "pay/retire-adjust/list";
 	}
@@ -66,6 +71,13 @@ public class RetireAdjustController {
 	@PutMapping("")
 	public ResponseEntity<Void> updateAdjust (@Valid @RequestBody RetireAdjustRequestDto dto) {
 		retireAdjustService.updateAdjust(dto);
+		return ResponseEntity.ok().build();
+	}
+	
+	// 기존 항목 삭제
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteAdjust (@PathVariable Long id) {
+		retireAdjustService.deleteAdjust(id);
 		return ResponseEntity.ok().build();
 	}
 	

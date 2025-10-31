@@ -82,4 +82,11 @@ public class RetireSummaryService {
 				.map(i -> modelMapper.map(i, EmployeeMasterDto.class))
 				.toList();
 	}
+	
+	// 검색용 reitreSummary List 조회
+	public List<RetireSummaryDetailDto> getRetireSummaryList () {
+		return retireSummaryRepository.getRetireSummaryList().stream()
+				.map(i -> modelMapper.map(i, RetireSummaryDetailDto.class))
+				.toList();
+	}
 }

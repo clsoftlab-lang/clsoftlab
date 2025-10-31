@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퇴직금 가감 항목 관리 (ZHR_RETIRE_ADJUST)</title>
+    <title>퇴직금 가감 항목 관리</title>
 
     <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
 	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
@@ -98,8 +98,8 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="adj : ${retireAdjust}">
-                                        <td th:text="|${adj.retireSummary.employee.name}(${adj.retireSummary.employeePernr})|"></td>
-                                        <td th:text="${adj.retireSummary.retireDate}"></td>
+                                        <td th:text="|${adj.retireSummaryEmployeeName}(${adj.retireSummaryEmployeePernr})|"></td>
+                                        <td th:text="${adj.retireSummaryRetireDate}"></td>
                                         <td th:text="${adj.adjType == 'EXTRA' ? '가산 (EXTRA)' : '차감 (DEDUCT)'}"></td>
                                         <td th:text="${adj.adjReason}"></td>
                                         <td th:text="${adj.adjAmount}"></td> 
@@ -134,9 +134,9 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">정산 대상 (사번)<span class="text-danger">*</span></label>
-                                            <select name="retireSummaryId" class="form-control" id="addRetireSummarySelect">
+                                            <select name="retireSummaryId" class="form-control" id="addSummarySelect">
                                             	<option value="">---정산 내역 선택---</option>
-                                                <option th:each="s : ${retireSummaryList}" th:value="${s.id}" th:text="|${s.employeeName}(${s.employeePernr}) - 퇴직일: ${s.retireDate}|" >
+                                                <option th:each="s : ${retireSummaryList}" th:value="${s.id}" th:text="|${s.employeeName}(${s.employeePernr}) - 퇴직일: ${s.retireDate}|" ></option>
 										    </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -196,6 +196,8 @@
                             <div class="modal-body">
                                 <form id="editForm">
                                     <input type="hidden" name="id"> 
+                                    <input type="hidden" name="retireSummaryId"> 
+                                    <input type="hidden" name="empNo">
                                     
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -258,9 +260,11 @@
                                 <p>이 가감 항목을 정말 삭제하시겠습니까?<br>삭제 시 즉시 상위 정산 금액이 재계산됩니다.</p>
                             </div>
                             <div class="modal-footer">
-                                <input type="hidden" id="deleteId" value="">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                <button type="button" class="btn btn-danger" onclick="deleteAdjust()">삭제</button>
+                            	<div class="d-flex gap-2">
+	                                <input type="hidden" id="deleteId" value="">
+    	                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        	                        <button type="button" class="btn btn-danger" onclick="deleteAdjust()">삭제</button>
+                            	</div>
                             </div>
                         </div>
                     </div>
@@ -284,7 +288,57 @@
     <script type="text/javascript" th:inline="none">
 	    
 	    document.addEventListener('DOMContentLoaded', function () {
+	    	
+	    	 // (수정 모달창을 열 때, 불러오기 로직 필요)
+	        const tableBody = document.querySelector('.table tbody');
+		    if (tableBody) {
+		        tableBody.addEventListener('click', function(event) {
+		            const editButton = event.target.closest('.edit-btn');
+		            if (editButton) {
+		                const id = editButton.dataset.id; 
+		                findDetail(id);
+		            }
+		        });
+		    }
+		    
 		    $('#paySummarySelect').select2();
+		    
+		 	// 사번 선택시 일자 불러오기.
+		    $('#addSummarySelect').on('change', async function() {
+                const id = $(this).val(); // 선택된 RetireSummary의 ID
+                const addForm = document.getElementById('addForm');
+                const retireDateField = addForm.querySelector('[name="retireDate"]');
+
+                if (!id) {
+                    // "---정산 내역 선택---"을 고른 경우 필드 초기화
+                    retireDateField.value = '';
+                    return;
+                }
+
+                // [수정] try-catch 로직을 바로 실행
+                try {
+                    // 1. 서버에서 RetireSummary 정보(퇴직일) 가져오기
+                    const response = await fetch(`/pay/retire-summary/detail/${id}`); // ID로 조회
+                    
+                    if (!response.ok) {
+                        throw new Error('정산 정보를 불러오는 데 실패했습니다.');
+                    }
+                    
+                    const summary = await response.json(); // summary 객체
+
+                    if (!summary.retireDate) {
+                         throw new Error('조회된 정산 정보에 퇴직일자가 없습니다.');
+                    }
+
+                    // 2. 날짜 필드 채우기 (readonly)
+                    retireDateField.value = summary.retireDate;
+
+                } catch (error) { // [수정] 올바른 위치의 catch
+                    console.error('Error fetching summary details:', error);
+                    alert(error.message);
+                    retireDateField.value = '';
+                }
+            });
             
 		    const tableSpecificOptions = {
 			        'columns': [
@@ -322,7 +376,197 @@
 			    };
 		    
 		    initializeResizableDataTable('#dataTable',tableSpecificOptions);
+		    
+		    const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const id = button.getAttribute('data-id');
+                    const deleteIdInput = deleteModal.querySelector('#deleteId');
+                    deleteIdInput.value = id;
+                });
+            }
 		});
+	    
+	 // 새 항목 등록
+	    async function addNewAdjust() {
+			const addForm = document.getElementById('addForm');
+		    const formData = new FormData(addForm);
+		    const data = Object.fromEntries(formData.entries());
+
+		    if (!data.retireSummaryId || data.retireSummaryId.trim() === '') {
+		        alert('정산 대상(사번)을 선택해주세요.');
+		        return;
+		    }
+		    
+		    if (!data.adjType || data.adjType.trim() === '') {
+		        alert('가감 유형을 선택해주세요.');
+		        return;
+		    }
+
+            if (!data.adjReason || !data.adjReason.trim()) {
+		    	alert('가감 사유를 입력해주세요.');
+		    	return;
+		    }
+
+            const amountIsEmpty = !data.adjAmount || data.adjAmount.trim() === '';
+            const exprIsEmpty = !data.adjExpr || !data.adjExpr.trim() === '';
+
+            if (amountIsEmpty && exprIsEmpty) {
+                alert('가감 금액 또는 공식/비율 중 하나는 반드시 입력해야 합니다.');
+                return;
+            }
+            
+            if (amountIsEmpty) {
+                data.adjAmount = null;
+            }
+		    
+		    // --- 서버 작업 시작 ---
+		    try {
+
+		        const saveResponse = await fetch('/pay/retire-adjust', {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (saveResponse.ok) {
+		            alert('성공적으로 등록되었습니다.');
+		            location.reload();
+		        } else {
+		            const errorText = await saveResponse.text();
+		            alert(`등록에 실패했습니다: ${errorText}`);
+		        }
+
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('등록 중 오류가 발생했습니다.');
+		    }
+		};
+		
+		async function findDetail(id) {
+		    try {
+		        const response = await fetch(`/pay/retire-adjust/detail/${id}`);
+		        if (!response.ok) {
+		            throw new Error('데이터를 불러오는 데 실패했습니다.');
+		        }
+		        const data = await response.json();
+		        const editForm = document.getElementById('editForm')
+
+
+		        for (const key in data) {
+		            const field = editForm.querySelector(`[name="${key}"]`);
+
+		            if (field) {
+		                field.value = data[key];
+		            }
+		            
+		            
+		            const empNoField = editForm.querySelector('[name="empNo"]');
+		            const empField = editForm.querySelector('[name="employeePernr"]');
+			        if (empNoField && empField && data.retireSummaryEmployeeName && data.retireSummaryEmployeePernr) {
+			            empNoField.value = `${data.retireSummaryEmployeePernr}`;
+			            empField.value = `${data.retireSummaryEmployeeName}(${data.retireSummaryEmployeePernr})`;
+			            
+			        }
+			        
+			        const retireDateField = editForm.querySelector('[name="retireDate"]');
+			        if (retireDateField && data.retireSummaryRetireDate) {
+			        	retireDateField.value = `${data.retireSummaryRetireDate}`;
+			        }
+			        
+		        }
+
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert(error.message);
+		    }
+		}
+		
+		//근로 시간 수정
+		async function updateAdjust() {
+		    const editForm = document.getElementById('editForm');
+		    const formData = new FormData(editForm);
+		    const data = Object.fromEntries(formData.entries());
+		    
+		    
+		    if (!data.adjType || data.adjType.trim() === '') {
+		        alert('가감 유형을 선택해주세요.');
+		        return;
+		    }
+
+            if (!data.adjReason || !data.adjReason.trim()) {
+		    	alert('가감 사유를 입력해주세요.');
+		    	return;
+		    }
+
+            const amountIsEmpty = !data.adjAmount || data.adjAmount.trim() === '';
+            const exprIsEmpty = !data.adjExpr || !data.adjExpr.trim() === '';
+
+            if (amountIsEmpty && exprIsEmpty) {
+                alert('가감 금액 또는 공식/비율 중 하나는 반드시 입력해야 합니다.');
+                return;
+            }
+            
+            if (amountIsEmpty) {
+                data.adjAmount = null;
+            }
+
+		    
+		    try {
+		        
+		        const url = `/pay/retire-adjust`;
+		        const response = await fetch(url, {
+		            method: 'PUT', 
+		            headers: {
+		                'Content-Type': 'application/json',
+		            },
+		            body: JSON.stringify(data),
+		        });
+
+		        if (response.ok) {
+		            alert('성공적으로 수정되었습니다.');
+		            location.reload(); // 성공 시 페이지 새로고침
+		        } else {
+		            const errorText = await response.text();
+		            alert(`수정에 실패했습니다: ${errorText}`);
+		        }
+		    } catch (error) {
+		        console.error('Error:', error);
+		        alert('수정 중 오류가 발생했습니다.');
+		    }
+		}
+		
+		// 항목 삭제
+		async function deleteAdjust() {
+            
+            const id = document.getElementById('deleteId').value;
+            if (!id) {
+                alert("삭제할 항목의 ID를 찾을 수 없습니다.");
+                return;
+            }
+
+            try {
+                // RESTful API 엔드포인트로 DELETE 요청
+                const response = await fetch(`/pay/retire-adjust/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('성공적으로 삭제되었습니다.');
+                    location.reload(); // 성공 시 페이지 새로고침
+                } else {
+                    const errorText = await response.text();
+                    alert(`삭제에 실패했습니다: ${errorText}`);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('삭제 중 오류가 발생했습니다.');
+            }
+        }
 	    
 	</script>
 </body>
