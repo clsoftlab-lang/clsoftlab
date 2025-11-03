@@ -1,13 +1,13 @@
 package com.example.clsoftlab.service.pay;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -32,14 +32,15 @@ public class StepBaseService {
 	}
 	
 	// 검색어로 목록 조회
-	public Page<StepBaseDetailDto> searchStepBase (String gradeCode, Integer stepNo, String useYn, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("fromDate").descending());
+	public Page<StepBaseDetailDto> searchStepBase (List<String> gradeCode, Integer stepNo, String useYn, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
 		Specification<StepBase> spec = Specification.not(null);
 		spec = spec.and(StepBaseSpecs.withGradeCode(gradeCode));
 		spec = spec.and(StepBaseSpecs.withStepNo(stepNo));
 		spec = spec.and(StepBaseSpecs.withUseYn(useYn));
 		
-		return stepBaseRepository.findAll(spec, pageable).map(i -> modelMapper.map(i, StepBaseDetailDto.class));
+		return stepBaseRepository.findAll(spec, pageable)
+				.map(i -> modelMapper.map(i, StepBaseDetailDto.class));
 	}
 	
 	// 새 항목 등록
@@ -58,18 +59,22 @@ public class StepBaseService {
 	}
 	
 	// 중복 체크
-	public boolean checkOverlapping (String gradeCode, String stepNo, LocalDate fromDate, LocalDate toDate) {
-		return stepBaseRepository.existsOverlap(gradeCode, stepNo, fromDate, toDate);
-	}
-	
-	// 중복 체크(수정용)
-	public boolean checkOverlapping (String gradeCode, String stepNo, LocalDate fromDate, LocalDate toDate, long id) {
-		return stepBaseRepository.existsOverlapForUpdate(gradeCode, stepNo, fromDate, toDate, id);
+	public boolean checkOverlapping (String gradeCode, String stepNo, LocalDate fromDate, LocalDate toDate, Long id) {
+		if (id == null) {
+			return stepBaseRepository.existsOverlap(gradeCode, stepNo, fromDate, toDate);
+		} else {
+			return stepBaseRepository.existsOverlap(gradeCode, stepNo, fromDate, toDate, id);
+		}
 	}
 	
 	// 세부 정보 조회
 	public Optional<StepBaseDetailDto> findById (long id) {
 		return stepBaseRepository.findById(id).map(i -> modelMapper.map(i, StepBaseDetailDto.class));
+	}
+	
+	// 검색용 직군 코드 조회
+	public List<String> getGradeCodeList () {
+		return stepBaseRepository.getGadeCodeList();
 	}
 
 }

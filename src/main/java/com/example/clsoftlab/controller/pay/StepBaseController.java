@@ -1,6 +1,7 @@
 package com.example.clsoftlab.controller.pay;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.pay.StepBaseDetailDto;
 import com.example.clsoftlab.dto.pay.StepBaseRequestDto;
@@ -33,13 +33,10 @@ public class StepBaseController {
 
 	// 검색어로 목록 조회
 	@GetMapping("")
-	public String getStepBaseList (@RequestParam(defaultValue = "") String gradeCode, @RequestParam(required = false) Integer stepNo,
-			@RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page,
+	public String getStepBaseList (@RequestParam(required = false) List<String> gradeCode, @RequestParam(required = false) Integer stepNo,
+			@RequestParam(required = false) String useYn, @RequestParam(required = false, defaultValue = "0") Integer page,
 			Model model) {
 		
-		if (page == null) {
-			page = 0;
-		}
 		int size = 1000;
 		
 		Page<StepBaseDetailDto> stepBasePage = stepBaseService.searchStepBase(gradeCode, stepNo, useYn, page, size);
@@ -49,6 +46,7 @@ public class StepBaseController {
 		model.addAttribute("stepNo", stepNo);
 		model.addAttribute("useYn", useYn);
 		model.addAttribute("stepBasePage", stepBasePage);
+		model.addAttribute("gradeCodeList", stepBaseService.getGradeCodeList());
 		
 		return "pay/step-base/list";
 	}
@@ -70,19 +68,13 @@ public class StepBaseController {
 	}
 	
 	// 중복 확인
-	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public boolean checkOverlap (@RequestParam String gradeCode, @RequestParam String stepNo, @RequestParam LocalDate fromDate,
-			@RequestParam LocalDate toDate) {
-		return stepBaseService.checkOverlapping(gradeCode, stepNo, fromDate, toDate);
-	}
-	
-	// 중복 확인(수정용)
-	@ResponseBody
-	@GetMapping("/checkOverlap/update")
-	public boolean checkOverlapForUpdate (@RequestParam String gradeCode, @RequestParam String stepNo, @RequestParam LocalDate fromDate,
-			@RequestParam LocalDate toDate, @RequestParam long id) {
-		return stepBaseService.checkOverlapping(gradeCode, stepNo, fromDate, toDate, id);
+	public ResponseEntity<Boolean> checkOverlap (@RequestParam String gradeCode, @RequestParam String stepNo, @RequestParam LocalDate fromDate,
+			@RequestParam LocalDate toDate, @RequestParam(required = false) Long id) {
+		
+		boolean	result = stepBaseService.checkOverlapping(gradeCode, stepNo, fromDate, toDate, id);
+		
+		return ResponseEntity.ok(result);
 	}
 	
 	// 세부 정보 조회

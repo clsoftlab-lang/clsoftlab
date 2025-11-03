@@ -1,6 +1,7 @@
 package com.example.clsoftlab.repository.pay;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -30,6 +31,11 @@ public interface StepBaseRepository extends JpaRepository<StepBase, Long>, JpaSp
 			+ "AND (s.stepNo = :stepNo) "
 			+ "AND (s.fromDate <= :toDate) "
 			+ "AND (s.toDate >= :fromDate)")
-	public boolean existsOverlapForUpdate (@Param("gradeCode") String gradeCode,@Param("stepNo") String stepNo,@Param("fromDate") LocalDate fromDate,@Param("toDate") LocalDate toDate,@Param("id") long id);
+	public boolean existsOverlap (@Param("gradeCode") String gradeCode,@Param("stepNo") String stepNo,@Param("fromDate") LocalDate fromDate,@Param("toDate") LocalDate toDate,@Param("id") long id);
 
+	// 검색용 직군 코드 조회
+	@Query("SELECT DISTINCT s.gradeCode "
+			+ "FROM StepBase s "
+			+ "ORDER BY s.gradeCode")
+	public List<String> getGadeCodeList();
 }

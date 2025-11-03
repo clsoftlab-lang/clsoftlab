@@ -47,7 +47,7 @@ public class StepBase extends BaseEntity{
     private LocalDate toDate; // 유효 종료일
 
     @Column(name = "ZUSE_YN", nullable = false, length = 1)
-    private String useYn = "Y"; // 사용 여부 (Y/N)
+    private String useYn; // 사용 여부 (Y/N)
 
     @Column(name = "ZNOTE", length = 500)
     private String note; // 비고 (설명)

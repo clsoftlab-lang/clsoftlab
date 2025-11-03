@@ -19,6 +19,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PayDeductReasonRequestDto {
 
+	private Long id;
+	
 	@NotBlank(message = "사번은 필수 입력 항목입니다.")
     private String empNo;
 

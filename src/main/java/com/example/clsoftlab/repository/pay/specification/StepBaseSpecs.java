@@ -1,16 +1,20 @@
 package com.example.clsoftlab.repository.pay.specification;
 
+import java.util.List;
+
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.example.clsoftlab.entity.StepBase;
 
 public class StepBaseSpecs {
 
-	 public static Specification<StepBase> withGradeCode(String gradeCode) {
-	        if (gradeCode == null) {
+	 public static Specification<StepBase> withGradeCode(List<String> gradeCode) {
+	        if (CollectionUtils.isEmpty(gradeCode)) {
 	            return null;
 	        }
-	        return (root, query, builder) -> builder.like(root.get("gradeCode"), "%" + gradeCode + "%");
+	        return (root, query, builder) -> root.get("gradeCode").in(gradeCode);
 	    }
 	 
     public static Specification<StepBase> withStepNo(Integer stepNo) { 
@@ -21,9 +25,9 @@ public class StepBaseSpecs {
     }
 
     public static Specification<StepBase> withUseYn(String useYn) {
-        if (useYn == null) {
+        if (!StringUtils.hasText(useYn)) {
             return null;
         }
-        return (root, query, builder) -> builder.like(root.get("useYn"), "%" + useYn + "%");
+        return (root, query, builder) -> builder.equal(root.get("useYn"), useYn);
     }
 }

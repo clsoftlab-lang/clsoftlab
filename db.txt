@@ -120,17 +120,14 @@ CREATE TABLE ZHR_PAY_ITEM (
     CONSTRAINT CHK_ZUSE_YN CHECK (ZUSE_YN IN ('Y', 'N'))
 );
 
-
-INSERT INTO ZHR_PAY_ITEM 
-(ZITEM_CD, ZITEM_NM, ZITEM_TY, ZTAX_YN, ZTAX_TY, ZTAX_PC, ZROUND_TY, ZBACK_YN, ZINSR_YN, ZUSE_YN, ZNOTE, CREATED_BY) 
+-- 더미 데이터 --
+INSERT INTO ZHR_PAY_ITEM
+(ZITEM_CD, ZITEM_NM, ZITEM_TY, ZTAX_YN, ZTAX_TY, ZTAX_PC, ZROUND_TY, ZBACK_YN, ZINSR_YN, ZUSE_YN, ZNOTE, CREATED_BY)
 VALUES
+-- 1. 급여 항목 (PAY) --
 ('PAY001', '기본급', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'Y', 'Y', 'Y', '월 기본 급여 항목', 'system_admin'),
 ('PAY002', '상여금', 'PAY', 'Y', 'PERCENT', NULL, 'TEN', 'N', 'Y', 'Y', '정기/비정기 상여금', 'system_admin'),
 ('PAY003', '식대(비과세)', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '비과세 식대 항목 (월 20만원 한도)', 'system_admin'),
-('TAX001', '소득세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '근로소득세 갑근세 원천징수', 'system_admin'),
-('INS001', '국민연금', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 국민연금 근로자 부담분', 'system_admin'),
-('INS002', '건강보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 건강보험 근로자 부담분', 'system_admin'),
-('DED001', '학자금상환', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'N', '취업 후 학자금 상환 의무공제', 'system_admin'),
 ('PAY004', '직책수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '팀장/임원 직책 보유자 수당', 'system_admin'),
 ('PAY005', '자격수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '자격증/면허 보유자 수당', 'system_admin'),
 ('PAY006', '가족수당', 'PAY', 'Y', 'PERCENT', NULL, 'WON', 'N', 'Y', 'Y', '부양가족 기준 지급 수당', 'system_admin'),
@@ -138,17 +135,32 @@ VALUES
 ('PAY008', '차량유지비', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '개인 차량 유지보조비', 'system_admin'),
 ('PAY009', '성과급', 'PAY', 'Y', 'PERCENT', NULL, 'TEN', 'N', 'Y', 'Y', '목표 달성 시 성과급 지급', 'system_admin'),
 ('PAY010', '휴가비', 'PAY', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '정기 휴가비 지원', 'system_admin'),
+
+-- 2. 세금 항목 (TAX) --
+('TAX001', '소득세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '근로소득세 갑근세 원천징수', 'system_admin'),
 ('TAX002', '지방소득세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '소득세 연계 지방세', 'system_admin'),
 ('TAX003', '주민세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'Y', '특별세 성격 주민세', 'system_admin'),
 ('TAX004', '농어촌특별세', 'TAX', 'N', NULL, NULL, 'WON', 'Y', 'N', 'N', '특정 대상자 농어촌특별세', 'system_admin'),
+
+-- 3. 보험 항목 (INSURANCE) --
+('INS001', '국민연금', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 국민연금 근로자 부담분', 'system_admin'),
+('INS002', '건강보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 건강보험 근로자 부담분', 'system_admin'),
 ('INS003', '장기요양보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '건강보험 연계 장기요양보험', 'system_admin'),
 ('INS004', '고용보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'Y', '4대보험 고용보험 근로자 부담분', 'system_admin'),
 ('INS005', '산재보험', 'INSURANCE', 'N', NULL, NULL, 'TEN', 'Y', 'N', 'N', '사용자 부담 관리용', 'system_admin'),
+
+-- 4. 일반 공제 항목 (DEDUCT) --
+('DED001', '학자금상환', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'N', '취업 후 학자금 상환 의무공제', 'system_admin'),
 ('DED002', '노조비', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '노동조합 조합비', 'system_admin'),
 ('DED003', '사내대출상환', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '사내대출 원리금 상환', 'system_admin'),
 ('DED004', '기숙사비', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '사내 기숙사 사용료', 'system_admin'),
 ('DED005', '복지기금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '동호회비/복지기금', 'system_admin'),
-('DED006', '개인연금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '개인연금(회사 대납 후 공제)', 'system_admin');
+('DED006', '개인연금', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '개인연금(회사 대납 후 공제)', 'system_admin'),
+
+-- 5. [추가] 징계/병가 감액용 공제 항목 (DEDUCT) - (ZHR_PAY_DEDUCT_REASON 테이블용) --
+('DED101', '병가 감액(무급)', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '무급 병가 사용 시 감액', 'system_admin'),
+('DED102', '징계 감액(감봉)', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '징계위원회 결과 감봉 조치', 'system_admin'),
+('DED103', '결근 감액', 'DEDUCT', 'N', NULL, NULL, 'WON', 'N', 'N', 'Y', '무단 결근 시 감액', 'system_admin');
 
 
 -- 월별 급여 항목 내역 (대리 키 PK + 고유 키 UNIQUE) --
@@ -1114,17 +1126,25 @@ CREATE TABLE ZHR_RETIRE_ADJUST (
         CHECK (ZADJ_AMOUNT IS NOT NULL OR ZADJ_EXPR IS NOT NULL)
 
 ) COMMENT '퇴직금 가감 항목 관리 (스토리보드: ZHR_RETIRE_ADJUST)';
+
+-- 징계/병가 공제 항목 --
 CREATE TABLE ZHR_PAY_DEDUCT_REASON (
     PAY_DEDUCT_REASON_ID BIGINT       NOT NULL AUTO_INCREMENT COMMENT '징계/병가 공제 ID (PK)',
-    ZEMP_NO              VARCHAR(20)  NOT NULL COMMENT '사번',
+    
+    ZEMP_NO              VARCHAR(10)  NOT NULL COMMENT '사번 (FK to ZHR_EMP_MASTER)',
     ZPAY_YM              VARCHAR(6)   NOT NULL COMMENT '급여월 (YYYYMM)',
     ZSEQ_NO              SMALLINT     NOT NULL COMMENT '급여차수',
-    ZITEM_CD             VARCHAR(20)  NOT NULL COMMENT '감액 항목 코드 (FK)',
+    ZITEM_CD             VARCHAR(20)  NOT NULL COMMENT '감액 항목 코드 (FK to ZHR_PAY_ITEM)',
     ZDAYS                DECIMAL(5,2) NULL     COMMENT '감액 일수',
     ZHOURS               DECIMAL(5,2) NULL     COMMENT '감액 시간',
     ZAMOUNT              BIGINT       NOT NULL COMMENT '감액 금액',
     ZREASON_CD           VARCHAR(20)  NOT NULL COMMENT '사유 코드',
     ZNOTE                VARCHAR(500) NULL     COMMENT '비고 (상세 사유 등)',
+
+    --  데이터 버전 관리 (낙관적 락)
+    VERSION              BIGINT       NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 락용)',
+
+    -- 감사(Audit) 필드
     CREATED_AT           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
     CREATED_BY           VARCHAR(50)  NOT NULL COMMENT '생성자',
     UPDATED_AT           DATETIME     NULL     COMMENT '수정 일시',
@@ -1143,53 +1163,57 @@ CREATE TABLE ZHR_PAY_DEDUCT_REASON (
 
     -- 외래 키(Foreign Key) 설정
     CONSTRAINT FK_DEDUCT_REASON_TO_PAY_ITEM
-    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD)
+    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD),
+
+    CONSTRAINT FK_DEDUCT_REASON_TO_EMP_MASTER
+    FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_MASTER(PERNR)
+    
 ) COMMENT '징계/병가 등 급여 감액 사유 관리';
 
+
 -- ZHR_PAY_DEDUCT_REASON 테이블에 삽입할 더미 데이터 (30건)
-INSERT INTO ZHR_PAY_DEDUCT_REASON 
-(ZEMP_NO, ZPAY_YM, ZSEQ_NO, ZITEM_CD, ZDAYS, ZHOURS, ZAMOUNT, ZREASON_CD, ZNOTE, CREATED_BY) 
+INSERT INTO ZHR_PAY_DEDUCT_REASON
+(ZEMP_NO, ZPAY_YM, ZSEQ_NO, ZITEM_CD, ZDAYS, ZHOURS, ZAMOUNT, ZREASON_CD, ZNOTE, CREATED_BY)
 VALUES
--- === DED001: 학자금상환 ===
-('EMP102', '202507', 1, 'DED001', NULL, NULL, 175000, 'STUDENT_LOAN', '취업 후 학자금 상환 (7월분)', 'hr_manager'),
-('EMP102', '202508', 1, 'DED001', NULL, NULL, 175000, 'STUDENT_LOAN', '취업 후 학자금 상환 (8월분)', 'hr_manager'),
-('EMP102', '202509', 1, 'DED001', NULL, NULL, 175000, 'STUDENT_LOAN', '취업 후 학자금 상환 (9월분)', 'hr_manager'),
+-- 2025년 10월 (ZPAY_YM = '202510')
+('2203004', '202510', 1, 'DED101', 3.00, NULL, 450000, 'SICK_2510', '10/13~10/15 무급 병가 (3일)', 'system_admin'),
+('2207006', '202510', 1, 'DED102', NULL, NULL, 300000, 'DISC_2509', '징계(감봉) 3개월 중 1회차', 'system_admin'),
+('2302013', '202510', 1, 'DED103', 1.00, 8.00, 210000, 'ABSENT_2510', '10/20 무단 결근 (1일)', 'system_admin'),
+('2305015', '202510', 1, 'DED102', NULL, 4.00, 100000, 'LATE_2510', '10월 중 지각 2회 (총 4시간) 감액', 'system_admin'),
+('2401022', '202510', 1, 'DED003', NULL, NULL, 500000, 'LOAN_REPAY', '사내대출 원리금 상환 (10/12회차)', 'system_admin'),
+('2402023', '202510', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '10월 기숙사 사용료', 'system_admin'),
+('2209007', '202510', 1, 'DED002', NULL, NULL, 30000, 'UNION_FEE', '10월 정기 노조 조합비', 'system_admin'),
+('2210009', '202510', 1, 'DED003', NULL, NULL, 250000, 'LOAN_REPAY', '생활안정자금 대출 상환 (5/24회차)', 'system_admin'),
+('2309018', '202510', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '10월 기숙사 사용료 (2인실)', 'system_admin'),
+('2310019', '202510', 1, 'DED005', NULL, NULL, 10000, 'WELFARE_FUND', '사내 복지 기금', 'system_admin'),
+('2403025', '202510', 1, 'DED103', 0.50, 4.00, 95000, 'LATE_HALF', '10/30 오전 무단 결근 (반차 감액)', 'system_admin'),
+('2404026', '202510', 1, 'DED101', 1.00, NULL, 180000, 'SICK_2510', '10/07 개인 질병 (무급 병가 1일)', 'system_admin'),
 
--- === DED002: 노조비 ===
-('EMP001', '202507', 1, 'DED002', NULL, NULL, 20000, 'UNION_FEE', '7월 정기 노조비', 'hr_manager'),
-('EMP001', '202508', 1, 'DED002', NULL, NULL, 20000, 'UNION_FEE', '8월 정기 노조비', 'hr_manager'),
-('EMP001', '202509', 1, 'DED002', NULL, NULL, 20000, 'UNION_FEE', '9월 정기 노조비', 'hr_manager'),
-('EMP002', '202507', 1, 'DED002', NULL, NULL, 25000, 'UNION_FEE', '7월 정기 노조비 (간부)', 'hr_manager'),
-('EMP002', '202508', 1, 'DED002', NULL, NULL, 25000, 'UNION_FEE', '8월 정기 노조비 (간부)', 'hr_manager'),
-('EMP002', '202509', 1, 'DED002', NULL, NULL, 25000, 'UNION_FEE', '9월 정기 노조비 (간부)', 'hr_manager'),
+-- 2025년 10월 퇴직 정산 (ZSEQ_NO = 9)
+('2203003', '202510', 9, 'DED103', 2.00, 16.00, 420000, 'ABSENT_FINAL', '퇴직 전 무단 결근(10/27~28) 정산', 'system_admin'),
+('2203003', '202510', 9, 'DED003', NULL, NULL, 2500000, 'LOAN_FINAL', '퇴직 정산 시 사내 대출 잔액 일시 상환', 'system_admin'),
+('2401021', '202510', 9, 'DED101', 1.50, NULL, 200000, 'SICK_FINAL', '최종 급여 정산 (10/06~ 1.5일 무급 병가)', 'system_admin'),
 
--- === DED003: 사내대출상환 ===
-('EMP101', '202507', 1, 'DED003', NULL, NULL, 250000, 'LOAN_REPAY', '사내대출 원리금 상환 (3/24)', 'hr_manager'),
-('EMP101', '202508', 1, 'DED003', NULL, NULL, 250000, 'LOAN_REPAY', '사내대출 원리금 상환 (4/24)', 'hr_manager'),
-('EMP101', '202509', 1, 'DED003', NULL, NULL, 250000, 'LOAN_REPAY', '사내대출 원리금 상환 (5/24)', 'hr_manager'),
-('EMP301', '202509', 1, 'DED003', NULL, NULL, 300000, 'LOAN_REPAY', '긴급 생활자금 대출 상환 (1/12)', 'hr_manager'),
-('EMP102', '202509', 2, 'DED003', NULL, NULL, 50000, 'LOAN_INTEREST', '사내대출 이자 별도 상환(성과급 지급분)', 'system_admin'),
+-- 2025년 9월 (ZPAY_YM = '202509')
+('2402024', '202509', 1, 'DED101', 5.00, NULL, 1000000, 'SICK_2509', '9/01~9/05 무급 병가 (5일)', 'system_admin'),
+('2203004', '202509', 1, 'DED003', NULL, NULL, 300000, 'LOAN_REPAY', '주택자금 대출 상환 (9월분)', 'system_admin'),
+('2401022', '202509', 1, 'DED003', NULL, NULL, 500000, 'LOAN_REPAY', '사내대출 원리금 상환 (9/12회차)', 'system_admin'),
+('2402023', '202509', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '9월 기숙사 사용료', 'system_admin'),
+('2207006', '202509', 1, 'DED102', NULL, NULL, 300000, 'DISC_2509', '징계(감봉) 3개월 중 2회차', 'system_admin'),
+('2501041', '202509', 1, 'DED103', 1.00, 8.00, 190000, 'ABSENT_2509', '9/22 무단 결근', 'system_admin'),
 
--- === DED004: 기숙사비 ===
-('EMP201', '202507', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '7월 기숙사 관리비', 'hr_manager'),
-('EMP201', '202508', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '8월 기숙사 관리비', 'hr_manager'),
-('EMP201', '202509', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '9월 기숙사 관리비', 'hr_manager'),
-('EMP202', '202507', 1, 'DED004', NULL, NULL, 180000, 'DORM_FEE', '7월 기숙사 관리비 (2인실)', 'hr_manager'),
-('EMP202', '202508', 1, 'DED004', NULL, NULL, 180000, 'DORM_FEE', '8월 기숙사 관리비 (2인실)', 'hr_manager'),
-('EMP301', '202509', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '9월 기숙사비', 'hr_manager'),
+-- 2025년 9월 퇴직 정산 (ZSEQ_NO = 9)
+('2201001', '202509', 9, 'DED003', NULL, NULL, 1200000, 'LOAN_FINAL', '퇴직 정산 대출 잔액 상환', 'system_admin'),
+('2201001', '202509', 9, 'DED101', 1.00, NULL, 220000, 'SICK_FINAL', '9/15 무급 병가 정산', 'system_admin'),
 
--- === DED005: 복지기금 (징계/병가 사유 포함) ===
-('EMP003', '202509', 1, 'DED005', NULL, NULL, 10000, 'WELFARE_FUND', '9월 정기 복지기금', 'hr_manager'),
-('EMP101', '202507', 1, 'DED005', 1.0, NULL, 185000, 'DISCIPLINE_01', '무단결근 1일분 감봉', 'system_admin'),
-('EMP202', '202508', 1, 'DED005', NULL, 4.0, 95000, 'DISCIPLINE_02', '근무지 무단 이탈 4시간분 감급', 'system_admin'),
-('EMP001', '202508', 1, 'DED005', 2.0, NULL, 250000, 'SICK_UNPAID', '개인사유 무급 병가 2일 사용', 'system_admin'),
-('EMP201', '202509', 1, 'DED005', 0.5, NULL, 55000, 'SICK_UNPAID', '오전 무급 병가(반차)', 'system_admin'),
+-- 2025년 8월 (ZPAY_YM = '202508')
+('2402024', '202508', 1, 'DED003', NULL, NULL, 150000, 'LOAN_REPAY_S', '학자금 대출 상환 (8월)', 'system_admin'),
+('2401022', '202508', 1, 'DED003', NULL, NULL, 500000, 'LOAN_REPAY', '사내대출 원리금 상환 (8/12회차)', 'system_admin'),
+('2402023', '202508', 1, 'DED004', NULL, NULL, 150000, 'DORM_FEE', '8월 기숙사 사용료', 'system_admin'),
+('2207006', '202508', 1, 'DED102', NULL, NULL, 300000, 'DISC_2509', '징계(감봉) 3개월 중 3회차', 'system_admin'),
 
--- === DED006: 개인연금 ===
-('EMP002', '202507', 1, 'DED006', NULL, NULL, 100000, 'PENSION_PRI', '개인연금 대납분 공제 (7월)', 'hr_manager'),
-('EMP002', '202508', 1, 'DED006', NULL, NULL, 100000, 'PENSION_PRI', '개인연금 대납분 공제 (8월)', 'hr_manager'),
-('EMP002', '202509', 1, 'DED006', NULL, NULL, 100000, 'PENSION_PRI', '개인연금 대납분 공제 (9월)', 'hr_manager'),
-('EMP101', '202509', 1, 'DED006', NULL, NULL, 150000, 'PENSION_PRI', '개인연금 신규 가입분 공제', 'hr_manager');
+-- 2025년 8월 퇴직 정산 (ZSEQ_NO = 9)
+('2308017', '202508', 9, 'DED103', 0.50, 4.00, 100000, 'ABSENT_FINAL', '퇴직일 무단 조퇴 (4시간)', 'system_admin');
 
 CREATE TABLE ZHR_STEP_BASE (
     STEP_BASE_ID      BIGINT       NOT NULL AUTO_INCREMENT COMMENT '호봉 기준 ID (PK)',
@@ -1263,6 +1287,95 @@ VALUES
 -- === 사용 안 함(N) 처리된 과거 데이터 예시 ===
 ('DEV01', 1, 36000000, 'YEARLY', '2023-01-01', '2023-12-31', 'N', '2023년도 기준. 현재 미사용.', 'system_admin'),
 ('DSN01', 1, 35000000, 'YEARLY', '2023-01-01', '2023-12-31', 'N', '2023년도 기준. 현재 미사용.', 'system_admin');
+
+-- 사원별 호봉 정보 --
+CREATE TABLE ZHR_EMP_STEP (
+    -- 1. 기본 키 및 버전 관리 (요청 사항)
+    ID            BIGINT       NOT NULL AUTO_INCREMENT COMMENT '호봉 이력 ID (PK)',
+    VERSION       INT          NOT NULL DEFAULT 0 COMMENT '데이터 버전',
+
+    -- 2. 핵심 데이터 (스토리보드 4.C 기준)
+    PERNR         VARCHAR(10)  NOT NULL COMMENT '사번 (FK: ZHR_EMP_MASTER)',
+    ZGRADE_CD     VARCHAR(20)  NOT NULL COMMENT '직군 코드',
+    ZSTEP_NO      SMALLINT     NOT NULL COMMENT '호봉 번호',
+    ZFROM_DT      DATE         NOT NULL COMMENT '적용 시작일',
+    ZTO_DT        DATE         NOT NULL COMMENT '적용 종료일',
+    ZNOTE         VARCHAR(500) NULL     COMMENT '비고',
+
+    -- 3. 감사(Audit) 필드
+    CREATED_AT    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY    VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY    VARCHAR(50)  NULL     COMMENT '수정자',
+
+    -- 4. 제약 조건
+    PRIMARY KEY (ID),
+
+    -- 스토리보드 5. "동일 사원의 기간이 겹치면 안 됨"
+    UNIQUE KEY UK_ZHR_EMP_STEP_BIZ (PERNR, ZFROM_DT),
+
+    -- 스토리보드 5. "사원 테이블에 존재해야 함" (요청 사항)
+    FOREIGN KEY (PERNR) 
+        REFERENCES ZHR_EMP_MASTER(PERNR)
+        ON DELETE RESTRICT
+
+) COMMENT '사원별 호봉 등록 정보';
+
+-- 더미 데이터 -- 
+INSERT INTO ZHR_EMP_STEP
+(PERNR, ZGRADE_CD, ZSTEP_NO, ZFROM_DT, ZTO_DT, ZNOTE, CREATED_BY)
+VALUES
+-- 시나리오 1: 2025년 신규 입사자 (5명, 5건)
+-- 입사일 = 첫 호봉 시작일, 종료일 = 9999-12-31
+('2501041', 'G1', 1, '2025-01-01', '9999-12-31', '신규 입사', 'system_admin'),
+('2501042', 'G1', 1, '2025-01-01', '9999-12-31', '신규 입사', 'system_admin'),
+('2502043', 'S1', 1, '2025-02-01', '9999-12-31', '신규 입사', 'system_admin'),
+('2503044', 'G1', 1, '2025-03-01', '9999-12-31', '신규 입사', 'system_admin'),
+('2505047', 'M1', 1, '2025-05-01', '9999-12-31', '신규 입사 (경력)', 'system_admin'),
+
+-- 시나리오 2: 2024년 입사자 (5명, 10건)
+-- 2025년 1월 1일부로 정기 승급 (1호봉 -> 2호봉)
+('2401022', 'G1', 1, '2024-01-01', '2024-12-31', '신규 입사', 'system_admin'),
+('2401022', 'G1', 2, '2025-01-01', '9999-12-31', '2025년 정기승급', 'system_admin'),
+('2402023', 'S1', 1, '2024-02-01', '2024-12-31', '신규 입사', 'system_admin'),
+('2402023', 'S1', 2, '2025-01-01', '9999-12-31', '2025년 정기승급', 'system_admin'),
+('2403025', 'G1', 1, '2024-03-01', '2024-12-31', '신규 입사', 'system_admin'),
+('2403025', 'G1', 2, '2025-01-01', '9999-12-31', '2025년 정기승급', 'system_admin'),
+('2407031', 'G1', 1, '2024-07-01', '2024-12-31', '신규 입사', 'system_admin'),
+('2407031', 'G1', 2, '2025-01-01', '9999-12-31', '2025년 정기승급', 'system_admin'),
+('2410036', 'M1', 1, '2024-10-01', '2024-12-31', '신규 입사 (경력)', 'system_admin'),
+('2410036', 'M1', 2, '2025-01-01', '9999-12-31', '2025년 정기승급', 'system_admin'),
+
+-- 시나리오 3: 2022년 입사자 (재직자, 3명, 12건)
+-- 매년 정기 승급 + 1명은 중간에 승진 (G1 -> G2)
+-- 최서연 ('2203004', G1 -> G2 승진)
+('2203004', 'G1', 1, '2022-03-01', '2022-12-31', '신규 입사', 'system_admin'),
+('2203004', 'G1', 2, '2023-01-01', '2023-12-31', '2023년 정기승급', 'system_admin'),
+('2203004', 'G1', 3, '2024-01-01', '2024-06-30', '2024년 정기승급', 'system_admin'),
+('2203004', 'G2', 1, '2024-07-01', '9999-12-31', 'G2 승진', 'system_admin'),
+-- 윤서아 ('2207006', 정기 승급만)
+('2207006', 'S1', 1, '2022-07-01', '2022-12-31', '신규 입사', 'system_admin'),
+('2207006', 'S1', 2, '2023-01-01', '2023-12-31', '2023년 정기승급', 'system_admin'),
+('2207006', 'S1', 3, '2024-01-01', '2024-12-31', '2024년 정기승급', 'system_admin'),
+('2207006', 'S1', 4, '2025-01-01', '9999-12-31', '2025년 정기승급', 'system_admin'),
+-- 강도윤 ('2209007', 정기 승급만)
+('2209007', 'G1', 1, '2022-09-01', '2022-12-31', '신규 입사', 'system_admin'),
+('2209007', 'G1', 2, '2023-01-01', '2023-12-31', '2023년 정기승급', 'system_admin'),
+('2209007', 'G1', 3, '2024-01-01', '2024-12-31', '2024년 정기승급', 'system_admin'),
+('2209007', 'G1', 4, '2025-01-01', '9999-12-31', '2025년 정기승급', 'system_admin'),
+
+-- 시나리오 4: 퇴직자 (2명, 7건)
+-- 마지막 레코드의 ZTO_DT가 RETIRE_DT와 일치함
+-- 김철수 ('2201001', 2025-09-30 퇴직)
+('2201001', 'S1', 1, '2022-01-01', '2022-12-31', '신규 입사', 'system_admin'),
+('2201001', 'S1', 2, '2023-01-01', '2023-12-31', '2023년 정기승급', 'system_admin'),
+('2201001', 'S1', 3, '2024-01-01', '2024-12-31', '2024년 정기승급', 'system_admin'),
+('2201001', 'S1', 4, '2025-01-01', '2025-09-30', '퇴직 (최종)', 'system_admin'),
+-- 신유나 ('2301011', 2025-06-30 퇴직)
+('2301011', 'G1', 1, '2023-01-01', '2023-12-31', '신규 입사', 'system_admin'),
+('2301011', 'G1', 2, '2024-01-01', '2024-12-31', '2024년 정기승급', 'system_admin'),
+('2301011', 'G1', 3, '2025-01-01', '2025-06-30', '퇴직 (최종)', 'system_admin');
+
 
 CREATE TABLE ZHR_BANK_ACCOUNT (
     BANK_ACCOUNT_ID   BIGINT         NOT NULL AUTO_INCREMENT COMMENT '계좌 ID (PK)',

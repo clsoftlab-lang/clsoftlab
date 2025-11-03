@@ -14,10 +14,12 @@ import lombok.Setter;
 public class PayDeductReasonDetailDto {
 
 	private long id;
-    private String empNo;
+    private String employeeName;
+    private String employeePernr;
     private String payYm;
     private Integer seqNo;
-    private String itemCode;
+    private String payItemCode;
+    private String payItemName;
     private BigDecimal days;
     private BigDecimal hours;
     private Long amount;
