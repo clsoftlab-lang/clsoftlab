@@ -1,5 +1,6 @@
 package com.example.clsoftlab.dto.pay;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -11,22 +12,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmployeeFamilyDetailDto {
-	
-	private long id;
+public class EmployeeWithholdRateDetailDto {
+
+	private Long id;
     private String employeeName;
     private String employeePernr;
-    private Integer familySeq;
-    private String familyType;
-    private String familyName;
-    private LocalDate birth;
-    private String gender;
-    private String dependYn; 
-    private String allowYn;
-    private String taxYn;
-    private String disabledYn;
+    private BigDecimal withholdPc;
     private LocalDate fromDate;
     private LocalDate toDate;
     private String note;
-
 }

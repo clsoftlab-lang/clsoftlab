@@ -12,7 +12,8 @@ import lombok.Setter;
 public class BankAccountDetailDto {
 
 	private long id;
-    private String empNo;
+    private String employeePernr;
+    private String employeeName;
     private String accountType;
     private String bankCode;
     private String bankName;

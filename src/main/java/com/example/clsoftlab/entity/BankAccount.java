@@ -8,10 +8,14 @@ import com.example.clsoftlab.dto.pay.BankAccountRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,8 +34,9 @@ public class BankAccount extends BaseEntity {
     @Column(name = "BANK_ACCOUNT_ID")
     private Long id;
 
-    @Column(name = "ZEMP_NO", nullable = false, length = 20)
-    private String empNo;
+	@ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "ZEMP_NO",referencedColumnName = "PERNR", nullable = false)
+    private EmployeeMaster employee;
 
     @Column(name = "ZACC_TYPE", nullable = false, length = 10)
     private String accountType;
@@ -63,6 +68,10 @@ public class BankAccount extends BaseEntity {
 
     @Column(name = "ZNOTE", length = 500)
     private String note;
+    
+    @Version
+    @Column(name = "VERSION")
+    private Long version;
     
     public void update (BankAccountRequestDto dto) {
     	this.fromDate = dto.getFromDate();
