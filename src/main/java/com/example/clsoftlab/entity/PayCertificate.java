@@ -4,10 +4,14 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,14 +30,15 @@ public class PayCertificate extends BaseEntity {
     @Column(name = "CERTIFICATE_ID")
     private Long id;
 
-    @Column(name = "ZCERT_NO", nullable = false, length = 30)
+    @Column(name = "ZCERT_NO", nullable = false, length = 50)
     private String certNo;
 
     @Column(name = "ZYEAR", nullable = false, length = 4)
     private String year;
 
-    @Column(name = "ZEMP_NO", nullable = false, length = 20)
-    private String empNo;
+    @ManyToOne(fetch = FetchType.LAZY) // 성능 최적화를 위해 LAZY 로딩 권장
+    @JoinColumn(name = "ZEMP_NO", nullable = false) // DDL의 FK 컬럼명(ZEMP_NO) 지정
+    private EmployeeMaster employee;
 
     @Column(name = "ZPERIOD_TY", nullable = false, length = 20)
     private String periodType;
@@ -70,4 +75,8 @@ public class PayCertificate extends BaseEntity {
 
     @Column(name = "ZNOTE", length = 500)
     private String note;
+    
+    @Version
+    @Column(name = "VERSION")
+    private Integer version;
 }

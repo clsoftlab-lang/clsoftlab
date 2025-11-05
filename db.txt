@@ -1628,23 +1628,26 @@ VALUES
 ('2404026', 1, 'MOTHER', '김미자', '1966-07-20', 'F', 'Y', 'N', 'Y', 'N', '2025-01-02', '9999-12-31', '모', 'system_admin'),
 ('2404026', 2, 'FATHER', '김영철', '1963-03-15', 'M', 'Y', 'N', 'Y', 'N', '2025-01-02', '9999-12-31', '부', 'system_admin');
 
--- ZHR_PAY_ITEM 테이블이 먼저 생성되어 있어야 하며, ZITEM_CD가 기본 키(PK) 또는 고유 키(Unique Key)로 설정되어 있어야 합니다.
 
+-- 급여 절사 이력 --
 CREATE TABLE ZHR_PAY_ROUND_HISTORY (
-    ROUND_HISTORY_ID  BIGINT          NOT NULL AUTO_INCREMENT COMMENT '절사 이력 ID (PK)',
-    ZEMP_NO           VARCHAR(20)     NOT NULL COMMENT '사원번호',
-    ZPAY_YM           VARCHAR(6)      NOT NULL COMMENT '급여월 (YYYYMM)',
-    ZITEM_CD          VARCHAR(20)     NOT NULL COMMENT '급여 항목 코드',
-    ZRAW_AMT          BIGINT          NOT NULL DEFAULT 0 COMMENT '절사 전 원금액',
-    ZROUND_TY         VARCHAR(20)     NOT NULL COMMENT '절사 방식 (WON, TEN, HUNDRED 등)',
-    ZROUND_AMT        BIGINT          NOT NULL DEFAULT 0 COMMENT '절사 후 금액 (실제 지급/공제액)',
-    ZDIFF_AMT         BIGINT          NOT NULL DEFAULT 0 COMMENT '차액 (ZRAW_AMT - ZROUND_AMT)',
-    ZSRC_CD           VARCHAR(20)     NOT NULL COMMENT '절사 기준 항목 코드 (ZHR_PAY_ITEM.ZITEM_CD 참조)',
-    ZNOTE             VARCHAR(500)    NULL     COMMENT '절사 기준 설명 및 비고',
-    CREATED_AT        DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY        VARCHAR(50)     NOT NULL COMMENT '생성자',
-    UPDATED_AT        DATETIME        NULL     COMMENT '수정 일시',
-    UPDATED_BY        VARCHAR(50)     NULL     COMMENT '수정자',
+    ROUND_HISTORY_ID  BIGINT         NOT NULL AUTO_INCREMENT COMMENT '절사 이력 ID (PK)',
+    ZEMP_NO           VARCHAR(10)    NOT NULL COMMENT '사원번호 (FK: ZHR_EMP_MASTER.PERNR)',
+    ZPAY_YM           VARCHAR(6)     NOT NULL COMMENT '급여월 (YYYYMM)',
+    ZITEM_CD          VARCHAR(20)    NOT NULL COMMENT '급여 항목 코드 (FK: ZHR_PAY_ITEM.ZITEM_CD)',
+    ZRAW_AMT          BIGINT         NOT NULL DEFAULT 0 COMMENT '절사 전 원금액',
+    ZROUND_TY         VARCHAR(20)    NOT NULL COMMENT '절사 방식 (WON, TEN, HUNDRED 등)',
+    ZROUND_AMT        BIGINT         NOT NULL DEFAULT 0 COMMENT '절사 후 금액 (실제 지급/공제액)',
+    ZDIFF_AMT         BIGINT         NOT NULL DEFAULT 0 COMMENT '차액 (ZRAW_AMT - ZROUND_AMT)',
+    ZSRC_CD           VARCHAR(20)    NOT NULL COMMENT '절사 기준 항목 코드 (FK: ZHR_PAY_ITEM.ZITEM_CD)',
+    ZNOTE             VARCHAR(500)   NULL     COMMENT '절사 기준 설명 및 비고',
+    
+    -- 버전 및 감사(Audit) 필드
+    VERSION           BIGINT         NOT NULL DEFAULT 0 COMMENT '버전 (낙관적 잠금용)',
+    CREATED_AT        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY        VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT        DATETIME       NULL     COMMENT '수정 일시',
+    UPDATED_BY        VARCHAR(50)    NULL     COMMENT '수정자',
 
     -- 기본 키 설정
     PRIMARY KEY (ROUND_HISTORY_ID),
@@ -1654,148 +1657,180 @@ CREATE TABLE ZHR_PAY_ROUND_HISTORY (
     
     -- 검색 성능 향상을 위한 인덱스
     INDEX IDX_ZPAY_YM (ZPAY_YM),
-    INDEX IDX_ZSRC_CD (ZSRC_CD), -- 외래 키 성능을 위한 인덱스 추가
+    INDEX IDX_ZSRC_CD (ZSRC_CD), -- '절사 기준 항목' FK 인덱스
+    INDEX IDX_ZEMP_NO (ZEMP_NO), -- '사번' FK 인덱스
+    INDEX IDX_ZITEM_CD (ZITEM_CD), --  '급여 항목' FK 인덱스
 
     -- 데이터 무결성을 위한 제약 조건
     CONSTRAINT CHK_ZROUND_TY_VALUE CHECK (ZROUND_TY IN ('WON', 'TEN', 'HUNDRED', 'THOUSAND')),
     CONSTRAINT CHK_AMOUNT_VALIDITY CHECK (ZRAW_AMT >= ZROUND_AMT),
 
-    -- 외래 키 제약 조건 추가
-    CONSTRAINT FK_ZHR_PAY_ROUND_HISTORY_01
+    -- 외래 키 제약 조건
+    CONSTRAINT FK_ZHR_PAY_ROUND_HISTORY_01 -- 절사 '기준' 항목
         FOREIGN KEY (ZSRC_CD)
+        REFERENCES ZHR_PAY_ITEM(ZITEM_CD),
+        
+    CONSTRAINT FK_ZHR_PAY_ROUND_HISTORY_02 -- 사번
+        FOREIGN KEY (ZEMP_NO)
+        REFERENCES ZHR_EMP_MASTER(PERNR),
+        
+    CONSTRAINT FK_ZHR_PAY_ROUND_HISTORY_03 -- 절사 '대상' 항목 (신규 추가)
+        FOREIGN KEY (ZITEM_CD)
         REFERENCES ZHR_PAY_ITEM(ZITEM_CD)
 
 ) COMMENT '급여 항목별 금액 절사 이력';
 
+-- 더미데이터 --
 INSERT INTO ZHR_PAY_ROUND_HISTORY 
-(ZEMP_NO, ZPAY_YM, ZITEM_CD, ZRAW_AMT, ZROUND_TY, ZROUND_AMT, ZDIFF_AMT, ZSRC_CD, ZNOTE, CREATED_BY) 
+(ZEMP_NO, ZPAY_YM, ZITEM_CD, ZRAW_AMT, ZROUND_TY, ZROUND_AMT, ZDIFF_AMT, ZSRC_CD, ZNOTE, VERSION, CREATED_BY) 
 VALUES
--- EMP1001, 2025년 9월 급여
-('EMP1001', '202509', 'TAX001', 158234, 'WON', 158230, 4, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
-('EMP1001', '202509', 'TAX002', 15823, 'WON', 15820, 3, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
-('EMP1001', '202509', 'INS001', 265509, 'TEN', 265500, 9, 'INS001', '국민연금법 고지 금액 기준', 'system_batch'),
-('EMP1001', '202509', 'INS002', 210875, 'TEN', 210870, 5, 'INS002', '건강보험법 고지 금액 기준', 'system_batch'),
-('EMP1001', '202509', 'INS003', 27092, 'TEN', 27090, 2, 'INS003', '장기요양보험법 고지 금액 기준', 'system_batch'),
-('EMP1001', '202509', 'INS004', 52981, 'TEN', 52980, 1, 'INS004', '고용보험법 기준 절사', 'system_batch'),
-('EMP1001', '202509', 'PAY009', 1250008, 'TEN', 1250000, 8, 'PAY009', '성과급 지급 규정 10원 단위 절사', 'system_batch'),
+-- 'EMP1001' -> '2201001' (김철수) / 2025년 9월 (퇴직월)
+('2201001', '202509', 'TAX001', 158234, 'WON', 158230, 4, 'TAX001', '소득세법 기준 10원 미만 절사', 0, 'system_batch'),
+('2201001', '202509', 'TAX002', 15823, 'WON', 15820, 3, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 0, 'system_batch'),
+('2201001', '202509', 'INS001', 265509, 'TEN', 265500, 9, 'INS001', '국민연금법 고지 금액 기준', 0, 'system_batch'),
+('2201001', '202509', 'INS002', 210875, 'TEN', 210870, 5, 'INS002', '건강보험법 고지 금액 기준', 0, 'system_batch'),
+('2201001', '202509', 'INS003', 27092, 'TEN', 27090, 2, 'INS003', '장기요양보험법 고지 금액 기준', 0, 'system_batch'),
+('2201001', '202509', 'INS004', 52981, 'TEN', 52980, 1, 'INS004', '고용보험법 기준 절사', 0, 'system_batch'),
+('2201001', '202509', 'PAY009', 1250008, 'TEN', 1250000, 8, 'PAY009', '성과급 지급 규정 10원 단위 절사', 0, 'system_batch'),
 
--- EMP2004, 2025년 9월 급여
-('EMP2004', '202509', 'TAX001', 89442, 'WON', 89440, 2, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
-('EMP2004', '202509', 'TAX002', 8944, 'WON', 8940, 4, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
-('EMP2004', '202509', 'INS001', 180001, 'TEN', 180000, 1, 'INS001', '국민연금법 고지 금액 기준', 'system_batch'),
-('EMP2004', '202509', 'INS002', 145678, 'TEN', 145670, 8, 'INS002', '건강보험법 고지 금액 기준', 'system_batch'),
-('EMP2004', '202509', 'INS003', 18721, 'TEN', 18720, 1, 'INS003', '장기요양보험법 고지 금액 기준', 'system_batch'),
-('EMP2004', '202509', 'INS004', 35555, 'TEN', 35550, 5, 'INS004', '고용보험법 기준 절사', 'system_batch'),
+-- 'EMP2004' -> '2302013' (송지아) / 2025년 9월
+('2302013', '202509', 'TAX001', 89442, 'WON', 89440, 2, 'TAX001', '소득세법 기준 10원 미만 절사', 0, 'system_batch'),
+('2302013', '202509', 'TAX002', 8944, 'WON', 8940, 4, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 0, 'system_batch'),
+('2302013', '202509', 'INS001', 180001, 'TEN', 180000, 1, 'INS001', '국민연금법 고지 금액 기준', 0, 'system_batch'),
+('2302013', '202509', 'INS002', 145678, 'TEN', 145670, 8, 'INS002', '건강보험법 고지 금액 기준', 0, 'system_batch'),
+('2302013', '202509', 'INS003', 18721, 'TEN', 18720, 1, 'INS003', '장기요양보험법 고지 금액 기준', 0, 'system_batch'),
+('2302013', '202509', 'INS004', 35555, 'TEN', 35550, 5, 'INS004', '고용보험법 기준 절사', 0, 'system_batch'),
 
--- EMP3015, 2025년 9월 급여
-('EMP3015', '202509', 'TAX001', 310569, 'WON', 310560, 9, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
-('EMP3015', '202509', 'TAX002', 31056, 'WON', 31050, 6, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
-('EMP3015', '202509', 'INS001', 265500, 'TEN', 265500, 0, 'INS001', '국민연금 상한액, 절사 금액 없음', 'system_batch'),
-('EMP3015', '202509', 'INS002', 288443, 'TEN', 288440, 3, 'INS002', '건강보험법 고지 금액 기준', 'system_batch'),
-('EMP3015', '202509', 'INS003', 37064, 'TEN', 37060, 4, 'INS003', '장기요양보험법 고지 금액 기준', 'system_batch'),
-('EMP3015', '202509', 'INS004', 65547, 'TEN', 65540, 7, 'INS004', '고용보험법 기준 절사', 'system_batch'),
+-- 'EMP3015' -> '2402024' (백시원) / 2025년 9월
+('2402024', '202509', 'TAX001', 310569, 'WON', 310560, 9, 'TAX001', '소득세법 기준 10원 미만 절사', 0, 'system_batch'),
+('2402024', '202509', 'TAX002', 31056, 'WON', 31050, 6, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 0, 'system_batch'),
+('2402024', '202509', 'INS001', 265500, 'TEN', 265500, 0, 'INS001', '국민연금 상한액, 절사 금액 없음', 0, 'system_batch'),
+('2402024', '202509', 'INS002', 288443, 'TEN', 288440, 3, 'INS002', '건강보험법 고지 금액 기준', 0, 'system_batch'),
+('2402024', '202509', 'INS003', 37064, 'TEN', 37060, 4, 'INS003', '장기요양보험법 고지 금액 기준', 0, 'system_batch'),
+('2402024', '202509', 'INS004', 65547, 'TEN', 65540, 7, 'INS004', '고용보험법 기준 절사', 0, 'system_batch'),
 
--- EMP4210, 2025년 9월 급여
-('EMP4210', '202509', 'TAX001', 45111, 'WON', 45110, 1, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
-('EMP4210', '202509', 'TAX002', 4511, 'WON', 4510, 1, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
-('EMP4210', '202509', 'INS001', 166503, 'TEN', 166500, 3, 'INS001', '국민연금법 고지 금액 기준', 'system_batch'),
+-- 'EMP4210' -> '2503044' (설강민) / 2025년 9월
+('2503044', '202509', 'TAX001', 45111, 'WON', 45110, 1, 'TAX001', '소득세법 기준 10원 미만 절사', 0, 'system_batch'),
+('2503044', '202509', 'TAX002', 4511, 'WON', 4510, 1, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 0, 'system_batch'),
+('2503044', '202509', 'INS001', 166503, 'TEN', 166500, 3, 'INS001', '국민연금법 고지 금액 기준', 0, 'system_batch'),
 
--- EMP1001, 2025년 8월 급여
-('EMP1001', '202508', 'TAX001', 157998, 'WON', 157990, 8, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
-('EMP1001', '202508', 'TAX002', 15799, 'WON', 15790, 9, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
-('EMP1001', '202508', 'INS001', 265501, 'TEN', 265500, 1, 'INS001', '국민연금법 고지 금액 기준', 'system_batch'),
-('EMP1001', '202508', 'INS002', 210871, 'TEN', 210870, 1, 'INS002', '건강보험법 고지 금액 기준', 'system_batch'),
-('EMP1001', '202508', 'INS003', 27099, 'TEN', 27090, 9, 'INS003', '장기요양보험법 고지 금액 기준', 'system_batch'),
-('EMP1001', '202508', 'INS004', 52988, 'TEN', 52980, 8, 'INS004', '고용보험법 기준 절사', 'system_batch'),
-('EMP1001', '202508', 'PAY002', 800005, 'TEN', 800000, 5, 'PAY002', '명절 상여금 지급', 'system_batch'),
+-- 'EMP1001' -> '2201001' (김철수) / 2025년 8월
+('2201001', '202508', 'TAX001', 157998, 'WON', 157990, 8, 'TAX001', '소득세법 기준 10원 미만 절사', 0, 'system_batch'),
+('2201001', '202508', 'TAX002', 15799, 'WON', 15790, 9, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 0, 'system_batch'),
+('2201001', '202508', 'INS001', 265501, 'TEN', 265500, 1, 'INS001', '국민연금법 고지 금액 기준', 0, 'system_batch'),
+('2201001', '202508', 'INS002', 210871, 'TEN', 210870, 1, 'INS002', '건강보험법 고지 금액 기준', 0, 'system_batch'),
+('2201001', '202508', 'INS003', 27099, 'TEN', 27090, 9, 'INS003', '장기요양보험법 고지 금액 기준', 0, 'system_batch'),
+('2201001', '202508', 'INS004', 52988, 'TEN', 52980, 8, 'INS004', '고용보험법 기준 절사', 0, 'system_batch'),
+('2201001', '202508', 'PAY002', 800005, 'TEN', 800000, 5, 'PAY002', '명절 상여금 지급', 0, 'system_batch'),
 
--- EMP2004, 2025년 8월 급여
-('EMP2004', '202508', 'TAX001', 89333, 'WON', 89330, 3, 'TAX001', '소득세법 기준 10원 미만 절사', 'system_batch'),
-('EMP2004', '202508', 'TAX002', 8933, 'WON', 8930, 3, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 'system_batch'),
-('EMP2004', '202508', 'INS002', 145672, 'TEN', 145670, 2, 'INS002', '건강보험법 고지 금액 기준', 'system_batch');
+-- 'EMP2004' -> '2302013' (송지아) / 2025년 8월
+('2302013', '202508', 'TAX001', 89333, 'WON', 89330, 3, 'TAX001', '소득세법 기준 10원 미만 절사', 0, 'system_batch'),
+('2302013', '202508', 'TAX002', 8933, 'WON', 8930, 3, 'TAX001', '소득세분 지방소득세, 소득세법 연동', 0, 'system_batch'),
+('2302013', '202508', 'INS002', 145672, 'TEN', 145670, 2, 'INS002', '건강보험법 고지 금액 기준', 0, 'system_batch');
 
+-- 지급명세표 --
 CREATE TABLE ZHR_PAY_CERTIFICATE (
+    CERTIFICATE_ID  BIGINT        NOT NULL AUTO_INCREMENT COMMENT '지급명세표 ID (PK)',
+    ZCERT_NO        VARCHAR(50)   NOT NULL UNIQUE COMMENT '지급명세표 번호 (화면 표시용/참조용)',
+    ZYEAR           VARCHAR(4)    NOT NULL COMMENT '귀속 연도 (YYYY)',
+    ZEMP_NO         VARCHAR(10)   NOT NULL COMMENT '사원번호 (FK to ZHR_EMP_MASTER.PERNR)',
+    ZPERIOD_TY      VARCHAR(20)   NOT NULL COMMENT '기간 유형 (HALF, MONTH, QUARTER, YEAR 등)',
     
-    CERTIFICATE_ID    BIGINT          NOT NULL AUTO_INCREMENT COMMENT '지급명세표 ID (PK)',
-    ZCERT_NO          VARCHAR(30)     NOT NULL UNIQUE COMMENT '지급명세표 번호 (화면 표시용/참조용)',
-    ZYEAR             VARCHAR(4)      NOT NULL COMMENT '귀속 연도 (YYYY)',
-    ZEMP_NO           VARCHAR(20)     NOT NULL COMMENT '사원번호',
-    ZPERIOD_TY        VARCHAR(20)     NOT NULL COMMENT '기간 유형 (HALF, MONTH, QUARTER, YEAR)',
-    ZPERIOD_FROM      DATE            NOT NULL COMMENT '귀속 기간 시작일',
-    ZPERIOD_TO        DATE            NOT NULL COMMENT '귀속 기간 종료일',
-    ZTOT_GROSS        BIGINT          NOT NULL DEFAULT 0 COMMENT '총 지급액 (과세+비과세)',
-    ZTOT_TAXABLE      BIGINT          NOT NULL DEFAULT 0 COMMENT '과세 대상 금액',
-    ZTOT_NONTAX       BIGINT          NOT NULL DEFAULT 0 COMMENT '비과세 금액',
-    ZTOT_TAX          BIGINT          NOT NULL DEFAULT 0 COMMENT '소득세',
-    ZTOT_LOCAL_TAX    BIGINT          NOT NULL DEFAULT 0 COMMENT '지방소득세',
-    ZTOT_INSURANCE    BIGINT          NOT NULL DEFAULT 0 COMMENT '4대보험 총액',
-    ZINSR_DETAIL      VARCHAR(1000)   NULL     COMMENT '보험 상세 내역 (JSON 또는 텍스트)',
-    ZPAY_COUNT        INT             NOT NULL DEFAULT 0 COMMENT '급여 지급 횟수',
-    ZNOTE             VARCHAR(500)    NULL     COMMENT '비고',
-    CREATED_AT        DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY        VARCHAR(50)     NOT NULL COMMENT '생성자',
-    UPDATED_AT        DATETIME        NULL     COMMENT '수정 일시',
-    UPDATED_BY        VARCHAR(50)     NULL     COMMENT '수정자',
+    ZPERIOD_FROM    DATE          NOT NULL COMMENT '귀속 기간 시작일',
+    ZPERIOD_TO      DATE          NOT NULL COMMENT '귀속 기간 종료일',
+    ZTOT_GROSS      BIGINT        NOT NULL DEFAULT 0 COMMENT '총 지급액 (과세+비과세)',
+    ZTOT_TAXABLE    BIGINT        NOT NULL DEFAULT 0 COMMENT '과세 대상 금액',
+    ZTOT_NONTAX     BIGINT        NOT NULL DEFAULT 0 COMMENT '비과세 금액',
+    ZTOT_TAX        BIGINT        NOT NULL DEFAULT 0 COMMENT '소득세',
+    ZTOT_LOCAL_TAX  BIGINT        NOT NULL DEFAULT 0 COMMENT '지방소득세',
+    ZTOT_INSURANCE  BIGINT        NOT NULL DEFAULT 0 COMMENT '4대보험 총액',
+    ZINSR_DETAIL    VARCHAR(1000) NULL     COMMENT '보험 상세 내역 (JSON 또는 텍스트)',
+    ZPAY_COUNT      INT           NOT NULL DEFAULT 0 COMMENT '급여 지급 횟수',
+    ZNOTE           VARCHAR(500)  NULL     COMMENT '비고',
+    CREATED_AT      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME      NULL     COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)   NULL     COMMENT '수정자',
+    VERSION         INT           NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 잠금용)',
+
     -- 기본 키 설정
     PRIMARY KEY (CERTIFICATE_ID),
+    
     -- 검색 성능 향상을 위한 인덱스
     INDEX IDX_ZEMP_NO (ZEMP_NO),
-    INDEX IDX_ZCERT_NO (ZCERT_NO) -- 명세서 번호로도 검색할 수 있으므로 인덱스 추가
+    INDEX IDX_ZCERT_NO (ZCERT_NO),
+    
+    -- 외래 키(FK) 제약 조건
+    CONSTRAINT FK_CERT_TO_EMP FOREIGN KEY (ZEMP_NO) 
+        REFERENCES ZHR_EMP_MASTER(PERNR)
+        ON DELETE RESTRICT 
+        ON UPDATE CASCADE
+        
 ) COMMENT '지급명세표(근로소득 원천징수영수증) 정보';
 
-INSERT INTO ZHR_PAY_CERTIFICATE 
-(ZCERT_NO, ZYEAR, ZEMP_NO, ZPERIOD_TY, ZPERIOD_FROM, ZPERIOD_TO, ZTOT_GROSS, ZTOT_TAXABLE, ZTOT_NONTAX, ZTOT_TAX, ZTOT_LOCAL_TAX, ZTOT_INSURANCE, ZINSR_DETAIL, ZPAY_COUNT, ZNOTE, CREATED_BY) 
+
+-- 더미 데이터 --
+INSERT INTO ZHR_PAY_CERTIFICATE
+(ZCERT_NO, ZYEAR, ZEMP_NO, ZPERIOD_TY, ZPERIOD_FROM, ZPERIOD_TO, ZTOT_GROSS, ZTOT_TAXABLE, ZTOT_NONTAX, ZTOT_TAX, ZTOT_LOCAL_TAX, ZTOT_INSURANCE, ZINSR_DETAIL, ZPAY_COUNT, ZNOTE, CREATED_BY)
 VALUES
--- EMP1001
-('2024-EMP1001-1', '2024', 'EMP1001', 'YEAR', '2024-01-01', '2024-12-31', 65000000, 62600000, 2400000, 3855000, 385500, 5984000, '국민:2817000, 건강:2200000, 장기:280000, 고용:587000', 12, '2024년 귀속 연말정산', 'admin'),
-('2024-EMP1001-2', '2024', 'EMP1001', 'QUARTER', '2024-04-01', '2024-06-30', 16250000, 15650000, 600000, 960000, 96000, 1496000, NULL, 3, '2024년 2분기', 'user_park'),
-('2023-EMP1001-1', '2023', 'EMP1001', 'YEAR', '2023-01-01', '2023-12-31', 62000000, 59600000, 2400000, 3510000, 351000, 5680000, '국민:2682000, 건강:2100000, 장기:268000, 고용:530000', 12, '2023년 귀속 연말정산', 'admin'),
-('2023-EMP1001-2', '2023', 'EMP1001', 'HALF', '2023-07-01', '2023-12-31', 31000000, 29800000, 1200000, 1750000, 175000, 2840000, NULL, 6, '2023년 하반기 관공서 제출용', 'user_kim'),
-('2025-EMP1001-1', '2025', 'EMP1001', 'QUARTER', '2025-01-01', '2025-03-31', 17000000, 16400000, 600000, 1050000, 105000, 1550000, NULL, 3, '2025년 1분기', 'system_batch'),
-('2025-EMP1001-2', '2025', 'EMP1001', 'QUARTER', '2025-04-01', '2025-06-30', 17000000, 16400000, 600000, 1050000, 105000, 1550000, NULL, 3, '2025년 2분기', 'system_batch'),
-('2025-EMP1001-3', '2025', 'EMP1001', 'MONTH', '2025-09-01', '2025-09-30', 5600000, 5400000, 200000, 310000, 31000, 510000, NULL, 1, '2025년 9월분', 'system_batch'),
+-- '2203004' (최서연)
+('2024-2203004-YEAR-2024-01-01', '2024', '2203004', 'YEAR', '2024-01-01', '2024-12-31', 65000000, 62600000, 2400000, 3855000, 385500, 5984000, '국민:2817000, 건강:2200000, 장기:280000, 고용:587000', 12, '2024년 귀속 연말정산', 'admin'),
+('2024-2203004-QUARTER-2024-04-01', '2024', '2203004', 'QUARTER', '2024-04-01', '2024-06-30', 16250000, 15650000, 600000, 960000, 96000, 1496000, NULL, 3, '2024년 2분기', 'user_park'),
+('2023-2203004-YEAR-2023-01-01', '2023', '2203004', 'YEAR', '2023-01-01', '2023-12-31', 62000000, 59600000, 2400000, 3510000, 351000, 5680000, '국민:2682000, 건강:2100000, 장기:268000, 고용:530000', 12, '2023년 귀속 연말정산', 'admin'),
+('2023-2203004-HALF-2023-07-01', '2023', '2203004', 'HALF', '2023-07-01', '2023-12-31', 31000000, 29800000, 1200000, 1750000, 175000, 2840000, NULL, 6, '2023년 하반기 관공서 제출용', 'user_kim'),
+('2025-2203004-QUARTER-2025-01-01', '2025', '2203004', 'QUARTER', '2025-01-01', '2025-03-31', 17000000, 16400000, 600000, 1050000, 105000, 1550000, NULL, 3, '2025년 1분기', 'system_batch'),
+('2025-2203004-QUARTER-2025-04-01', '2025', '2203004', 'QUARTER', '2025-04-01', '2025-06-30', 17000000, 16400000, 600000, 1050000, 105000, 1550000, NULL, 3, '2025년 2분기', 'system_batch'),
+('2025-2203004-MONTH-2025-09-01', '2025', '2203004', 'MONTH', '2025-09-01', '2025-09-30', 5600000, 5400000, 200000, 310000, 31000, 510000, NULL, 1, '2025년 9월분', 'system_batch'),
 
--- EMP2004
-('2024-EMP2004-1', '2024', 'EMP2004', 'YEAR', '2024-01-01', '2024-12-31', 42000000, 39600000, 2400000, 1450000, 145000, 3800000, '국민:1782000, 건강:1395000, 장기:178000, 고용:356000', 12, '2024년 귀속 연말정산', 'admin'),
-('2023-EMP2004-1', '2023', 'EMP2004', 'YEAR', '2023-01-01', '2023-12-31', 38000000, 35600000, 2400000, 1180000, 118000, 3410000, '국민:1602000, 건강:1250000, 장기:158000, 고용:310000', 12, '2023년 귀속 연말정산', 'admin'),
-('2023-EMP2004-2', '2023', 'EMP2004', 'MONTH', '2023-11-01', '2023-11-30', 3160000, 2960000, 200000, 98000, 9800, 284000, NULL, 1, '2023년 11월분', 'system_batch'),
-('2025-EMP2004-1', '2025', 'EMP2004', 'HALF', '2025-01-01', '2025-06-30', 22000000, 20800000, 1200000, 810000, 81000, 1950000, NULL, 6, '2025년 상반기', 'system_batch'),
-('2024-EMP2004-2', '2024', 'EMP2004', 'MONTH', '2024-10-01', '2024-10-31', 3500000, 3300000, 200000, 120000, 12000, 316000, NULL, 1, '2024년 10월분', 'system_batch'),
+-- '2207006' (윤서아)
+('2024-2207006-YEAR-2024-01-01', '2024', '2207006', 'YEAR', '2024-01-01', '2024-12-31', 42000000, 39600000, 2400000, 1450000, 145000, 3800000, '국민:1782000, 건강:1395000, 장기:178000, 고용:356000', 12, '2024년 귀속 연말정산', 'admin'),
+('2023-2207006-YEAR-2023-01-01', '2023', '2207006', 'YEAR', '2023-01-01', '2023-12-31', 38000000, 35600000, 2400000, 1180000, 118000, 3410000, '국민:1602000, 건강:1250000, 장기:158000, 고용:310000', 12, '2023년 귀속 연말정산', 'admin'),
+('2023-2207006-MONTH-2023-11-01', '2023', '2207006', 'MONTH', '2023-11-01', '2023-11-30', 3160000, 2960000, 200000, 98000, 9800, 284000, NULL, 1, '2023년 11월분', 'system_batch'),
+('2025-2207006-HALF-2025-01-01', '2025', '2207006', 'HALF', '2025-01-01', '2025-06-30', 22000000, 20800000, 1200000, 810000, 81000, 1950000, NULL, 6, '2025년 상반기', 'system_batch'),
+('2024-2207006-MONTH-2024-10-01', '2024', '2207006', 'MONTH', '2024-10-01', '2024-10-31', 3500000, 3300000, 200000, 120000, 12000, 316000, NULL, 1, '2024년 10월분', 'system_batch'),
 
--- EMP3015
-('2024-EMP3015-1', '2024', 'EMP3015', 'YEAR', '2024-01-01', '2024-12-31', 95000000, 92600000, 2400000, 11500000, 1150000, 8310000, '국민:3186000, 건강:3250000, 장기:415000, 고용:859000', 12, '2024년 귀속 연말정산', 'admin'),
-('2023-EMP3015-1', '2023', 'EMP3015', 'YEAR', '2023-01-01', '2023-12-31', 91000000, 88600000, 2400000, 10800000, 1080000, 7950000, '국민:3042000, 건강:3110000, 장기:398000, 고용:800000', 12, '2023년 귀속 연말정산', 'admin'),
-('2023-EMP3015-2', '2023', 'EMP3015', 'QUARTER', '2023-10-01', '2023-12-31', 22750000, 22150000, 600000, 2700000, 270000, 1987500, NULL, 3, '2023년 4분기', 'user_park'),
-('2023-EMP3015-3', '2023', 'EMP3015', 'HALF', '2023-01-01', '2023-06-30', 45500000, 44300000, 1200000, 5400000, 540000, 3975000, NULL, 6, '2023년 상반기', 'user_lee'),
-('2025-EMP3015-1', '2025', 'EMP3015', 'MONTH', '2025-07-01', '2025-07-31', 8200000, 8000000, 200000, 980000, 98000, 710000, NULL, 1, '2025년 7월분', 'user_kim'),
-('2025-EMP3015-2', '2025', 'EMP3015', 'MONTH', '2025-08-01', '2025-08-31', 8200000, 8000000, 200000, 980000, 98000, 710000, NULL, 1, '2025년 8월분', 'user_kim'),
+-- '2302013' (송지아)
+('2024-2302013-YEAR-2024-01-01', '2024', '2302013', 'YEAR', '2024-01-01', '2024-12-31', 95000000, 92600000, 2400000, 11500000, 1150000, 8310000, '국민:3186000, 건강:3250000, 장기:415000, 고용:859000', 12, '2024년 귀속 연말정산', 'admin'),
+('2023-2302013-YEAR-2023-01-01', '2023', '2302013', 'YEAR', '2023-01-01', '2023-12-31', 91000000, 88600000, 2400000, 10800000, 1080000, 7950000, '국민:3042000, 건강:3110000, 장기:398000, 고용:800000', 12, '2023년 귀속 연말정산', 'admin'),
+('2023-2302013-QUARTER-2023-10-01', '2023', '2302013', 'QUARTER', '2023-10-01', '2023-12-31', 22750000, 22150000, 600000, 2700000, 270000, 1987500, NULL, 3, '2023년 4분기', 'user_park'),
+('2023-2302013-HALF-2023-01-01', '2023', '2302013', 'HALF', '2023-01-01', '2023-06-30', 45500000, 44300000, 1200000, 5400000, 540000, 3975000, NULL, 6, '2023년 상반기', 'user_lee'),
+('2025-2302013-MONTH-2025-07-01', '2025', '2302013', 'MONTH', '2025-07-01', '2025-07-31', 8200000, 8000000, 200000, 980000, 98000, 710000, NULL, 1, '2025년 7월분', 'user_kim'),
+('2025-2302013-MONTH-2025-08-01', '2025', '2302013', 'MONTH', '2025-08-01', '2025-08-31', 8200000, 8000000, 200000, 980000, 98000, 710000, NULL, 1, '2025년 8월분', 'user_kim'),
 
--- EMP4210
-('2024-EMP4210-1', '2024', 'EMP4210', 'YEAR', '2024-07-01', '2024-12-31', 21000000, 19800000, 1200000, 680000, 68000, 1900000, '국민:891000, 건강:697500, 장기:89000, 고용:178000', 6, '2024년 귀속 연말정산 (중도입사)', 'admin'),
-('2025-EMP4210-1', '2025', 'EMP4210', 'MONTH', '2025-08-01', '2025-08-31', 3500000, 3300000, 200000, 113000, 11300, 316000, NULL, 1, '2025년 8월 급여명세서', 'user_lee'),
+-- '2407031' (서재윤)
+('2024-2407031-YEAR-2024-07-01', '2024', '2407031', 'YEAR', '2024-07-01', '2024-12-31', 21000000, 19800000, 1200000, 680000, 68000, 1900000, '국민:891000, 건강:697500, 장기:89000, 고용:178000', 6, '2024년 귀속 연말정산 (중도입사)', 'admin'),
+('2025-2407031-MONTH-2025-08-01', '2025', '2407031', 'MONTH', '2025-08-01', '2025-08-31', 3500000, 3300000, 200000, 113000, 11300, 316000, NULL, 1, '2025년 8월 급여명세서', 'user_lee'),
 
--- EMP5500
-('2024-EMP5500-1', '2024', 'EMP5500', 'YEAR', '2024-01-01', '2024-12-31', 51000000, 48600000, 2400000, 2350000, 235000, 4610000, '국민:2187000, 건강:1710000, 장기:218000, 고용:437000', 12, '2024년 귀속 연말정산', 'admin'),
-('2024-EMP5500-2', '2024', 'EMP5500', 'QUARTER', '2024-04-01', '2024-06-30', 12750000, 12150000, 600000, 587500, 58750, 1152500, NULL, 3, '2024년 2분기', 'user_park'),
-('2024-EMP5500-3', '2024', 'EMP5500', 'QUARTER', '2024-07-01', '2024-09-30', 12750000, 12150000, 600000, 587500, 58750, 1152500, NULL, 3, '2024년 3분기', 'system_batch'),
-('2023-EMP5500-1', '2023', 'EMP5500', 'YEAR', '2023-01-01', '2023-12-31', 48000000, 45600000, 2400000, 2100000, 210000, 4320000, '국민:2052000, 건강:1605000, 장기:205000, 고용:400000', 12, '2023년 귀속 연말정산', 'admin'),
-('2025-EMP5500-1', '2025', 'EMP5500', 'MONTH', '2025-09-01', '2025-09-30', 4500000, 4300000, 200000, 195000, 19500, 400000, NULL, 1, '2025년 9월 급여명세서', 'system_batch');
+-- '2305015' (황수빈)
+('2024-2305015-YEAR-2024-01-01', '2024', '2305015', 'YEAR', '2024-01-01', '2024-12-31', 51000000, 48600000, 2400000, 2350000, 235000, 4610000, '국민:2187000, 건강:1710000, 장기:218000, 고용:437000', 12, '2024년 귀속 연말정산', 'admin'),
+('2024-2305015-QUARTER-2024-04-01', '2024', '2305015', 'QUARTER', '2024-04-01', '2024-06-30', 12750000, 12150000, 600000, 587500, 58750, 1152500, NULL, 3, '2024년 2분기', 'user_park'),
+('2024-2305015-QUARTER-2024-07-01', '2024', '2305015', 'QUARTER', '2024-07-01', '2024-09-30', 12750000, 12150000, 600000, 587500, 58750, 1152500, NULL, 3, '2024년 3분기', 'system_batch'),
+('2023-2305015-YEAR-2023-01-01', '2023', '2305015', 'YEAR', '2023-01-01', '2023-12-31', 48000000, 45600000, 2400000, 2100000, 210000, 4320000, '국민:2052000, 건강:1605000, 장기:205000, 고용:400000', 12, '2023년 귀속 연말정산', 'admin'),
+('2025-2305015-MONTH-2025-09-01', '2025', '2305015', 'MONTH', '2025-09-01', '2025-09-30', 4500000, 4300000, 200000, 195000, 19500, 400000, NULL, 1, '2025년 9월 급여명세서', 'system_batch');
 
+-- 사내 회비 항목 --
 CREATE TABLE ZHR_CLUB_ITEM (
-    ZCLUB_CD      VARCHAR(10)     NOT NULL COMMENT '회비 코드 (PK)',
+	ID           BIGINT         NOT NULL AUTO_INCREMENT COMMENT '내부 관리용 ID (PK)',
+    ZCLUB_CD     VARCHAR(10)    NOT NULL COMMENT '회비 코드 (Biz Key, Unique)',
     ZCLUB_NM      VARCHAR(100)    NOT NULL COMMENT '회비 명칭',
     ZAMOUNT       BIGINT          NOT NULL DEFAULT 0 COMMENT '회비 금액',
     ZUSE_YN       VARCHAR(1)      NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
     ZNOTE         VARCHAR(500)    NULL COMMENT '비고 (금액 변경 이력 등)',
+    VERSION      INT            NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 락용)',
     CREATED_AT    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
     CREATED_BY    VARCHAR(50)     NOT NULL COMMENT '생성자',
     UPDATED_AT    DATETIME        NULL COMMENT '수정 일시',
     UPDATED_BY    VARCHAR(50)     NULL COMMENT '수정자',
     -- 기본 키 설정
-    PRIMARY KEY (ZCLUB_CD),
+    PRIMARY KEY (ID),
+    
+    --  회비 코드는 중복될 수 없으므로 UNIQUE KEY 설정
+    UNIQUE KEY UK_ZCLUB_CD (ZCLUB_CD),
+    
     -- 검색 성능 향상을 위한 인덱스
     INDEX IDX_ZCLUB_NM (ZCLUB_NM) -- 회비명으로도 검색할 수 있으므로 인덱스 추가
 ) COMMENT '사내 회비 항목 마스터';
+
 
 INSERT INTO ZHR_CLUB_ITEM (ZCLUB_CD, ZCLUB_NM, ZAMOUNT, ZUSE_YN, ZNOTE, CREATED_BY) VALUES
 -- 필수/공통 회비
@@ -1838,6 +1873,7 @@ INSERT INTO ZHR_CLUB_ITEM (ZCLUB_CD, ZCLUB_NM, ZAMOUNT, ZUSE_YN, ZNOTE, CREATED_
 ('PARKING', '사내 주차비 (카풀)', 30000, 'Y', '카풀 참여 직원 대상 주차비 지원금', 'system_batch'),
 ('DONA_CHILD', '결식아동 후원금', 30000, 'Y', '매월 정기 후원', 'admin'),
 ('GYM_FEE', '사내 헬스장 이용료', 10000, 'Y', '헬스장 관리 및 기구 유지보수', 'system_batch');
+
 
 CREATE TABLE ZHR_EMP_CLUB (
     ZHR_EMP_CLUB_ID BIGINT          NOT NULL AUTO_INCREMENT COMMENT '사원별 회비 설정 ID (PK)',

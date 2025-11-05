@@ -16,7 +16,8 @@ public class PayCertificateDetailDto {
 	private Long id;
 	private String certNo;
     private String year;
-    private String empNo;
+    private String employeeName;
+    private String employeePernr;
     private String periodType;
     private LocalDate periodFrom;
     private LocalDate periodTo;

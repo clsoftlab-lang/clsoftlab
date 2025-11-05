@@ -1,6 +1,7 @@
 package com.example.clsoftlab.controller.pay;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.pay.PayCertificateDetailDto;
 import com.example.clsoftlab.dto.pay.PayCertificateRequestDto;
+import com.example.clsoftlab.service.common.EmployeeMasterService;
 import com.example.clsoftlab.service.pay.PayCertificateService;
 
 import jakarta.validation.Valid;
@@ -26,19 +27,17 @@ import jakarta.validation.Valid;
 public class PayCertificateController {
 
 	private final PayCertificateService payCertificateService;
+	private final EmployeeMasterService employeeMasterService;
 	
-	public PayCertificateController(PayCertificateService payCertificateService) {
+	public PayCertificateController(PayCertificateService payCertificateService, EmployeeMasterService employeeMasterService) {
 		this.payCertificateService = payCertificateService;
+		this.employeeMasterService = employeeMasterService;
 	}
 	
 	// 검색어로 전체 목록 조회
 	@GetMapping("")
-	public String getPayCertificateList (@RequestParam(defaultValue = "") String year, @RequestParam(defaultValue = "") String empNo,
-			@RequestParam(defaultValue = "") String periodType, @RequestParam(required = false) Integer page, Model model) {
-		
-		if (page == null) {
-			page = 0;
-		}
+	public String getPayCertificateList (@RequestParam(required = false) String year, @RequestParam(required = false) List<String> empNo,
+			@RequestParam(required = false) List<String> periodType, @RequestParam(required = false, defaultValue = "0") Integer page, Model model) {
 		
 		int size = 1000;
 		
@@ -49,6 +48,8 @@ public class PayCertificateController {
 		model.addAttribute("empNo", empNo);
 		model.addAttribute("periodType", periodType);
 		model.addAttribute("payCertificatePage", payCertificatePage);
+		model.addAttribute("employeeList", employeeMasterService.findAll());
+		model.addAttribute("searchEmployeeList", payCertificateService.getEmployeeList());
 		
 		return "pay/pay-certificate/list";
 	}
@@ -62,11 +63,12 @@ public class PayCertificateController {
 	}
 	
 	// 중복 검사
-	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public boolean checkOverlap (@RequestParam String empNo, @RequestParam String year, @RequestParam String periodType,
+	public ResponseEntity<Boolean> checkOverlap (@RequestParam String empNo, @RequestParam String year, @RequestParam String periodType,
 			@RequestParam LocalDate periodFrom, @RequestParam LocalDate periodTo) {
-		return payCertificateService.checkOverlap(empNo, year, periodType, periodFrom, periodTo);
+		boolean result = payCertificateService.checkOverlap(empNo, year, periodType, periodFrom, periodTo);
+		
+		return ResponseEntity.ok(result);
 	}
 	
 	// 세부 정보 조회

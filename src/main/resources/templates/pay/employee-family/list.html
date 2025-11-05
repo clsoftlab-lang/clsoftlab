@@ -6,12 +6,15 @@
     <title>사원 가족정보 관리</title>
 
     <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
+	<link rel="stylesheet" href="/assets/css/select2-bootstrap-5-theme.min.css">
 </head>
 
 <body>
@@ -42,7 +45,9 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>사번</label>
-                                        <input class="form-control" name="empNo" placeholder="사번 입력" th:value="${empNo}">
+                                        <select name="empNo" multiple="multiple" class="form-control" id="searchEmployeeSelect">
+                                        	<option th:each="emp : ${searchEmployeeList}" th:value="${emp.pernr}" th:text="|${emp.name} (${emp.pernr})|" th:selected="${empNo != null && #lists.contains(empNo, emp.pernr)}"></option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -54,14 +59,13 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>관계</label>
-                                        <select class="form-select" name="familyType">
-                                            <option value="">전체</option>
-                                            <option value="SPOUSE" th:selected="${familyType == 'SPOUSE'}">배우자</option>
-                                            <option value="SON" th:selected="${familyType == 'SON'}">자녀(남)</option>
-                                            <option value="DAUGHTER" th:selected="${familyType == 'DAUGHTER'}">자녀(여)</option>
-                                            <option value="FATHER" th:selected="${familyType == 'FATHER'}">부</option>
-                                            <option value="MOTHER" th:selected="${familyType == 'MOTHER'}">모</option>
-                                            <option value="ETC" th:selected="${familyType == 'ETC'}">기타</option>
+                                        <select class="form-select" name="familyType" multiple="multiple" id="familyTypeSelect">
+                                            <option value="SPOUSE" th:selected="${familyType != null && #lists.contains(familyType, 'SPOUSE')}">배우자</option>
+                                            <option value="SON" th:selected="${familyType != null && #lists.contains(familyType, 'SON')}">자녀(남)</option>
+                                            <option value="DAUGHTER" th:selected="${familyType != null && #lists.contains(familyType, 'DAUGHTER')}">자녀(여)</option>
+                                            <option value="FATHER" th:selected="${familyType != null && #lists.contains(familyType, 'FATHER')}">부</option>
+                                            <option value="MOTHER" th:selected="${familyType != null && #lists.contains(familyType, 'MOTHER')}">모</option>
+                                            <option value="ETC" th:selected="${familyType != null && #lists.contains(familyType, 'ETC')}">기타</option>
                                         </select>
                                     </div>
                                 </div>
@@ -81,7 +85,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover datatable" id="familyTable">
+                            <table class="table table-striped table-hover datatable-resizable" id="dataTable">
                                 <thead class="table-light">
                                     <tr>
                                         <th>사번</th>
@@ -100,7 +104,7 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="f : ${employeeFamily}">
-                                        <td th:text="${f.empNo}"></td>
+                                        <td th:text="|${f.employeeName}(${f.employeePernr})|"></td>
                                         <td th:text="${f.familyName}"></td>
                                         <td th:text="${f.familyType}"></td>
                                         <td th:text="${f.birth}"></td> 
@@ -137,12 +141,16 @@
                                 <form id="addForm">
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">사번</label>
-                                            <input type="text" class="form-control" name="empNo" required maxlength="20">
+                                            <label class="form-label">사번<span class="text-danger">*</span></label>
+                                            <select class="form-select" name="empNo" required id="employeeSelect">
+                                                <option value="">-- 사원 선택 --</option>
+                                                <option th:each="emp : ${employeeList}" th:value="${emp.pernr}" th:text="|${emp.name} (${emp.pernr})|"></option>
+                                            </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">관계</label>
+                                            <label class="form-label">관계<span class="text-danger">*</span></label>
                                             <select class="form-select" name="familyType" required>
+                                            	<option value="">-- 관계 선택 --</option>
                                                 <option value="SPOUSE">배우자</option>
                                                 <option value="SON">자녀(남)</option>
                                                 <option value="DAUGHTER">자녀(여)</option>
@@ -152,83 +160,60 @@
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">이름</label>
+                                            <label class="form-label">이름<span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" name="familyName" required maxlength="100">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">생년월일</label>
+                                            <label class="form-label">생년월일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="birth" required id="add_birth">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">성별</label>
+                                            <label class="form-label">성별<span class="text-danger">*</span></label>
                                             <select class="form-select" name="gender" required>
+                                            	<option value="">-- 성별 선택 --</option>
                                                 <option value="M">남자</option>
                                                 <option value="F">여자</option>
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">가족 순번</label>
+                                            <label class="form-label">가족 순번<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="familySeq" required min="1">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">적용 시작일</label>
+                                            <label class="form-label">적용 시작일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="fromDate" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">적용 종료일</label>
+                                            <label class="form-label">적용 종료일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="toDate" required value="9999-12-31">
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">부양가족</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="dependYn"  value="Y">
-                                                    <label class="form-check-label" for="add_dependY">예</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="dependYn"  value="N" checked>
-                                                    <label class="form-check-label" for="add_dependN">아니오</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">부양가족<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+									            <input type="hidden" value="N" name="dependYn"> 
+									            <input class="form-check-input" type="checkbox" value="Y" name="dependYn">
+									        </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">가족수당</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="allowYn"  value="Y">
-                                                    <label class="form-check-label" for="add_allowY">예</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="allowYn"  value="N" checked>
-                                                    <label class="form-check-label" for="add_allowN">아니오</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">가족수당<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+										            <input type="hidden" value="N" name="allowYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="allowYn">
+									        </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">세금공제</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="taxYn"  value="Y">
-                                                    <label class="form-check-label" for="add_taxY">예</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="taxYn" value="N" checked>
-                                                    <label class="form-check-label" for="add_taxN">아니오</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">세금공제<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+										            <input type="hidden" value="N" name="taxYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="taxYn">
+									        </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">장애여부</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="disabledYn"  value="Y">
-                                                    <label class="form-check-label" for="add_disabledY">예</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="disabledYn"  value="N" checked>
-                                                    <label class="form-check-label" for="add_disabledN">아니오</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">장애여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+										            <input type="hidden" value="N" name="disabledYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="disabledYn">
+									        </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
                                             <label class="form-label">비고</label>
@@ -259,10 +244,11 @@
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
                                             <label class="form-label">사번</label>
-                                            <input type="text" class="form-control" name="empNo" readonly>
+                                            <input type="text" class="form-control" name="employeePernr" readonly>
+                                            <input type="hidden" class="form-control" name="empNo">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">관계</label>
+                                            <label class="form-label">관계<span class="text-danger">*</span></label>
                                             <select class="form-select" name="familyType" required>
                                                 <option value="SPOUSE">배우자</option>
                                                 <option value="SON">자녀(남)</option>
@@ -273,83 +259,59 @@
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">이름</label>
+                                            <label class="form-label">이름<span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" name="familyName" required maxlength="100">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">생년월일</label>
+                                            <label class="form-label">생년월일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="birth" required id="edit_birth">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">성별</label>
+                                            <label class="form-label">성별<span class="text-danger">*</span></label>
                                             <select class="form-select" name="gender" required>
                                                 <option value="M">남자</option>
                                                 <option value="F">여자</option>
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">가족 순번</label>
+                                            <label class="form-label">가족 순번<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="familySeq" readonly>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">적용 시작일</label>
+                                            <label class="form-label">적용 시작일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="fromDate" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">적용 종료일</label>
+                                            <label class="form-label">적용 종료일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="toDate" required>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">부양가족</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="dependYn" value="Y">
-                                                    <label class="form-check-label" for="edit_dependY">예</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="dependYn"  value="N">
-                                                    <label class="form-check-label" for="edit_dependN">아니오</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">부양가족<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+									            <input type="hidden" value="N" name="dependYn"> 
+									            <input class="form-check-input" type="checkbox" value="Y" name="dependYn">
+									        </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">가족수당</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="allowYn"  value="Y">
-                                                    <label class="form-check-label" for="edit_allowY">예</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="allowYn" value="N">
-                                                    <label class="form-check-label" for="edit_allowN">아니오</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">가족수당<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+										            <input type="hidden" value="N" name="allowYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="allowYn">
+									        </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">세금공제</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="taxYn"  value="Y">
-                                                    <label class="form-check-label" for="edit_taxY">예</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="taxYn"  value="N">
-                                                    <label class="form-check-label" for="edit_taxN">아니오</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">세금공제<span class="text-danger">*</span></label>
+                                             <div class="form-check">
+										            <input type="hidden" value="N" name="taxYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="taxYn">
+									        </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label">장애여부</label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="disabledYn"  value="Y">
-                                                    <label class="form-check-label" for="edit_disabledY">예</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="disabledYn"  value="N">
-                                                    <label class="form-check-label" for="edit_disabledN">아니오</label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">장애여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+										            <input type="hidden" value="N" name="disabledYn"> 
+										            <input class="form-check-input" type="checkbox" value="Y" name="disabledYn">
+									        </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
                                             <label class="form-label">비고</label>
@@ -373,14 +335,17 @@
     </div>
 
     <script src="/assets/js/jquery-3.7.1.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.slimscroll.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="/assets/js/jquery.dataTables.min.js"></script>
-    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
-    <script src="/assets/js/script.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
+	<script src="/assets/js/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
+	<script src="https://unpkg.com/feather-icons"></script>
+	<script src="/assets/js/jquery.dataTables.min.js"></script>
+	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
     
-    <script type="text/javascript">
+    <script type="text/javascript" th:inline="none">
 	    document.addEventListener('DOMContentLoaded', function () {
 	    	
 	    	// 오늘 날짜를 YYYY-MM-DD 형식으로 설정
@@ -409,6 +374,56 @@
 		        });
 		        
 		    }
+		    
+		    $('#searchEmployeeSelect').select2({theme: "bootstrap-5"});
+		    $('#familyTypeSelect').select2({theme: "bootstrap-5"});
+		    $('#employeeSelect').select2({
+		        dropdownParent: $('#addModal'),
+		        theme: "bootstrap-5"
+		    });
+		    
+		    const tableSpecificOptions = {
+			        'columns': [
+			            null,                 // 0. 사번
+			            null,                 // 1. 이름
+			            null,                 // 2. 관계
+			            null,                 // 3. 생년월일
+			            null,                 // 4. 성별
+			            null,                 // 5. 부양
+			            null,                 // 6. 수당
+			            null,                 // 7. 공제
+			            null,                 // 8. 장애
+			            null,                 // 9. 적용시작
+			            null,                 // 10. 적용종료
+			            // 11. 수정 (버튼, 좁게, 검색/정렬 비활성화)
+			            { "width": "80px", "searchable": false, "orderable": false } 
+			        ],
+			        
+			        // 기본 정렬: 1순위: 사번(오름차순), 2순위: 적용시작일(내림차순, 최신순)
+			        "order": [[ 0, "asc" ], [ 9, "desc" ]], 
+
+		            // DataTables 한글화 및 기본 설정 (유지)
+		            "language": {
+		                "emptyTable": "데이터가 없습니다.",
+		                "info": "_START_ - _END_ / _TOTAL_ 항목",
+		                "infoEmpty": "0 항목",
+		                "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+		                "lengthMenu": "_MENU_ 개씩 보기",
+		                "loadingRecords": "로딩중...",
+		                "processing": "처리중...",
+		                "search": "검색: ",
+		                "zeroRecords": "일치하는 항목이 없습니다.",
+		                "paginate": {
+		                    "first": "처음",
+		                    "last": "마지막",
+		                    "next": "다음",
+		                    "previous": "이전"
+		                }
+		            },
+		            "pageLength": 10, 
+		            "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+			    };
+		    initializeResizableDataTable('#dataTable',tableSpecificOptions);
 		});
 	    
 	 // 새 항목 등록
@@ -493,22 +508,28 @@
 		        const editForm = document.getElementById('editForm')
 
 
-		        for (const key in data) {
+		         for (const key in data) {
 		            const field = editForm.querySelector(`[name="${key}"]`);
+		            const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
 		            
-		            if(field) {
-		            	
-						if (field.type === 'radio') {
-		            		editForm.querySelector(`[name="${key}"][value="${data[key]}"]`).checked = true;
-		            	} else {
-				            field.value = data[key];
-		            	}
+		            if (checkbox && field && field.type === 'hidden') {
+		                checkbox.checked = (data[key] === 'Y');
+		            } else if (field) {
+		                field.value = data[key];
 		            }
+		        }
+	        
+		        const empNoField = editForm.querySelector('[name="empNo"]');
+		        const empField = editForm.querySelector('[name="employeePernr"]');
+		        if (empNoField && empField && data.employeePernr && data.employeeName) {
+		            empNoField.value = `${data.employeePernr}`;
+		            empField.value = `${data.employeeName}(${data.employeePernr})`;
+		            
 		        }
 
 		    } catch (error) {
 		        console.error('Error:', error);
-		        alert(error.message);
+		        alert('가족 정보를 불러오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.');
 		    }
 		}
 		

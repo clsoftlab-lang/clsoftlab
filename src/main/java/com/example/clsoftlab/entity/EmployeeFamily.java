@@ -36,7 +36,7 @@ public class EmployeeFamily extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ZEMP_NO", referencedColumnName = "PERNR", nullable = false)
-    private EmployeeMaster employeer;
+    private EmployeeMaster employee;
 
     @Column(name = "ZFAM_SEQ", nullable = false)
     private Integer familySeq;

@@ -1,5 +1,7 @@
 package com.example.clsoftlab.controller.pay;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,10 +13,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.pay.EmployeeFamilyDetailDto;
 import com.example.clsoftlab.dto.pay.EmployeeFamilyRequestDto;
+import com.example.clsoftlab.service.common.EmployeeMasterService;
 import com.example.clsoftlab.service.pay.EmployeeFamilyService;
 
 import jakarta.validation.Valid;
@@ -24,19 +26,17 @@ import jakarta.validation.Valid;
 public class EmployeeFamilyController {
 
 	private final EmployeeFamilyService employeeFamilyService;
+	private final EmployeeMasterService employeeMasterService;
 	
-	public EmployeeFamilyController(EmployeeFamilyService employeeFamilyService) {
+	public EmployeeFamilyController(EmployeeFamilyService employeeFamilyService, EmployeeMasterService employeeMasterService) {
 		this.employeeFamilyService = employeeFamilyService;
+		this.employeeMasterService = employeeMasterService;
 	}
 	
 	// 검색어로 목록 조회
 	@GetMapping("")
-	public String getEmployeeFamilyList (@RequestParam(defaultValue = "")String empNo, @RequestParam(defaultValue = "")String familyName,
-			@RequestParam(defaultValue = "") String familyType, @RequestParam(required = false) Integer page, Model model) {
-		if (page == null) {
-			page = 0;
-		}
-		
+	public String getEmployeeFamilyList (@RequestParam(required = false)List<String> empNo, @RequestParam(required = false)String familyName,
+			@RequestParam(required = false) List<String> familyType, @RequestParam(required = false, defaultValue = "0") Integer page, Model model) {
 		int size = 1000;
 		
 		Page<EmployeeFamilyDetailDto> employeeFamilyPage = employeeFamilyService.searchEmployeeFamily(empNo, familyName, familyType, page, size);
@@ -46,6 +46,8 @@ public class EmployeeFamilyController {
 		model.addAttribute("familyName", familyName);
 		model.addAttribute("familyType", familyType);
 		model.addAttribute("employeeFamilyPage", employeeFamilyPage);
+		model.addAttribute("employeeList", employeeMasterService.findAll());
+		model.addAttribute("searchEmployeeList", employeeFamilyService.getEmployeeList());
 		
 		return "pay/employee-family/list";
 	}
@@ -65,10 +67,10 @@ public class EmployeeFamilyController {
 	}
 	
 	// 중복 체크
-	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public boolean checkOverlap (@RequestParam String empNo, @RequestParam Integer familySeq) {
-		return employeeFamilyService.checkOverlap(empNo, familySeq);
+	public ResponseEntity<Boolean> checkOverlap (@RequestParam String empNo, @RequestParam Integer familySeq) {
+		boolean result = employeeFamilyService.checkOverlap(empNo, familySeq);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 상세 정보 조회

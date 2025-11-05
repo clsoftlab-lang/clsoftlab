@@ -4,8 +4,11 @@ import com.example.clsoftlab.dto.pay.ClubItemRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,9 +23,13 @@ import lombok.Setter;
 public class ClubItem extends BaseEntity {
 
 	@Id
-    @Column(name = "ZCLUB_CD", nullable = false, length = 10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID", nullable = false)
+    private Long id;
+
+    @Column(name = "ZCLUB_CD", nullable = false, length = 10, unique = true)
     private String clubCode;
-	
+    
     @Column(name = "ZCLUB_NM", nullable = false, length = 100)
     private String clubName;
 
@@ -34,6 +41,10 @@ public class ClubItem extends BaseEntity {
 
     @Column(name = "ZNOTE", length = 500)
     private String note;
+    
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Integer version;
     
     public void update (ClubItemRequestDto dto) {
     	this.clubName = dto.getClubName();

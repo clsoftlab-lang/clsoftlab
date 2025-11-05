@@ -3,15 +3,18 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지급명세표 관리(미완)</title>
+    <title>지급명세표 관리</title>
 
     <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
+	<link rel="stylesheet" href="/assets/css/select2-bootstrap-5-theme.min.css">
 </head>
 
 <body>
@@ -42,24 +45,25 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>연도</label>
-                                        <input class="form-control" name="year" placeholder="YYYY" th:value="${year}" maxlength="4">
+                                        <input class="form-control" name="year" placeholder="YYYY" th:value="${year}" maxlength="4" type="number" min="1900" max="9999">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>사번</label>
-                                        <input type="text" class="form-control" name="empNo" th:value="${empNo}" placeholder="사번 입력">
+                                        <select name="empNo" multiple="multiple" class="form-control" id="searchEmployeeSelect">
+                                        	<option th:each="emp : ${searchEmployeeList}" th:value="${emp.pernr}" th:text="|${emp.name} (${emp.pernr})|" th:selected="${empNo != null && #lists.contains(empNo, emp.pernr)}"></option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>기간 유형</label>
-                                        <select class="form-select" name="periodType">
-                                            <option value="">전체</option>
-                                            <option value="YEAR" th:selected="${periodType == 'YEAR'}">연간</option>
-                                            <option value="HALF" th:selected="${periodType == 'HALF'}">반기</option>
-                                            <option value="QUARTER" th:selected="${periodType == 'QUARTER'}">분기</option>
-                                            <option value="MONTH" th:selected="${periodType == 'MONTH'}">월간</option>
+                                        <select class="form-select" name="periodType" multiple="multiple" id="periodTypeSelect">
+                                            <option value="YEAR" th:selected="${periodType != null && #lists.contains(periodType, 'YEAR')}">연간</option>
+                                            <option value="HALF" th:selected="${periodType != null && #lists.contains(periodType, 'HALF')}">반기</option>
+                                            <option value="QUARTER" th:selected="${periodType != null && #lists.contains(periodType, 'QUARTER')}">분기</option>
+                                            <option value="MONTH" th:selected="${periodType != null && #lists.contains(periodType, 'MONTH')}">월간</option>
                                         </select>
                                     </div>
                                 </div>
@@ -79,7 +83,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover" id="payCertificateTable">
+                            <table class="table table-striped table-hover datatable-resizable" id="dataTable">
                                 <thead class="table-light">
                                     <tr>
                                         <th><input type="checkbox" class="form-check-input"></th>
@@ -99,7 +103,7 @@
                                     <tr th:each="c : ${payCertificate}">
                                         <td><input type="checkbox" class="form-check-input"></td>
                                         <td th:text="${c.year}"></td>
-                                        <td th:text="${c.empNo}"></td>
+                                        <td th:text="|${c.employeeName}(${c.employeePernr})|"></td>
                                         <td th:text="${c.certNo}"></td>
                                         <td th:text="${#numbers.formatInteger(c.totalGross, 3, 'COMMA')}"></td>
                                         <td th:text="${#numbers.formatInteger(c.totalTaxable, 3, 'COMMA')}"></td>
@@ -180,10 +184,6 @@
 	                            <label class="form-label">보험 상세</label>
 	                            <textarea class="form-control" rows="2" name="insuranceDetail" readonly></textarea>
 	                        </div>
-	                        <div class="col-md-6 mb-3">
-	                            <label class="form-label">급여 횟수</label>
-	                            <input type="text" class="form-control" name="payCount" readonly>
-	                        </div>
                             <div class="col-md-12 mb-3">
 	                            <label class="form-label">비고</label>
 	                            <textarea class="form-control" rows="2" name="note" readonly></textarea>
@@ -199,17 +199,17 @@
     </div>
 
     <script src="/assets/js/jquery-3.7.1.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.slimscroll.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="/assets/js/jquery.dataTables.min.js"></script>
-    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
-    <script src="/assets/js/script.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
+	<script src="/assets/js/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
+	<script src="https://unpkg.com/feather-icons"></script>
+	<script src="/assets/js/jquery.dataTables.min.js"></script>
+	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
     
     <script type="text/javascript" th:inline="none">
-	    new DataTable('#payCertificateTable', {
-	        order: [[1, 'desc'], [2, 'asc'], [3, 'desc']]
-	    });
 	    
 		document.addEventListener('DOMContentLoaded', function () {
 	    	// 상세 모달창을 열 때, 불러오기.
@@ -227,6 +227,48 @@
 			        });
 			        
 			    }
+			    
+			    $('#searchEmployeeSelect').select2({theme: "bootstrap-5"});
+			    $('#periodTypeSelect').select2({theme: "bootstrap-5"});
+			    
+			    const tableSpecificOptions = {
+				        'columns': [
+				            { "searchable": false, "orderable": false }, // 0. 체크박스
+				            null,                 // 1. 연도
+				            null,                 // 2. 사번
+				            null,                 // 3. 명세번호
+				            null,                 // 4. 총지급액
+				            null,                 // 5. 과세
+				            null,                 // 6. 비과세
+				            null,                 // 7. 세금
+				            null,                 // 8. 보험
+				            null,                 // 9. 급여횟수
+				            { "width": "80px", "searchable": false, "orderable": false } // 10. 상세
+				        ],
+				        
+				        "order": [[ 1, "desc" ], [ 2, "asc" ]], // 기본 정렬: 1순위: 연도(내림차순), 2순위: 사번(오름차순)
+
+			            "language": { // DataTables 한글화 및 기본 설정
+			                "emptyTable": "데이터가 없습니다.",
+			                "info": "_START_ - _END_ / _TOTAL_ 항목",
+			                "infoEmpty": "0 항목",
+			                "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+			                "lengthMenu": "_MENU_ 개씩 보기",
+			                "loadingRecords": "로딩중...",
+			                "processing": "처리중...",
+			                "search": "검색: ",
+			                "zeroRecords": "일치하는 항목이 없습니다.",
+			                "paginate": {
+			                    "first": "처음",
+			                    "last": "마지막",
+			                    "next": "다음",
+			                    "previous": "이전"
+			                }
+			            },
+			            "pageLength": 10, 
+			            "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+				    };
+			    initializeResizableDataTable('#dataTable',tableSpecificOptions);
 	        
 		});
 		

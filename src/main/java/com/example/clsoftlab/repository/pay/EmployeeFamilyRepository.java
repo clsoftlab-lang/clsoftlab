@@ -1,14 +1,25 @@
 package com.example.clsoftlab.repository.pay;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.example.clsoftlab.entity.EmployeeFamily;
+import com.example.clsoftlab.entity.EmployeeMaster;
 
 @Repository
 public interface EmployeeFamilyRepository extends JpaRepository<EmployeeFamily, Long>, JpaSpecificationExecutor<EmployeeFamily> {
 	
 	// 중복 검사
 	public boolean existsByEmployee_PernrAndFamilySeq(String empNo, Integer familySeq);
+	
+	// 검색용 사원 list 조회
+	@Query("SELECT DISTINCT em "
+			+ "FROM EmployeeFamily e "
+			+ "JOIN e.employee em "
+			+ "ORDER BY em.name")
+	public List<EmployeeMaster> getEmployeeList ();
 }

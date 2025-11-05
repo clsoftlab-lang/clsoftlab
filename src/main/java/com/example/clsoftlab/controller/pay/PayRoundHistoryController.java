@@ -1,5 +1,7 @@
 package com.example.clsoftlab.controller.pay;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,12 +26,8 @@ public class PayRoundHistoryController {
 	
 	// 검색어로 전체 목록 조회
 	@GetMapping("")
-	public String getPayRoundHistoryList (@RequestParam(defaultValue = "") String empNo, @RequestParam(defaultValue = "") String payYm,
-			@RequestParam(defaultValue = "")String itemCode, @RequestParam(required = false) Integer page, Model model) {
-		
-		if(page == null) {
-			page = 0;
-		}
+	public String getPayRoundHistoryList (@RequestParam(required = false) List<String> empNo, @RequestParam(required = false) String payYm,
+			@RequestParam(required = false)List<String> itemCode, @RequestParam(required = false, defaultValue = "0") Integer page, Model model) {
 		
 		int size = 1000;
 		
@@ -40,6 +38,8 @@ public class PayRoundHistoryController {
 		model.addAttribute("payYm", payYm);
 		model.addAttribute("itemCode", itemCode);
 		model.addAttribute("payRoundHistoryPage", payRoundHistoryPage);
+		model.addAttribute("searchEmployeeList", payRoundHistoryService.getEmployeeList());
+		model.addAttribute("searchPayItemList", payRoundHistoryService.getPayItemList());
 		
 		return "pay/pay-round-history/list";
 	}
