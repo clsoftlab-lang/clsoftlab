@@ -20,8 +20,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class OvertimeDetailRequestDto {
 
+	private Long id;
+	
 	@NotBlank(message = "사원번호는 필수입니다.")
-    @Size(max = 50, message = "사원번호는 최대 50자까지 입력 가능합니다.")
+    @Size(max = 10, message = "사원번호는 최대 10자까지 입력 가능합니다.")
     private String empNo;
 
     @NotNull(message = "근무일자는 필수입니다.")

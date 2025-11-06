@@ -1831,7 +1831,7 @@ CREATE TABLE ZHR_CLUB_ITEM (
     INDEX IDX_ZCLUB_NM (ZCLUB_NM) -- 회비명으로도 검색할 수 있으므로 인덱스 추가
 ) COMMENT '사내 회비 항목 마스터';
 
-
+-- 더미 데이터 --
 INSERT INTO ZHR_CLUB_ITEM (ZCLUB_CD, ZCLUB_NM, ZAMOUNT, ZUSE_YN, ZNOTE, CREATED_BY) VALUES
 -- 필수/공통 회비
 ('UNION001', '전사 노동조합비', 25000, 'Y', '매월 급여 공제', 'admin'),
@@ -1874,15 +1874,17 @@ INSERT INTO ZHR_CLUB_ITEM (ZCLUB_CD, ZCLUB_NM, ZAMOUNT, ZUSE_YN, ZNOTE, CREATED_
 ('DONA_CHILD', '결식아동 후원금', 30000, 'Y', '매월 정기 후원', 'admin'),
 ('GYM_FEE', '사내 헬스장 이용료', 10000, 'Y', '헬스장 관리 및 기구 유지보수', 'system_batch');
 
-
+-- 사원별 회비 납부 설정 --
 CREATE TABLE ZHR_EMP_CLUB (
     ZHR_EMP_CLUB_ID BIGINT          NOT NULL AUTO_INCREMENT COMMENT '사원별 회비 설정 ID (PK)',
-    ZEMP_NO         VARCHAR(50)     NOT NULL COMMENT '사원 번호 (FK)',
+    ZEMP_NO         VARCHAR(10)     NOT NULL COMMENT '사원 번호 (FK)',
     ZCLUB_CD        VARCHAR(10)     NOT NULL COMMENT '회비 코드 (FK)',
     ZFROM_DT        DATE            NOT NULL COMMENT '적용 시작일',
     ZTO_DT          DATE            NOT NULL COMMENT '적용 종료일',
     ZPAY_YN         VARCHAR(1)      NOT NULL DEFAULT 'Y' COMMENT '납부 여부 (Y/N)',
     ZNOTE           VARCHAR(500)    NULL COMMENT '비고 (미납 사유 등)',
+    
+	VERSION         INT           NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 락킹용)',
     CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
     CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
     UPDATED_AT      DATETIME        NULL COMMENT '수정 일시',
@@ -1896,8 +1898,7 @@ CREATE TABLE ZHR_EMP_CLUB (
 
     -- 외래 키 설정 (회비 항목 마스터 테이블 참조)
     FOREIGN KEY (ZCLUB_CD) REFERENCES ZHR_CLUB_ITEM(ZCLUB_CD),
-    -- 참고: ZEMP_NO는 사원 마스터 테이블(예: ZHR_EMP_MASTER)을 참조해야 하지만, 해당 테이블 정의가 없어 주석으로 처리합니다.
-    -- FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_MASTER(ZEMP_NO),
+    FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_MASTER(PERNR),
 
     -- 제약 조건 설정
     CHECK (ZPAY_YN IN ('Y', 'N')), -- 납부 여부는 'Y' 또는 'N'만 가능
@@ -1909,70 +1910,285 @@ CREATE TABLE ZHR_EMP_CLUB (
 
 ) COMMENT '사원별 회비 납부 설정';
 
+-- 더미데이터 --
 INSERT INTO ZHR_EMP_CLUB (ZEMP_NO, ZCLUB_CD, ZFROM_DT, ZTO_DT, ZPAY_YN, ZNOTE, CREATED_BY) VALUES
--- EMP001: 일반적인 사원 (필수 회비 + 동호회 2개)
-('EMP001', 'UNION001', '2023-01-01', '9999-12-31', 'Y', '입사 시 자동 가입', 'system_batch'),
-('EMP001', 'ASSOC001', '2023-01-01', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
-('EMP001', 'CLUB_HIKE', '2024-03-01', '9999-12-31', 'Y', '산악회 신규 가입', 'user_park'),
-('EMP001', 'CLUB_BOOK', '2023-05-10', '9999-12-31', 'Y', '독서모임 창립 멤버', 'user_lee'),
+-- 시나리오 1: 일반적인 사원 (필수 회비 + 동호회 2개) - 대상: '2203004' (최서연)
+('2203004', 'UNION001', '2023-01-01', '9999-12-31', 'Y', '입사 시 자동 가입', 'system_batch'),
+('2203004', 'ASSOC001', '2023-01-01', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
+('2203004', 'CLUB_HIKE', '2024-03-01', '9999-12-31', 'Y', '산악회 신규 가입', 'user_park'),
+('2203004', 'CLUB_BOOK', '2023-05-10', '9999-12-31', 'Y', '독서모임 창립 멤버', 'user_lee'),
 
--- EMP002: 열정적인 동호회원 (필수 회비 + 동호회 3개 + 헬스장)
-('EMP002', 'UNION001', '2022-05-15', '9999-12-31', 'Y', '입사 시 자동 가입', 'system_batch'),
-('EMP002', 'ASSOC001', '2022-05-15', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
-('EMP002', 'CLUB_SOC', '2022-08-01', '9999-12-31', 'Y', '축구 동호회 활동', 'user_kim'),
-('EMP002', 'CLUB_TENN', '2025-01-01', '9999-12-31', 'Y', '테니스 동호회 가입', 'user_kim'),
-('EMP002', 'CLUB_PHOTO', '2023-11-20', '9999-12-31', 'Y', '사진 동호회 활동', 'admin'),
-('EMP002', 'GYM_FEE', '2024-01-01', '2025-12-31', 'Y', '헬스장 2년 이용권', 'system_batch'),
+-- 시나리오 2: 열정적인 동호회원 (필수 회비 + 동호회 3개 + 헬스장) - 대상: '2207006' (윤서아)
+('2207006', 'UNION001', '2022-05-15', '9999-12-31', 'Y', '입사 시 자동 가입', 'system_batch'),
+('2207006', 'ASSOC001', '2022-05-15', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
+('2207006', 'CLUB_SOC', '2022-08-01', '9999-12-31', 'Y', '축구 동호회 활동', 'user_kim'),
+('2207006', 'CLUB_TENN', '2025-01-01', '9999-12-31', 'Y', '테니스 동호회 가입', 'user_kim'),
+('2207006', 'CLUB_PHOTO', '2023-11-20', '9999-12-31', 'Y', '사진 동호회 활동', 'admin'),
+('2207006', 'GYM_FEE', '2024-01-01', '2025-12-31', 'Y', '헬스장 2년 이용권', 'system_batch'),
 
--- EMP003: 휴직자 (필수 회비 납부 일시 중지)
-('EMP003', 'UNION001', '2021-09-01', '2024-12-31', 'Y', '휴직 전까지 납부', 'admin'),
-('EMP003', 'UNION001', '2025-01-01', '2025-12-31', 'N', '2025년 육아휴직으로 인한 납부 면제', 'admin'),
-('EMP003', 'ASSOC001', '2021-09-01', '9999-12-31', 'Y', '사우회비는 휴직과 관계없이 유지', 'admin'),
+-- 시나리오 3: 휴직자 (필수 회비 납부 일시 중지) - 대상: '2209007' (강도윤)
+('2209007', 'UNION001', '2021-09-01', '2024-12-31', 'Y', '휴직 전까지 납부', 'admin'),
+('2209007', 'UNION001', '2025-01-01', '2025-12-31', 'N', '2025년 육아휴직으로 인한 납부 면제', 'admin'),
+('2209007', 'ASSOC001', '2021-09-01', '9999-12-31', 'Y', '사우회비는 휴직과 관계없이 유지', 'admin'),
 
--- EMP004: 개발본부 팀원 (기술 펀드 + 팀 펀드 납부)
-('EMP004', 'UNION001', '2024-02-01', '9999-12-31', 'Y', '입사 시 가입', 'system_batch'),
-('EMP004', 'ASSOC001', '2024-02-01', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
-('EMP004', 'ASSOC002', '2024-02-01', '9999-12-31', 'Y', '개발본부 기술서적 구매펀드 참여', 'admin'),
-('EMP004', 'DEPT_CFE', '2025-01-01', '2025-12-31', 'Y', '디자인팀 소속으로 커피 구독료 납부', 'user_lee'),
-('EMP004', 'CLUB_GAME', '2024-07-01', '9999-12-31', 'Y', '보드게임 동호회 활동', 'user_kim'),
+-- 시나리오 4: 개발본부 팀원 (기술 펀드 + 팀 펀드 납부) - 대상: '2302013' (송지아)
+('2302013', 'UNION001', '2024-02-01', '9999-12-31', 'Y', '입사 시 가입', 'system_batch'),
+('2302013', 'ASSOC001', '2024-02-01', '9999-12-31', 'Y', '사우회 가입', 'system_batch'),
+('2302013', 'ASSOC002', '2024-02-01', '9999-12-31', 'Y', '개발본부 기술서적 구매펀드 참여', 'admin'),
+('2302013', 'DEPT_CFE', '2025-01-01', '2025-12-31', 'Y', '디자인팀 소속으로 커피 구독료 납부', 'user_lee'),
+('2302013', 'CLUB_GAME', '2024-07-01', '9999-12-31', 'Y', '보드게임 동호회 활동', 'user_kim'),
 
--- EMP005: 영업팀 팀원 (팀 점심값 펀드 + 카풀 이용)
-('EMP005', 'UNION001', '2020-03-01', '9999-12-31', 'Y', '기존 가입자', 'admin'),
-('EMP005', 'ASSOC001', '2020-03-01', '9999-12-31', 'Y', '기존 가입자', 'admin'),
-('EMP005', 'DEPT_MEAL', '2025-01-01', '2025-06-30', 'Y', '상반기 영업1팀 점심값 펀드', 'user_kim'),
-('EMP005', 'PARKING', '2025-07-01', '9999-12-31', 'Y', '카풀 참여로 주차비 지원 대상', 'system_batch'),
-('EMP005', 'CLUB_GOLF', '2023-02-01', '9999-12-31', 'Y', '스크린골프 동호회', 'admin'),
+-- 시나리오 5: 영업팀 팀원 (팀 점심값 펀드 + 카풀 이용) - 대상: '2305015' (황수빈)
+('2305015', 'UNION001', '2020-03-01', '9999-12-31', 'Y', '기존 가입자', 'admin'),
+('2305015', 'ASSOC001', '2020-03-01', '9999-12-31', 'Y', '기존 가입자', 'admin'),
+('2305015', 'DEPT_MEAL', '2025-01-01', '2025-06-30', 'Y', '상반기 영업1팀 점심값 펀드', 'user_kim'),
+('2305015', 'PARKING', '2025-07-01', '9999-12-31', 'Y', '카풀 참여로 주차비 지원 대상', 'system_batch'),
+('2305015', 'CLUB_GOLF', '2023-02-01', '9999-12-31', 'Y', '스크린골프 동호회', 'admin'),
 
--- EMP006: 과거 동호회 활동 이력 보유자
-('EMP006', 'UNION001', '2019-11-01', '9999-12-31', 'Y', NULL, 'admin'),
-('EMP006', 'ASSOC001', '2019-11-01', '9999-12-31', 'Y', NULL, 'admin'),
-('EMP006', 'CLUB_GO', '2022-01-01', '2024-07-31', 'Y', '바둑 동호회 활동 중단으로 종료 처리', 'user_park'),
-('EMP006', 'CLUB_FISH', '2024-09-01', '9999-12-31', 'Y', '낚시 동호회로 이전 가입', 'user_kim'),
+-- 시나리오 6: 과거 동호회 활동 이력 보유자 - 대상: '2211010' (오시우)
+('2211010', 'UNION001', '2019-11-01', '9999-12-31', 'Y', NULL, 'admin'),
+('2211010', 'ASSOC001', '2019-11-01', '9999-12-31', 'Y', NULL, 'admin'),
+('2211010', 'CLUB_GO', '2022-01-01', '2024-07-31', 'Y', '바둑 동호회 활동 중단으로 종료 처리', 'user_park'),
+('2211010', 'CLUB_FISH', '2024-09-01', '9999-12-31', 'Y', '낚시 동호회로 이전 가입', 'user_kim'),
 
--- EMP007: 정기 후원 및 일회성 기부 참여
-('EMP007', 'UNION001', '2023-08-01', '9999-12-31', 'Y', NULL, 'system_batch'),
-('EMP007', 'ASSOC001', '2023-08-01', '9999-12-31', 'Y', NULL, 'system_batch'),
-('EMP007', 'FUND001', '2025-12-01', '2025-12-31', 'Y', '2025년 연말 불우이웃돕기 성금', 'user_lee'),
-('EMP007', 'DONA_CHILD', '2024-01-01', '9999-12-31', 'Y', '결식아동 정기 후원 신청', 'admin'),
-('EMP007', 'CLUB_VOL', '2023-10-01', '9999-12-31', 'Y', '봉사활동 동호회 가입', 'system_batch'),
+-- 시나리오 7: 정기 후원 및 일회성 기부 참여 - 대상: '2401022' (홍예준)
+('2401022', 'UNION001', '2023-08-01', '9999-12-31', 'Y', NULL, 'system_batch'),
+('2401022', 'ASSOC001', '2023-08-01', '9999-12-31', 'Y', NULL, 'system_batch'),
+('2401022', 'FUND001', '2025-12-01', '2025-12-31', 'Y', '2025년 연말 불우이웃돕기 성금', 'user_lee'),
+('2401022', 'DONA_CHILD', '2024-01-01', '9999-12-31', 'Y', '결식아동 정기 후원 신청', 'admin'),
+('2401022', 'CLUB_VOL', '2023-10-01', '9999-12-31', 'Y', '봉사활동 동호회 가입', 'system_batch'),
 
--- EMP008: 신규 여성 풋살 동호회 가입자
-('EMP008', 'UNION001', '2025-01-15', '9999-12-31', 'Y', NULL, 'system_batch'),
-('EMP008', 'ASSOC001', '2025-01-15', '9999-12-31', 'Y', NULL, 'system_batch'),
-('EMP008', 'CLUB_SOC2', '2025-04-01', '9999-12-31', 'Y', '여성 풋살 동호회 창립 멤버', 'user_kim'),
-('EMP008', 'CLUB_CYCLE', '2025-05-01', '9999-12-31', 'Y', '자전거 동호회 가입', 'system_batch');
+-- 시나리오 8: 신규 여성 풋살 동호회 가입자 - 대상: '2403025' (노하린)
+('2403025', 'UNION001', '2025-01-15', '9999-12-31', 'Y', NULL, 'system_batch'),
+('2403025', 'ASSOC001', '2025-01-15', '9999-12-31', 'Y', NULL, 'system_batch'),
+('2403025', 'CLUB_SOC2', '2025-04-01', '9999-12-31', 'Y', '여성 풋살 동호회 창립 멤버', 'user_kim'),
+('2403025', 'CLUB_CYCLE', '2025-05-01', '9999-12-31', 'Y', '자전거 동호회 가입', 'system_batch');
 
+
+-- 납부 내역 기록 (중심 테이블) --
+CREATE TABLE ZHR_CLUB_PAY_DETAIL (
+    -- 기본 키 컬럼 (PK) - Surrogate Key
+    ID              BIGINT          NOT NULL AUTO_INCREMENT COMMENT '내부 관리용 ID (PK)',
+
+    -- Business Key 컬럼 (Unique)
+    ZEMP_NO         VARCHAR(10)     NOT NULL COMMENT '사번 (FK to ZHR_EMP_MASTER.PERNR)',
+    ZPAY_YM         CHAR(6)         NOT NULL COMMENT '납부월 (YYYYMM)',
+    ZCLUB_CD        VARCHAR(10)     NOT NULL COMMENT '회비 코드 (FK to ZHR_CLUB_ITEM.ZCLUB_CD)',
+
+    -- 데이터 컬럼
+    ZAMOUNT         BIGINT          NOT NULL DEFAULT 0 COMMENT '납부금액 (Biz Rule: > 0)',
+    ZNOTE           VARCHAR(500)    NULL COMMENT '비고 (경조사, 특별 납부, 면제 후 자율 납부 등 특이사항)',
+
+    -- 데이터 버전 관리 (낙관적 락용)
+    VERSION         INT             NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 락용)',
+
+    -- 감사(Audit) 필드
+    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME        NULL COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+
+    -- 기본 키 설정 (Surrogate Key)
+    PRIMARY KEY (ID),
+
+    -- 비즈니스 키 (Unique Key) 설정 (명세서 5번: 중복 불가 조건)
+    UNIQUE KEY UK_PAY_DETAIL (ZEMP_NO, ZPAY_YM, ZCLUB_CD) COMMENT '사번+납부월+회비코드 중복 방지',
+
+    -- 외래 키 설정 (명세서 3번 항목: 테이블 연계 구조)
+    CONSTRAINT FK_PAY_DETAIL_TO_EMP 
+        FOREIGN KEY (ZEMP_NO) 
+        REFERENCES ZHR_EMP_MASTER (PERNR),
+        
+    CONSTRAINT FK_PAY_DETAIL_TO_ITEM
+        FOREIGN KEY (ZCLUB_CD) 
+        REFERENCES ZHR_CLUB_ITEM (ZCLUB_CD),
+
+    -- 검색 성능 향상을 위한 인덱스 (명세서 4번 [A] 검색 조건)
+    INDEX IDX_PAY_YM (ZPAY_YM),     -- 납부월 기준 조회
+    INDEX IDX_CLUB_CD (ZCLUB_CD)    -- 회비 항목별 조회
+
+) COMMENT '사내 회비 납부 실적 내역 (중심 테이블)';
+
+
+-- 더미 데이터 --
+/*
+-- ZHR_CLUB_PAY_DETAIL (사내 회비 납부 내역) 더미 데이터
+-- 기준 월: 2025년 1월, 2월, 3월
+-- 생성 로직: ZHR_EMP_CLUB에 ZPAY_YN='Y'이고, ZHR_EMP_MASTER에 재직 중이며, 납부 기간(ZFROM_DT~ZTO_DT)이 유효한 건에 대해 ZHR_CLUB_ITEM의 ZAMOUNT를 기준으로 INSERT
+*/
+INSERT INTO ZHR_CLUB_PAY_DETAIL
+(ZEMP_NO, ZPAY_YM, ZCLUB_CD, ZAMOUNT, ZNOTE, CREATED_BY)
+VALUES
+
+-- =================================================================
+-- 2025년 1월 납부 내역 (202501)
+-- =================================================================
+
+-- 시나리오 1: '2203004' (최서연) - 4건
+('2203004', '202501', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2203004', '202501', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2203004', '202501', 'CLUB_HIKE', 20000, '정기 납부', 'system_batch'),
+('2203004', '202501', 'CLUB_BOOK', 15000, '정기 납부', 'system_batch'),
+
+-- 시나리오 2: '2207006' (윤서아) - 6건 (CLUB_TENN 1월부터 시작)
+('2207006', '202501', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2207006', '202501', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2207006', '202501', 'CLUB_SOC', 30000, '정기 납부', 'system_batch'),
+('2207006', '202501', 'CLUB_TENN', 40000, '2025년 신규 가입', 'system_batch'),
+('2207006', '202501', 'CLUB_PHOTO', 30000, '정기 납부 (인상분 적용)', 'system_batch'),
+('2207006', '202501', 'GYM_FEE', 10000, '정기 납부', 'system_batch'),
+
+-- 시나리오 3: '2209007' (강도윤) - 1건 (UNION001은 'N'이라 제외, ASSOC001만 납부)
+('2209007', '202501', 'ASSOC001', 10000, '휴직 중 정기 납부', 'system_batch'),
+
+-- 시나리오 4: '2302013' (송지아) - 5건 (DEPT_CFE 1월부터 시작)
+('2302013', '202501', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2302013', '202501', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2302013', '202501', 'ASSOC002', 10000, '정기 납부', 'system_batch'),
+('2302013', '202501', 'DEPT_CFE', 15000, '2025년 신규 납부', 'system_batch'),
+('2302013', '202501', 'CLUB_GAME', 15000, '정기 납부', 'system_batch'),
+
+-- 시나리오 5: '2305015' (황수빈) - 4건 (DEPT_MEAL 1월부터 시작, PARKING은 7월부터라 제외)
+('2305015', '202501', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2305015', '202501', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2305015', '202501', 'DEPT_MEAL', 50000, '상반기 펀드 시작', 'system_batch'),
+('2305015', '202501', 'CLUB_GOLF', 50000, '정기 납부', 'system_batch'),
+
+-- 시나리오 6: '2211010' (오시우) - 3건 (CLUB_GO는 종료되어 제외)
+('2211010', '202501', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2211010', '202501', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2211010', '202501', 'CLUB_FISH', 25000, '정기 납부', 'system_batch'),
+
+-- 시나리오 7: '2401022' (홍예준) - 4건 (FUND001은 12월이라 제외)
+('2401022', '202501', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2401022', '202501', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2401022', '202501', 'DONA_CHILD', 30000, '정기 후원', 'system_batch'),
+('2401022', '202501', 'CLUB_VOL', 5000, '정기 납부', 'system_batch'),
+
+-- 시나리오 8: '2403025' (노하린) - 2건 (CLUB_SOC2는 4월, CLUB_CYCLE은 5월부터라 제외)
+('2403025', '202501', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2403025', '202501', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+
+
+-- =================================================================
+-- 2025년 2월 납부 내역 (202502)
+-- =================================================================
+
+-- 시나리오 1: '2203004' (최서연) - 4건
+('2203004', '202502', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2203004', '202502', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2203004', '202502', 'CLUB_HIKE', 20000, '정기 납부', 'system_batch'),
+('2203004', '202502', 'CLUB_BOOK', 15000, '정기 납부', 'system_batch'),
+
+-- 시나리오 2: '2207006' (윤서아) - 6건
+('2207006', '202502', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2207006', '202502', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2207006', '202502', 'CLUB_SOC', 30000, '정기 납부', 'system_batch'),
+('2207006', '202502', 'CLUB_TENN', 40000, '정기 납부', 'system_batch'),
+('2207006', '202502', 'CLUB_PHOTO', 30000, '정기 납부', 'system_batch'),
+('2207006', '202502', 'GYM_FEE', 10000, '정기 납부', 'system_batch'),
+
+-- 시나리오 3: '2209007' (강도윤) - 1건 (ASSOC001만 납부)
+('2209007', '202502', 'ASSOC001', 10000, '휴직 중 정기 납부', 'system_batch'),
+
+-- 시나리오 4: '2302013' (송지아) - 5건
+('2302013', '202502', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2302013', '202502', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2302013', '202502', 'ASSOC002', 10000, '정기 납부', 'system_batch'),
+('2302013', '202502', 'DEPT_CFE', 15000, '정기 납부', 'system_batch'),
+('2302013', '202502', 'CLUB_GAME', 15000, '정기 납부', 'system_batch'),
+
+-- 시나리오 5: '2305015' (황수빈) - 4건
+('2305015', '202502', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2305015', '202502', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2305015', '202502', 'DEPT_MEAL', 50000, '정기 납부', 'system_batch'),
+('2305015', '202502', 'CLUB_GOLF', 50000, '정기 납부', 'system_batch'),
+
+-- 시나리오 6: '2211010' (오시우) - 3건
+('2211010', '202502', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2211010', '202502', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2211010', '202502', 'CLUB_FISH', 25000, '정기 납부', 'system_batch'),
+
+-- 시나리오 7: '2401022' (홍예준) - 4건
+('2401022', '202502', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2401022', '202502', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2401022', '202502', 'DONA_CHILD', 30000, '정기 후원', 'system_batch'),
+('2401022', '202502', 'CLUB_VOL', 5000, '정기 납부', 'system_batch'),
+
+-- 시나리오 8: '2403025' (노하린) - 2건
+('2403025', '202502', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2403025', '202502', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+
+
+-- =================================================================
+-- 2025년 3월 납부 내역 (202503)
+-- [!] 비즈니스 룰 6번 (예외 케이스) 포함
+-- =================================================================
+
+-- 시나리오 1: '2203004' (최서연) - 4건
+('2203004', '202503', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2203004', '202503', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2203004', '202503', 'CLUB_HIKE', 20000, '정기 납부', 'system_batch'),
+('2203004', '202503', 'CLUB_BOOK', 15000, '정기 납부', 'system_batch'),
+
+-- 시나리오 2: '2207006' (윤서아) - 6건
+('2207006', '202503', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2207006', '202503', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2207006', '202503', 'CLUB_SOC', 30000, '정기 납부', 'system_batch'),
+('2207006', '202503', 'CLUB_TENN', 40000, '정기 납부', 'system_batch'),
+('2207006', '202503', 'CLUB_PHOTO', 30000, '정기 납부', 'system_batch'),
+('2207006', '202503', 'GYM_FEE', 10000, '정기 납부', 'system_batch'),
+
+-- 시나리오 3: '2209007' (강도윤) - 2건
+-- [예외 케이스 1] '면제 후 자율 납부' (비즈니스 룰 6번)
+-- ZHR_EMP_CLUB에는 UNION001이 'N'(면제)이지만, ZNOTE에 '자율 납부'를 기재하고 5000원(기준금액 25000원과 다름) 납부
+('2209007', '202503', 'ASSOC001', 10000, '휴직 중 정기 납부', 'system_batch'),
+('2209007', '202503', 'UNION001', 5000, '휴직 중 자율 납부 (면제 대상)', 'hr_admin'),
+
+-- 시나리오 4: '2302013' (송지아) - 5건
+('2302013', '202503', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2302013', '202503', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2302013', '202503', 'ASSOC002', 10000, '정기 납부', 'system_batch'),
+('2302013', '202503', 'DEPT_CFE', 15000, '정기 납부', 'system_batch'),
+('2302013', '202503', 'CLUB_GAME', 15000, '정기 납부', 'system_batch'),
+
+-- 시나리오 5: '2305015' (황수빈) - 4건
+('2305015', '202503', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2305015', '202503', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2305015', '202503', 'DEPT_MEAL', 50000, '정기 납부', 'system_batch'),
+('2305015', '202503', 'CLUB_GOLF', 50000, '정기 납부', 'system_batch'),
+
+-- 시나리오 6: '2211010' (오시우) - 3건
+('2211010', '202503', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2211010', '202503', 'ASSOC001', 10000, '정기 납부', 'system_batch'),
+('2211010', '202503', 'CLUB_FISH', 25000, '정기 납부', 'system_batch'),
+
+-- 시나리오 7: '2401022' (홍예준) - 4건
+-- [예외 케이스 2] '경조사비 특별 납부' (비즈니스 룰 6번)
+-- ASSOC001(사우회비)의 기준금액은 10,000원이지만, 3월에 경조사비 100,000원을 추가 납부하여 총 110,000원 납부
+('2401022', '202503', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2401022', '202503', 'ASSOC001', 110000, '정기 사우회비 10,000 + 본인 결혼 경조 100,000', 'hr_admin'),
+('2401022', '202503', 'DONA_CHILD', 30000, '정기 후원', 'system_batch'),
+('2401022', '202503', 'CLUB_VOL', 5000, '정기 납부', 'system_batch'),
+
+-- 시나리오 8: '2403025' (노하린) - 2건 (다른 항목들은 4월, 5월 시작)
+('2403025', '202503', 'UNION001', 25000, '정기 납부', 'system_batch'),
+('2403025', '202503', 'ASSOC001', 10000, '정기 납부', 'system_batch');
+
+
+-- 근로자별 시간외근무 실적 --
 CREATE TABLE ZHR_OVERTIME_DETAIL (
-    ZHR_OVERTIME_DETAIL_ID BIGINT        NOT NULL AUTO_INCREMENT COMMENT '시간외근무 실적 ID (PK)',
-    ZEMP_NO                VARCHAR(50)   NOT NULL COMMENT '사원 번호 (FK)',
-    ZDATE                  DATE          NOT NULL COMMENT '근무 일자',
-    ZHOURS                 DECIMAL(5,2)  NOT NULL COMMENT '근로 시간',
-    ZTYPE                  VARCHAR(10)   NOT NULL COMMENT '근로 유형 (OVERTIME, NIGHT, HOLIDAY)',
-    ZNOTE                  VARCHAR(500)  NULL     COMMENT '비고 (사유 등)',
-    CREATED_AT             DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY             VARCHAR(50)   NOT NULL COMMENT '생성자',
-    UPDATED_AT             DATETIME      NULL     COMMENT '수정 일시',
-    UPDATED_BY             VARCHAR(50)   NULL     COMMENT '수정자',
+    ZHR_OVERTIME_DETAIL_ID BIGINT       NOT NULL AUTO_INCREMENT COMMENT '시간외근무 실적 ID (PK)',
+    ZEMP_NO                VARCHAR(10)  NOT NULL COMMENT '사원 번호 (FK, ZHR_EMP_MASTER.PERNR 참조)',
+    ZDATE                  DATE         NOT NULL COMMENT '근무 일자',
+    ZHOURS                 DECIMAL(5,2) NOT NULL COMMENT '근로 시간',
+    ZTYPE                  VARCHAR(10)  NOT NULL COMMENT '근로 유형 (OVERTIME, NIGHT, HOLIDAY)',
+    ZNOTE                  VARCHAR(500) NULL     COMMENT '비고 (사유 등)',
+    CREATED_AT             DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY             VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT             DATETIME     NULL     COMMENT '수정 일시',
+    UPDATED_BY             VARCHAR(50)  NULL     COMMENT '수정자',
+    VERSION                INT          NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 잠금용)', 
 
     -- 기본 키 설정
     PRIMARY KEY (ZHR_OVERTIME_DETAIL_ID),
@@ -1980,9 +2196,8 @@ CREATE TABLE ZHR_OVERTIME_DETAIL (
     -- 비즈니스 규칙에 따른 고유 키 설정 (중복 입력 방지)
     UNIQUE KEY UK_OVERTIME_UNIQUE (ZEMP_NO, ZDATE, ZTYPE),
 
-    -- 외래 키 설정 (사원 마스터 테이블 참조)
-    -- 참고: ZEMP_NO는 사원 프로필 테이블(예: ZHR_EMP_PROFILE)을 참조해야 하지만, 해당 테이블 정의가 없어 주석으로 처리합니다.
-    -- FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_PROFILE(ZEMP_NO),
+    -- 2. 외래 키 설정 (사원 마스터 테이블 참조)
+    FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_MASTER(PERNR),
 
     -- 제약 조건 설정
     CHECK (ZHOURS > 0), -- 근로시간은 0보다 커야 함
@@ -1994,62 +2209,70 @@ CREATE TABLE ZHR_OVERTIME_DETAIL (
 
 ) COMMENT '시간외근무 실적 상세';
 
+-- 더미 데이터 --
 INSERT INTO ZHR_OVERTIME_DETAIL (ZEMP_NO, ZDATE, ZHOURS, ZTYPE, ZNOTE, CREATED_BY) VALUES
--- EMP001: 프로젝트 마감 등 일반적인 연장 근무
-('EMP001', '2024-11-28', 2.5, 'OVERTIME', '4분기 프로젝트 제안서 마감', 'user_park'),
-('EMP001', '2025-02-10', 3.0, 'OVERTIME', '월간 실적 보고서 작성', 'user_lee'),
-('EMP001', '2025-06-01', 8.0, 'HOLIDAY', '주말 시스템 업데이트 지원 근무', 'admin'),
-('EMP001', '2025-08-22', 2.0, 'NIGHT', '야간 긴급 서버 패치 작업', 'system_batch'),
+-- '2201001' (김철수): 2025-09-30 퇴사. 모든 실적이 퇴사일 이전이므로 유효.
+('2201001', '2024-11-28', 2.5, 'OVERTIME', '4분기 프로젝트 제안서 마감', 'user_park'),
+('2201001', '2025-02-10', 3.0, 'OVERTIME', '월간 실적 보고서 작성', 'user_lee'),
+('2201001', '2025-06-01', 8.0, 'HOLIDAY', '주말 시스템 업데이트 지원 근무', 'admin'),
+('2201001', '2025-08-22', 2.0, 'NIGHT', '야간 긴급 서버 패치 작업', 'system_batch'),
 
--- EMP002: 동호회 활동만큼이나 열정적인 연장 근무
-('EMP002', '2024-10-15', 4.0, 'OVERTIME', '신규 서비스 기획안 최종 검토', 'user_kim'),
-('EMP002', '2025-01-28', 8.0, 'HOLIDAY', '설 연휴 기간 서비스 모니터링', 'admin'),
-('EMP002', '2025-03-25', 3.0, 'NIGHT', '해외 지사 화상회의로 인한 야간 근무', 'user_kim'),
-('EMP002', '2025-07-31', 3.5, 'OVERTIME', '반기 마감 실적 취합', 'user_kim'),
+-- '2201002' (이영희): 2025-01-31 퇴사. 퇴사일 이전 실적은 유지.
+('2201002', '2024-10-15', 4.0, 'OVERTIME', '신규 서비스 기획안 최종 검토', 'user_kim'),
+('2201002', '2025-01-28', 8.0, 'HOLIDAY', '설 연휴 기간 서비스 모니터링', 'admin'),
+-- (수정) 2025-03-25 실적 -> 재직자 '2203004' (최서연)에게 배분
+('2203004', '2025-03-25', 3.0, 'NIGHT', '해외 지사 화상회의로 인한 야간 근무', 'user_kim'),
+-- (수정) 2025-07-31 실적 -> 재직자 '2207006' (윤서아)에게 배분
+('2207006', '2025-07-31', 3.5, 'OVERTIME', '반기 마감 실적 취합', 'user_kim'),
 
--- EMP003: 휴직 전 과거 근무 기록
-('EMP003', '2024-09-10', 2.0, 'OVERTIME', '업무 인수인계 자료 작성', 'admin'),
-('EMP003', '2024-11-05', 3.0, 'OVERTIME', '휴직 전 최종 보고서 제출', 'admin'),
-('EMP003', '2024-12-20', 1.5, 'OVERTIME', '팀 비품 정리 및 인수인계', 'admin'),
+-- '2203003' (박민준): 2025-10-29 퇴사. 모든 실적이 퇴사일 이전이므로 유효.
+('2203003', '2024-09-10', 2.0, 'OVERTIME', '업무 인수인계 자료 작성', 'admin'),
+('2203003', '2024-11-05', 3.0, 'OVERTIME', '휴직 전 최종 보고서 제출', 'admin'),
+('2203003', '2024-12-20', 1.5, 'OVERTIME', '팀 비품 정리 및 인수인계', 'admin'),
 
--- EMP004: 야간 배포 및 긴급 대응이 잦은 개발자
-('EMP004', '2024-12-20', 4.0, 'NIGHT', '연말 정기 시스템 배포', 'system_batch'),
-('EMP004', '2025-01-11', 8.0, 'HOLIDAY', '주말 긴급 장애 대응', 'admin'),
-('EMP004', '2025-04-16', 3.0, 'NIGHT', '신규 기능 릴리즈 야간 작업', 'system_batch'),
-('EMP004', '2025-05-25', 4.5, 'OVERTIME', '기술 부채 해결을 위한 집중 근무', 'user_lee'),
-('EMP004', '2025-08-01', 2.0, 'NIGHT', 'DB 마이그레이션 모니터링', 'system_batch'),
+-- '2203004' (최서연): 재직자.
+('2203004', '2024-12-20', 4.0, 'NIGHT', '연말 정기 시스템 배포', 'system_batch'),
+('2203004', '2025-01-11', 8.0, 'HOLIDAY', '주말 긴급 장애 대응', 'admin'),
+('2203004', '2025-04-16', 3.0, 'NIGHT', '신규 기능 릴리즈 야간 작업', 'system_batch'),
+('2203004', '2025-05-25', 4.5, 'OVERTIME', '기술 부채 해결을 위한 집중 근무', 'user_lee'),
+('2203004', '2025-08-01', 2.0, 'NIGHT', 'DB 마이그레이션 모니터링', 'system_batch'),
 
--- EMP005: 고객사 미팅 및 월말 정산이 있는 영업팀
-('EMP005', '2025-02-28', 3.0, 'OVERTIME', '2월 영업 실적 마감 정산', 'user_kim'),
-('EMP005', '2025-05-15', 8.0, 'HOLIDAY', '고객사 주말 워크샵 기술 지원', 'user_kim'),
-('EMP005', '2025-06-20', 2.0, 'OVERTIME', '주요 고객사 저녁 미팅', 'admin'),
-('EMP005', '2025-09-25', 2.5, 'OVERTIME', '3분기 마감 대비 계약서 검토', 'user_kim'),
+-- '2207005' (정지훈): 2025-02-28 퇴사. 퇴사일 당일 실적은 유지.
+('2207005', '2025-02-28', 3.0, 'OVERTIME', '2월 영업 실적 마감 정산', 'user_kim'),
+-- (수정) 2025-05-15 실적 -> 재직자 '2209007' (강도윤)에게 배분
+('2209007', '2025-05-15', 8.0, 'HOLIDAY', '고객사 주말 워크샵 기술 지원', 'user_kim'),
+-- (수정) 2025-06-20 실적 -> 재직자 '2210009' (한지우)에게 배분
+('2210009', '2025-06-20', 2.0, 'OVERTIME', '주요 고객사 저녁 미팅', 'admin'),
+-- (수정) 2025-09-25 실적 -> 재직자 '2211010' (오시우)에게 배분
+('2211010', '2025-09-25', 2.5, 'OVERTIME', '3분기 마감 대비 계약서 검토', 'user_kim'),
 
--- EMP006: 꾸준히 발생하는 연장 근무
-('EMP006', '2024-08-15', 8.0, 'HOLIDAY', '광복절 대체 근무', 'user_park'),
-('EMP006', '2025-01-02', 2.0, 'OVERTIME', '연초 업무 계획 수립', 'admin'),
-('EMP006', '2025-06-06', 8.0, 'HOLIDAY', '현충일 당직 근무', 'admin'),
+-- '2207006' (윤서아): 재직자.
+('2207006', '2024-08-15', 8.0, 'HOLIDAY', '광복절 대체 근무', 'user_park'),
+('2207006', '2025-01-02', 2.0, 'OVERTIME', '연초 업무 계획 수립', 'admin'),
+('2207006', '2025-06-06', 8.0, 'HOLIDAY', '현충일 당직 근무', 'admin'),
 
--- EMP007: 행사 지원 및 후원 관련 업무
-('EMP007', '2024-12-24', 4.0, 'OVERTIME', '연말 봉사활동 행사 준비', 'user_lee'),
-('EMP007', '2025-05-05', 8.0, 'HOLIDAY', '어린이날 기념 행사 지원', 'system_batch'),
-('EMP007', '2025-07-10', 3.0, 'NIGHT', '해외 후원 재단과 야간 통화', 'admin'),
+-- '2209007' (강도윤): 재직자.
+('2209007', '2024-12-24', 4.0, 'OVERTIME', '연말 봉사활동 행사 준비', 'user_lee'),
+('2209007', '2025-05-05', 8.0, 'HOLIDAY', '어린이날 기념 행사 지원', 'system_batch'),
+('2209007', '2025-07-10', 3.0, 'NIGHT', '해외 후원 재단과 야간 통화', 'admin'),
 
--- EMP008: 신규 입사자의 업무 적응을 위한 연장 근무
-('EMP008', '2025-03-20', 1.5, 'OVERTIME', '신규입사자 OJT 교육 참여', 'system_batch'),
-('EMP008', '2025-06-18', 2.0, 'OVERTIME', '상반기 성과 리뷰 준비', 'user_kim'),
-('EMP008', '2025-09-01', 3.0, 'OVERTIME', '하반기 사업 전략 수립 지원', 'user_kim'),
+-- '2210008' (임하윤): 2025-03-31 퇴사. 퇴사일 이전 실적은 유지.
+('2210008', '2025-03-20', 1.5, 'OVERTIME', '신규입사자 OJT 교육 참여', 'system_batch'),
+-- (수정) 2025-06-18 실적 -> 재직자 '2302013' (송지아)에게 배분
+('2302013', '2025-06-18', 2.0, 'OVERTIME', '상반기 성과 리뷰 준비', 'user_kim'),
+-- (수정) 2025-09-01 실적 -> 재직자 '2305015' (황수빈)에게 배분
+('2305015', '2025-09-01', 3.0, 'OVERTIME', '하반기 사업 전략 수립 지원', 'user_kim'),
 
--- EMP009: 회계팀 (월말/분기말/연말 집중 근무)
-('EMP009', '2025-03-31', 4.0, 'OVERTIME', '1분기 재무제표 마감', 'admin'),
-('EMP009', '2025-04-01', 3.0, 'NIGHT', '감사 대응 자료 야간 준비', 'admin'),
-('EMP009', '2025-06-30', 4.0, 'OVERTIME', '상반기 결산 작업', 'admin'),
-('EMP009', '2025-07-01', 8.0, 'HOLIDAY', '결산 관련 시스템 점검', 'system_batch'),
+-- '2210009' (한지우): 재직자. (회계팀)
+('2210009', '2025-03-31', 4.0, 'OVERTIME', '1분기 재무제표 마감', 'admin'),
+('2210009', '2025-04-01', 3.0, 'NIGHT', '감사 대응 자료 야간 준비', 'admin'),
+('2210009', '2025-06-30', 4.0, 'OVERTIME', '상반기 결산 작업', 'admin'),
+('2210009', '2025-07-01', 8.0, 'HOLIDAY', '결산 관련 시스템 점검', 'system_batch'),
 
--- EMP010: 인프라팀 (주말 및 야간 작업)
-('EMP010', '2025-02-15', 8.0, 'HOLIDAY', '데이터센터 이전 작업', 'system_batch'),
-('EMP010', '2025-02-16', 6.0, 'HOLIDAY', '데이터센터 이전 후 안정화 작업', 'system_batch'),
-('EMP010', '2025-07-12', 4.0, 'NIGHT', '네트워크 장비 교체 및 야간 모니터링', 'system_batch');
+-- '2211010' (오시우): 재직자. (인프라팀)
+('2211010', '2025-02-15', 8.0, 'HOLIDAY', '데이터센터 이전 작업', 'system_batch'),
+('2211010', '2025-02-16', 6.0, 'HOLIDAY', '데이터센터 이전 후 안정화 작업', 'system_batch'),
+('2211010', '2025-07-12', 4.0, 'NIGHT', '네트워크 장비 교체 및 야간 모니터링', 'system_batch');
 
 CREATE TABLE ZHR_CALC_ORDER (
     ZITEM_CD      VARCHAR(50)     NOT NULL COMMENT '항목 코드 (PK, FK from ZHR_PAY_ITEM)',

@@ -16,7 +16,8 @@ import lombok.Setter;
 public class OvertimeDetailDto {
 
 	private Long id;
-    private String empNo;
+    private String employeeName;
+    private String employeePernr;
     private LocalDate date;
     private BigDecimal hours;
     private String type;

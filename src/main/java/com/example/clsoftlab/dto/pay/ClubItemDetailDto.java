@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ClubItemDetailDto {
 
+	private Long id;
     private String clubCode;
     private String clubName;
     private Long amount;

@@ -15,6 +15,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClubItemRequestDto {
+	
+	private Long id;
 
 	@NotBlank(message = "회비 코드는 필수입니다.")
     @Size(max = 10, message = "회비 코드는 10자를 초과할 수 없습니다.")

@@ -1,8 +1,6 @@
 package com.example.clsoftlab.entity;
 
-import java.time.LocalDate;
-
-import com.example.clsoftlab.dto.pay.EmployeeClubRequestDto;
+import com.example.clsoftlab.dto.pay.ClubPayDetailRequestDto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,43 +22,37 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ZHR_EMP_CLUB")
-public class EmployeeClub extends BaseEntity{
+@Table(name = "ZHR_CLUB_PAY_DETAIl")
+public class ClubPayDetail extends BaseEntity {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ZHR_EMP_CLUB_ID")
+    @Column(name = "ID")
     private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ZEMP_NO", referencedColumnName = "PERNR", nullable = false)
-	private EmployeeMaster employee;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ZEMP_NO", referencedColumnName = "PERNR", nullable = false)
+    private EmployeeMaster employee;
+
+    @Column(name = "ZPAY_YM", nullable = false, length = 6)
+    private String payYm;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ZCLUB_CD", referencedColumnName = "ZCLUB_CD", nullable = false)
     private ClubItem clubItem;
 
-    @Column(name = "ZFROM_DT", nullable = false)
-    private LocalDate fromDate;
-
-    @Column(name = "ZTO_DT", nullable = false)
-    private LocalDate toDate;
-
-    @Column(name = "ZPAY_YN", nullable = false, length = 1)
-    private String payYn;
-
+    @Column(name = "ZAMOUNT", nullable = false)
+    private Long amount;
+    
     @Column(name = "ZNOTE", length = 500)
     private String note;
-    
+
     @Version
-    @Column(name = "VERSION")
-    private Long version;
+    @Column(name = "VERSION", nullable = false)
+    private Integer version;
     
-    public void update(EmployeeClubRequestDto dto) {
-    	this.fromDate = dto.getFromDate();
-    	this.toDate = dto.getToDate();
-    	this.payYn = dto.getPayYn();
+    public void update (ClubPayDetailRequestDto dto) {
+    	this.amount = dto.getAmount();
     	this.note = dto.getNote();
     }
-
 }

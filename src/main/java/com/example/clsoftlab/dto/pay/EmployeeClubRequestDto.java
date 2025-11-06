@@ -17,14 +17,14 @@ import lombok.Setter;
 @AllArgsConstructor
 public class EmployeeClubRequestDto {
 
+	private Long id;
 
     @NotBlank(message = "사원 번호는 필수입니다.")
-    @Size(max = 50, message = "사원 번호는 최대 50자까지 입력 가능합니다.")
+    @Size(max = 10, message = "사원 번호는 최대 10자까지 입력 가능합니다.")
     private String empNo;
 
-    @NotBlank(message = "회비 코드는 필수입니다.")
-    @Size(max = 10, message = "회비 코드는 최대 10자까지 입력 가능합니다.")
-    private String clubCode;
+    @NotNull(message = "회비 항목 ID는 필수입니다.")
+    private Long clubId;
 
     @NotNull(message = "적용 시작일은 필수입니다.")
     private LocalDate fromDate;

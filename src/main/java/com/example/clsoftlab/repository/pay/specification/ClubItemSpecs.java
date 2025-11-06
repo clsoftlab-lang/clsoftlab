@@ -15,7 +15,7 @@ public class ClubItemSpecs {
 			return null;
 		}
 		
-		return (root, query, builder) -> root.get("clubCode").in("clubCode");
+		return (root, query, builder) -> root.get("clubCode").in(clubCode);
 	}
 	
 	public static Specification<ClubItem> withUseYn (String useYn) {

@@ -1,6 +1,7 @@
 package com.example.clsoftlab.repository.pay;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,5 +18,8 @@ public interface ClubItemRepository extends JpaRepository<ClubItem, Long>, JpaSp
 
 	
 	//  검색용 list 조회
-	public List<ClubItem> findAllOrderByClubName ();
+	public List<ClubItem> findAllByOrderByClubName ();
+	
+	// clubCode로 항목 조회
+	public Optional<ClubItem> findByClubCode (String clubCode);
 }

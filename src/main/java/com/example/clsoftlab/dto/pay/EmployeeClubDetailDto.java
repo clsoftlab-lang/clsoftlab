@@ -14,7 +14,9 @@ import lombok.Setter;
 public class EmployeeClubDetailDto {
 
 	private Long id;
-    private String empNo;
+	private Long clubId;
+    private String employeeName;
+    private String employeePernr;
     private String clubCode;
     private String clubName;
     private LocalDate fromDate;

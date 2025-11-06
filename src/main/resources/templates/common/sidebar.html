@@ -44,7 +44,8 @@
 						<li><a th:href="@{/pay/pay-round-history}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-round-history' || currentUrl.startsWith('/pay/pay-round-history?'))} ? 'active' : ''">급여 항목 절사 이력</a></li>
 						<li><a th:href="@{/pay/pay-certificate}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-certificate' || currentUrl.startsWith('/pay/pay-certificate?'))} ? 'active' : ''">지급명세표 관리</a></li>
 						<li><a th:href="@{/pay/club-item}" th:classappend="${currentUrl != null && (currentUrl == '/pay/club-item' || currentUrl.startsWith('/pay/club-item?'))} ? 'active' : ''">사내 회비 항목 관리</a></li>
-						<li><a th:href="@{/pay/employee-club}" th:classappend="${currentUrl != null && (currentUrl == '/pay/employee-club' || currentUrl.startsWith('/pay/employee-club?'))} ? 'active' : ''">사원별 회비 납수 설정</a></li>
+						<li><a th:href="@{/pay/employee-club}" th:classappend="${currentUrl != null && (currentUrl == '/pay/employee-club' || currentUrl.startsWith('/pay/employee-club?'))} ? 'active' : ''">사원별 회비 납부 설정</a></li>
+						<li><a th:href="@{/pay/club-pay-detail}" th:classappend="${currentUrl != null && (currentUrl == '/pay/club-pay-detail' || currentUrl.startsWith('/pay/club-pay-detail?'))} ? 'active' : ''">납부 내역 기록</a></li>
 						<li><a th:href="@{/pay/overtime}" th:classappend="${currentUrl != null && (currentUrl == '/pay/overtime' || currentUrl.startsWith('/pay/overtime?'))} ? 'active' : ''">근로자별 시간외근무 실적 관리</a></li>
 						<li><a th:href="@{/pay/calc-order}" th:classappend="${currentUrl != null && (currentUrl == '/pay/calc-order' || currentUrl.startsWith('/pay/calc-order?'))} ? 'active' : ''">급여 항목 계산 순서 관리</a></li>
 						<li><a th:href="@{/pay/allow-cycle}" th:classappend="${currentUrl != null && (currentUrl == '/pay/allow-cycle' || currentUrl.startsWith('/pay/allow-cycle?'))} ? 'active' : ''">상여금별 계산 주기 관리</a></li>

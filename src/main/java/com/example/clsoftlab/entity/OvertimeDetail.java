@@ -10,7 +10,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,8 +32,9 @@ public class OvertimeDetail extends BaseEntity {
     @Column(name = "ZHR_OVERTIME_DETAIL_ID")
     private Long id;
 
-    @Column(name = "ZEMP_NO", nullable = false, length = 50)
-    private String empNo;
+	@ManyToOne
+	@JoinColumn(name = "ZEMP_NO", referencedColumnName = "PERNR", nullable = false)
+    private EmployeeMaster employee;
 
     @Column(name = "ZDATE", nullable = false)
     private LocalDate date;
@@ -43,6 +47,10 @@ public class OvertimeDetail extends BaseEntity {
 
     @Column(name = "ZNOTE", length = 500)
     private String note;
+    
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Integer version;
     
     public void update (OvertimeDetailRequestDto dto) {
     	this.date = dto.getDate();
