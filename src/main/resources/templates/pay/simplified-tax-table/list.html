@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>간이세액표 관리</title>
+
+    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
+	<link rel="stylesheet" href="/assets/css/select2-bootstrap-5-theme.min.css">
+</head>
+
+<body>
+    <div id="global-loader"><div class="page-loader"></div></div>
+
+    <div class="main-wrapper">
+
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
+        
+        <div th:replace="~{common/sidebar :: sidebar}"></div>
+
+        <div class="page-wrapper">
+            <div class="content">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">검색 조건</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/pay/simplified-tax-table" method="get" id="searchForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>기준 연도</label>
+                                        <input name="year" type="number" class="form-control" min="1900" max="9999" th:value="${year}">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>가족 수</label>
+                                        <input class="form-control" type="number" name="familyCount" th:value="${familyCounnt}" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>월 소득 기준</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="incomeAmtFrom" placeholder="From" th:value="${incomeAmtFrom}" min="0">
+                                        <span class="input-group-text">~</span>
+                                        <input type="number" class="form-control" name="incomeAmtTo" placeholder="To" th:value="${incomeAmtTo}" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <div class="form-group w-100">
+                                        <button type="submit" class="btn btn-primary w-100">조회</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">간이세액표 목록</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover datatable-resizable" id="dataTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>기준 연도</th>
+                                        <th>월 소득 기준</th>
+                                        <th>가족 수</th>
+                                        <th>소득세율(%)</th>
+                                        <th>지방세율(%)</th>
+                                        <th>총 세액</th>
+                                        <th>사용 여부</th>
+                                        <th>비고</th>
+                                        <th>수정</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item: ${simplifiedTaxTable}">
+                                        <td th:text="${item.year}"></td>
+                                        <td th:text="${item.incomeAmt}"></td>
+                                        <td th:text="${item.familyCount}"></td>
+                                        <td th:text="${item.taxPc}"></td>
+                                        <td th:text="${item.localPc}"></td>
+                                        <td th:text="${item.totalTax}"></td>
+                                        <td>
+                                        	<input type="checkbox" class="form-check-input" th:value="${item.useYn} == 'Y'"  onclick="return false;">
+                                        </td>
+                                        <td th:text="${#strings.abbreviate(item.note, 50)}"></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"
+                                                th:data-id="${item.id}">수정</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-3 text-end gap-2 d-flex justify-content-end">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        <i class="ti ti-upload me-1"></i> 엑셀 일괄 업로드
+                    </button>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+                        <i class="ti ti-plus me-1"></i> 신규 등록
+                    </button>
+                </div>
+
+                <div class="modal fade" id="addModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">신규 간이세액 기준 등록</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">기준 연도<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="year" placeholder="YYYY (예: 2024)" min="1900" maxlength="9999">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">공제 가족 수<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="familyCount" required min="1" placeholder="본인 포함 (예: 1)">
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">월 소득 기준<span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" name="incomeAmt" required min="0" placeholder="소득 구간의 하한값 (예: 3000000)">
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">소득세율</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" name="taxPc" min="0" max="100" step="0.01" placeholder="예: 24.00">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">지방세율</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" name="localPc" min="0" max="100" step="0.01" placeholder="예: 2.40">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">총 세액</label>
+                                            <input type="number" class="form-control" name="totalTax" min="0" placeholder="세율 대신 고정 금액 적용 시">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사용 여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+                                            	<input type="hidden" name="useYn" value="N">
+                                            	<input type="checkbox" name="useYn" value="Y" class="form-check-input" checked>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">비고</label>
+                                            <textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="reset" form="addForm" class="btn btn-outline-secondary">초기화</button>
+                                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-primary" onclick="addNewTaxTable()">저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="editModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">간이세액 기준 수정</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editForm">
+                                    <input type="hidden" name="id">
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">기준 연도</label>
+                                            <input type="text" class="form-control" name="year" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">공제 가족 수</label>
+                                            <input type="number" class="form-control" name="familyCount" readonly>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">월 소득 기준</label>
+                                            <input type="number" class="form-control" name="incomeAmt" readonly>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">소득세율</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" name="taxPc" min="0" max="100" step="0.01">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">지방세율</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" name="localPc" min="0" max="100" step="0.01">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">총 세액</label>
+                                            <input type="number" class="form-control" name="totalTax" min="0">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">사용 여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+                                            	<input type="hidden" name="useYn" value="N">
+                                            	<input type="checkbox" name="useYn" value="Y" class="form-check-input" >
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">비고</label>
+                                            <textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer gap-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-primary" onclick="updateTaxTable()">변경사항 저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:replace="~{common/footer :: footer}"></div>
+        </div>
+    </div>
+
+    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
+	<script src="/assets/js/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
+	<script src="https://unpkg.com/feather-icons"></script>
+	<script src="/assets/js/jquery.dataTables.min.js"></script>
+	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
+    
+    <script type="text/javascript" th:inline="none">
+	   
+    document.addEventListener('DOMContentLoaded', function () {
+  		// 수정 모달창을 열 때, 불러오기.
+       const tableBody = document.querySelector('.table tbody');
+  		
+	    if (tableBody) {
+	        tableBody.addEventListener('click', function(event) {
+	        	
+	            const editButton = event.target.closest('.edit-btn');
+	            
+	            if (editButton) {
+	                const id = editButton.dataset.id; 
+	                findDetail(id);
+	            }
+	        });
+	        
+	    }
+	    
+	    const tableSpecificOptions = {
+		        'columns': [
+		            null,                 // 0. 기준 연도 (검색 O, 정렬 O)
+		            null,                 // 1. 월 소득 기준 (검색 O, 정렬 O)
+		            null,                 // 2. 가족 수 (검색 O, 정렬 O)
+		            { "searchable": false, "orderable": true }, // 3. 소득세율(%) (검색 X, 정렬 O)
+		            { "searchable": false, "orderable": true },  // 4. 지방세율(%) (검색 X, 정렬 O)
+		            { "searchable": false, "orderable": true }, // 5. 총 세액 (검색 X, 정렬 O)
+		            null,                 // 6. 사용 여부 (검색 O, 정렬 O)
+		            { "searchable": true, "orderable": false }, // 7. 비고 (검색 O, 정렬 X)
+		            { "width": "80px", "searchable": false, "orderable": false }  // 8. 수정 (버튼) (검색 X, 정렬 X)
+		        ],
+		        
+		        // 1순위: 기준 연도(0, 내림차순, 최신순)
+                // 2순위: 월 소득 기준(2, 오름차순, 낮은금액순)
+                // 3순위: 가족 수(1, 오름차순, 적은순)
+		        "order": [[ 0, "desc" ], [ 2, "asc" ], [ 1, "asc" ]], 
+
+	            // DataTables 한글화 및 기본 설정 (유지)
+	            "language": {
+	                "emptyTable": "데이터가 없습니다.",
+	                "info": "_START_ - _END_ / _TOTAL_ 항목",
+	                "infoEmpty": "0 항목",
+	                "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+	                "lengthMenu": "_MENU_ 개씩 보기",
+	                "loadingRecords": "로딩중...",
+	                "processing": "처리중...",
+	                "search": "검색: ",
+	                "zeroRecords": "일치하는 항목이 없습니다.",
+	                "paginate": {
+	                    "first": "처음",
+	                    "last": "마지막",
+	                    "next": "다음",
+	                    "previous": "이전"
+	                }
+	            },
+	            "pageLength": 10, 
+	            "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+		    };
+	    
+	    initializeResizableDataTable('#dataTable',tableSpecificOptions);
+	    
+	});
+    
+ 	// 새 항목 등록
+    async function addNewTaxTable() {
+		const addForm = document.getElementById('addForm');
+	    const formData = new FormData(addForm);
+	    const data = Object.fromEntries(formData.entries());
+	    
+	    if (!data.year) {
+	        alert('기준 연도를 입력해주세요.');
+	        return;
+	    }
+
+	    if (!data.familyCount) {
+	    	alert('공제 가족 수를 입력해주세요.');
+	    	return;
+	    }
+	    
+	    if (!data.incomeAmt) {
+	    	alert('월 소득 기준을 입력해주세요.');
+	    	return;
+	    }
+	    
+	    const hasTaxPc = data.taxPc && data.taxPc.trim() !== "";
+        const hasLocalPc = data.localPc && data.localPc.trim() !== "";
+        const hasTotalTax = data.totalTax && data.totalTax.trim() !== "";
+
+        // 시나리오 검증: 세율과 총 세액이 동시에 입력될 수 없음
+        if ((hasTaxPc || hasLocalPc) && hasTotalTax) {
+            alert('세율(소득세율, 지방세율)과 총 세액은 동시에 입력할 수 없습니다.\n- 세율 기반: 총 세액을 비워주세요.\n- 고정 세액 기반: 세율을 비워주세요.');
+            return;
+        }
+
+        // 시나리오 검증: 세율은 항상 쌍(pair)으로 입력되어야 함
+        if (hasTaxPc !== hasLocalPc) {
+            alert('소득세율과 지방세율은 함께 입력하거나 함께 비워두어야 합니다.');
+            return;
+        }
+        
+        // 데이터 정제 (서버로 보내기 전)
+        // (사용자가 실수로 입력한 값을 정리)
+        if (hasTaxPc || hasLocalPc) {
+            // 세율 기반 -> totalTax를 null로 보냄
+            data.totalTax = null;
+        } else if (hasTotalTax) {
+            // 고정 세액 기반 -> taxPc, localPc를 null로 보냄
+            data.taxPc = null;
+            data.localPc = null;
+        } else {
+            // 셋 다 비어있는 경우 (비과세 구간 등)
+            // 비과세 구간은 0으로 입력하는 것을 권장하지만, null로 보내도 무방
+            data.taxPc = null;
+            data.localPc = null;
+            // totalTax가 비어있으면 null로, 0이면 0으로 전송됨 (정상)
+            if (!hasTotalTax && data.totalTax.trim() === "") {
+                 data.totalTax = null;
+            }
+        }
+	    
+	    // --- 서버 작업 시작 ---
+	    try {
+	    	
+	        const response = await fetch(`/pay/simplified-tax-table/checkOverlap?year=${data.year}&familyCount=${data.familyCount}&incomeAmt=${data.incomeAmt}`);
+	        const checkResult = await response.text();
+	        
+	        if (checkResult == 'true') { 
+	            alert('동일한 [기준 연도], [가족 수], [월 소득 기준]의 데이터가 이미 존재합니다.'); 
+	            return;
+	        }
+
+	        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
+	        const saveResponse = await fetch('/pay/simplified-tax-table', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (saveResponse.ok) {
+	            alert('성공적으로 등록되었습니다.');
+	            location.reload();
+	        } else {
+	            const errorText = await saveResponse.text();
+	            alert(`등록에 실패했습니다: ${errorText}`);
+	        }
+
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('등록 중 오류가 발생했습니다.');
+	    }
+	};
+	
+	// 수정 모달창 데이터 불러오기.
+	async function findDetail(id) {
+	    try {
+	        const response = await fetch(`/pay/simplified-tax-table/detail/${id}`);
+	        if (!response.ok) {
+	            throw new Error('데이터를 불러오는 데 실패했습니다.');
+	        }
+	        const data = await response.json();
+	        const editForm = document.getElementById('editForm')
+
+
+	        for (const key in data) {
+	            const field = editForm.querySelector(`[name="${key}"]`);
+	            const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+	            
+	            if (checkbox && field && field.type === 'hidden') {
+	                checkbox.checked = (data[key] === 'Y');
+	            } else if (field) {
+	                field.value = data[key];
+	            }
+	        }
+	        
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('[조회 실패] 데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.');
+	    }
+	}
+	
+	
+	//항목 정보 수정
+	async function updateTaxTable() {
+	    const editForm = document.getElementById('editForm');
+	    const formData = new FormData(editForm);
+	    const data = Object.fromEntries(formData.entries());
+	    
+	    const hasTaxPc = data.taxPc && data.taxPc.trim() !== "";
+        const hasLocalPc = data.localPc && data.localPc.trim() !== "";
+        const hasTotalTax = data.totalTax && data.totalTax.trim() !== "";
+
+        // 시나리오 검증: 세율과 총 세액이 동시에 입력될 수 없음
+        if ((hasTaxPc || hasLocalPc) && hasTotalTax) {
+            alert('세율(소득세율, 지방세율)과 총 세액은 동시에 입력할 수 없습니다.\n- 세율 기반: 총 세액을 비워주세요.\n- 고정 세액 기반: 세율을 비워주세요.');
+            return;
+        }
+
+        // 시나리오 검증: 세율은 항상 쌍(pair)으로 입력되어야 함
+        if (hasTaxPc !== hasLocalPc) {
+            alert('소득세율과 지방세율은 함께 입력하거나 함께 비워두어야 합니다.');
+            return;
+        }
+        
+        // 데이터 정제 (서버로 보내기 전)
+        // (사용자가 실수로 입력한 값을 정리)
+        if (hasTaxPc || hasLocalPc) {
+            // 세율 기반 -> totalTax를 null로 보냄
+            data.totalTax = null;
+        } else if (hasTotalTax) {
+            // 고정 세액 기반 -> taxPc, localPc를 null로 보냄
+            data.taxPc = null;
+            data.localPc = null;
+        } else {
+            // 셋 다 비어있는 경우 (비과세 구간 등)
+            // 비과세 구간은 0으로 입력하는 것을 권장하지만, null로 보내도 무방
+            data.taxPc = null;
+            data.localPc = null;
+            // totalTax가 비어있으면 null로, 0이면 0으로 전송됨 (정상)
+            if (!hasTotalTax && data.totalTax.trim() === "") {
+                 data.totalTax = null;
+            }
+        }
+	    
+	    try {
+	    	
+	        const url = `/pay/simplified-tax-table`;
+	        const response = await fetch(url, {
+	            method: 'PUT', 
+	            headers: {
+	                'Content-Type': 'application/json',
+	            },
+	            body: JSON.stringify(data),
+	        });
+
+	        if (response.ok) {
+	            alert('성공적으로 수정되었습니다.');
+	            location.reload(); // 성공 시 페이지 새로고침
+	        } else {
+	            const errorText = await response.text();
+	            alert(`수정에 실패했습니다: ${errorText}`);
+	        }
+	    } catch (error) {
+	        console.error('Error:', error);
+	        alert('수정 중 오류가 발생했습니다.');
+	    }
+	}
+
+    </script>
+
+    </body>
+</html>

@@ -1,5 +1,7 @@
 package com.example.clsoftlab.controller.pay;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,11 +13,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.pay.CalcOrderDetailDto;
 import com.example.clsoftlab.dto.pay.CalcOrderRequestDto;
 import com.example.clsoftlab.service.pay.CalcOrderService;
+import com.example.clsoftlab.service.pay.PayItemService;
 
 import jakarta.validation.Valid;
 
@@ -25,18 +27,17 @@ public class CalcOrderController {
 
 
 	private final CalcOrderService calcOrderService;
+	private final PayItemService payItemService;
 	
-	public CalcOrderController(CalcOrderService calcOrderService) {
+	public CalcOrderController(CalcOrderService calcOrderService, PayItemService payItemService) {
 		this.calcOrderService = calcOrderService;
+		this.payItemService = payItemService;
 	}
 	
 	// 검색어로 목록 조회
 	@GetMapping("")
-	public String getCalcOrderList (@RequestParam(defaultValue = "") String itemCode, @RequestParam(defaultValue = "") String groupCode, 
-			@RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page, Model model) {
-		if (page == null) {
-			page = 0;
-		}
+	public String getCalcOrderList (@RequestParam(required = false) List<String> itemCode, @RequestParam(required = false) List<String> groupCode, 
+			@RequestParam(required = false) String useYn, @RequestParam(required = false, defaultValue = "0") Integer page, Model model) {
 		
 		int size = 1000;
 		
@@ -47,6 +48,8 @@ public class CalcOrderController {
 		model.addAttribute("groupCode", groupCode);
 		model.addAttribute("useYn", useYn);
 		model.addAttribute("calcOrderPage", calcOrderPage);
+		model.addAttribute("searchCalcOrderList", calcOrderService.findAll());
+		model.addAttribute("payItemList", payItemService.findAllForSearch());
 		
 		return "pay/calc-order/list";
 	}
@@ -66,40 +69,25 @@ public class CalcOrderController {
 	}
 	
 	// 코드 중복 체크
-	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public boolean checkOverlap (@RequestParam String itemCode) {
-		return calcOrderService.checkOverlap(itemCode);
+	public ResponseEntity<Boolean> checkOverlap (@RequestParam String itemCode) {
+		boolean result = calcOrderService.checkOverlap(itemCode);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 계산 순서 중복 체크
-	@ResponseBody
 	@GetMapping("/checkOverlap/order")
-	public boolean checkOverlappingOrder (@RequestParam Integer order, @RequestParam String groupCode , @RequestParam(defaultValue = "") String itemCode) {
-		return calcOrderService.checkOverlap(order, groupCode, itemCode);
+	public ResponseEntity<Boolean> checkOverlappingOrder (@RequestParam Integer order, @RequestParam String groupCode , @RequestParam(defaultValue = "") String itemCode) {
+		boolean result = calcOrderService.checkOverlap(order, groupCode, itemCode);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 상세 정보 조회
-	@GetMapping("/detail/{itemCode}")
-	public ResponseEntity<CalcOrderDetailDto> findById (@PathVariable String itemCode) {
-		return calcOrderService.findById(itemCode)
+	@GetMapping("/detail/{id}")
+	public ResponseEntity<CalcOrderDetailDto> findById (@PathVariable Long id) {
+		return calcOrderService.findById(id)
 				.map(dto -> ResponseEntity.ok(dto))
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
-	// 급여 항목 순서 검색'
-	@ResponseBody
-	@GetMapping("/list")
-	public Page<CalcOrderDetailDto> getCalcOrderList (@RequestParam(defaultValue = "") String itemCode, @RequestParam(defaultValue = "") String groupCode ,
-			@RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page) {
-		if (page == null) {
-			page = 0;
-		}
-		
-		int size = 1000;
-		
-		Page<CalcOrderDetailDto> calcOrderPage = calcOrderService.searchCalcOrder(itemCode, groupCode, useYn, page, size);
-		
-		return calcOrderPage;
-	}
 }

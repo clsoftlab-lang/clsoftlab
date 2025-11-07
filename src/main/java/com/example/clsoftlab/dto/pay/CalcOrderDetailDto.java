@@ -11,8 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CalcOrderDetailDto {
 	
-    private String itemCode;
-    private String itemName;
+    private String payItemCode;
+    private String payItemName;
     private Integer order;
     private String groupCode;
     private CalcOrderSimpleDetailDto dependsOn;

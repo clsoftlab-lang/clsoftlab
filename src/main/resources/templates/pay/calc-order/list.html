@@ -6,12 +6,15 @@
     <title>급여 항목 계산 순서 관리</title>
 
     <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
+	<link rel="stylesheet" href="/assets/css/select2-bootstrap-5-theme.min.css">
 </head>
 
 <body>
@@ -45,7 +48,9 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>항목 코드</label>
-                                        <input class="form-control " th:value="${itemCode}" data-modal-title="급여 항목 코드 입력"  name="itemCode">
+                                        <select name="itemCode" multiple="multiple" class="form-control" id="searchCalcOrderSelect">
+                                        	<option th:each="c : ${searchCalcOrderList}" th:value="${c.payItemCode}" th:text="|${c.payItemName} (${c.payItemCode})|" th:selected="${itemCode != null && #lists.contains(itemCode, c.payItemCode)}"></option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">

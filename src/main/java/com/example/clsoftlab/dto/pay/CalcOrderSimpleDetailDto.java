@@ -12,8 +12,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CalcOrderSimpleDetailDto {
 
-	private String itemCode;
-	private String itemName;
+	private String payItemCode;
+	private String payItemName;
 	
  }
 

@@ -14,6 +14,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CalcOrderRequestDto {
+	
+	private Long id;
 
 	@NotBlank(message = "항목 코드는 필수입니다.")
     private String itemCode;
@@ -25,7 +27,7 @@ public class CalcOrderRequestDto {
     @NotBlank(message = "계산 그룹은 필수입니다.")
     private String groupCode;
 
-    private String dependsOn;
+    private Long dependsOnId;
     private String note;
     
     @NotBlank(message = "사용 여부는 필수입니다.")

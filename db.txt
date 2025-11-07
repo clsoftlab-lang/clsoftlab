@@ -2274,20 +2274,132 @@ INSERT INTO ZHR_OVERTIME_DETAIL (ZEMP_NO, ZDATE, ZHOURS, ZTYPE, ZNOTE, CREATED_B
 ('2211010', '2025-02-16', 6.0, 'HOLIDAY', '데이터센터 이전 후 안정화 작업', 'system_batch'),
 ('2211010', '2025-07-12', 4.0, 'NIGHT', '네트워크 장비 교체 및 야간 모니터링', 'system_batch');
 
-CREATE TABLE ZHR_CALC_ORDER (
-    ZITEM_CD      VARCHAR(50)     NOT NULL COMMENT '항목 코드 (PK, FK from ZHR_PAY_ITEM)',
-    ZORDER        INT             NOT NULL COMMENT '계산 순서',
-    ZGROUP_CD     VARCHAR(20)     NOT NULL COMMENT '계산 그룹 (TAX, INSURANCE, ALLOW 등)',
-    ZDEPENDS_ON   VARCHAR(50)     NULL     COMMENT '선행(의존) 항목 코드 (Self-reference)',
-    ZNOTE         VARCHAR(500)    NULL     COMMENT '설명',
-    ZUSE_YN       CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
-    CREATED_AT    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY    VARCHAR(50)     NOT NULL COMMENT '생성자',
-    UPDATED_AT    DATETIME        NULL     COMMENT '수정 일시',
-    UPDATED_BY    VARCHAR(50)     NULL     COMMENT '수정자',
+-- 간이세액표 -- 
+CREATE TABLE ZHR_SIMPLIFIED_TAX_TABLE (
+    -- 1. ID 및 버전 필드
+    ZTAX_ID         BIGINT        NOT NULL AUTO_INCREMENT COMMENT '행 고유 ID (자동 증가)',
+    ZVERSION        INT           NOT NULL DEFAULT 0 COMMENT '데이터 버전 (Optimistic Lock용)',
 
-    -- 기본 키 설정
-    PRIMARY KEY (ZITEM_CD),
+    -- 2. 핵심 데이터 필드 (스토리보드 기준)
+    ZYEAR           CHAR(4)       NOT NULL COMMENT '기준 연도 (YYYY)',
+    ZFAMILY_CNT     INT           NOT NULL COMMENT '공제 대상 가족 수 (본인 포함)',
+    ZINCOME_AMT     BIGINT        NOT NULL COMMENT '월 소득 기준 금액 (소득 구간의 하한값)',
+    ZTAX_PC         DECIMAL(5, 2) NULL     COMMENT '소득세율 (%)',
+    ZLOCAL_PC       DECIMAL(5, 2) NULL     COMMENT '지방소득세율 (%)',
+    ZTOTAL_TAX      BIGINT        NULL     COMMENT '총 세액 (세율 대신 고정 금액 적용 시)',
+    ZUSE_YN         CHAR(1)       NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y: 사용, N: 미사용)',
+    ZNOTE           VARCHAR(500)  NULL     COMMENT '비고 사항',
+
+    -- 3. 감사 필드 (Audit Fields)
+    CREATED_BY      VARCHAR(100)  NULL     COMMENT '생성자 ID',
+    CREATED_AT      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    UPDATED_BY      VARCHAR(100)  NULL     COMMENT '수정자 ID',
+    UPDATED_AT      DATETIME      NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+
+    -- 4. 제약 조건 (Constraints)
+    -- 기본 키 (Primary Key): 자동 증가 ID 사용
+    PRIMARY KEY (ZTAX_ID),
+
+    -- 비즈니스 제약 (Unique Constraint): "동일 연도·가족 수 조합에서 ZINCOME_AMT 중복 불가"
+    UNIQUE KEY UK_ZHR_TAX_BIZ_KEY (ZYEAR, ZFAMILY_CNT, ZINCOME_AMT),
+
+    -- 검증 조건 (Check Constraints)
+    
+    CHECK (ZTAX_PC BETWEEN 0 AND 100),     -- 0~100 사이 값
+    CHECK (ZLOCAL_PC BETWEEN 0 AND 100),   -- 0~100 사이 값
+    CHECK (ZUSE_YN IN ('Y', 'N')),         -- 'Y' 또는 'N'만 허용
+    CHECK (ZINCOME_AMT >= 0),              -- 소득은 0 이상
+    CHECK (ZFAMILY_CNT >= 0)               -- 가족 수는 0 이상 (본인만 해당)
+    
+) COMMENT = '간이세액표 기준 관리 테이블';
+
+-- 더미데이터 -- 
+INSERT INTO ZHR_SIMPLIFIED_TAX_TABLE 
+(ZYEAR, ZFAMILY_CNT, ZINCOME_AMT, ZTAX_PC, ZLOCAL_PC, ZTOTAL_TAX, ZNOTE, CREATED_BY) 
+VALUES
+
+-- [2024년 기준 데이터] (국세청 자료 일괄 업로드) --
+
+-- 2024년 / 1인 가구 (본인)
+('2024', 1, 0,       NULL, NULL, 0,      '비과세 구간', 'batch_upload'),
+('2024', 1, 2000000, NULL, NULL, 22000,  '월 소득 200만원 이상 ~ 250만원 미만', 'batch_upload'),
+('2024', 1, 2500000, NULL, NULL, 55000,  '월 소득 250만원 이상 ~ 300만원 미만', 'batch_upload'),
+('2024', 1, 3000000, NULL, NULL, 98000,  '월 소득 300만원 이상 ~ 350만원 미만', 'batch_upload'),
+('2024', 1, 4000000, NULL, NULL, 185000, '월 소득 400만원 이상 ~ 450만원 미만', 'batch_upload'),
+('2024', 1, 5000000, NULL, NULL, 310000, '월 소득 500만원 이상 ~ 550만원 미만', 'batch_upload'),
+
+-- 2024년 / 2인 가구 (본인 + 1)
+('2024', 2, 0,       NULL, NULL, 0,      '비과세 구간', 'batch_upload'),
+('2024', 2, 2000000, NULL, NULL, 10000,  '월 소득 200만원 이상 ~ 250만원 미만', 'batch_upload'),
+('2024', 2, 2500000, NULL, NULL, 34000,  '월 소득 250만원 이상 ~ 300만원 미만', 'batch_upload'),
+('2024', 2, 3000000, NULL, NULL, 72000,  '월 소득 300만원 이상 ~ 350만원 미만', 'batch_upload'),
+('2024', 2, 4000000, NULL, NULL, 151000, '월 소득 400만원 이상 ~ 450만원 미만', 'batch_upload'),
+('2024', 2, 5000000, NULL, NULL, 265000, '월 소득 500만원 이상 ~ 550만원 미만', 'batch_upload'),
+
+-- 2024년 / 3인 가구 (본인 + 2)
+('2024', 3, 0,       NULL, NULL, 0,      '비과세 구간', 'batch_upload'),
+('2024', 3, 2000000, NULL, NULL, 0,      '비과세 구간', 'batch_upload'),
+('2024', 3, 2500000, NULL, NULL, 15000,  '월 소득 250만원 이상 ~ 300만원 미만', 'batch_upload'),
+('2024', 3, 3000000, NULL, NULL, 48000,  '월 소득 300만원 이상 ~ 350만원 미만', 'batch_upload'),
+('2024', 3, 4000000, NULL, NULL, 120000, '월 소득 400만원 이상 ~ 450만원 미만', 'batch_upload'),
+('2024', 3, 5000000, NULL, NULL, 225000, '월 소득 500만원 이상 ~ 550만원 미만', 'batch_upload'),
+
+
+-- [2025년 기준 데이터] (국세청 자료 일괄 업로드) --
+
+-- 2025년 / 1인 가구 (본인)
+('2025', 1, 0,       NULL, NULL, 0,      '비과세 구간', 'system_admin'),
+('2025', 1, 2000000, NULL, NULL, 23000,  '월 소득 200만원 이상 ~ 250만원 미만', 'system_admin'),
+('2025', 1, 2500000, NULL, NULL, 57000,  '월 소득 250만원 이상 ~ 300만원 미만', 'system_admin'),
+('2025', 1, 3000000, NULL, NULL, 101000, '월 소득 300만원 이상 ~ 350만원 미만', 'system_admin'),
+('2025', 1, 4000000, NULL, NULL, 190000, '월 소득 400만원 이상 ~ 450만원 미만', 'system_admin'),
+('2025', 1, 5000000, NULL, NULL, 318000, '월 소득 500만원 이상 ~ 550만원 미만', 'system_admin'),
+
+-- 2025년 / 2인 가구 (본인 + 1)
+('2025', 2, 0,       NULL, NULL, 0,      '비과세 구간', 'system_admin'),
+('2025', 2, 2000000, NULL, NULL, 11000,  '월 소득 200만원 이상 ~ 250만원 미만', 'system_admin'),
+('2025', 2, 2500000, NULL, NULL, 36000,  '월 소득 250만원 이상 ~ 300만원 미만', 'system_admin'),
+('2025', 2, 3000000, NULL, NULL, 75000,  '월 소득 300만원 이상 ~ 350만원 미만', 'system_admin'),
+('2025', 2, 4000000, NULL, NULL, 155000, '월 소득 400만원 이상 ~ 450만원 미만', 'system_admin'),
+('2025', 2, 5000000, NULL, NULL, 270000, '월 소득 500만원 이상 ~ 550만원 미만', 'system_admin'),
+
+-- 2025년 / 3인 가구 (본인 + 2)
+('2025', 3, 0,       NULL, NULL, 0,      '비과세 구간', 'system_admin'),
+('2025', 3, 2000000, NULL, NULL, 0,      '비과세 구간', 'system_admin'),
+('2025', 3, 2500000, NULL, NULL, 16000,  '월 소득 250만원 이상 ~ 300만원 미만', 'system_admin'),
+('2025', 3, 3000000, NULL, NULL, 50000,  '월 소득 300만원 이상 ~ 350만원 미만', 'system_admin'),
+('2025', 3, 4000000, NULL, NULL, 124000, '월 소득 400만원 이상 ~ 450만원 미만', 'system_admin'),
+('2025', 3, 5000000, NULL, NULL, 230000, '월 소득 500만원 이상 ~ 550만원 미만', 'system_admin'),
+
+-- (예외 케이스) 세율(%) 기반으로 계산하는 경우 (스토리보드 5번 조건)
+('2025', 1, 10000000, 24.00, 2.40, NULL, '고소득자 구간, 세율 기반 계산', 'system_admin');
+
+-- 급여 항목 계산 우선순위 --
+CREATE TABLE ZHR_CALC_ORDER (
+    
+    CALC_ID       BIGINT         NOT NULL AUTO_INCREMENT COMMENT '순서 관리 ID (PK)',
+    
+    ZITEM_CD      VARCHAR(20)    NOT NULL COMMENT '항목 코드 (FK from ZHR_PAY_ITEM, UK)',
+    ZORDER        INT            NOT NULL COMMENT '계산 순서',
+    ZGROUP_CD     VARCHAR(20)    NOT NULL COMMENT '계산 그룹 (TAX, INSURANCE, ALLOW 등)',
+    ZDEPENDS_ON   VARCHAR(20)    NULL     COMMENT '선행(의존) 항목 코드 (Self-reference)',
+    ZNOTE         VARCHAR(500)   NULL     COMMENT '설명',
+    ZUSE_YN       CHAR(1)        NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    
+    --  데이터 버전 관리 (낙관적 락)
+    ZVERSION      INT            NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 락용)',
+    
+    -- 감사 컬럼
+    CREATED_AT    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY    VARCHAR(50)    NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME       NULL     COMMENT '수정 일시',
+    UPDATED_BY    VARCHAR(50)    NULL     COMMENT '수정자',
+
+    -- 기본 키 설정 
+    PRIMARY KEY (CALC_ID),
+
+    --  항목 코드의 고유성 보장 
+    UNIQUE KEY UK_ZITEM_CD (ZITEM_CD),
 
     -- 비즈니스 규칙에 따른 고유 키 설정 (그룹 내 계산 순서 중복 방지)
     UNIQUE KEY UK_CALC_ORDER_UNIQUE (ZGROUP_CD, ZORDER),
@@ -2308,6 +2420,7 @@ CREATE TABLE ZHR_CALC_ORDER (
 
 ) COMMENT '급여 항목 계산 순서 정의';
 
+-- 더미데이터 --
 INSERT INTO ZHR_CALC_ORDER 
 (ZITEM_CD, ZORDER, ZGROUP_CD, ZDEPENDS_ON, ZNOTE, ZUSE_YN, CREATED_BY) 
 VALUES
@@ -2344,7 +2457,12 @@ VALUES
 ('DED004', 3, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
 ('DED005', 4, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
 ('DED006', 5, 'DEDUCT', NULL, '기타 공제 항목', 'Y', 'system_admin'),
-('DED001', 6, 'DEDUCT', NULL, '현재 사용하지 않는 공제 항목', 'N', 'system_admin');
+('DED001', 6, 'DEDUCT', NULL, '현재 사용하지 않는 공제 항목', 'N', 'system_admin'),
+
+-- [추가] ZHR_PAY_ITEM에만 있고 ZHR_CALC_ORDER에 누락된 항목들 추가
+('DED101', 7, 'DEDUCT', NULL, '무급 병가 사용 시 감액', 'Y', 'system_admin'),
+('DED102', 8, 'DEDUCT', NULL, '징계위원회 결과 감봉 조치', 'Y', 'system_admin'),
+('DED103', 9, 'DEDUCT', NULL, '무단 결근 시 감액', 'Y', 'system_admin');
 
 CREATE TABLE ZHR_ALLOW_CYCLE (
     ZITEM_CD    VARCHAR(50)     NOT NULL COMMENT '항목 코드 (PK, FK from ZHR_PAY_ITEM)',
