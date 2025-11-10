@@ -14,4 +14,7 @@ public interface PayItemRepository extends JpaRepository<PayItem, String>, JpaSp
 	// 검색용 list
 	List<PayItem> findAllByOrderByItemCode();
 
+	// 타입 조건으로 리스트로 조회
+	List<PayItem> findAllByItemTypeOrderByItemCode(String itemType);
+
 }

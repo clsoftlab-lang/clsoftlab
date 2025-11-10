@@ -11,11 +11,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CalcOrderDetailDto {
 	
+	private Long id;
     private String payItemCode;
     private String payItemName;
     private Integer order;
     private String groupCode;
     private CalcOrderSimpleDetailDto dependsOn;
+    private String dependsOnPayItemCode;
     private String note;
     private String useYn;
 

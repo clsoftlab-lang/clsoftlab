@@ -49,20 +49,19 @@
                                     <div class="form-group">
                                         <label>항목 코드</label>
                                         <select name="itemCode" multiple="multiple" class="form-control" id="searchCalcOrderSelect">
-                                        	<option th:each="c : ${searchCalcOrderList}" th:value="${c.payItemCode}" th:text="|${c.payItemName} (${c.payItemCode})|" th:selected="${itemCode != null && #lists.contains(itemCode, c.payItemCode)}"></option>
+                                        	<option th:each="c : ${calcOrderList}" th:value="${c.payItemCode}" th:text="|${c.payItemName} (${c.payItemCode})|" th:selected="${itemCode != null && #lists.contains(itemCode, c.payItemCode)}"></option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>계산 그룹</label>
-                                        <select class="form-select" name="groupCode">
-                                            <option value="">전체</option>
-                                            <option value="PAY" th:selected="${groupCode == 'PAY'}">과세지급</option>
-                                            <option value="ALLOWANCE" th:selected="${groupCode == 'ALLOWANCE'}">비과세지급</option>
-                                            <option value="INSURANCE" th:selected="${groupCode == 'INSURANCE'}">사회보험</option>
-                                            <option value="TAX" th:selected="${groupCode == 'TAX'}">세금</option>
-                                            <option value="DEDUCT" th:selected="${groupCode == 'DEDUCT'}">기타공제</option>
+                                        <select class="form-select" name="groupCode" multiple="multiple" id="searchGroupCodeSelect">
+                                            <option value="PAY" th:selected="${groupCode != null && #lists.contains(groupCode, 'PAY')}">과세지급</option>
+                                            <option value="ALLOWANCE" th:selected="${groupCode != null && #lists.contains(groupCode, 'ALLOWANCE')}">비과세지급</option>
+                                            <option value="INSURANCE" th:selected="${groupCode != null && #lists.contains(groupCode, 'INSURANCE')}">사회보험</option>
+                                            <option value="TAX" th:selected="${groupCode != null && #lists.contains(groupCode, 'TAX')}">세금</option>
+                                            <option value="DEDUCT" th:selected="${groupCode != null && #lists.contains(groupCode, 'DEDUCT')}">기타공제</option>
                                         </select>
                                     </div>
                                 </div>
@@ -79,7 +78,6 @@
                                 <div class="col-md-3 d-flex align-items-end">
                                     <div class="form-group w-100 position-relative">
                                         <button type="submit" class="btn btn-primary w-100">조회</button>
-                                        <button type="button" id="searchResetBtn" class="btn btn-sm btn-outline-secondary position-absolute" style="top: -40px; right: 0;">초기화</button>
                                     </div>
                                 </div>
                             </div>
@@ -93,7 +91,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover" id="calcOrderTable">
+                            <table class="table table-striped table-hover datatable-resizable" id="dataTable">
                                 <thead class="table-light">
                                     <tr>
                                         <th>항목코드</th>
@@ -108,16 +106,18 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="c : ${calcOrder}">
-                                        <td th:text="${c.itemCode}"></td>
-                                        <td th:text="${c.itemName}"></td>
+                                        <td th:text="${c.payItemCode}"></td>
+                                        <td th:text="${c.payItemName}"></td>
                                         <td th:text="${c.order}"></td>
                                         <td th:text="${c.groupCode}"></td>
-                                        <td th:text="${c.dependsOn?.itemCode}"></td>
+                                        <td th:text="${c.dependsOn != null ? (c.dependsOn.payItemName + '(' + c.dependsOn.payItemCode + ')') : ''}"></td>
                                         <td th:text="${#strings.abbreviate(c.note, 50)}"></td>
-                                        <td th:text="${c.useYn}"></td>
+                                        <td>
+                                        	<input type="checkbox" class="form-check-input" th:checked="${c.useYn == 'Y'}" onclick="return false;">
+                                        </td>
                                         <td>
                                             <button class="btn btn-sm btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"
-                                                th:data-id="${c.itemCode}">수정</button>
+                                                th:data-id="${c.id}">수정</button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -141,18 +141,20 @@
                                 <form id="addForm">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label ">항목 코드</label>
-                                            <input class="form-control selector-input"readonly placeholder="클릭하여 항목 선택" 
-                                            data-modal-title="급여 항목 선택"  data-api-url="/pay/pay-item/list" data-search-form="#payItemSearchForm">
-                                            <input type="hidden" name="itemCode">
+                                            <label class="form-label ">항목 코드<span class="text-danger">*</span></label>
+                                            <select name="itemCode" class="form-control" id="payItemSelect">
+                                            	<option value="">--- 항목 선택 ---</option>
+	                                        	<option th:each="p : ${payItemList}" th:value="${p.itemCode}" th:text="|${p.itemName} (${p.itemCode})|" ></option>
+	                                        </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">계산 순서</label>
+                                            <label class="form-label">계산 순서<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="order" required min="1" max="99999999">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">계산 그룹</label>
+                                            <label class="form-label">계산 그룹<span class="text-danger">*</span></label>
                                             <select class="form-select" name="groupCode" required>
+                                            	<option value="">--- 계산 그룹 선택 ---</option>
                                                 <option value="PAY">과세지급</option>
                                                 <option value="ALLOWANCE">비과세지급</option>
                                                 <option value="INSURANCE">사회보험</option>
@@ -162,22 +164,24 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label ">선행 항목</label>
-                                            <input class="form-control selector-input" readonly placeholder="클릭하여 항목 선택"
-                                            data-modal-title="선행 항목 선택" data-api-url="/pay/calc-order/list" data-search-form="#calcOrderSearchForm">
-                                            <input type="hidden" name="dependsOn">
+                                            <select name="dependsOnId" class="form-control" id="calcOrderSelect">
+                                            	<option value="">--- 항목 선택 ---</option>
+	                                        	<option th:each="c : ${calcOrderList}" th:value="${c.id}" th:text="|${c.payItemName} (${c.payItemCode})|" ></option>
+	                                        </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">사용 여부</label>
-                                            <select class="form-select" name="useYn" required>
-                                                <option value="Y">Y</option>
-                                                <option value="N">N</option>
-                                            </select>
+                                            <label class="form-label">사용 여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+                                            	<input type="hidden" name="useYn" value="N">
+                                            	<input type="checkbox" name="useYn" class="form-check-input" value="Y" checked>
+                                           	</div>
                                         </div>
                                         <div class="col-md-12 mb-3">
                                             <label class="form-label">설명</label>
                                             <textarea class="form-control" rows="3" name="note" maxlength="500"></textarea>
                                         </div>
                                     </div>
+                                    
                                 </form>
                             </div>
                             <div class="modal-footer gap-2">
@@ -198,17 +202,19 @@
                             </div>
                             <div class="modal-body">
                                 <form id="editForm">
+                                	<input type="hidden" name="id">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label ">항목 코드</label>
-                                            <input type="text" class="form-control" name="itemCode" readonly>
+                                            <input type="text" class="form-control" name="payItemDisplay" readonly>
+                                            <input type="hidden" name="itemCode"> 
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">계산 순서</label>
+                                            <label class="form-label">계산 순서<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="order" required min="1" max="99999999">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">계산 그룹</label>
+                                            <label class="form-label">계산 그룹<span class="text-danger">*</span></label>
                                             <select class="form-select" name="groupCode" required>
                                                 <option value="PAY">과세지급</option>
                                                 <option value="ALLOWANCE">비과세지급</option>
@@ -219,16 +225,17 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">선행 항목</label>
-                                            <input class="form-control selector-input" readonly placeholder="클릭하여 항목 선택"
-                                            data-modal-title="선행 항목 선택"  data-api-url="/pay/calc-order/list" data-search-form="#calcOrderSearchForm">
-                                            <input type="hidden" name="dependsOn">
+                                            <select name="dependsOnId" class="form-control" id="updateCalcOrderSelect">
+                                            	<option value="">--- 선행 항목 없음 ---</option>
+	                                        	<option th:each="c : ${calcOrderList}" th:value="${c.id}" th:text="|${c.payItemName} (${c.payItemCode})|" ></option>
+	                                        </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">사용 여부</label>
-                                            <select class="form-select" name="useYn" required>
-                                                <option value="Y">Y</option>
-                                                <option value="N">N</option>
-                                            </select>
+                                            <label class="form-label">사용 여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">
+                                            	<input type="hidden" name="useYn" value="N">
+                                            	<input type="checkbox" class="form-check-input" name="useYn" value="Y">
+                                            </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
                                             <label class="form-label">설명</label>
@@ -244,85 +251,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="modal fade" id="selectModal" tabindex="-1">
-				    <div class="modal-dialog modal-lg modal-dialog-centered">
-				        <div class="modal-content">
-				            <div class="modal-header">
-				                <h5 class="modal-title">급여 항목 선택</h5>
-				                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				            </div>
-				            <div class="modal-body">
-				                
-				                <div id="payItemSearchForm" class="card card-body mb-3 modal-search-form">
-							        <form>
-							            <div class="row">
-							                <div class="col-md-4">
-							                    <input type="text" class="form-control" placeholder="항목명 검색" name="itemName">
-							                </div>
-							                <div class="col-md-3">
-							                    <select class="form-select" name="useYn">
-							                        <option value="">사용(전체)</option>
-							                        <option value="Y">Y</option>
-							                        <option value="N">N</option>
-							                    </select>
-							                </div>
-							                <div class="col-md-2">
-							                    <button type="submit" class="btn btn-primary w-100">조회</button>
-							                </div>
-							            </div>
-							        </form>
-							    </div>
-							
-							    <div id="calcOrderSearchForm" class="card card-body mb-3 modal-search-form" style="display: none;">
-							        <form>
-							            <div class="row">
-							                <div class="col-md-3">
-							                    <input type="text" class="form-control" placeholder="항목코드 검색" name="itemCode">
-							                </div>
-							                <div class="col-md-3">
-							                    <select class="form-select" name="groupCode">
-							                        <option value="">그룹(전체)</option>
-							                        <option value="PAY">과세지급</option>
-							                        <option value="ALLOWANCE">비과세지급</option>
-							                        <option value="INSURANCE">사회보험</option>
-							                        <option value="TAX">세금</option>
-							                        <option value="DEDUCT">기타공제</option>
-							                    </select>
-							                </div>
-							                <div class="col-md-3">
-							                    <select class="form-select" name="useYn">
-							                        <option value="">사용(전체)</option>
-							                        <option value="Y">Y</option>
-							                        <option value="N">N</option>
-							                    </select>
-							                </div>
-							                <div class="col-md-2">
-							                    <button type="submit" class="btn btn-primary w-100">조회</button>
-							                </div>
-							            </div>
-							        </form>
-							    </div>
-				                
-				                <div class="table-responsive">
-				                    <table class="table table-hover datatable" id="item-select-table">
-				                        <thead>
-				                            <tr>
-				                                <th>항목코드</th>
-				                                <th>항목명</th>
-				                                <th>사용여부</th>
-				                            </tr>
-				                        </thead>
-				                        <tbody id="item-list-body">
-				                            </tbody>
-				                    </table>
-				                </div>
-				
-				            </div>
-				        </div>
-				    </div>
-				</div>
-
             </div>
 
             <div th:replace="~{common/footer :: footer}"></div>
@@ -330,21 +258,17 @@
     </div>
 
     <script src="/assets/js/jquery-3.7.1.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.slimscroll.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="/assets/js/jquery.dataTables.min.js"></script>
-    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
-    <script src="/assets/js/script.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
+	<script src="/assets/js/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
+	<script src="https://unpkg.com/feather-icons"></script>
+	<script src="/assets/js/jquery.dataTables.min.js"></script>
+	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
     
     <script type="text/javascript" th:inline="none">
-	    new DataTable('#calcOrderTable', {
-	        order: [[3, 'asc'], [2, 'asc']] // 그룹, 계산순서 순으로 정렬
-	    });
-	    
-	    let selectModalInstance;
-		let selectDataTable;
-		let currentTargetInput;
 	    
  		document.addEventListener('DOMContentLoaded', function () {
 	  		// 수정 모달창을 열 때, 불러오기.
@@ -359,148 +283,66 @@
 		        });
 		    }
 		    
-		    const selectModal = document.getElementById('selectModal');
-	        if (selectModal) {
-	            selectModalInstance = new bootstrap.Modal(selectModal);
-	        }
-	        
-	     	// 급여 선택 항목에서, 검색시 급여 화면으로 넘어가는걸 방지.
-	        document.getElementById('payItemSearchForm').addEventListener('submit', handleModalSearch);
-    		document.getElementById('calcOrderSearchForm').addEventListener('submit', handleModalSearch);
-	        
-	        document.querySelectorAll('.selector-input').forEach(input => {
-	            input.addEventListener('click', openSelectorModal);
-	        });
+		    $('#searchCalcOrderSelect').select2({theme: "bootstrap-5"});
+		    $('#searchGroupCodeSelect').select2({theme: "bootstrap-5"});
+		    $('#payItemSelect').select2({
+		        dropdownParent: $('#addModal'),
+		        theme: "bootstrap-5"
+		    });
+		    $('#calcOrderSelect').select2({
+		        dropdownParent: $('#addModal'),
+		        theme: "bootstrap-5"
+		    });
+		    $('#updateCalcOrderSelect').select2({
+		        dropdownParent: $('#editModal'),
+		        theme: "bootstrap-5"
+		    });
+		    
+		    const tableSpecificOptions = {
+                    'columns': [
+                        null,                                                        // 0. 항목코드 (검색 O, 정렬 O)
+                        null,                                                        // 1. 항목명 (검색 O, 정렬 O)
+                        { "searchable": false, "orderable": true },                  // 2. 계산순서 (검색 X, 정렬 O)
+                        null,                                                        // 3. 그룹 (검색 O, 정렬 O)
+                        null,                                                        // 4. 선행항목 (검색 O, 정렬 O)
+                        { "searchable": true, "orderable": false },                   // 5. 설명 (검색 O, 정렬 X)
+                        { "width": "80px", "searchable": true, "orderable": true },  // 6. 사용여부 (검색 O, 정렬 O)
+                        { "width": "80px", "searchable": false, "orderable": false }  // 7. 수정 (버튼) (검색 X, 정렬 X)
+                    ],
+                    
+                    // 1순위: 그룹(3, 오름차순)
+                    // 2순위: 계산순서(2, 오름차순)
+                    "order": [[ 3, "asc" ], [ 2, "asc" ]], 
+
+                    // DataTables 한글화 및 기본 설정 (유지)
+                    "language": {
+                        "emptyTable": "데이터가 없습니다.",
+                        "info": "_START_ - _END_ / _TOTAL_ 항목",
+                        "infoEmpty": "0 항목",
+                        "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+                        "lengthMenu": "_MENU_ 개씩 보기",
+                        "loadingRecords": "로딩중...",
+                        "processing": "처리중...",
+                        "search": "검색: ",
+                        "zeroRecords": "일치하는 항목이 없습니다.",
+                        "paginate": {
+                            "first": "처음",
+                            "last": "마지막",
+                            "next": "다음",
+                            "previous": "이전"
+                        }
+                    },
+                    "pageLength": 10, 
+                    "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+                };
+		    
+		    initializeResizableDataTable('#dataTable',tableSpecificOptions);
 	    	
-	    	 // 모달 테이블의 행 클릭 시 값 입력 및 모달 닫기 
-	        document.getElementById('item-select-table').addEventListener('click', function(event) {
-		            const selectedRow = event.target.closest('.select-item-row');
-		            if (selectedRow && currentTargetInput ) {
-		                const code = selectedRow.dataset.code;
-		                const name = selectedRow.dataset.name;
-		                
-		                currentTargetInput.value = `${name} (${code})`;
-		                
-		                const hiddenInput = currentTargetInput.nextElementSibling;
-		                if (hiddenInput && hiddenInput.type === 'hidden') {
-		                    hiddenInput.value = code;
-		                }
-		                
-		                if (selectModalInstance) selectModalInstance.hide();
-		                currentTargetInput = null; // 사용 후 변수 초기화
-		            }
-		        });
-	    	 
-	     	// 검색창 초기화.
-	        const searchResetBtn = document.getElementById('searchResetBtn');
-	        if (searchResetBtn) {
-	            searchResetBtn.addEventListener('click', function() {
-	                const searchForm = document.getElementById('searchForm');
-	                if (searchForm) {
-	                    searchForm.querySelector('input[name="itemCode"]').value = '';
-	                    searchForm.querySelector('[name="groupCode"]').value = '';
-	                    searchForm.querySelector('[name="useYn"]').value = '';
-	                }
-	            });
-	       	}  
 		    
  		
 		});
  		
- 		//  input 클릭 시 실행될 공통 함수
-
-		async function openSelectorModal(event) {
-		    currentTargetInput = event.target; 
-		
-		    const title = currentTargetInput.dataset.modalTitle;
-		    const apiUrl = currentTargetInput.dataset.apiUrl;
-		    const searchFormId = currentTargetInput.dataset.searchForm;
-		    
-		 	// 1. 모든 검색 폼을 일단 숨김
-		    document.querySelectorAll('.modal-search-form').forEach(form => {
-		        form.style.display = 'none';
-		    });
-
-		    // 2. 보여줘야 할 폼만 표시
-		    const activeSearchForm = document.querySelector(searchFormId);
-		    if (activeSearchForm) {
-		        activeSearchForm.style.display = 'block';
-		        activeSearchForm.querySelector('form').reset(); // 폼 내용 초기화
-		    }
-		
-		    document.querySelector('#selectModal .modal-title').textContent = title;
-		    
-		    if (!selectDataTable) { 
-		        initializeDataTable(); // 최초 한 번만 DataTables 초기화
-		    }
-		    await loadDataForModal(apiUrl); // API URL을 인자로 전달
-		
-		    // 5. 모달 띄우기
-		    if (selectModalInstance) {
-		        selectModalInstance.show();
-		    }
-		}
- 		
-		 // 모달 내 검색 버튼 클릭 시 실행될 핸들러
-	    async function handleModalSearch(event) {
-	        event.preventDefault(); // 폼 기본 제출 방지
-	        
-	        const visibleForm = document.querySelector('.modal-search-form[style*="block"] form');
-	        if (!visibleForm) return;
-	        
-	        const formData = new FormData(event.target);
-	        const searchParams = new URLSearchParams(formData).toString();
-	        if (currentTargetInput) {
-	            const apiUrl = currentTargetInput.dataset.apiUrl;
-	            await loadDataForModal(apiUrl, searchParams);
-	        }
-	    }
-		 
-	 	// 회비 항목 선택 테이블 초기화 함수
-	    function initializeDataTable() {
-	        selectDataTable = $('#item-select-table').DataTable({
-	            // DataTables 옵션 설정
-	            destroy: true,
-	            searching: true, 
-	            lengthChange: true, 
-	            pageLength: 15,       // 한 페이지에 15개씩 표시
-	            info: true,          // 'Showing 1 to 5 of...' 정보 표시
-	            
-	            // 서버에서 받은 JSON 데이터의 키와 테이블 컬럼을 매핑
-	            columns: [ 
-	                { data: 'itemCode' },
-	                { data: 'itemName' },
-	                { data: 'useYn' }
-	            ],
-	            
-	            // 각 행(row)이 생성될 때 추가 작업을 수행
-	            createdRow: function(row, data, dataIndex) {
-	                // 클릭 이벤트를 위해 필요한 클래스와 data-* 속성을 추가
-	                $(row).addClass('select-item-row').css('cursor', 'pointer');
-	                $(row).attr('data-code', data.itemCode);
-	                $(row).attr('data-name', data.itemName);
-	            }
-	        });
-	    }
 	 	
-		// fetch를 이용해 PayItem 리스트를 불러오는 함수
-	    async function loadDataForModal(apiUrl, searchParams = '') {
-		    try {
-		        const fullUrl = `${apiUrl}?${searchParams}`;
-		        const response = await fetch(fullUrl); 
-		        if (!response.ok) throw new Error('데이터 로딩 실패');
-		        
-		        const pageData = await response.json();
-		        const items = pageData.content; // API 응답 구조에 따라 조정
-		        
-		        if (selectDataTable) {
-		            selectDataTable.clear().rows.add(items).draw();
-		        }
-		    } catch (error) {
-		        console.error(error);
-		    }
-		}
-
 	 // 새 항목 등록
 	    async function addNewCalcOrder() {
 			const addForm = document.getElementById('addForm');
@@ -517,8 +359,13 @@
 		    	return;
 		    }
 		    
-		    if (!data.dependsOn || !data.dependsOn.trim()) {
-		    	data.dependsOn = null;
+		    if (!data.groupCode) {
+		    	alert('계산 그룹을 선택해주세요.');
+		    	return;
+		    }
+		    
+		    if (!data.dependsOnId || !data.dependsOnId.trim()) {
+		    	data.dependsOnId = null;
 		    }
 		    
 		    // --- 서버 작업 시작 ---
@@ -528,7 +375,7 @@
 		        const codeCheckResult = await codeResponse.text();
 		        
 		        if (codeCheckResult == 'true') { 
-		            alert('이미 계산 순서가 등록된 항목 코드입니다.'); 
+		            alert('이미 계산 순서가 정의된 항목입니다. 다른 항목을 선택해 주세요.'); 
 		            return;
 		        }
 		        
@@ -536,7 +383,7 @@
 		        const orderCheckResult = await orderResponse.text();
 		        
 		        if (orderCheckResult == 'true') { 
-		            alert('해당 그룹 내에 동일한 계산 순서가 이미 존재합니다.'); 
+		            alert('선택하신 [계산 그룹]에 동일한 [계산 순서]가 이미 존재합니다. 다른 순서를 입력해 주세요.'); 
 		            return;
 		        }
 		        
@@ -577,26 +424,23 @@
 
 		        for (const key in data) {
 		            const field = editForm.querySelector(`[name="${key}"]`);
+					const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
 		            
-		            if (field) { 
-	                    field.value = data[key];
+		            if (checkbox && field && field.type === 'hidden') {
+		                checkbox.checked = (data[key] === 'Y');
+		            } else if (field) {
+		                field.value = data[key];
 		            }
 		        }
 		        
-		        // dependsON만 예외로 처리
-		        const dependsOnData = data.dependsOn;
-		        const hiddenDependsOnInput = editForm.querySelector('input[type="hidden"][name="dependsOn"]');
-		        // 숨겨진 input의 바로 앞에 있는 형제 요소(보이는 input)를 찾음
-		        const visibleDependsOnInput = hiddenDependsOnInput.previousElementSibling; 
-
-		        if (dependsOnData) { // 선행 항목 데이터가 있을 경우
-		            visibleDependsOnInput.value = `${dependsOnData.itemName} (${dependsOnData.itemCode})`;
-		            hiddenDependsOnInput.value = dependsOnData.itemCode;
-		        } else { // 선행 항목 데이터가 null일 경우
-		            visibleDependsOnInput.value = ''; // 보이는 input을 비움
-		            hiddenDependsOnInput.value = '';  // 숨겨진 input도 비움
+		        const itemCodeField = editForm.querySelector('[name="itemCode"]');
+		        const payItemField = editForm.querySelector('[name="payItemDisplay"]');
+		        if (itemCodeField && payItemField && data.payItemName && data.payItemCode) {
+		        	itemCodeField.value = `${data.payItemCode}`;
+		        	payItemField.value = `${data.payItemName} (${data.payItemCode})`;
+		            
 		        }
-
+		        
 		    } catch (error) {
 		        console.error('Error:', error);
 		        alert(error.message);
@@ -614,11 +458,11 @@
 		    	return;
 		    }
 		    
-		    if (!data.dependsOn || !data.dependsOn.trim()) {
-		    	data.dependsOn = null;
+		    if (!data.dependsOnId || !data.dependsOnId.trim()) {
+		    	data.dependsOnId = null;
 		    }
 		    
-		    if(data.itemCode == data.dependsOn) {
+		    if(data.id == data.dependsOnId) {
 		    	alert('자기 자신을 선행 항목으로 지정할 수 없습니다.')
 		    	return;
 		    }
@@ -629,7 +473,7 @@
 		        const checkResult = await checkResponse.text();
 		        
 		        if (checkResult == 'true') { 
-		            alert('해당 그룹 내에 동일한 계산 순서가 이미 존재합니다.'); 
+		            alert('선택하신 [계산 그룹]에 동일한 [계산 순서]가 이미 존재합니다. 다른 순서를 입력해 주세요.'); 
 		            return;
 		        }
 		        

@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CalcOrderSimpleDetailDto {
 
+	private Long id;
 	private String payItemCode;
 	private String payItemName;
 	

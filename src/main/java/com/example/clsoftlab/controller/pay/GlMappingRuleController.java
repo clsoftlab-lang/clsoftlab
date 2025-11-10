@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.pay.GlMappingRuleDetailDto;
 import com.example.clsoftlab.dto.pay.GlMappingRuleRequestDto;
 import com.example.clsoftlab.dto.pay.GlMappingRuleSearchDto;
 import com.example.clsoftlab.service.pay.GlMappingRuleService;
+import com.example.clsoftlab.service.pay.PayItemService;
 
 import jakarta.validation.Valid;
 
@@ -26,17 +26,16 @@ import jakarta.validation.Valid;
 public class GlMappingRuleController {
 
 	private final GlMappingRuleService glMappingRuleService;
+	private final PayItemService payItemService;
 	
-	public GlMappingRuleController(GlMappingRuleService glMappingRuleService) {
+	public GlMappingRuleController(GlMappingRuleService glMappingRuleService, PayItemService payItemService) {
 		this.glMappingRuleService = glMappingRuleService;
+		this.payItemService = payItemService;
 	}
 	
 	// 검색어로 목록 조회
 	@GetMapping("")
-	public String getGlMappingRuleList (@ModelAttribute GlMappingRuleSearchDto search, @RequestParam(required = false) Integer page, Model model) {
-		if (page == null) {
-			page = 0;
-		}
+	public String getGlMappingRuleList (@ModelAttribute GlMappingRuleSearchDto search, @RequestParam(required = false, defaultValue = "0") Integer page, Model model) {
 		
 		int size = 1000;
 		
@@ -46,7 +45,12 @@ public class GlMappingRuleController {
 		model.addAttribute("itemCode", search.getItemCode());
 		model.addAttribute("bizCode", search.getBizCode());
 		model.addAttribute("costCntr", search.getCostCntr());
+		model.addAttribute("useYn", search.getUseYn());
 		model.addAttribute("glMappingRulePage", glMappingRulePage);
+		model.addAttribute("payItemList", payItemService.findAllForSearch());
+		model.addAttribute("searchPayItemList", glMappingRuleService.getPayItemList());
+		model.addAttribute("searchBizCodeList", glMappingRuleService.getBizCodeList());
+		model.addAttribute("searchCostCntrList", glMappingRuleService.getCostCntrList());
 		
 		return "pay/gl-mapping-rule/list";
 	}
@@ -59,17 +63,17 @@ public class GlMappingRuleController {
 	}
 	
 	// 기존 항목 수정
-	@PutMapping("/{id}")
-	public ResponseEntity<Void> updateGlMappingRule (@PathVariable long id, @Valid @RequestBody GlMappingRuleRequestDto dto) {
-		glMappingRuleService.updateGlMappingRule(id, dto);
+	@PutMapping("")
+	public ResponseEntity<Void> updateGlMappingRule (@Valid @RequestBody GlMappingRuleRequestDto dto) {
+		glMappingRuleService.updateGlMappingRule(dto);
 		return ResponseEntity.ok().build();
 	}
 	
 	// 중복 검사
-	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public boolean checkOverap (@RequestParam String itemCode, @RequestParam String bizCode, @RequestParam String costCntr) {
-		return glMappingRuleService.checkOverlap(itemCode, bizCode, costCntr);
+	public ResponseEntity<Boolean> checkOverap (@RequestParam String itemCode, @RequestParam String bizCode, @RequestParam String costCntr) {
+		boolean result = glMappingRuleService.checkOverlap(itemCode, bizCode, costCntr);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 상세 정보 조회

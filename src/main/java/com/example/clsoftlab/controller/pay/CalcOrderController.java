@@ -48,7 +48,7 @@ public class CalcOrderController {
 		model.addAttribute("groupCode", groupCode);
 		model.addAttribute("useYn", useYn);
 		model.addAttribute("calcOrderPage", calcOrderPage);
-		model.addAttribute("searchCalcOrderList", calcOrderService.findAll());
+		model.addAttribute("calcOrderList", calcOrderService.findAll());
 		model.addAttribute("payItemList", payItemService.findAllForSearch());
 		
 		return "pay/calc-order/list";

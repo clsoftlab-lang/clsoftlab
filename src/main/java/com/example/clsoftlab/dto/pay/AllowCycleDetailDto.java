@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AllowCycleDetailDto {
 
+	private Long id;
     private String itemCode;
     private String itemName;
     private String cycle;

@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,8 +30,9 @@ public class GlMappingRule extends BaseEntity {
     @Column(name = "MAPPING_ID")
     private Long id;
 
-    @Column(name = "ZITEM_CD", nullable = false, length = 50)
-    private String itemCode;
+ 	@ManyToOne(fetch = FetchType.LAZY)
+ 	@JoinColumn(name = "ZITEM_CD", nullable = false)
+ 	private PayItem payItem;
 
     @Column(name = "ZBIZ_CD", nullable = false, length = 10)
     private String bizCode;
@@ -47,9 +49,10 @@ public class GlMappingRule extends BaseEntity {
     @Column(name = "ZUSE_YN", nullable = false, length = 1)
     private String useYn; 
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ZITEM_CD", insertable = false, updatable = false)
-    private PayItem payItem;
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Long version;
+    
 
     
     public void update (GlMappingRuleRequestDto dto) {

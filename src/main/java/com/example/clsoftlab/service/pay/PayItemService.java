@@ -105,4 +105,11 @@ public class PayItemService {
 				.map(i -> modelMapper.map(i, PayItemSearchDto.class))
 				.toList();
 	}
+	
+	// 전체 list 조회 (검색용)
+		public List<PayItemSearchDto> findAllByItemType (String itemType) { 
+			return payItemRepository.findAllByItemTypeOrderByItemCode(itemType).stream()
+					.map(i -> modelMapper.map(i, PayItemSearchDto.class))
+					.toList();
+		}
 }

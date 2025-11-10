@@ -13,9 +13,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GlMappingRuleRequestDto {
+	
+	private Long id;
 
 	@NotBlank(message = "항목 코드는 필수 입력 항목입니다.")
-    @Size(max = 50, message = "항목 코드는 최대 50자까지 입력 가능합니다.")
+    @Size(max = 20, message = "항목 코드는 최대 50자까지 입력 가능합니다.")
     private String itemCode;
 
     @NotBlank(message = "사업장 코드는 필수 입력 항목입니다.")

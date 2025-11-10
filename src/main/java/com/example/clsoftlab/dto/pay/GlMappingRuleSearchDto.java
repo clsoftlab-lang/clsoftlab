@@ -1,5 +1,7 @@
 package com.example.clsoftlab.dto.pay;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GlMappingRuleSearchDto {
 
-	private String itemCode;
-	private String bizCode;
-	private String costCntr;
+	private List<String> itemCode;
+	private List<String> bizCode;
+	private List<String> costCntr;
 	private String useYn;
 }

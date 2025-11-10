@@ -2420,6 +2420,7 @@ CREATE TABLE ZHR_CALC_ORDER (
 
 ) COMMENT '급여 항목 계산 순서 정의';
 
+
 -- 더미데이터 --
 INSERT INTO ZHR_CALC_ORDER 
 (ZITEM_CD, ZORDER, ZGROUP_CD, ZDEPENDS_ON, ZNOTE, ZUSE_YN, CREATED_BY) 
@@ -2464,18 +2465,26 @@ VALUES
 ('DED102', 8, 'DEDUCT', NULL, '징계위원회 결과 감봉 조치', 'Y', 'system_admin'),
 ('DED103', 9, 'DEDUCT', NULL, '무단 결근 시 감액', 'Y', 'system_admin');
 
+-- 상여금별 계산 주기 --
 CREATE TABLE ZHR_ALLOW_CYCLE (
-    ZITEM_CD    VARCHAR(50)     NOT NULL COMMENT '항목 코드 (PK, FK from ZHR_PAY_ITEM)',
+    ZCYCLE_ID   BIGINT          NOT NULL AUTO_INCREMENT COMMENT '지급 주기 고유 ID (PK)',
+    ZITEM_CD    VARCHAR(20)     NOT NULL COMMENT '항목 코드 (UK, FK from ZHR_PAY_ITEM)',
     ZCYCLE      VARCHAR(20)     NOT NULL COMMENT '지급 주기 (MONTHLY, QUARTER, HALF, YEAR)',
     ZNOTE       VARCHAR(500)    NULL     COMMENT '설명',
     ZUSE_YN     CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZVERSION    INT             NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 잠금용)',
+    
     CREATED_AT  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
     CREATED_BY  VARCHAR(50)     NOT NULL COMMENT '생성자',
     UPDATED_AT  DATETIME        NULL     COMMENT '수정 일시',
     UPDATED_BY  VARCHAR(50)     NULL     COMMENT '수정자',
 
     -- 기본 키 설정
-    PRIMARY KEY (ZITEM_CD),
+    PRIMARY KEY (ZCYCLE_ID),
+
+    -- 고유 키 설정 (1:1 관계 보장)
+    -- ZITEM_CD는 항목별로 유일해야 함
+    UNIQUE KEY UK_ZITEM_CD (ZITEM_CD),
 
     -- 외래 키 설정
     -- ZHR_PAY_ITEM 테이블의 항목 코드를 참조하여 데이터 무결성 보장
@@ -2488,46 +2497,43 @@ CREATE TABLE ZHR_ALLOW_CYCLE (
     CHECK (ZUSE_YN IN ('Y', 'N')),
 
     -- 검색 성능 향상을 위한 인덱스
-    INDEX IDX_ZCYCLE (ZCYCLE),    -- 지급 주기로 조회
-    INDEX IDX_ZUSE_YN (ZUSE_YN)     -- 사용 여부로 조회
+    INDEX IDX_ZCYCLE (ZCYCLE),   -- 지급 주기로 조회
+    INDEX IDX_ZUSE_YN (ZUSE_YN)   -- 사용 여부로 조회
 
 ) COMMENT '상여 항목 지급 주기 정의';
 
 
 -- 더미데이터 --
-INSERT INTO ZHR_ALLOW_CYCLE 
-(ZITEM_CD, ZCYCLE, ZNOTE, ZUSE_YN, CREATED_BY) 
+INSERT INTO ZHR_ALLOW_CYCLE
+(ZITEM_CD, ZCYCLE, ZNOTE, ZUSE_YN, CREATED_BY)
 VALUES
-('PAY001', 'MONTHLY', '월 기본급 (매월 지급)', 'Y', 'system_admin'),
-('PAY002', 'HALF', '반기별 정기 상여금 지급 주기', 'Y', 'system_admin'),
-('PAY003', 'MONTHLY', '매월 고정 지급되는 식대 보조금', 'Y', 'system_admin'),
-('PAY004', 'MONTHLY', '직책 보유자에게 매월 지급되는 수당', 'Y', 'system_admin'),
-('PAY005', 'MONTHLY', '자격증 보유자에게 매월 지급 (현재 미사용 정책)', 'N', 'system_admin'),
-('PAY006', 'MONTHLY', '부양가족 기준 매월 지급되는 가족 수당', 'Y', 'system_admin'),
-('PAY007', 'MONTHLY', '연장/야간/휴일근로 정산 후 매월 지급', 'Y', 'system_admin'),
-('PAY008', 'MONTHLY', '차량유지비(유류대) 매월 지급', 'Y', 'system_admin'),
-('PAY009', 'QUARTER', '분기별 성과 평가에 따른 성과급', 'Y', 'system_admin'),
-('PAY010', 'YEAR', '연 1회 지급되는 정기 휴가비', 'Y', 'system_admin');
+('PAY002', 'HALF', '반기별 정기 상여금 (ZHR_PAY_ITEM: 상여금)', 'Y', 'system_admin'),
+('PAY009', 'QUARTER', '분기별 성과 평가에 따른 성과급 (ZHR_PAY_ITEM: 성과급)', 'Y', 'system_admin'),
+('PAY010', 'YEAR', '연 1회 지급되는 정기 휴가비 (ZHR_PAY_ITEM: 휴가비)', 'Y', 'system_admin');
 
+-- 회계 연결 매핑 --
 CREATE TABLE ZHR_GL_MAPPING_RULE (
     -- 관리용 고유 ID 컬럼 (PK)
-    MAPPING_ID        BIGINT         NOT NULL AUTO_INCREMENT COMMENT '매핑 ID (PK)',
+    MAPPING_ID      BIGINT        NOT NULL AUTO_INCREMENT COMMENT '매핑 ID (PK)',
 
     -- 비즈니스 키 컬럼 (UNIQUE)
-    ZITEM_CD          VARCHAR(50)    NOT NULL COMMENT '항목 코드 (FK from ZHR_PAY_ITEM)',
-    ZBIZ_CD           VARCHAR(10)    NOT NULL COMMENT '사업장 코드',
-    ZCOST_CNTR        VARCHAR(20)    NOT NULL COMMENT '코스트센터',
+    ZITEM_CD        VARCHAR(20)   NOT NULL COMMENT '항목 코드 (FK from ZHR_PAY_ITEM)',
+    ZBIZ_CD         VARCHAR(10)   NOT NULL COMMENT '사업장 코드',
+    ZCOST_CNTR      VARCHAR(20)   NOT NULL COMMENT '코스트센터',
 
     -- 데이터 컬럼
-    ZGL_ACCT          VARCHAR(30)    NOT NULL COMMENT '회계 계정 코드',
-    ZNOTE             VARCHAR(500)   NULL     COMMENT '설명',
-    ZUSE_YN           CHAR(1)        NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZGL_ACCT        VARCHAR(30)   NOT NULL COMMENT '회계 계정 코드',
+    ZNOTE           VARCHAR(500)  NULL     COMMENT '설명',
+    ZUSE_YN         CHAR(1)       NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+
+    -- 버전 관리 (낙관적 락)
+    VERSION         BIGINT        NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 락)',
 
     -- 감사(Audit) 컬럼
-    CREATED_AT        DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY        VARCHAR(50)    NOT NULL COMMENT '생성자',
-    UPDATED_AT        DATETIME       NULL     COMMENT '수정 일시',
-    UPDATED_BY        VARCHAR(50)    NULL     COMMENT '수정자',
+    CREATED_AT      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME      NULL     COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)   NULL     COMMENT '수정자',
 
     -- 기본 키 설정 (새로운 ID 컬럼)
     PRIMARY KEY (MAPPING_ID),
@@ -2547,6 +2553,7 @@ CREATE TABLE ZHR_GL_MAPPING_RULE (
 
 ) COMMENT '급여 항목별 회계 계정 매핑 규칙';
 
+-- 더미데이터 -- 
 INSERT INTO ZHR_GL_MAPPING_RULE
 (ZITEM_CD, ZBIZ_CD, ZCOST_CNTR, ZGL_ACCT, ZNOTE, ZUSE_YN, CREATED_BY)
 VALUES
@@ -2565,14 +2572,17 @@ VALUES
 -- 2. 전사 공통 계정 매핑 (세금/보험/공제)
 ('TAX001', '*', '*', '21501000', '예수금 - 소득세', 'Y', 'system_loader'),
 ('TAX002', '*', '*', '21501001', '예수금 - 지방소득세', 'Y', 'system_loader'),
+('TAX003', '*', '*', '21501003', '예수금 - 주민세', 'Y', 'system_loader'), -- [추가] PAY_ITEM 기준 누락분
 ('INS001', '*', '*', '21502001', '예수금 - 국민연금', 'Y', 'system_loader'),
 ('INS002', '*', '*', '21502002', '예수금 - 건강보험', 'Y', 'system_loader'),
 ('INS003', '*', '*', '21502003', '예수금 - 장기요양보험', 'Y', 'system_loader'),
 ('INS004', '*', '*', '21502004', '예수금 - 고용보험', 'Y', 'system_loader'),
+-- (참고: INS005 산재보험은 PAY_ITEM에 '사용자 부담 관리용'으로 명시되어, 직원 급여 공제 예수금이 아니므로 여기서 매핑 제외)
 ('DED002', '*', '*', '21503001', '예수금 - 노조비', 'Y', 'system_loader'),
 ('DED003', '*', '*', '21503002', '예수금 - 사내대출상환', 'Y', 'system_loader'),
 ('DED004', '*', '*', '21503003', '예수금 - 기숙사비', 'Y', 'system_loader'),
 ('DED005', '*', '*', '21503004', '예수금 - 복지기금', 'Y', 'system_loader'),
+('DED006', '*', '*', '21503005', '예수금 - 개인연금 대납 후 공제 계정', 'Y', 'system_loader'),
 
 -- 3. 특정 사업장/코스트센터별 계정 매핑 (우선 적용)
 ('PAY001', '2000', '*', '52101000', '생산본부(2000) 소속 직원의 기본급은 제조원가로 처리', 'Y', 'system_loader'),
@@ -2586,8 +2596,14 @@ VALUES
 -- 4. 미사용(N) 또는 특수 계정 매핑
 ('DED001', '*', '*', '21503000', '학자금 상환 의무 공제 (현재 미사용)', 'N', 'system_loader'),
 ('TAX004', '*', '*', '21501002', '농어촌특별세 (특정 대상자만 적용, 현재 미사용)', 'N', 'system_loader'),
-('DED006', '*', '*', '21503005', '개인연금 대납 후 공제 계정', 'Y', 'system_loader');
 
+-- 5. 전사 공통 계정 매핑 (감액 항목) [추가]
+('DED101', '*', '*', '51101000', '병가 감액(기본급 계정에서 차감)', 'Y', 'system_loader'),
+('DED102', '*', '*', '51101000', '징계 감액(기본급 계정에서 차감)', 'Y', 'system_loader'),
+('DED103', '*', '*', '51101000', '결근 감액(기본급 계정에서 차감)', 'Y', 'system_loader');
+
+
+-- 4대보험 요율 관리 --
 CREATE TABLE ZHR_INS_RATE (
     -- 관리용 고유 ID 컬럼 (PK)
     RATE_ID         BIGINT          NOT NULL AUTO_INCREMENT COMMENT '보험 요율 ID (PK)',
@@ -2603,6 +2619,7 @@ CREATE TABLE ZHR_INS_RATE (
     ZNOTE           VARCHAR(500)    NULL     COMMENT '개정 사유 또는 비고',
     ZUSE_YN         CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
 
+	VERSION         INT             NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 잠금용)',
     -- 감사(Audit) 컬럼
     CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
     CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
@@ -2619,8 +2636,8 @@ CREATE TABLE ZHR_INS_RATE (
     -- 제약 조건 설정
     CHECK (ZUSE_YN IN ('Y', 'N')),
     CHECK (ZINS_TYPE IN ('NPS', 'HLT', 'LTC', 'EMP')),
-    CHECK (ZPC_EMP >= 0),
-    CHECK (ZPC_CMP >= 0),
+    CHECK (ZPC_EMP >= 0 AND ZPC_EMP <= 100), -- 0 ~ 100% 범위 검증 추가
+    CHECK (ZPC_CMP >= 0 AND ZPC_CMP <= 100), -- 0 ~ 100% 범위 검증 추가
 
     -- 검색 성능 향상을 위한 인덱스
     -- 급여 계산 시 특정 시점의 유효한 요율을 빠르게 조회하기 위함
@@ -2628,49 +2645,52 @@ CREATE TABLE ZHR_INS_RATE (
 
 ) COMMENT '4대보험 요율 이력 관리 테이블';
 
+
 -- 더미데이터 --
 INSERT INTO ZHR_INS_RATE 
-(ZINS_TYPE, ZFROM_DT, ZTO_DT, ZPC_EMP, ZPC_CMP, ZNOTE, ZUSE_YN, CREATED_BY)
+(ZINS_TYPE, ZFROM_DT, ZTO_DT, ZPC_EMP, ZPC_CMP, ZNOTE, ZUSE_YN, CREATED_BY, VERSION)
 VALUES
 -- 1. 국민연금 (NPS) - National Pension Service
-('NPS', '1999-01-01', '9999-12-31', 4.50000, 4.50000, '국민연금 보험료율 9%로 조정 및 현재까지 유지', 'Y', 'system_loader'),
-('NPS', '1995-07-01', '1998-12-31', 3.00000, 3.00000, '국민연금 보험료율 6% 시기', 'N', 'system_loader'),
-('NPS', '1988-01-01', '1995-06-30', 1.50000, 1.50000, '국민연금 제도 도입 초기 요율', 'N', 'system_loader'),
+-- 1999년 요율을 2025-12-31에 종료하고, 2026년 테스트 데이터가 이어지도록 수정
+('NPS', '1999-01-01', '2025-12-31', 4.50000, 4.50000, '국민연금 보험료율 9% (2025년까지)', 'Y', 'system_loader', 0),
+('NPS', '1995-07-01', '1998-12-31', 3.00000, 3.00000, '국민연금 보험료율 6% 시기', 'N', 'system_loader', 0),
+('NPS', '1988-01-01', '1995-06-30', 1.50000, 1.50000, '국민연금 제도 도입 초기 요율', 'N', 'system_loader', 0),
+('NPS', '2026-01-01', '9999-12-31', 5.00000, 5.00000, '국민연금 요율 인상안 (예시)', 'N', 'system_loader', 0),
 
 -- 2. 건강보험 (HLT) - Health Insurance
-('HLT', '2025-01-01', '9999-12-31', 3.54500, 3.54500, '2025년 건강보험요율 (가정)', 'Y', 'system_loader'),
-('HLT', '2024-01-01', '2024-12-31', 3.54500, 3.54500, '2024년 건강보험요율 7.09% 적용', 'Y', 'system_loader'),
-('HLT', '2023-01-01', '2023-12-31', 3.54500, 3.54500, '2023년 건강보험요율 7.09% 적용 (동결)', 'N', 'system_loader'),
-('HLT', '2022-01-01', '2022-12-31', 3.49500, 3.49500, '2022년 건강보험요율 6.99% 적용', 'N', 'system_loader'),
-('HLT', '2021-01-01', '2021-12-31', 3.43000, 3.43000, '2021년 건강보험요율 6.86% 적용', 'N', 'system_loader'),
-('HLT', '2020-01-01', '2020-12-31', 3.33500, 3.33500, '2020년 건강보험요율 6.67% 적용', 'N', 'system_loader'),
-('HLT', '2019-01-01', '2019-12-31', 3.23000, 3.23000, '2019년 건강보험요율 6.46% 적용', 'N', 'system_loader'),
-('HLT', '2018-01-01', '2018-12-31', 3.12000, 3.12000, '2018년 건강보험요율 6.24% 적용', 'N', 'system_loader'),
+-- 2025년 요율('Y')을 2025-12-31에 종료, 2024년 요율은 'N'으로 변경
+('HLT', '2025-01-01', '2025-12-31', 3.54500, 3.54500, '2025년 건강보험요율', 'Y', 'system_loader', 0),
+('HLT', '2024-01-01', '2024-12-31', 3.54500, 3.54500, '2024년 건강보험요율 7.09% 적용', 'N', 'system_loader', 0),
+('HLT', '2023-01-01', '2023-12-31', 3.54500, 3.54500, '2023년 건강보험요율 7.09% 적용 (동결)', 'N', 'system_loader', 0),
+('HLT', '2022-01-01', '2022-12-31', 3.49500, 3.49500, '2022년 건강보험요율 6.99% 적용', 'N', 'system_loader', 0),
+('HLT', '2021-01-01', '2021-12-31', 3.43000, 3.43000, '2021년 건강보험요율 6.86% 적용', 'N', 'system_loader', 0),
+('HLT', '2020-01-01', '2020-12-31', 3.33500, 3.33500, '2020년 건강보험요율 6.67% 적용', 'N', 'system_loader', 0),
+('HLT', '2019-01-01', '2019-12-31', 3.23000, 3.23000, '2019년 건강보험요율 6.46% 적용', 'N', 'system_loader', 0),
+('HLT', '2018-01-01', '2018-12-31', 3.12000, 3.12000, '2018년 건강보험요율 6.24% 적용', 'N', 'system_loader', 0),
+('HLT', '2017-01-01', '2017-12-31', 3.06000, 3.06000, '2017년 건강보험요율 6.12% 적용', 'N', 'system_loader', 0),
+('HLT', '2026-01-01', '9999-12-31', 3.60000, 3.60000, '2026년 건강보험료 인상 계획 (미확정)', 'N', 'system_loader', 0),
 
 -- 3. 장기요양보험 (LTC) - Long Term Care Insurance
-('LTC', '2025-01-01', '9999-12-31', 0.45410, 0.45410, '2025년 장기요양보험료율 (건강보험료의 12.81%, 가정)', 'Y', 'system_loader'),
-('LTC', '2024-01-01', '2024-12-31', 0.45410, 0.45410, '2024년 장기요양보험료율 (건강보험료의 12.81%)', 'Y', 'system_loader'),
-('LTC', '2023-01-01', '2023-12-31', 0.45410, 0.45410, '2023년 장기요양보험료율 (건강보험료의 12.81%, 동결)', 'N', 'system_loader'),
-('LTC', '2022-01-01', '2022-12-31', 0.42855, 0.42855, '2022년 장기요양보험료율 (건강보험료의 12.27%)', 'N', 'system_loader'),
-('LTC', '2021-01-01', '2021-12-31', 0.39415, 0.39415, '2021년 장기요양보험료율 (건강보험료의 11.52%)', 'N', 'system_loader'),
-('LTC', '2020-01-01', '2020-12-31', 0.33855, 0.33855, '2020년 장기요양보험료율 (건강보험료의 10.25%)', 'N', 'system_loader'),
-('LTC', '2019-01-01', '2019-12-31', 0.27695, 0.27695, '2019년 장기요양보험료율 (건강보험료의 8.51%)', 'N', 'system_loader'),
-('LTC', '2018-01-01', '2018-12-31', 0.23100, 0.23100, '2018년 장기요양보험료율 (건강보험료의 7.38%)', 'N', 'system_loader'),
+-- 2025년 요율('Y')을 2025-12-31에 종료, 2024년 요율은 'N'으로 변경
+('LTC', '2025-01-01', '2025-12-31', 0.45410, 0.45410, '2025년 장기요양보험료율', 'Y', 'system_loader', 0),
+('LTC', '2024-01-01', '2024-12-31', 0.45410, 0.45410, '2024년 장기요양보험료율', 'N', 'system_loader', 0),
+('LTC', '2023-01-01', '2023-12-31', 0.45410, 0.45410, '2023년 장기요양보험료율 (동결)', 'N', 'system_loader', 0),
+('LTC', '2022-01-01', '2022-12-31', 0.42855, 0.42855, '2022년 장기요양보험료율', 'N', 'system_loader', 0),
+('LTC', '2021-01-01', '2021-12-31', 0.39415, 0.39415, '2021년 장기요양보험료율', 'N', 'system_loader', 0),
+('LTC', '2020-01-01', '2020-12-31', 0.33855, 0.33855, '2020년 장기요양보험료율', 'N', 'system_loader', 0),
+('LTC', '2019-01-01', '2019-12-31', 0.27695, 0.27695, '2019년 장기요양보험료율', 'N', 'system_loader', 0),
+('LTC', '2018-01-01', '2018-12-31', 0.23100, 0.23100, '2018년 장기요양보험료율', 'N', 'system_loader', 0),
+('LTC', '2017-01-01', '2017-12-31', 0.20043, 0.20043, '2017년 장기요양보험료율', 'N', 'system_loader', 0),
+('LTC', '2026-01-01', '9999-12-31', 0.50000, 0.50000, '2026년 장기요양보험료 인상 계획 (미확정)', 'N', 'system_loader', 0),
 
 -- 4. 고용보험 (EMP) - Employment Insurance (실업급여 요율 기준)
-('EMP', '2022-07-01', '9999-12-31', 0.90000, 0.90000, '실업급여 요율 1.8%로 인상 (근로자/사업주 각 0.9%)', 'Y', 'system_loader'),
-('EMP', '2019-10-01', '2022-06-30', 0.80000, 0.80000, '실업급여 요율 1.6%로 인상', 'N', 'system_loader'),
-('EMP', '2017-07-01', '2019-09-30', 0.65000, 0.65000, '실업급여 요율 1.3% 시기', 'N', 'system_loader'),
-('EMP', '2013-01-01', '2017-06-30', 0.65000, 0.65000, '실업급여 요율 1.3% 유지', 'N', 'system_loader'),
-('EMP', '2011-01-01', '2012-12-31', 0.55000, 0.55000, '실업급여 요율 1.1% 시기', 'N', 'system_loader'),
-
--- 5. 기타 가상 데이터 (테스트용)
-('NPS', '2026-01-01', '9999-12-31', 5.00000, 5.00000, '국민연금 요율 인상안 (예시)', 'N', 'system_loader'),
-('HLT', '2017-01-01', '2017-12-31', 3.06000, 3.06000, '2017년 건강보험요율 6.12% 적용', 'N', 'system_loader'),
-('LTC', '2017-01-01', '2017-12-31', 0.20043, 0.20043, '2017년 장기요양보험료율 (건강보험료의 6.55%)', 'N', 'system_loader'),
-('EMP', '2009-01-01', '2010-12-31', 0.45000, 0.45000, '실업급여 요율 0.9% 시기', 'N', 'system_loader'),
-('HLT', '2026-01-01', '9999-12-31', 3.60000, 3.60000, '2026년 건강보험료 인상 계획 (미확정)', 'N', 'system_loader'),
-('LTC', '2026-01-01', '9999-12-31', 0.50000, 0.50000, '2026년 장기요양보험료 인상 계획 (미확정)', 'N', 'system_loader');
+-- 원본 데이터가 기간 중복 없이 양호하여 VERSION 필드만 추가
+('EMP', '2022-07-01', '9999-12-31', 0.90000, 0.90000, '실업급여 요율 1.8%로 인상 (근로자/사업주 각 0.9%)', 'Y', 'system_loader', 0),
+('EMP', '2019-10-01', '2022-06-30', 0.80000, 0.80000, '실업급여 요율 1.6%로 인상', 'N', 'system_loader', 0),
+('EMP', '2017-07-01', '2019-09-30', 0.65000, 0.65000, '실업급여 요율 1.3% 시기', 'N', 'system_loader', 0),
+('EMP', '2013-01-01', '2017-06-30', 0.65000, 0.65000, '실업급여 요율 1.3% 유지', 'N', 'system_loader', 0),
+('EMP', '2011-01-01', '2012-12-31', 0.55000, 0.55000, '실업급여 요율 1.1% 시기', 'N', 'system_loader', 0),
+('EMP', '2009-01-01', '2010-12-31', 0.45000, 0.45000, '실업급여 요율 0.9% 시기', 'N', 'system_loader', 0);
 
 
 

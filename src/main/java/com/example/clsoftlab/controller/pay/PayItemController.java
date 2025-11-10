@@ -99,35 +99,6 @@ public class PayItemController {
 		return payItemService.checkOverlap(itemCode);
 	}
 	
-	// 급여 항목 검색 
-	@ResponseBody
-	@GetMapping("/list")
-	public Page<PayItemListDto> getPayItemList(@RequestParam(defaultValue = "") String itemName, @RequestParam(defaultValue = "") List<String> itemTypes,
-			@RequestParam(defaultValue = "") String useYn, @RequestParam(required = false) Integer page) { 
-		
-		
-		if (page == null) {
-			page = 0;
-		}
-		int size= 1000;
-		
-		if (!StringUtils.hasText(itemName)) {
-			itemName = null;
-		}
-		
-		if (itemTypes.isEmpty()) {
-			itemTypes = null;
-		}
-		
-		if (!StringUtils.hasText(useYn)) {
-			useYn = null;
-		}
-		
-		Page<PayItemListDto> itemPage = payItemService.searchPayItem(itemName, itemTypes, useYn, page, size);
-		
-		
-		return itemPage;
-	}
 	
 	// 급여 항목 검색 (DEDUCT만)
 		@ResponseBody

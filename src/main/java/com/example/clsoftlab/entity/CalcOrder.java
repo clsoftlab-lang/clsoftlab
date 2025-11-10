@@ -44,7 +44,7 @@ public class CalcOrder extends BaseEntity {
     private String useYn;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ZDEPENDS_ON" , referencedColumnName = "ZITEM_CD") // DB의 ZDEPENDS_ON 컬럼을 통해 Join
+    @JoinColumn(name = "ZDEPENDS_ON" , referencedColumnName = "ZITEM_CD")
     private CalcOrder dependsOn;
 
     @OneToOne(fetch = FetchType.LAZY)
