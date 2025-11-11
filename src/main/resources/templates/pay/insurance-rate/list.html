@@ -6,12 +6,15 @@
     <title>4대보험 요율 관리</title>
 
     <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="/assets/css/style.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
+	<link rel="stylesheet" href="/assets/css/select2-bootstrap-5-theme.min.css">
 </head>
 
 <body>
@@ -44,18 +47,17 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>보험 종류</label>
-                                        <select class="form-select" name="insType">
-                                            <option value="">전체</option>
-                                            <option value="NPS" th:selected="${insType == 'NPS'}">국민연금</option>
-                                            <option value="HLT" th:selected="${insType == 'HLT'}">건강보험</option>
-                                            <option value="LTC" th:selected="${insType == 'LTC'}">장기요양</option>
-                                            <option value="EMP" th:selected="${insType == 'EMP'}">고용보험</option>
+                                        <select class="form-select" name="insType" multiple="multiple" id="searchInsTypeSelect">
+                                            <option value="NPS" th:selected="${insType!= null && #lists.contains(insType, 'NPS')}">국민연금 (NPC)</option>
+                                            <option value="HLT" th:selected="${insType!= null && #lists.contains(insType, 'HLT')}">건강보험 (HLT)</option>
+                                            <option value="LTC" th:selected="${insType!= null && #lists.contains(insType, 'LTC')}">장기요양 (LTC)</option>
+                                            <option value="EMP" th:selected="${insType!= null && #lists.contains(insType, 'EMP')}">고용보험 (EMP)</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>적용 시작일</label>
+                                        <label>적용일</label>
                                         <input type="date" class="form-control" th:value="${fromDate}" name="fromDate">
                                     </div>
                                 </div>
@@ -85,7 +87,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover" id="insuranceRateTable">
+                            <table class="table table-striped table-hover datatable-resizable" id="dataTable">
                                 <thead class="table-light">
                                     <tr>
                                         <th>보험종류</th>
@@ -100,12 +102,22 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="i : ${insuranceRate}">
-                                        <td th:text="${i.insType}"></td>
+                                        <td>
+                                        	<span th:switch="${i.insType}">
+								                <span th:case="'NPS'">국민연금 (NPS)</span>
+								                <span th:case="'HLT'">건강보험 (HLT)</span>
+								                <span th:case="'LTC'">장기요양 (LTC)</span>
+								                <span th:case="'EMP'">고용보험 (EMP)</span>
+								                <span th:case="*" th:text="${i.insType}"></span>
+								            </span>
+                                        </td>
                                         <td th:text="${i.pcEmp}"></td>
                                         <td th:text="${i.pcCmp}"></td>
                                         <td th:text="${i.fromDate}"></td>
                                         <td th:text="${i.toDate}"></td>
-                                        <td th:text="${i.useYn}"></td>
+                                        <td>
+                                        	<input type="checkbox" class="form-check-input" th:checked="${i.useYn == 'Y'}" onclick="return false;">
+                                        </td>
                                         <td th:text="${#strings.abbreviate(i.note, 50)}"></td>
                                         <td>
                                             <button class="btn btn-sm btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"
@@ -133,8 +145,9 @@
                                 <form id="addForm">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">보험 종류</label>
+                                            <label class="form-label">보험 종류<span class="text-danger">*</span></label>
                                             <select class="form-select" name="insType" required>
+                                            	<option value="">--- 보험 선택 ---</option>
                                                 <option value="NPS">국민연금</option>
                                                 <option value="HLT">건강보험</option>
                                                 <option value="LTC">장기요양</option>
@@ -142,27 +155,27 @@
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">근로자 부담율(%)</label>
+                                            <label class="form-label">근로자 부담율(%)<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="pcEmp" required step="0.00001" min="0" max="100">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">사업주 부담율(%)</label>
+                                            <label class="form-label">사업주 부담율(%)<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="pcCmp" required step="0.00001" min="0" max="100">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">적용 시작일</label>
+                                            <label class="form-label">적용 시작일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="fromDate" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">적용 종료일</label>
+                                            <label class="form-label">적용 종료일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="toDate" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">사용 여부</label>
-                                            <select class="form-select" name="useYn" required>
-                                                <option value="Y" selected>Y</option>
-                                                <option value="N">N</option>
-                                            </select>
+                                            <label class="form-label">사용 여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">                                            
+                                            	<input type="hidden" name="useYn" value="N">
+                                            	<input type="checkbox" name="useYn" class="form-check-input" value="Y" checked>
+                                            </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
                                             <label class="form-label">개정 사유 (비고)</label>
@@ -196,27 +209,27 @@
                                             <input type="text" class="form-control" name="insType" readonly>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">근로자 부담율(%)</label>
+                                            <label class="form-label">근로자 부담율(%)<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="pcEmp" required step="0.00001" min="0" max="100">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">사업주 부담율(%)</label>
+                                            <label class="form-label">사업주 부담율(%)<span class="text-danger">*</span></label>
                                             <input type="number" class="form-control" name="pcCmp" required step="0.00001" min="0" max="100">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">적용 시작일</label>
+                                            <label class="form-label">적용 시작일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="fromDate" required="required">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">적용 종료일</label>
+                                            <label class="form-label">적용 종료일<span class="text-danger">*</span></label>
                                             <input type="date" class="form-control" name="toDate" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">사용 여부</label>
-                                            <select class="form-select" name="useYn" required>
-                                                <option value="Y">Y</option>
-                                                <option value="N">N</option>
-                                            </select>
+                                            <label class="form-label">사용 여부<span class="text-danger">*</span></label>
+                                            <div class="form-check">                                            
+                                            	<input type="hidden" name="useYn" value="N">
+                                            	<input type="checkbox" name="useYn" class="form-check-input" value="Y" >
+                                            </div>
                                         </div>
                                         <div class="col-md-12 mb-3">
                                             <label class="form-label">개정 사유 (비고)</label>
@@ -240,17 +253,17 @@
     </div>
 
     <script src="/assets/js/jquery-3.7.1.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.slimscroll.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="/assets/js/jquery.dataTables.min.js"></script>
-    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
-    <script src="/assets/js/script.js"></script>
+	<script src="/assets/js/colResizable-1.6.min.js"></script>
+	<script src="/assets/js/bootstrap.bundle.min.js"></script>
+	<script src="/assets/js/jquery.slimscroll.min.js"></script>
+	<script src="/assets/js/select2.min.js"></script>
+	<script src="https://unpkg.com/feather-icons"></script>
+	<script src="/assets/js/jquery.dataTables.min.js"></script>
+	<script src="/assets/js/dataTables.bootstrap5.min.js"></script>
+	<script src="/assets/js/script.js"></script>
+	<script src="/assets/js/common-datatable-init.js"></script>
     
     <script type="text/javascript" th:inline="none">
-    new DataTable('#insuranceRateTable', {
-        order: [[0, 'asc'], [3, 'desc']] 
-    });
     
     document.addEventListener('DOMContentLoaded', function () {
   		// 수정 모달창을 열 때, 불러오기.
@@ -264,6 +277,53 @@
 	            }
 	        });
 	    }
+	    
+	    $('#searchInsTypeSelect').select2({theme: "bootstrap-5"});
+	    
+	    const tableSpecificOptions = {
+                'columns': [
+                    // HTML <thead> 순서와 정확히 일치해야 합니다.
+                    null,                                                        // 0. 보험종류 (검색 O, 정렬 O)
+                    null,                                                        // 1. 근로자부담율(%) (검색 O, 정렬 O)
+                    null,                                                        // 2. 사업주부담율(%) (검색 O, 정렬 O)
+                    null,                                                        // 3. 적용시작일 (검색 O, 정렬 O)
+                    null,                                                        // 4. 적용종료일 (검색 O, 정렬 O)
+                    { "width": "80px", "searchable": true, "orderable": true },  // 5. 사용여부 (검색 O, 정렬 O)
+                    { "searchable": true, "orderable": false },                  // 6. 비고 (검색 O, 정렬 X)
+                    { "width": "80px", "searchable": false, "orderable": false }  // 7. 수정 (버튼) (검색 X, 정렬 X)
+                ],
+                
+                // 1순위: 보험종류(0) 기준으로 오름차순 정렬
+                // 2순위: 적용시작일(3) 기준으로 내림차순 정렬 (최신순)
+                "order": [
+                    [ 0, "asc" ], // 보험종류 오름차순
+                    [ 3, "desc" ] // 적용시작일 내림차순
+                ], 
+
+                // DataTables 한글화 및 기본 설정 (유지)
+                "language": {
+                    // (한글화 설정은 원본과 동일하게 유지)
+                    "emptyTable": "데이터가 없습니다.",
+                    "info": "_START_ - _END_ / _TOTAL_ 항목",
+                    "infoEmpty": "0 항목",
+                    "infoFiltered": "(_MAX_ 항목에서 필터링됨)",
+                    "lengthMenu": "_MENU_ 개씩 보기",
+                    "loadingRecords": "로딩중...",
+                    "processing": "처리중...",
+                    "search": "검색: ",
+                    "zeroRecords": "일치하는 항목이 없습니다.",
+                    "paginate": {
+                        "first": "처음",
+                        "last": "마지막",
+                        "next": "다음",
+                        "previous": "이전"
+                    }
+                },
+                "pageLength": 10, 
+                "lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ] // 페이지 메뉴
+            };
+	    
+	    initializeResizableDataTable('#dataTable',tableSpecificOptions);
 	});
     
  	// 새 항목 등록
@@ -272,6 +332,11 @@
 	    const formData = new FormData(addForm);
 	    const data = Object.fromEntries(formData.entries());
 
+	    if (!data.insType) {
+	        alert('보험 종류를 선택해주세요.');
+	        return;
+	    }
+	    
 	    if (!data.pcEmp) {
 	        alert('근로자 부담율을 입력해주세요.');
 	        return;
@@ -298,12 +363,10 @@
 	        const codeResponse = await fetch(`/pay/insurance-rate/checkOverlap?insType=${data.insType}&fromDate=${data.fromDate}&toDate=${data.toDate}`);
 	        const codeCheckResult = await codeResponse.text();
 	        
-	        if (data.useYn === 'Y') {
 	        	
-		        if (codeCheckResult == 'true') { 
-		            alert('정한 기간과 중복되는 다른 활성 요율 데이터가 존재합니다.\n시작일 또는 종료일을 확인해 주세요.'); 
-		            return;
-		        }
+	        if (codeCheckResult == 'true') { 
+	            alert('정한 기간과 중복되는 다른 활성 요율 데이터가 존재합니다.\n시작일 또는 종료일을 확인해 주세요.'); 
+	            return;
 	        }
 
 	        // --- 중복 검사를 통과하면 최종 저장 (POST) ---
@@ -343,12 +406,15 @@
 
 
 	        for (const key in data) {
-	            const field = editForm.querySelector(`[name="${key}"]`);
-	            
-	            if (field) { 
-                    field.value = data[key];
-	            }
-	        }
+		            const field = editForm.querySelector(`[name="${key}"]`);
+					const checkbox = editForm.querySelector(`input[type="checkbox"][name="${key}"]`); // checkbox
+		            
+		            if (checkbox && field && field.type === 'hidden') {
+		                checkbox.checked = (data[key] === 'Y');
+		            } else if (field) {
+		                field.value = data[key];
+		            }
+		        }
 	        
 	    } catch (error) {
 	        console.error('Error:', error);
@@ -385,16 +451,14 @@
 	    
 	    try {
 	    	
-	    	if (data.useYn === 'Y') {
 	    		
-	    	 	const checkResponse = await fetch(`/pay/insurance-rate/checkOverlap/update?insType=${data.insType}&fromDate=${data.fromDate}&toDate=${data.toDate}&id=${data.id}`);
-		        const checkResult = await checkResponse.text();
-		        
-		        if (checkResult == 'true') { 
-		            alert('입력하신 기간과 중복되는 활성 요율 데이터가 이미 존재합니다.\n시작일 또는 종료일을 확인해 주세요.'); 
-		            return;
-		        }
-	    	}
+    	 	const checkResponse = await fetch(`/pay/insurance-rate/checkOverlap?insType=${data.insType}&fromDate=${data.fromDate}&toDate=${data.toDate}&id=${data.id}`);
+	        const checkResult = await checkResponse.text();
+	        
+	        if (checkResult == 'true') { 
+	            alert('입력하신 기간과 중복되는 활성 요율 데이터가 이미 존재합니다.\n시작일 또는 종료일을 확인해 주세요.'); 
+	            return;
+	        }
 	    	
 	        const url = `/pay/insurance-rate/${data.id}`;
 	        const response = await fetch(url, {

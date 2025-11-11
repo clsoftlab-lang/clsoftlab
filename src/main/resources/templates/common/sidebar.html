@@ -52,6 +52,7 @@
 						<li><a th:href="@{/pay/allow-cycle}" th:classappend="${currentUrl != null && (currentUrl == '/pay/allow-cycle' || currentUrl.startsWith('/pay/allow-cycle?'))} ? 'active' : ''">상여금별 계산 주기 관리</a></li>
 						<li><a th:href="@{/pay/gl-mapping}" th:classappend="${currentUrl != null && (currentUrl == '/pay/gl-mapping' || currentUrl.startsWith('/pay/gl-mapping?'))} ? 'active' : ''">급여 항목별 회계 계정 매핑 관리</a></li>
 						<li><a th:href="@{/pay/insurance-rate}" th:classappend="${currentUrl != null && (currentUrl == '/pay/insurance-rate' || currentUrl.startsWith('/pay/insurance-rate?'))} ? 'active' : ''">4대보험 요율 관리</a></li>
+						<li><a th:href="@{/pay/log-pay-calc}" th:classappend="${currentUrl != null && (currentUrl == '/pay/log-pay-calc' || currentUrl.startsWith('/pay/ilog-pay-calc?'))} ? 'active' : ''">급여 항목 계산 이력</a></li>
 					</ul>
 				</li>
 				

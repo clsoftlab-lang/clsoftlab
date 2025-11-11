@@ -7,7 +7,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -34,13 +33,12 @@ public class InsuranceRateService {
 	
 	// 검색어로 전체 목록 조회
 	public Page<InsuranceRateDetailDto> searchInsuraceRate (InsuranceRateSearchDto search, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("insType"));
+		Pageable pageable = PageRequest.of(page, size);
 		Specification<InsuranceRate> spec = Specification.not(null);
 		
-		spec = spec.and(InsuranceRateSpecs.withInsType(search.getInsType()));
-		spec = spec.and(InsuranceRateSpecs.lessThanOrEqualToFromDate(search.getFromDate()));
-		spec = spec.and(InsuranceRateSpecs.greaterThanOrEqualToFromDate(search.getFromDate()));
-		spec = spec.and(InsuranceRateSpecs.withUseYn(search.getUseYn()));
+		spec = spec.and(InsuranceRateSpecs.withInsType(search.getInsType()))
+				.and(InsuranceRateSpecs.withFromDate(search.getFromDate()))
+				.and(InsuranceRateSpecs.withUseYn(search.getUseYn()));
 		
 		return insuranceRateRepository.findAll(spec, pageable)
 				.map(i -> modelMapper.map(i, InsuranceRateDetailDto.class));
@@ -62,13 +60,12 @@ public class InsuranceRateService {
 	}
 	
 	// 중복 검사
-	public boolean checkOverlap (String insType, LocalDate fromDate, LocalDate toDate) {
-		return insuranceRateRepository.checkOverlap(insType, fromDate, toDate);
-	}
-	
-	// 중복 검사 (수정용)
 	public boolean checkOverlap (String insType, LocalDate fromDate, LocalDate toDate, Long id) {
-		return insuranceRateRepository.checkOverlap(insType, fromDate, toDate, id);
+		if (id == null) {
+			return insuranceRateRepository.checkOverlap(insType, fromDate, toDate);
+		} else {
+			return insuranceRateRepository.checkOverlap(insType, fromDate, toDate, id);
+		}
 	}
 	
 	// 상세 정보 조회

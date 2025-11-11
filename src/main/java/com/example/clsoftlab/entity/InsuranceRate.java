@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,6 +50,10 @@ public class InsuranceRate extends BaseEntity {
 
     @Column(name = "ZUSE_YN", nullable = false, length = 1)
     private String useYn;	
+    
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Long version;
 
     public void update (InsuranceRateRequestDto dto) {
     	this.fromDate = dto.getFromDate();

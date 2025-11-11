@@ -17,7 +17,6 @@ public interface InsuranceRateRepository extends JpaRepository<InsuranceRate, Lo
 	@Query("SELECT CASE WHEN COUNT(i) > 0 THEN TRUE ELSE FALSE END "
 			+ "FROM InsuranceRate i "
 			+ "WHERE (i.insType = :insType) "
-			+ "AND (i.useYn = 'Y') "
 			+ "AND (i.fromDate <= :toDate) "
 			+ "AND (i.toDate >= :fromDate) ")
 	public boolean checkOverlap (@Param("insType") String insType, @Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
@@ -26,7 +25,6 @@ public interface InsuranceRateRepository extends JpaRepository<InsuranceRate, Lo
 	@Query("SELECT CASE WHEN COUNT(i) > 0 THEN TRUE ELSE FALSE END "
 			+ "FROM InsuranceRate i "
 			+ "WHERE (i.insType = :insType) "
-			+ "AND (i.useYn = 'Y') "
 			+ "AND (i.id != :id) "
 			+ "AND (i.fromDate <= :toDate) "
 			+ "AND (i.toDate >= :fromDate) ")

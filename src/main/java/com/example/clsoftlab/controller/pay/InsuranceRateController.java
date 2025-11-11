@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.pay.InsuranceRateDetailDto;
 import com.example.clsoftlab.dto.pay.InsuranceRateRequestDto;
@@ -36,20 +34,8 @@ public class InsuranceRateController {
 	
 	// 검색어로 전체 목록 조회
 	@GetMapping("")
-	public String getInsuranceRateList (@ModelAttribute InsuranceRateSearchDto search, @RequestParam(required =  false) Integer page,
+	public String getInsuranceRateList (@ModelAttribute InsuranceRateSearchDto search, @RequestParam(required =  false, defaultValue = "0") Integer page,
 			Model model) {
-		if (page == null) {
-			page = 0;
-		}
-		
-		if (!StringUtils.hasText(search.getInsType())) {
-			search.setInsType(null);
-		}
-		
-		if (!StringUtils.hasText(search.getUseYn())) {
-			search.setUseYn(null);
-		}
-		
 		int size = 1000;
 		
 		Page<InsuranceRateDetailDto> insuranceRatePage = insuranceRateService.searchInsuraceRate(search, page, size);
@@ -78,17 +64,10 @@ public class InsuranceRateController {
 	}
 	
 	// 중복 체크
-	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public boolean checkOverlap (@RequestParam String insType, @RequestParam LocalDate fromDate, @RequestParam LocalDate toDate) {
-		return insuranceRateService.checkOverlap(insType, fromDate, toDate);
-	}
-	
-	// 중복 체크 (수정용)
-	@ResponseBody
-	@GetMapping("/checkOverlap/update")
-	public boolean checkOverlap (@RequestParam String insType, @RequestParam LocalDate fromDate, @RequestParam LocalDate toDate, @RequestParam Long id) {
-		return insuranceRateService.checkOverlap(insType, fromDate, toDate, id);
+	public ResponseEntity<Boolean> checkOverlap (@RequestParam String insType, @RequestParam LocalDate fromDate, @RequestParam LocalDate toDate, @RequestParam(required = false) Long id) {
+		boolean result = insuranceRateService.checkOverlap(insType, fromDate, toDate, id);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 상세 정보 조회
