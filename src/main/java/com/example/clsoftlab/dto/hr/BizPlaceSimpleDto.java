@@ -9,15 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BizPlaceListDto {
+public class BizPlaceSimpleDto {
 
-	private Long id;
 	private String bizCode;
 	private String bizName;
-	private String addrMain;
-	private String addrDetail;
-	private String regNo;
-	private String useYn;
-	private String managerPernr;
-	private String managerName;
 }

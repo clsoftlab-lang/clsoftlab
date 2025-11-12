@@ -7,9 +7,16 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.example.clsoftlab.entity.BizPlace;
 
-public interface BizPlaceRepository extends JpaRepository<BizPlace, String>, JpaSpecificationExecutor<BizPlace> {
+public interface BizPlaceRepository extends JpaRepository<BizPlace, Long>, JpaSpecificationExecutor<BizPlace> {
 
 
-	public List<BizPlace> findAllByUseYnOrderByBizNameAsc(String useYn);
+	// useYn = Y인 리스트 조회
+	public List<BizPlace> findAllByUseYnOrderByBizName(String useYn);
 
+	// 중복 검사
+	public boolean existsByBizCode(String bizCode);
+	
+	// 검색용 bizPalce 리스트 조회
+	public List<BizPlace> findAllByOrderByBizName ();
+	
 }

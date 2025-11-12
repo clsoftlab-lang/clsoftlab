@@ -1,5 +1,7 @@
 package com.example.clsoftlab.dto.hr;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +13,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BizPlaceSearchDto {
 
-	private String bizCode;
-	private String bizName;
-	private String address;
+	private List<String> bizCode;
+	private String sido;
+	private String sigungu;
 	private String useYn;
 }

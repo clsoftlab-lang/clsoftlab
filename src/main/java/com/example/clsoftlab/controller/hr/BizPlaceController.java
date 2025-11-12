@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,12 +15,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.clsoftlab.dto.hr.BizPlaceDetailDto;
 import com.example.clsoftlab.dto.hr.BizPlaceListDto;
 import com.example.clsoftlab.dto.hr.BizPlaceRequestDto;
 import com.example.clsoftlab.dto.hr.BizPlaceSearchDto;
+import com.example.clsoftlab.service.common.EmployeeMasterService;
 import com.example.clsoftlab.service.hr.BizPlaceExcelService;
 import com.example.clsoftlab.service.hr.BizPlaceService;
 
@@ -34,46 +33,31 @@ public class BizPlaceController {
 
 	private final BizPlaceService bizPlaceService;
 	private final BizPlaceExcelService bizPlaceExcelService;
+	private final EmployeeMasterService employeeMasterService;
 	
-	public BizPlaceController(BizPlaceService bizPlaceService, BizPlaceExcelService bizPlaceExcelService) {
+	public BizPlaceController(BizPlaceService bizPlaceService, BizPlaceExcelService bizPlaceExcelService, 
+			EmployeeMasterService employeeMasterService) {
 		this.bizPlaceService = bizPlaceService;
 		this.bizPlaceExcelService = bizPlaceExcelService;
+		this.employeeMasterService = employeeMasterService;
 	}
 	
 	// 검색어로 전체 목록 조회
 	@GetMapping("")
-	public String getBizPlaceList (@ModelAttribute BizPlaceSearchDto search, @RequestParam(required = false) Integer page,
+	public String getBizPlaceList (@ModelAttribute BizPlaceSearchDto search, @RequestParam(required = false, defaultValue = "0") Integer page,
 			Model model) {
-		if (page == null) {
-			page = 0;
-		}
-		
 		int size = 1000;
-		
-		if (!StringUtils.hasText(search.getBizCode())) {
-			search.setBizCode(null);
-		}
-		
-		if (!StringUtils.hasText(search.getBizName())) {
-			search.setBizName(null);
-		}
-		
-		if (!StringUtils.hasText(search.getAddress())) {
-			search.setAddress(null);
-		}
-		
-		if (!StringUtils.hasText(search.getUseYn())) {
-			search.setUseYn(null);
-		}
 		
 		Page<BizPlaceListDto> bizPlacePage = bizPlaceService.searchBizPlace(search, page, size);
 		
 		model.addAttribute("bizPlace", bizPlacePage.getContent());
 		model.addAttribute("bizCode", search.getBizCode());
-		model.addAttribute("bizName", search.getBizName());
-		model.addAttribute("address", search.getAddress());
+		model.addAttribute("sido", search.getSido());
+		model.addAttribute("sigungu", search.getSigungu());
 		model.addAttribute("useYn", search.getUseYn());
 		model.addAttribute("bizPlacePage", bizPlacePage);
+		model.addAttribute("searchBizPlaceList", bizPlaceService.getBizPlaceListForSearch());
+		model.addAttribute("employeeList", employeeMasterService.findAll());
 		
 		return "hr/biz-place/list";
 	}
@@ -93,16 +77,16 @@ public class BizPlaceController {
 	}
 	
 	// 코드 중복 검사
-	@ResponseBody
 	@GetMapping("/checkOverlap")
-	public boolean checkOverlap (@RequestParam String bizCode) {
-		return bizPlaceService.checkOverlap(bizCode);
+	public ResponseEntity<Boolean> checkOverlap (@RequestParam String bizCode) {
+		boolean result = bizPlaceService.checkOverlap(bizCode);
+		return ResponseEntity.ok(result);
 	}
 	
 	// 상세 정보 조회
-	@GetMapping("/detail/{bizCode}")
-	public ResponseEntity<BizPlaceDetailDto> findById (@PathVariable String bizCode) {
-		return bizPlaceService.findByID(bizCode)
+	@GetMapping("/detail/{id}")
+	public ResponseEntity<BizPlaceDetailDto> findById (@PathVariable Long id) {
+		return bizPlaceService.findByID(id)
 				.map(dto -> ResponseEntity.ok(dto))
 				.orElse(ResponseEntity.notFound().build());
 	}
@@ -111,21 +95,6 @@ public class BizPlaceController {
 	@GetMapping("/excel")
 	public void downloadExcel(@ModelAttribute BizPlaceSearchDto search, HttpServletResponse response) throws IOException {
 		
-		if (!StringUtils.hasText(search.getBizCode())) {
-			search.setBizCode(null);
-		}
-		
-		if (!StringUtils.hasText(search.getBizName())) {
-			search.setBizName(null);
-		}
-		
-		if (!StringUtils.hasText(search.getAddress())) {
-			search.setAddress(null);
-		}
-		
-		if (!StringUtils.hasText(search.getUseYn())) {
-			search.setUseYn(null);
-		}
 		
 		// 1. 응답(Response) 헤더 설정
         // - 브라우저가 이 응답을 '엑셀 파일'로 인식하게 만듭니다.
@@ -144,29 +113,9 @@ public class BizPlaceController {
 	
 	// 검색어로 page 조회
 		@GetMapping("/list")
-		public ResponseEntity<Page<BizPlaceListDto>> getBizPlacePage (@ModelAttribute BizPlaceSearchDto search, @RequestParam(required = false) Integer page,
+		public ResponseEntity<Page<BizPlaceListDto>> getBizPlacePage (@ModelAttribute BizPlaceSearchDto search, @RequestParam(required = false, defaultValue = "0") Integer page,
 				Model model) {
-			if (page == null) {
-				page = 0;
-			}
-			
 			int size = 1000;
-			
-			if (!StringUtils.hasText(search.getBizCode())) {
-				search.setBizCode(null);
-			}
-			
-			if (!StringUtils.hasText(search.getBizName())) {
-				search.setBizName(null);
-			}
-			
-			if (!StringUtils.hasText(search.getAddress())) {
-				search.setAddress(null);
-			}
-			
-			if (!StringUtils.hasText(search.getUseYn())) {
-				search.setUseYn(null);
-			}
 			
 			Page<BizPlaceListDto> bizPlacePage = bizPlaceService.searchBizPlace(search, page, size);
 			

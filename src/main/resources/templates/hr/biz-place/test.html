@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Daum Postcode 'shorthand' 옵션 테스트</title>
+    
+    
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        button { font-size: 16px; padding: 10px; margin-bottom: 10px; }
+        pre { background-color: #f4f4f4; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+
+    <h2>Kakao 주소 API 'shorthand' 옵션 비교 테스트</h2>
+    <p>
+        '경기도', '경상북도' 등 '도'가 포함된 주소 (예: 경기도 성남시 분당구)를 검색해서 비교해 보세요.
+    </p>
+    
+    <hr>
+    
+    <h3>1. shorthand: false (풀네임 테스트)</h3>
+    <button onclick="execDaumPostcode(false)">주소검색 (shorthand: false)</button>
+    <pre id="result_false">여기에 결과가 표시됩니다.</pre>
+
+    <hr>
+
+    <h3>2. shorthand: true (기본값/축약형 테스트)</h3>
+    <button onclick="execDaumPostcode(true)">주소검색 (shorthand: true)</button>
+    <pre id="result_true">여기에 결과가 표시됩니다.</pre>
+
+	<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	
+    <script type="text/javascript">
+    function execDaumPostcode(isShorthand) {
+        
+        new daum.Postcode({
+            // 2. 테스트할 'shorthand' 옵션 설정
+            shorthand: isShorthand, 
+            
+            oncomplete: function(data) {
+                // 3. 비교에 필요한 핵심 필드만 추출
+                const result = {
+                    "data.sido": data.sido,
+                    "data.sigungu": data.sigungu,
+                    "data.roadAddress": data.roadAddress,
+                    "data.jibunAddress": data.jibunAddress,
+                    "data.address" : data.address
+                };
+                
+                // 4. 결과를 JSON 문자열로 예쁘게 변환하여 <pre> 태그에 표시
+                let resultString = JSON.stringify(result, null, 2);
+                
+                // 5. 결과창에 표시
+                if (isShorthand) {
+                    document.getElementById('result_true').textContent = resultString;
+                } else {
+                    document.getElementById('result_false').textContent = resultString;
+                }
+            }
+        }).open();
+    }
+    </script>
+
+</body>
+</html>

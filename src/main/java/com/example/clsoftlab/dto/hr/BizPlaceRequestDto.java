@@ -1,5 +1,6 @@
 package com.example.clsoftlab.dto.hr;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -14,6 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BizPlaceRequestDto {
 	
+	private Long id;
+	
     @NotBlank(message = "사업장 코드는 필수 입력 항목입니다.")
     @Size(max = 10, message = "사업장 코드는 최대 10자까지 입력 가능합니다.")
     private String bizCode;
@@ -22,9 +25,21 @@ public class BizPlaceRequestDto {
     @Size(max = 100, message = "사업장명은 최대 100자까지 입력 가능합니다.")
     private String bizName;
 
-    @NotBlank(message = "주소는 필수 입력 항목입니다.")
-    @Size(max = 200, message = "주소는 최대 200자까지 입력 가능합니다.")
-    private String address;
+    @Size(max = 5, message = "우편번호는 5자입니다.")
+    private String postcode;
+
+    @Size(max = 50, message = "시/도는 최대 50자입니다.")
+    private String sido;
+
+    @Size(max = 50, message = "시/군/구는 최대 50자입니다.")
+    private String sigungu;
+
+    @NotBlank(message = "기본 주소는 필수 입력 항목입니다.")
+    @Size(max = 200, message = "기본 주소는 최대 200자입니다.")
+    private String addrMain;
+
+    @Size(max = 100, message = "상세 주소는 최대 100자입니다.")
+    private String addrDetail;
 
     @Size(max = 20, message = "사업자등록번호는 최대 20자까지 입력 가능합니다.")
     private String regNo;
@@ -32,6 +47,7 @@ public class BizPlaceRequestDto {
     @Size(max = 20, message = "전화번호는 최대 20자까지 입력 가능합니다.")
     private String tel;
 
+    @Email(message = "유효한 이메일 형식이 아닙니다.")
     @Size(max = 50, message = "이메일은 최대 50자까지 입력 가능합니다.")
     private String email;
 
@@ -44,7 +60,7 @@ public class BizPlaceRequestDto {
     @Size(max = 20, message = "사업장 유형은 최대 20자까지 입력 가능합니다.")
     private String type;
 
-    @Size(max = 12, message = "담당자 ID는 최대 12자까지 입력 가능합니다.")
+    @Size(max = 10, message = "담당자 ID는 최대 10자까지 입력 가능합니다.")
     private String managerId;
 
     @NotBlank(message = "사용 여부는 필수 입력 항목입니다.")

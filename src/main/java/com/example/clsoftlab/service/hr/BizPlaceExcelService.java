@@ -40,7 +40,7 @@ public class BizPlaceExcelService {
             row.createCell(2).setCellValue(dto.getAddress());
             row.createCell(3).setCellValue(dto.getRegNo());
             row.createCell(4).setCellValue(dto.getUseYn());
-            row.createCell(5).setCellValue(dto.getManagerId());
+            row.createCell(5).setCellValue(dto.getManagerName() + " (" + dto.getManagerPernr() + ")");
         }
         
         // OutputStream에 워크북 데이터 쓰기

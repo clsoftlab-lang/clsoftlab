@@ -2693,25 +2693,76 @@ VALUES
 ('EMP', '2009-01-01', '2010-12-31', 0.45000, 0.45000, '실업급여 요율 0.9% 시기', 'N', 'system_loader', 0);
 
 
+-- 급여 항목별 계산 이력 --
+CREATE TABLE ZHR_LOG_PAY_CALC (
+    -- 1. 기본 키 컬럼 (PK) - 대리 키
+    LOG_ID      BIGINT         NOT NULL AUTO_INCREMENT COMMENT '로그 고유ID (PK)',
+
+    -- 2. 비즈니스 키 컬럼 (UNIQUE)
+    ZPAY_YM     CHAR(6)        NOT NULL COMMENT '지급월 (FK to ZHR_PAY_DETAIL.ZPAY_YM)',
+    ZSEQ_NO     SMALLINT       NOT NULL COMMENT '차수 (FK to ZHR_PAY_DETAIL.ZSEQ_NO)',
+    ZEMP_NO     VARCHAR(10)    NOT NULL COMMENT '사번 (FK to ZHR_EMP_MASTER.PERNR)',
+    ZITEM_CD    VARCHAR(20)    NOT NULL COMMENT '항목 코드 (FK to ZHR_PAY_ITEM.ZITEM_CD)',
+    ZSTEP_NO    SMALLINT       NOT NULL COMMENT '계산 단계 (항목별 1부터 순차 증가)',
+
+    -- 3. 계산 과정 데이터 필드 (UI 구성안 참고)
+    ZSTEP_DESC  VARCHAR(255)   NULL     COMMENT '단계 설명',
+    ZBASE_VAL   DECIMAL(20, 4) NULL     COMMENT '계산 기준값',
+    ZFORMULA    VARCHAR(1000)  NULL     COMMENT '적용된 수식 또는 참조 정보',
+    ZRESULT_VAL DECIMAL(20, 4) NOT NULL COMMENT '계산 결과 (절사 전 원시값)',
+    ZROUND_VAL  DECIMAL(18, 2) NULL     COMMENT '절사 후 값 (최종 단계 또는 필요시)',
+    ZROUND_TY   VARCHAR(20)    NULL     COMMENT '절사 방식 (ROUND, TRUNC, ...)',
+    ZCALC_SRC   VARCHAR(20)    NULL     COMMENT '계산 출처 (FORMULA, FIXED, SQL, TABLE)',
+    ZNOTE       VARCHAR(500)   NULL     COMMENT '비고',
+
+    -- 4. 감사(Audit) 필드 (로그 생성 시점)
+    CREATED_AT  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '로그 생성 일시',
+    CREATED_BY  VARCHAR(50)    NOT NULL COMMENT '로그 생성자 (배치 ID 또는 사용자)',
+
+    -- 5. 기본 키 설정
+    PRIMARY KEY (LOG_ID),
+
+    -- 6. 고유 키(UNIQUE) 설정 (중복 체크용)
+    UNIQUE KEY UK_ZHR_LOG_PAY_CALC_01 (ZPAY_YM, ZSEQ_NO, ZEMP_NO, ZITEM_CD, ZSTEP_NO),
+
+    -- 7. 외래 키 (FK) 설정 (마스터 데이터 참조)
+    FOREIGN KEY (ZEMP_NO) REFERENCES ZHR_EMP_MASTER(PERNR),
+    FOREIGN KEY (ZITEM_CD) REFERENCES ZHR_PAY_ITEM(ZITEM_CD)
+
+) COMMENT '급여 항목별 계산 단계별 이력 로그';
+
 
 -- 인사 --
 -- 사업장 관리 --
 CREATE TABLE ZHR_BIZPLACE (
-    -- 비즈니스 키 컬럼 (PK)
-    ZBIZ_CD         VARCHAR(10)     NOT NULL COMMENT '사업장 코드 (PK)',
+    -- === 대리 키(Surrogate Key) 컬럼 (PK) ===
+    ZID             BIGINT          NOT NULL AUTO_INCREMENT COMMENT '대리키 (PK)',
+
+    -- === 비즈니스 키 컬럼 (UNIQUE) ===
+    ZBIZ_CD         VARCHAR(10)     NOT NULL COMMENT '사업장 코드 (Business Key)',
 
     -- 데이터 컬럼
     ZBIZ_NM         VARCHAR(100)    NOT NULL COMMENT '사업장 명칭',
-    ZADDR           VARCHAR(200)    NOT NULL COMMENT '주소',
+	
+    -- === 주소 컬럼 재설계===
+    ZPOSTCODE       VARCHAR(5)      NULL     COMMENT '우편번호 (Kakao API)',
+    ZSIDO           VARCHAR(50)     NULL     COMMENT '시/도 (Kakao API, 검색용)',
+    ZSIGUNGU        VARCHAR(50)     NULL     COMMENT '시/군/구 (Kakao API, 검색용)',
+    ZADDR_MAIN      VARCHAR(150)    NOT NULL COMMENT '기본 주소 (Kakao API)',
+    ZADDR_DETAIL    VARCHAR(100)    NULL     COMMENT '상세 주소 (사용자 입력)',
+
     ZREG_NO         VARCHAR(20)     NULL     COMMENT '사업자등록번호',
     ZTEL            VARCHAR(20)     NULL     COMMENT '전화번호',
     ZEMAIL          VARCHAR(50)     NULL     COMMENT '이메일',
     ZWORK_HOUR      VARCHAR(20)     NULL     COMMENT '근무시간',
     ZWORK_DAYS      VARCHAR(10)     NULL     COMMENT '주간근무제',
     ZTYPE           VARCHAR(20)     NULL     COMMENT '사업장 유형 (사무소/공장 등)',
-    ZMANAGER_ID     VARCHAR(12)     NULL     COMMENT '담당자 ID',
+    ZMANAGER_ID     VARCHAR(10)     NULL     COMMENT '담당자 ID (FK to ZHR_EMP_MASTER)',
     ZUSE_YN         CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
     ZREMARK         VARCHAR(200)    NULL     COMMENT '비고',
+
+    -- === 버전 관리 컬럼 (낙관적 잠금용) ===
+    ZVERSION        INT             NOT NULL DEFAULT 1 COMMENT '데이터 버전 (낙관적 잠금용)',
 
     -- 감사(Audit) 컬럼
     CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
@@ -2719,66 +2770,146 @@ CREATE TABLE ZHR_BIZPLACE (
     UPDATED_AT      DATETIME        NULL     COMMENT '수정 일시',
     UPDATED_BY      VARCHAR(50)     NULL     COMMENT '수정자',
 
-    -- 기본 키 설정
-    PRIMARY KEY (ZBIZ_CD),
+    -- === 기본 키 설정 ===
+    PRIMARY KEY (ZID),
+
+    -- === 고유 키 설정===
+    -- ZBIZ_CD는 비즈니스적으로 고유해야 하므로 UNIQUE 인덱스 추가
+    UNIQUE KEY UK_BIZPLACE_CD (ZBIZ_CD),
 
     -- 제약 조건 설정
     CHECK (ZUSE_YN IN ('Y', 'N')),
 
+    -- === 외래 키(Foreign Key) 설정 추가 ===
+    CONSTRAINT FK_BIZPLACE_MANAGER
+        FOREIGN KEY (ZMANAGER_ID) 
+        REFERENCES ZHR_EMP_MASTER(PERNR) 
+        ON DELETE SET NULL  -- 담당자가 삭제(퇴사)되면, 이 컬럼을 NULL로 설정
+        ON UPDATE CASCADE,  -- 담당자의 사번이 변경되면, 이 컬럼도 같이 변경
+
     -- 검색 성능 향상을 위한 인덱스
-    -- 사업장명으로 조회하는 경우가 많으므로 인덱스 추가
     INDEX IDX_BIZPLACE_NM (ZBIZ_NM)
+    -- ZMANAGER_ID는 FK에 의해 인덱스가 생성될 수 있으나, 명시적 추가도 가능
+    -- INDEX IDX_BIZPLACE_MANAGER (ZMANAGER_ID)
 
 ) COMMENT '사업장 마스터 테이블';
 
--- 더미데이터--
+
+-- 더미 데이터 --
 INSERT INTO ZHR_BIZPLACE 
-(ZBIZ_CD, ZBIZ_NM, ZADDR, ZREG_NO, ZTEL, ZEMAIL, ZWORK_HOUR, ZWORK_DAYS, ZTYPE, ZMANAGER_ID, ZUSE_YN, ZREMARK, CREATED_BY)
+(
+    ZBIZ_CD, ZBIZ_NM, 
+    ZPOSTCODE, ZSIDO, ZSIGUNGU, ZADDR_MAIN, ZADDR_DETAIL, -- (신규 주소 컬럼)
+    ZREG_NO, ZTEL, ZEMAIL, ZWORK_HOUR, ZWORK_DAYS, ZTYPE, 
+    ZMANAGER_ID, ZUSE_YN, ZREMARK, CREATED_BY
+)
 VALUES
 -- 1. 본사 / 연구소
-('H0001', '서울 본사', '서울특별시 강남구 테헤란로 123, 20층', '123-81-00001', '02-1234-5678', 'seoul_hq@company.com', '09:00~18:00', '주 5일', '본사', 'mgr001', 'Y', '본사 및 수도권 영업 총괄', 'system_loader'),
-('R0001', '판교 R&D 센터', '경기도 성남시 분당구 판교역로 235', '123-81-00001', '031-123-4567', 'rnd@company.com', '09:30~18:30', '주 5일', '연구소', 'mgr002', 'Y', '핵심 기술 연구 개발', 'system_loader'),
-('D0001', '춘천 데이터센터', '강원도 춘천시 남산면 버들1길 130', '222-81-00011', '033-111-2222', 'datacenter@company.com', '24시간 3교대', '4조 3교대', '데이터센터', 'mgr003', 'Y', 'IDC 운영', 'system_loader'),
+('H0001', '서울 본사', 
+ NULL, '서울특별시', '강남구', '서울특별시 강남구 테헤란로 123', '20층', -- (주소 분리)
+ '123-81-00001', '02-1234-5678', 'seoul_hq@company.com', '09:00~18:00', '주 5일', '본사', '2203004', 'Y', '본사 및 수도권 영업 총괄', 'system_loader'),
+('R0001', '판교 R&D 센터', 
+ NULL, '경기도', '성남시', '경기도 성남시 분당구 판교역로 235', NULL, -- (주소 분리: '성남시 분당구' -> '성남시')
+ '123-81-00001', '031-123-4567', 'rnd@company.com', '09:30~18:30', '주 5일', '연구소', '2207006', 'Y', '핵심 기술 연구 개발', 'system_loader'),
+('D0001', '춘천 데이터센터', 
+ NULL, '강원도', '춘천시', '강원도 춘천시 남산면 버들1길 130', NULL, -- (주소 분리)
+ '222-81-00011', '033-111-2222', 'datacenter@company.com', '24시간 3교대', '4조 3교대', '데이터센터', '2209007', 'Y', 'IDC 운영', 'system_loader'),
 
 -- 2. 공장
-('F0101', '수원 1공장 (전자)', '경기도 수원시 영통구 삼성로 129', '321-82-00002', '031-222-3333', 'suwon_f1@company.com', '08:00~17:00', '주 5일', '공장', 'mgr101', 'Y', '모바일 부품 생산', 'system_loader'),
-('F0102', '수원 2공장 (반도체)', '경기도 수원시 영통구 중부대로 448번길', '321-82-00002', '031-222-4444', 'suwon_f2@company.com', '24시간 4조 3교대', '4조 3교대', '공장', 'mgr102', 'N', '2024년 평택으로 라인 이전', 'system_loader'),
-('F0201', '구미 1공장 (디스플레이)', '경상북도 구미시 3공단3로 331', '456-83-00003', '054-444-5555', 'gumi_f1@company.com', '08:30~17:30', '주 5일', '공장', 'mgr103', 'Y', 'OLED 패널 생산', 'system_loader'),
-('F0301', '평택 반도체 캠퍼스', '경기도 평택시 고덕면 삼성로 1', '321-82-00002', '031-8096-1114', 'pyeongtaek_f1@company.com', '24시간 4조 3교대', '4조 3교대', '공장', 'mgr104', 'Y', '차세대 반도체 생산 라인', 'system_loader'),
-('F0401', '울산 석유화학 공장', '울산광역시 남구 신항로 123', '555-84-00004', '052-555-6666', 'ulsan_f1@company.com', '07:30~16:30', '주 5일', '공장', 'mgr105', 'Y', '기초 유화 제품 생산', 'system_loader'),
-('F0501', '창원 정밀기계 공장', '경상남도 창원시 성산구 완암로 50', '654-85-00005', '055-777-8888', 'changwon_f1@company.com', '08:00~17:00', '주 5일', '공장', 'mgr106', 'Y', '산업용 로봇 생산', 'system_loader'),
+('F0101', '수원 1공장 (전자)', 
+ NULL, '경기도', '수원시', '경기도 수원시 영통구 삼성로 129', NULL, -- (주소 분리: '수원시 영통구' -> '수원시')
+ '321-82-00002', '031-222-3333', 'suwon_f1@company.com', '08:00~17:00', '주 5일', '공장', '2210009', 'Y', '모바일 부품 생산', 'system_loader'),
+('F0102', '수원 2공장 (반도체)', 
+ NULL, '경기도', '수원시', '경기도 수원시 영통구 중부대로 448번길', NULL, -- (주소 분리)
+ '321-82-00002', '031-222-4444', 'suwon_f2@company.com', '24시간 4조 3교대', '4조 3교대', '공장', NULL, 'N', '2024년 평택으로 라인 이전', 'system_loader'),
+('F0201', '구미 1공장 (디스플레이)', 
+ NULL, '경상북도', '구미시', '경상북도 구미시 3공단3로 331', NULL, -- (주소 분리)
+ '456-83-00003', '054-444-5555', 'gumi_f1@company.com', '08:30~17:30', '주 5일', '공장', '2211010', 'Y', 'OLED 패널 생산', 'system_loader'),
+('F0301', '평택 반도체 캠퍼스', 
+ NULL, '경기도', '평택시', '경기도 평택시 고덕면 삼성로 1', NULL, -- (주소 분리)
+ '321-82-00002', '031-8096-1114', 'pyeongtaek_f1@company.com', '24시간 4조 3교대', '4조 3교대', '공장', '2302013', 'Y', '차세대 반도체 생산 라인', 'system_loader'),
+('F0401', '울산 석유화학 공장', 
+ NULL, '울산광역시', '남구', '울산광역시 남구 신항로 123', NULL, -- (주소 분리)
+ '555-84-00004', '052-555-6666', 'ulsan_f1@company.com', '07:30~16:30', '주 5일', '공장', '2305015', 'Y', '기초 유화 제품 생산', 'system_loader'),
+('F0501', '창원 정밀기계 공장', 
+ NULL, '경상남도', '창원시', '경상남도 창원시 성산구 완암로 50', NULL, -- (주소 분리: '창원시 성산구' -> '창원시')
+ '654-85-00005', '055-777-8888', 'changwon_f1@company.com', '08:00~17:00', '주 5일', '공장', '2305016', 'Y', '산업용 로봇 생산', 'system_loader'),
 
 -- 3. 물류센터
-('L0101', '인천 물류센터', '인천광역시 서구 오류동 1543-5', '789-86-00006', '032-987-6543', 'incheon_logis@company.com', '09:00~18:00', '주 6일', '물류센터', 'mgr201', 'Y', '수도권 통합 물류 허브', 'system_loader'),
-('L0201', '부산 신항 물류센터', '부산광역시 강서구 신항남로 33', '888-87-00007', '051-888-9999', 'busan_logis@company.com', '09:00~18:00', '주 5일', '물류센터', 'mgr202', 'Y', '수출입 물류 담당', 'system_loader'),
-('L0301', '용인 허브 터미널', '경기도 용인시 처인구 양지면 중부대로 2374', '789-86-00006', '031-777-6666', 'yongin_hub@company.com', '24시간 운영', '스케줄 근무', '물류센터', 'mgr203', 'Y', '전국 택배 분류', 'system_loader'),
-('L0401', '대구 내륙물류기지', '대구광역시 북구 검단동 1234-1', '789-86-00006', '053-654-3210', 'daegu_logis@company.com', '09:00~18:00', '주 5일', '물류센터', 'mgr204', 'Y', '영남권 물류 담당', 'system_loader'),
-('L0501', '광주 물류센터', '광주광역시 광산구 평동산단로 182', '789-86-00006', '062-111-2222', 'gwangju_logis@company.com', '09:00~18:00', '주 5일', '물류센터', 'mgr205', 'N', '2025년 신규 센터로 이전 예정', 'system_loader'),
+('L0101', '인천 물류센터', 
+ NULL, '인천광역시', '서구', '인천광역시 서구 오류동 1543-5', NULL, -- (주소 분리)
+ '789-86-00006', '032-987-6543', 'incheon_logis@company.com', '09:00~18:00', '주 6일', '물류센터', '2309018', 'Y', '수도권 통합 물류 허브', 'system_loader'),
+('L0201', '부산 신항 물류센터', 
+ NULL, '부산광역시', '강서구', '부산광역시 강서구 신항남로 33', NULL, -- (주소 분리)
+ '888-87-00007', '051-888-9999', 'busan_logis@company.com', '09:00~18:00', '주 5일', '물류센터', '2310019', 'Y', '수출입 물류 담당', 'system_loader'),
+('L0301', '용인 허브 터미널', 
+ NULL, '경기도', '용인시', '경기도 용인시 처인구 양지면 중부대로 2374', NULL, -- (주소 분리: '용인시 처인구' -> '용인시')
+ '789-86-00006', '031-777-6666', 'yongin_hub@company.com', '24시간 운영', '스케줄 근무', '물류센터', '2312020', 'Y', '전국 택배 분류', 'system_loader'),
+('L0401', '대구 내륙물류기지', 
+ NULL, '대구광역시', '북구', '대구광역시 북구 검단동 1234-1', NULL, -- (주소 분리)
+ '789-86-00006', '053-654-3210', 'daegu_logis@company.com', '09:00~18:00', '주 5일', '물류센터', '2401022', 'Y', '영남권 물류 담당', 'system_loader'),
+('L0501', '광주 물류센터', 
+ NULL, '광주광역시', '광산구', '광주광역시 광산구 평동산단로 182', NULL, -- (주소 분리)
+ '789-86-00006', '062-111-2222', 'gwangju_logis@company.com', '09:00~18:00', '주 5일', '물류센터', NULL, 'N', '2025년 신규 센터로 이전 예정', 'system_loader'),
 
 -- 4. 지사 / 영업소
-('B0101', '부산 지사', '부산광역시 연제구 중앙대로 1000', '888-87-00007', '051-777-1234', 'busan_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr301', 'Y', '동남권 총괄 지사', 'system_loader'),
-('B0201', '대전 지사', '대전광역시 서구 둔산로 100', '999-88-00008', '042-666-5555', 'daejeon_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr302', 'Y', '중부권 총괄 지사', 'system_loader'),
-('B0301', '광주 지사', '광주광역시 서구 상무중앙로 7', '111-89-00009', '062-444-3333', 'gwangju_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr303', 'Y', '호남권 총괄 지사', 'system_loader'),
-('B0401', '대구 지사', '대구광역시 동구 동대구로 489', '222-90-00010', '053-222-1111', 'daegu_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr304', 'Y', '경북권 총괄 지사', 'system_loader'),
-('B0501', '제주 지사', '제주특별자치도 제주시 노형로 407', '333-91-00012', '064-999-8888', 'jeju_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr305', 'Y', '제주 지역 담당', 'system_loader'),
-('S0101', '강남 영업소', '서울특별시 서초구 강남대로 373', '123-81-00001', '02-345-6789', 'gangnam_sales@company.com', '09:00~18:00', '주 5일', '영업소', 'mgr401', 'Y', NULL, 'system_loader'),
-('S0102', '여의도 영업소', '서울특별시 영등포구 의사당대로 97', '123-81-00001', '02-789-1234', 'yeouido_sales@company.com', '09:00~18:00', '주 5일', '영업소', 'mgr402', 'Y', '금융기관 담당', 'system_loader'),
-('S0201', '세종 영업소', '세종특별자치시 한누리대로 411', '999-88-00008', '044-888-7777', 'sejong_sales@company.com', '09:00~18:00', '주 5일', '영업소', 'mgr403', 'Y', '정부부처 담당', 'system_loader'),
+('B0101', '부산 지사', 
+ NULL, '부산광역시', '연제구', '부산광역시 연제구 중앙대로 1000', NULL, -- (주소 분리)
+ '888-87-00007', '051-777-1234', 'busan_branch@company.com', '09:00~18:00', '주 5일', '지사', '2402023', 'Y', '동남권 총괄 지사', 'system_loader'),
+('B0201', '대전 지사', 
+ NULL, '대전광역시', '서구', '대전광역시 서구 둔산로 100', NULL, -- (주소 분리)
+ '999-88-00008', '042-666-5555', 'daejeon_branch@company.com', '09:00~18:00', '주 5일', '지사', '2402024', 'Y', '중부권 총괄 지사', 'system_loader'),
+('B0301', '광주 지사', 
+ NULL, '광주광역시', '서구', '광주광역시 서구 상무중앙로 7', NULL, -- (주소 분리)
+ '111-89-00009', '062-444-3333', 'gwangju_branch@company.com', '09:00~18:00', '주 5일', '지사', '2403025', 'Y', '호남권 총괄 지사', 'system_loader'),
+('B0401', '대구 지사', 
+ NULL, '대구광역시', '동구', '대구광역시 동구 동대구로 489', NULL, -- (주소 분리)
+ '222-90-00010', '053-222-1111', 'daegu_branch@company.com', '09:00~18:00', '주 5일', '지사', '2404026', 'Y', '경북권 총괄 지사', 'system_loader'),
+('B0501', '제주 지사', 
+ NULL, '제주특별자치도', '제주시', '제주특별자치도 제주시 노형로 407', NULL, -- (주소 분리)
+ '333-91-00012', '064-999-8888', 'jeju_branch@company.com', '09:00~18:00', '주 5일', '지사', '2404027', 'Y', '제주 지역 담당', 'system_loader'),
+('S0101', '강남 영업소', 
+ NULL, '서울특별시', '서초구', '서울특별시 서초구 강남대로 373', NULL, -- (주소 분리)
+ '123-81-00001', '02-345-6789', 'gangnam_sales@company.com', '09:00~18:00', '주 5일', '영업소', '2405028', 'Y', NULL, 'system_loader'),
+('S0102', '여의도 영업소', 
+ NULL, '서울특별시', '영등포구', '서울특별시 영등포구 의사당대로 97', NULL, -- (주소 분리)
+ '123-81-00001', '02-789-1234', 'yeouido_sales@company.com', '09:00~18:00', '주 5일', '영업소', '2405029', 'Y', '금융기관 담당', 'system_loader'),
+('S0201', '세종 영업소', 
+ NULL, '세종특별자치시', '', '세종특별자치시 한누리대로 411', NULL, -- (주소 분리: '세종' -> ZSIGUNGU는 '')
+ '999-88-00008', '044-888-7777', 'sejong_sales@company.com', '09:00~18:00', '주 5일', '영업소', '2406030', 'Y', '정부부처 담당', 'system_loader'),
 
--- 5. 해외 지사 (예시)
-('B9101', '미국 법인 (USA)', '1209 Orange Street, Wilmington, Delaware', NULL, '+1-302-123-4567', 'usa_office@company.com', '09:00~17:00', 'Mon-Fri', '해외법인', 'mgr901', 'Y', '북미 총괄 법인', 'system_loader'),
-('B9201', '베트남 호치민 지사', '1 Le Duan Street, District 1, Ho Chi Minh City', NULL, '+84-28-1234-5678', 'hcm_office@company.com', '08:00~17:00', 'Mon-Fri', '해외지사', 'mgr902', 'Y', '동남아 생산기지 관리', 'system_loader'),
-('B9301', '중국 상하이 지사', '100 Century Avenue, Pudong, Shanghai, China', NULL, '+86-21-9876-5432', 'sh_office@company.com', '09:00~18:00', 'Mon-Fri', '해외지사', 'mgr903', 'Y', '중화권 영업 담당', 'system_loader'),
+-- 5. 해외 지사
+('B9101', '미국 법인 (USA)', 
+ NULL, NULL, NULL, '1209 Orange Street, Wilmington, Delaware', NULL, -- (주소 분리: 해외)
+ NULL, '+1-302-123-4567', 'usa_office@company.com', '09:00~17:00', 'Mon-Fri', '해외법인', '2407031', 'Y', '북미 총괄 법인', 'system_loader'),
+('B9201', '베트남 호치민 지사', 
+ NULL, NULL, NULL, '1 Le Duan Street, District 1, Ho Chi Minh City', NULL, -- (주소 분리: 해외)
+ NULL, '+84-28-1234-5678', 'hcm_office@company.com', '08:00~17:00', 'Mon-Fri', '해외지사', '2407032', 'Y', '동남아 생산기지 관리', 'system_loader'),
+('B9301', '중국 상하이 지사', 
+ NULL, NULL, NULL, '100 Century Avenue, Pudong, Shanghai, China', NULL, -- (주소 분리: 해외)
+ NULL, '+86-21-9876-5432', 'sh_office@company.com', '09:00~18:00', 'Mon-Fri', '해외지사', '2408033', 'Y', '중화권 영업 담당', 'system_loader'),
 
 -- 6. 기타 특수 사업장
-('T0001', '인재개발원', '경기도 용인시 처인구 포곡읍 에버랜드로 199', '123-81-00001', '031-320-5000', 'hrd_center@company.com', '09:00~18:00', '주 5일', '연수원', 'mgr501', 'Y', '그룹 임직원 교육 담당', 'system_loader'),
-('T0002', '송도 R&D 캠퍼스', '인천광역시 연수구 송도과학로 55', '321-82-00002', '032-888-1234', 'songdo_rnd@company.com', '09:00~18:00', '주 5일', '연구소', 'mgr502', 'Y', '바이오 연구', 'system_loader'),
-('F0601', '아산 디스플레이 공장', '충청남도 아산시 탕정면 삼성로 177', '456-83-00003', '041-540-1114', 'asan_f1@company.com', '08:30~17:30', '주 5일', '공장', 'mgr107', 'Y', NULL, 'system_loader'),
-('S0301', '인천공항 사무소', '인천광역시 중구 공항로 272', '123-81-00001', '032-741-1000', 'airport_office@company.com', '09:00~18:00', '주 5일', '사무소', 'mgr404', 'Y', '항공물류 지원', 'system_loader'),
-('B0601', '원주 지사', '강원도 원주시 시청로 1', '222-81-00011', '033-737-2114', 'wonju_branch@company.com', '09:00~18:00', '주 5일', '지사', 'mgr306', 'Y', '강원권 총괄 지사', 'system_loader'),
-('F0202', '구미 2공장 (모바일)', '경상북도 구미시 1공단로 222', '456-83-00003', '054-444-6666', 'gumi_f2@company.com', '08:30~17:30', '주 5일', '공장', 'mgr108', 'Y', '스마트폰 완제품 조립', 'system_loader');
-
-
+('T0001', '인재개발원', 
+ NULL, '경기도', '용인시', '경기도 용인시 처인구 포곡읍 에버랜드로 199', NULL, -- (주소 분리: '용인시 처인구' -> '용인시')
+ '123-81-00001', '031-320-5000', 'hrd_center@company.com', '09:00~18:00', '주 5일', '연수원', '2409034', 'Y', '그룹 임직원 교육 담당', 'system_loader'),
+('T0002', '송도 R&D 캠퍼스', 
+ NULL, '인천광역시', '연수구', '인천광역시 연수구 송도과학로 55', NULL, -- (주소 분리)
+ '321-82-00002', '032-888-1234', 'songdo_rnd@company.com', '09:00~18:00', '주 5일', '연구소', '2409035', 'Y', '바이오 연구', 'system_loader'),
+('F0601', '아산 디스플레이 공장', 
+ NULL, '충청남도', '아산시', '충청남도 아산시 탕정면 삼성로 177', NULL, -- (주소 분리)
+ '456-83-00003', '041-540-1114', 'asan_f1@company.com', '08:30~17:30', '주 5일', '공장', '2410036', 'Y', NULL, 'system_loader'),
+('S0301', '인천공항 사무소', 
+ NULL, '인천광역시', '중구', '인천광역시 중구 공항로 272', NULL, -- (주소 분리)
+ '123-81-00001', '032-741-1000', 'airport_office@company.com', '09:00~18:00', '주 5일', '사무소', '2411037', 'Y', '항공물류 지원', 'system_loader'),
+('B0601', '원주 지사', 
+ NULL, '강원도', '원주시', '강원도 원주시 시청로 1', NULL, -- (주소 분리)
+ '222-81-00011', '033-737-2114', 'wonju_branch@company.com', '09:00~18:00', '주 5일', '지사', '2411038', 'Y', '강원권 총괄 지사', 'system_loader'),
+('F0202', '구미 2공장 (모바일)', 
+ NULL, '경상북도', '구미시', '경상북도 구미시 1공단로 222', NULL, -- (주소 분리)
+ '456-83-00003', '054-444-6666', 'gumi_f2@company.com', '08:30~17:30', '주 5일', '공장', '2412039', 'Y', '스마트폰 완제품 조립', 'system_loader');
+ 
+ 
 CREATE TABLE ZHR_ORG_UNIT (
     -- 비즈니스 키 컬럼 (PK)
     ZORG_CD         VARCHAR(10)     NOT NULL COMMENT '조직 코드 (PK)',
