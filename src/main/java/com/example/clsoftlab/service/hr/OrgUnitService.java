@@ -116,15 +116,17 @@ public class OrgUnitService {
 		}
 		
 		
-		if (dto.getParentOrgCode() != null && !dto.getParentOrgCode().isEmpty()) {
+		if (dto.getParentOrgUnitCode() != null && !dto.getParentOrgUnitCode().isEmpty()) {
 			OrgUnit parentOrgUnit = orgUnitRepository.findByOrgCode (dto.getParentOrgUnitCode())
 					.orElseThrow(() -> new EntityNotFoundException("해당 항목을 찾을 수 없습니다. orgCode : " + dto.getParentOrgUnitCode()));
 			
 			orgUnit.setParentOrgUnit(parentOrgUnit);
 		}
 		
-		orgUnitRepository.save(orgUnit);)
+		orgUnitRepository.save(orgUnit);
+		
 	}
+
 	
 	// 기존 항목 수정
 	@Transactional
@@ -137,17 +139,17 @@ public class OrgUnitService {
 	
 	// 코드 중복 검사
 	public boolean checkOverlap (String orgCode) {
-		return orgUnitRepository.existsById(orgCode);
+		return orgUnitRepository.existsByOrgCode (orgCode);
 	}
 	
 	// 상세 정보 조회
-	public Optional<OrgUnitDetailDto> findById (String orgCode) {
-		return  orgUnitRepository.findById(orgCode)
+	public Optional<OrgUnitDetailDto> findById (Long id) {
+		return  orgUnitRepository.findById(id)
 				.map(i -> modelMapper.map(i, OrgUnitDetailDto.class));
 	}
 	
 	// 엑셀 출력용 리스트
-	public List<OrgUnitExcelDto> getExcelList (String bizCode, String orgName, String useYn) {
+	public List<OrgUnitExcelDto> getExcelList (List<String> bizCode, List<String> orgName, String useYn) {
 		
 		Specification<OrgUnit> spec = Specification.not(null);
 		spec = spec.and(OrgUnitSpecs.withBizCode(bizCode))

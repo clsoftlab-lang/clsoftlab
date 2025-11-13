@@ -34,7 +34,7 @@ public class EmployeePersonalService {
 				.map(entity -> {
 					EmployeePersonalDetailDto dto = modelMapper.map(entity, EmployeePersonalDetailDto.class);
 					
-					orgUnitRepository.findById(dto.getDeptCode())
+					orgUnitRepository.findByOrgCode(dto.getDeptCode())
 					.ifPresent(orgUnit -> dto.setDeptName(orgUnit.getOrgName()));
 					
 					return dto;

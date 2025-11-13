@@ -70,16 +70,8 @@ public class OrgUnitController {
 	// 검색어로 조회후, tree 반환
 	@ResponseBody
 	@GetMapping("/tree")
-	public List<OrgUnitTreeDto> getOrgUnitTree (@RequestParam(required = false) String bizCode, @RequestParam(required = false) String orgName,
+	public List<OrgUnitTreeDto> getOrgUnitTree (@RequestParam(required = false) List<String> bizCode, @RequestParam(required = false) List<String> orgName,
 			@RequestParam(required = false) String useYn) {
-		
-		if (!StringUtils.hasText(orgName)) {
-			orgName = null;
-		}
-		
-		if (!StringUtils.hasText(useYn)) {
-			useYn = null;
-		}
 		
 		return orgUnitService.getOrgUnitTree(bizCode, orgName, useYn);
 	}
@@ -93,9 +85,9 @@ public class OrgUnitController {
 	
 	// 상세 정보 조회
 	@ResponseBody
-	@GetMapping("/detail/{orgCode}")
-	public ResponseEntity<OrgUnitDetailDto> findById (@PathVariable String orgCode) {
-		return orgUnitService.findById(orgCode)
+	@GetMapping("/detail/{id}")
+	public ResponseEntity<OrgUnitDetailDto> findById (@PathVariable Long id) {
+		return orgUnitService.findById(id)
 				.map(dto -> ResponseEntity.ok(dto))
 				.orElse(ResponseEntity.notFound().build());
 	}
@@ -103,37 +95,18 @@ public class OrgUnitController {
 	// 검색어로 목록 조회
 	@ResponseBody
 	@GetMapping("/list")
-	public Page<OrgUnitFlatDto> getOrgUnitList (@RequestParam String bizCode, @RequestParam(required = false) String orgName,
-			@RequestParam(required = false) String useYn, @RequestParam(required = false) Integer page) {
-		if (page == null) {
-			page = 0;
-		}
+	public Page<OrgUnitFlatDto> getOrgUnitList (@RequestParam(required = false) List<String> bizCode, @RequestParam(required = false) List<String> orgName,
+			@RequestParam(required = false) String useYn, @RequestParam(required = false, defaultValue = "0") Integer page) {
 		
 		int size= 1000;
-		
-		if (!StringUtils.hasText(orgName)) {
-			orgName = null;
-		}
-		
-		if (!StringUtils.hasText(useYn)) {
-			useYn = null;
-		}
 		
 		return orgUnitService.getOrgUnitList(bizCode, orgName, useYn, page, size);
 	}
 	
 	// 엑셀 다운로드
 	@GetMapping("/excel")
-	public void downloadExcel (@RequestParam String bizCode, @RequestParam(required = false) String orgName, 
+	public void downloadExcel (@RequestParam(required = false) List<String> bizCode, @RequestParam(required = false) List<String> orgName, 
 			@RequestParam(required = false) String useYn,HttpServletResponse response) throws IOException {
-		
-		if (!StringUtils.hasText(orgName)) {
-			orgName = null;
-		}
-		
-		if (!StringUtils.hasText(useYn)) {
-			useYn = null;
-		}
 		// 1. 응답(Response) 헤더 설정
         // - 브라우저가 이 응답을 '엑셀 파일'로 인식하게 만듭니다.
 		

@@ -14,7 +14,7 @@ import com.example.clsoftlab.entity.OrgUnit;
 public interface OrgUnitRepository extends JpaRepository<OrgUnit, Long>, JpaSpecificationExecutor<OrgUnit> {
 
 	// 검색용 조직명 리스트 조회
-	@Query("SELECT DISTINCT o.orgName"
+	@Query("SELECT DISTINCT o.orgName "
 			+ "FROM OrgUnit o "
 			+ "ORDER BY o.orgName")
 	List<String> getOrgNameList ();
@@ -22,5 +22,8 @@ public interface OrgUnitRepository extends JpaRepository<OrgUnit, Long>, JpaSpec
 	
 	// orgCode로 항목 조회
 	public Optional<OrgUnit> findByOrgCode(String parentOrgUnitCode);
+
+	// 중복 검사
+	public boolean existsByOrgCode(String orgCode);
 	
 }

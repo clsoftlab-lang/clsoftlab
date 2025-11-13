@@ -54,7 +54,7 @@ public class EmployeeWorkplaceService {
                 .map(EmployeeWorkplaceRequestDto::getWorkLocCode)
                 .collect(Collectors.toSet());
 		
-		Map<String, BizPlace> bizplaceMap = bizPlaceRepository.findAllById(workLocCodes).stream()
+		Map<String, BizPlace> bizplaceMap = bizPlaceRepository.findAllByBizCodeIn(workLocCodes).stream()
                 .collect(Collectors.toMap(BizPlace::getBizCode, bp -> bp));
 		
 		List<EmployeeWorkplace> originalList = employeeWorkplaceRepository.findByPernr(pernr);
