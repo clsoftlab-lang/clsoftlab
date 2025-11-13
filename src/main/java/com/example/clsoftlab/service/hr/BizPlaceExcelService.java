@@ -37,10 +37,16 @@ public class BizPlaceExcelService {
             Row row = sheet.createRow(i + 1);
             row.createCell(0).setCellValue(dto.getBizCode());
             row.createCell(1).setCellValue(dto.getBizName());
-            row.createCell(2).setCellValue(dto.getAddress());
+            if (dto.getAddrDetail() != null) {
+            	row.createCell(2).setCellValue(dto.getAddrMain() + " " + dto.getAddrDetail());
+            } else {
+            	row.createCell(2).setCellValue(dto.getAddrMain());
+            }
             row.createCell(3).setCellValue(dto.getRegNo());
             row.createCell(4).setCellValue(dto.getUseYn());
-            row.createCell(5).setCellValue(dto.getManagerName() + " (" + dto.getManagerPernr() + ")");
+            if(dto.getManagerPernr() != null) {
+            	row.createCell(5).setCellValue(dto.getManagerName() + " (" + dto.getManagerPernr() + ")");
+            }
         }
         
         // OutputStream에 워크북 데이터 쓰기

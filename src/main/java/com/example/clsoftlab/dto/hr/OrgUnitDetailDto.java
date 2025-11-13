@@ -13,15 +13,18 @@ import lombok.Setter;
 @AllArgsConstructor
 public class OrgUnitDetailDto {
 
+	private Long id;
 	private String orgCode;
 	private String parentOrgCode;
+	private String parentOrgName;
 	private String orgName;
 	private String orgType;
 	private String bizCode;
 	private LocalDate validFrom;
 	private LocalDate validTo;
 	private String mainPos;
-	private String managerId;
+	private String managerName;
+	private String managerPernr;
 	private String useYn;
 	private String remark;
 	

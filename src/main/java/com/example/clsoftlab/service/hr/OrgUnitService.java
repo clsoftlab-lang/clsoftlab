@@ -20,7 +20,10 @@ import com.example.clsoftlab.dto.hr.OrgUnitExcelDto;
 import com.example.clsoftlab.dto.hr.OrgUnitFlatDto;
 import com.example.clsoftlab.dto.hr.OrgUnitRequestDto;
 import com.example.clsoftlab.dto.hr.OrgUnitTreeDto;
+import com.example.clsoftlab.entity.BizPlace;
 import com.example.clsoftlab.entity.OrgUnit;
+import com.example.clsoftlab.repository.common.EmployeeMasterRepository;
+import com.example.clsoftlab.repository.hr.BizPlaceRepository;
 import com.example.clsoftlab.repository.hr.OrgUnitRepository;
 import com.example.clsoftlab.repository.hr.specification.OrgUnitSpecs;
 
@@ -31,15 +34,20 @@ import jakarta.transaction.Transactional;
 public class OrgUnitService {
 
 	private final OrgUnitRepository orgUnitRepository;
+	private final EmployeeMasterRepository employeeMasterRepository;
+	private final BizPlaceRepository bizPlaceRepository;
 	private final ModelMapper modelMapper;
 	
-	public OrgUnitService(OrgUnitRepository orgUnitRepository, ModelMapper modelMapper, GlMappingRuleController glMappingRuleController) {
+	public OrgUnitService(OrgUnitRepository orgUnitRepository, EmployeeMasterRepository employeeMasterRepository,
+			BizPlaceRepository bizPlaceRepository, ModelMapper modelMapper) {
 		this.orgUnitRepository = orgUnitRepository;
+		this.employeeMasterRepository = employeeMasterRepository;
+		this.bizPlaceRepository = bizPlaceRepository;
 		this.modelMapper = modelMapper;
 	}
 	
 	// 검색어로 목록 조회 (tree)
-	public List<OrgUnitTreeDto> getOrgUnitTree (String bizCode, String orgName, String useYn) {
+	public List<OrgUnitTreeDto> getOrgUnitTree (List<String> bizCode, List<String> orgName, String useYn) {
 		
 		Specification<OrgUnit> spec = Specification.not(null);
 		spec = spec.and(OrgUnitSpecs.withBizCode(bizCode))
@@ -82,7 +90,7 @@ public class OrgUnitService {
 	}
 	
 	// 검색어로 목록 조회
-	public Page<OrgUnitFlatDto> getOrgUnitList (String bizCode, String orgName, String useYn, int page, int size) {
+	public Page<OrgUnitFlatDto> getOrgUnitList (List<String> bizCode, List<String> orgName, String useYn, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("orgName"));
 		Specification<OrgUnit> spec = Specification.not(null);
 		spec = spec.and(OrgUnitSpecs.withBizCode(bizCode))
@@ -97,17 +105,31 @@ public class OrgUnitService {
 	// 새 항목 등록
 	@Transactional
 	public void addNewOrgUnit (OrgUnitRequestDto dto) {
-		if (orgUnitRepository.existsById(dto.getOrgCode())) {
-			throw new IllegalStateException("이미 존재하는 항목 코드입니다. orgCode :" + dto.getOrgCode());
+		OrgUnit orgUnit = modelMapper.map(dto, OrgUnit.class);
+		BizPlace bizPlace = bizPlaceRepository.findByBizCode(dto.getBizCode())
+				.orElseThrow(() -> new EntityNotFoundException("해당 항목을 찾을 수 없습니다. bizCode : " + dto.getBizCode()));
+		
+		orgUnit.setBizPlace(bizPlace);
+		
+		if (dto.getManagerId() != null && !dto.getManagerId().isEmpty()) {
+			orgUnit.setManager(employeeMasterRepository.getReferenceById(dto.getManagerId()));
 		}
 		
-		orgUnitRepository.save(modelMapper.map(dto, OrgUnit.class));
+		
+		if (dto.getParentOrgCode() != null && !dto.getParentOrgCode().isEmpty()) {
+			OrgUnit parentOrgUnit = orgUnitRepository.findByOrgCode (dto.getParentOrgUnitCode())
+					.orElseThrow(() -> new EntityNotFoundException("해당 항목을 찾을 수 없습니다. orgCode : " + dto.getParentOrgUnitCode()));
+			
+			orgUnit.setParentOrgUnit(parentOrgUnit);
+		}
+		
+		orgUnitRepository.save(orgUnit);)
 	}
 	
 	// 기존 항목 수정
 	@Transactional
 	public void updateOrgUnit (OrgUnitRequestDto dto) {
-		OrgUnit orgUnit = orgUnitRepository.findById(dto.getOrgCode())
+		OrgUnit orgUnit = orgUnitRepository.findById(dto.getId())
 				.orElseThrow(() -> new EntityNotFoundException("해당 항목을 찾을 수 없습니다. orgCode : " + dto.getOrgCode()));
 		
 		orgUnit.update(dto);

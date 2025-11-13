@@ -67,7 +67,9 @@ public class BizPlaceService {
 	@Transactional
 	public void addNewBizPlace (BizPlaceRequestDto dto) {
 		BizPlace bizPlace = modelMapper.map(dto, BizPlace.class);
-		bizPlace.setManager(employeeMasterRepository.getReferenceById(dto.getManagerId()));
+		if (dto.getManagerId() != null) {
+			bizPlace.setManager(employeeMasterRepository.getReferenceById(dto.getManagerId()));
+		}
 		bizPlaceRepository.save(bizPlace);
 	}
 	
@@ -80,6 +82,8 @@ public class BizPlaceService {
 		bizPlace.update(dto);
 		if (dto.getManagerId() != null) {
 			bizPlace.setManager(employeeMasterRepository.getReferenceById(dto.getManagerId()));
+		} else {
+			bizPlace.setManager(null);
 		}
 	}
 	

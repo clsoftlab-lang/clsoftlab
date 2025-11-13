@@ -1,6 +1,7 @@
 package com.example.clsoftlab.repository.hr;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -18,5 +19,8 @@ public interface BizPlaceRepository extends JpaRepository<BizPlace, Long>, JpaSp
 	
 	// 검색용 bizPalce 리스트 조회
 	public List<BizPlace> findAllByOrderByBizName ();
+
+	// bizCode로 조회
+	public Optional<BizPlace> findByBizCode(String bizCode);
 	
 }

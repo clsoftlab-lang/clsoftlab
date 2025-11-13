@@ -1,29 +1,33 @@
 package com.example.clsoftlab.repository.hr.specification;
 
+import java.util.List;
+
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.example.clsoftlab.entity.OrgUnit;
 
 public class OrgUnitSpecs {
 
-	public static Specification<OrgUnit> withBizCode (String bizCode) {
-		if (bizCode == null) {
+	public static Specification<OrgUnit> withBizCode (List<String> bizCode) {
+		if (CollectionUtils.isEmpty(bizCode)) {
 			return null;
 		}
 		
-		return (root, query, builder) -> builder.equal(root.get("bizCode"), bizCode);
+		return (root, query, builder) -> root.get("bizPlace").get("bizCode").in(bizCode);
 	}
 	
-	public static Specification<OrgUnit> withOrgName (String orgName) {
-		if (orgName == null) {
+	public static Specification<OrgUnit> withOrgName (List<String> orgName) {
+		if (CollectionUtils.isEmpty(orgName)) {
 			return null;
 		}
 		
-		return (root, query, builder) -> builder.like(root.get("orgName"), "%"+orgName+"%");
+		return (root, query, builder) -> root.get("orgName").in(orgName);
 	}
 	
 	public static Specification<OrgUnit> withUseYn (String useYn) {
-		if (useYn == null) {
+		if (!StringUtils.hasText(useYn)) {
 			return null;
 		}
 		
