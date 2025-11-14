@@ -2909,38 +2909,53 @@ VALUES
  NULL, '경상북도', '구미시', '경상북도 구미시 1공단로 222', NULL, -- (주소 분리)
  '456-83-00003', '054-444-6666', 'gumi_f2@company.com', '08:30~17:30', '주 5일', '공장', '2412039', 'Y', '스마트폰 완제품 조립', 'system_loader');
  
- 
+-- 조직 관리 --
 CREATE TABLE ZHR_ORG_UNIT (
-    -- 비즈니스 키 컬럼 (PK)
-    ZORG_CD         VARCHAR(10)     NOT NULL COMMENT '조직 코드 (PK)',
+    -- 1. 대리키(Surrogate Key) 추가
+    ID              BIGINT AUTO_INCREMENT NOT NULL COMMENT '시스템 ID (PK, 대리키)',
+
+    -- 2. 비즈니스 키 컬럼 (Business Key) - PK에서 UNIQUE로 변경
+    ZORG_CD         VARCHAR(10)           NOT NULL COMMENT '조직 코드 (Business Key)',
 
     -- 데이터 컬럼
-    ZORG_NM         VARCHAR(100)    NOT NULL COMMENT '조직명',
-    PARENT_ORG_CD   VARCHAR(10)     NULL     COMMENT '상위 조직 코드',
-    ZORG_TYPE       VARCHAR(10)     NOT NULL COMMENT '조직 유형 (팀, 본부 등)',
-    ZBIZ_CD         VARCHAR(10)     NOT NULL COMMENT '소속 사업장 코드',
-    ZVALID_FROM     DATE            NOT NULL COMMENT '조직 유효 시작일',
-    ZVALID_TO       DATE            NULL     COMMENT '조직 유효 종료일',
-    ZMAIN_POS       VARCHAR(20)     NULL     COMMENT '대표 직책',
-    ZMANAGER_ID     VARCHAR(12)     NULL     COMMENT '조직 담당자 ID',
-    ZUSE_YN         CHAR(1)         NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
-    ZREMARK         VARCHAR(200)    NULL     COMMENT '비고',
+    ZORG_NM         VARCHAR(100)          NOT NULL COMMENT '조직명',
+    PARENT_ORG_CD   VARCHAR(10)           NULL     COMMENT '상위 조직 코드 (ZORG_CD 참조)',
+    ZORG_TYPE       VARCHAR(10)           NOT NULL COMMENT '조직 유형 (팀, 본부 등)',
+    ZBIZ_CD         VARCHAR(10)           NOT NULL COMMENT '소속 사업장 코드',
+    ZVALID_FROM     DATE                  NOT NULL COMMENT '조직 유효 시작일',
+    ZVALID_TO       DATE                  NULL     COMMENT '조직 유효 종료일',
+    ZMAIN_POS       VARCHAR(20)           NULL     COMMENT '대표 직책',
+    ZMANAGER_ID     VARCHAR(10)           NULL     COMMENT '조직 담당자 ID',
+    ZUSE_YN         CHAR(1)               NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZREMARK         VARCHAR(200)          NULL     COMMENT '비고',
+
+    -- 3. Version 필드 추가 (Optimistic Locking 용)
+    VERSION         INT                   NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 락)',
 
     -- 감사(Audit) 컬럼
-    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
-    UPDATED_AT      DATETIME        NULL     COMMENT '수정 일시',
-    UPDATED_BY      VARCHAR(50)     NULL     COMMENT '수정자',
+    CREATED_AT      DATETIME              NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY      VARCHAR(50)           NOT NULL COMMENT '생성자',
+    UPDATED_AT      DATETIME              NULL     COMMENT '수정 일시',
+    UPDATED_BY      VARCHAR(50)           NULL     COMMENT '수정자',
 
-    -- 기본 키 설정
-    PRIMARY KEY (ZORG_CD),
+    -- 기본 키 설정 (대리키로 변경)
+    PRIMARY KEY (ID),
+
+    -- 유니크 제약 조건 (비즈니스 키)
+    UNIQUE KEY UK_ZORG_CD (ZORG_CD),
 
     -- 외래 키 설정 (다른 테이블과의 관계 정의)
+    
     -- 1. 사업장 테이블(ZHR_BIZPLACE) 연계
     FOREIGN KEY (ZBIZ_CD) REFERENCES ZHR_BIZPLACE(ZBIZ_CD),
-    -- 2. 상위 조직 연계 (자기 자신 테이블 참조)
+    
+    -- 2. 상위 조직 연계 (자기 자신 테이블의 비즈니스 키 참조)
+    -- PARENT_ORG_CD가 ZORG_CD를 참조하도록 유지합니다.
     FOREIGN KEY (PARENT_ORG_CD) REFERENCES ZHR_ORG_UNIT(ZORG_CD),
 
+	-- 3. 조직 담당자 연계 (직원 마스터 테이블)
+    FOREIGN KEY (ZMANAGER_ID) REFERENCES ZHR_EMP_MASTER(PERNR),
+    
     -- 제약 조건 설정
     CHECK (ZUSE_YN IN ('Y', 'N')),
     CHECK (ZORG_CD <> PARENT_ORG_CD), -- 상위 조직이 자기 자신이 되는 것을 방지
@@ -2949,54 +2964,61 @@ CREATE TABLE ZHR_ORG_UNIT (
     INDEX IDX_ORG_UNIT_NM (ZORG_NM), -- 조직명 검색
     INDEX IDX_ORG_UNIT_BIZ_CD (ZBIZ_CD) -- 사업장별 조회
 
-) COMMENT '조직 마스터 테이블';
+) COMMENT '조직 마스터 테이블' ;
 
 
--- ZHR_ORG_UNIT 테이블 더미 데이터 (조직 코드 10자 이내로 수정) --
-INSERT INTO ZHR_ORG_UNIT 
+-- ZHR_ORG_UNIT 테이블 더미 데이터 (수정본) --
+-- (ZMANAGER_ID를 ZHR_EMP_MASTER의 PERNR 기준으로 수정)
+INSERT INTO ZHR_ORG_UNIT
 (ZORG_CD, ZORG_NM, PARENT_ORG_CD, ZORG_TYPE, ZBIZ_CD, ZVALID_FROM, ZVALID_TO, ZMAIN_POS, ZMANAGER_ID, ZUSE_YN, ZREMARK, CREATED_BY)
 VALUES
 -- 1. 서울 본사 (H0001) 조직도
-('H0001CEO', '최고경영진', NULL, 'CEO', 'H0001', '2020-01-01', NULL, 'CEO', 'mgr001', 'Y', 'CEO 및 주요 임원 그룹', 'system_loader'),
-('H0001CSO', '전략기획본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', 'mgr011', 'Y', '전사 전략 및 기획 총괄', 'system_loader'),
-('H01CSOT1', '전략기획팀', 'H0001CSO', '팀', 'H0001', '2020-01-01', NULL, '팀장', 'mgr012', 'Y', '중장기 사업 전략 수립', 'system_loader'),
-('H01CSOT2', '인사총무팀', 'H0001CSO', '팀', 'H0001', '2021-03-01', NULL, '팀장', 'mgr013', 'Y', '인사, 급여, 복리후생, 총무 업무', 'system_loader'),
-('H0001CFO', '경영지원본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', 'mgr021', 'Y', '재무, 회계, 법무 총괄', 'system_loader'),
-('H01CFOT1', '재무팀', 'H0001CFO', '팀', 'H0001', '2020-01-01', NULL, '팀장', 'mgr022', 'Y', '자금, 회계, 세무 담당', 'system_loader'),
-('H01CFOT2', 'IR팀', 'H0001CFO', '팀', 'H0001', '2022-05-01', NULL, '팀장', 'mgr023', 'Y', '투자자 정보 관리', 'system_loader'),
-('H0001SALES', '국내영업본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', 'mgr031', 'Y', '국내 영업 총괄', 'system_loader'),
-('H01SALEST1', '수도권영업팀', 'H0001SALES', '팀', 'H0001', '2020-01-01', NULL, '팀장', 'mgr032', 'Y', '서울, 경기, 인천 지역 담당', 'system_loader'),
+-- (H0001 사업장 담당자: '2203004' 최서연)
+('H0001CEO', '최고경영진', NULL, 'CEO', 'H0001', '2020-01-01', NULL, 'CEO', '2203004', 'Y', 'CEO 및 주요 임원 그룹', 'system_loader'),
+('H0001CSO', '전략기획본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', '2402023', 'Y', '전사 전략 및 기획 총괄', 'system_loader'),
+('H01CSOT1', '전략기획팀', 'H0001CSO', '팀', 'H0001', '2020-01-01', NULL, '팀장', '2402024', 'Y', '중장기 사업 전략 수립', 'system_loader'),
+('H01CSOT2', '인사총무팀', 'H0001CSO', '팀', 'H0001', '2021-03-01', NULL, '팀장', '2403025', 'Y', '인사, 급여, 복리후생, 총무 업무', 'system_loader'),
+('H0001CFO', '경영지원본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', '2404026', 'Y', '재무, 회계, 법무 총괄', 'system_loader'),
+('H01CFOT1', '재무팀', 'H0001CFO', '팀', 'H0001', '2020-01-01', NULL, '팀장', '2404027', 'Y', '자금, 회계, 세무 담당', 'system_loader'),
+('H01CFOT2', 'IR팀', 'H0001CFO', '팀', 'H0001', '2022-05-01', NULL, '팀장', '2405028', 'Y', '투자자 정보 관리', 'system_loader'),
+('H0001SALES', '국내영업본부', 'H0001CEO', '본부', 'H0001', '2020-01-01', NULL, '본부장', '2405029', 'Y', '국내 영업 총괄', 'system_loader'),
+('H01SALEST1', '수도권영업팀', 'H0001SALES', '팀', 'H0001', '2020-01-01', NULL, '팀장', '2406030', 'Y', '서울, 경기, 인천 지역 담당', 'system_loader'),
 
 -- 2. 판교 R&D 센터 (R0001) 조직도
-('R0001CTO', '연구소', NULL, '연구소', 'R0001', '2021-01-01', NULL, '연구소장', 'mgr002', 'Y', '기술 연구개발 총괄', 'system_loader'),
-('R0001AI', 'AI연구실', 'R0001CTO', '실', 'R0001', '2021-01-01', NULL, '실장', 'mgr041', 'Y', '인공지능 기술 개발', 'system_loader'),
-('R01AIT1', '자연어처리팀', 'R0001AI', '팀', 'R0001', '2021-01-01', NULL, '팀장', 'mgr042', 'Y', 'NLP 모델 개발', 'system_loader'),
-('R01AIT2', '컴퓨터비전팀', 'R0001AI', '팀', 'R0001', '2022-07-01', '2025-12-31', '팀장', 'mgr043', 'N', '프로젝트 종료로 25년 말 해체 예정', 'system_loader'),
-('R0001PLAT', '플랫폼개발실', 'R0001CTO', '실', 'R0001', '2021-01-01', NULL, '실장', 'mgr051', 'Y', '서비스 플랫폼 개발', 'system_loader'),
-('R01PLATT1', '서버개발팀', 'R0001PLAT', '팀', 'R0001', '2021-01-01', NULL, '팀장', 'mgr052', 'Y', '백엔드 시스템 개발 및 운영', 'system_loader'),
-('R01PLATT2', 'UX/UI디자인팀', 'R0001PLAT', '팀', 'R0001', '2023-02-01', NULL, '팀장', 'mgr053', 'Y', NULL, 'system_loader'),
+-- (R0001 사업장 담당자: '2207006' 윤서아)
+('R0001CTO', '연구소', NULL, '연구소', 'R0001', '2021-01-01', NULL, '연구소장', '2207006', 'Y', '기술 연구개발 총괄', 'system_loader'),
+('R0001AI', 'AI연구실', 'R0001CTO', '실', 'R0001', '2021-01-01', NULL, '실장', '2407031', 'Y', '인공지능 기술 개발', 'system_loader'),
+('R01AIT1', '자연어처리팀', 'R0001AI', '팀', 'R0001', '2021-01-01', NULL, '팀장', '2407032', 'Y', 'NLP 모델 개발', 'system_loader'),
+('R01AIT2', '컴퓨터비전팀', 'R0001AI', '팀', 'R0001', '2022-07-01', '2025-12-31', '팀장', '2408033', 'N', '프로젝트 종료로 25년 말 해체 예정', 'system_loader'),
+('R0001PLAT', '플랫폼개발실', 'R0001CTO', '실', 'R0001', '2021-01-01', NULL, '실장', '2409034', 'Y', '서비스 플랫폼 개발', 'system_loader'),
+('R01PLATT1', '서버개발팀', 'R0001PLAT', '팀', 'R0001', '2021-01-01', NULL, '팀장', '2409035', 'Y', '백엔드 시스템 개발 및 운영', 'system_loader'),
+('R01PLATT2', 'UX/UI디자인팀', 'R0001PLAT', '팀', 'R0001', '2023-02-01', NULL, '팀장', '2410036', 'Y', NULL, 'system_loader'),
 
 -- 3. 수원 1공장 (F0101) 조직도
-('F0101FM', '공장운영총괄', NULL, '공장장', 'F0101', '2019-05-01', NULL, '공장장', 'mgr101', 'Y', '수원 1공장 운영 총괄', 'system_loader'),
-('F0101PROD', '생산본부', 'F0101FM', '본부', 'F0101', '2019-05-01', NULL, '본부장', 'mgr111', 'Y', NULL, 'system_loader'),
-('F01PRODT1', '생산1팀', 'F0101PROD', '팀', 'F0101', '2019-05-01', NULL, '팀장', 'mgr112', 'Y', '모바일 부품 A라인 담당', 'system_loader'),
-('F01PRT1P1', 'A라인 주간조', 'F01PRODT1', '파트', 'F0101', '2019-05-01', NULL, '파트장', 'mgr113', 'Y', NULL, 'system_loader'),
-('F01PRT1P2', 'A라인 야간조', 'F01PRODT1', '파트', 'F0101', '2019-05-01', NULL, '파트장', 'mgr114', 'Y', NULL, 'system_loader'),
-('F0101QC', '품질관리팀', 'F0101FM', '팀', 'F0101', '2019-05-01', NULL, '팀장', 'mgr121', 'Y', '생산품 품질 검수', 'system_loader'),
-('F0101MA', '설비보전팀', 'F0101FM', '팀', 'F0101', '2020-08-01', NULL, '팀장', 'mgr122', 'Y', '공장 설비 유지보수', 'system_loader'),
+-- (F0101 사업장 담당자: '2210009' 한지우)
+('F0101FM', '공장운영총괄', NULL, '공장장', 'F0101', '2019-05-01', NULL, '공장장', '2210009', 'Y', '수원 1공장 운영 총괄', 'system_loader'),
+('F0101PROD', '생산본부', 'F0101FM', '본부', 'F0101', '2019-05-01', NULL, '본부장', '2411037', 'Y', NULL, 'system_loader'),
+('F01PRODT1', '생산1팀', 'F0101PROD', '팀', 'F0101', '2019-05-01', NULL, '팀장', '2411038', 'Y', '모바일 부품 A라인 담당', 'system_loader'),
+('F01PRT1P1', 'A라인 주간조', 'F01PRODT1', '파트', 'F0101', '2019-05-01', NULL, '파트장', '2412039', 'Y', NULL, 'system_loader'),
+('F01PRT1P2', 'A라인 야간조', 'F01PRODT1', '파트', 'F0101', '2019-05-01', NULL, '파트장', '2412040', 'Y', NULL, 'system_loader'),
+('F0101QC', '품질관리팀', 'F0101FM', '팀', 'F0101', '2019-05-01', NULL, '팀장', '2501041', 'Y', '생산품 품질 검수', 'system_loader'),
+('F0101MA', '설비보전팀', 'F0101FM', '팀', 'F0101', '2020-08-01', NULL, '팀장', '2501042', 'Y', '공장 설비 유지보수', 'system_loader'),
 
 -- 4. 인천 물류센터 (L0101) 조직도
-('L0101CM', '센터운영', NULL, '센터장', 'L0101', '2022-01-01', NULL, '센터장', 'mgr201', 'Y', '인천 물류센터 총괄', 'system_loader'),
-('L0101OPS', '운영팀', 'L0101CM', '팀', 'L0101', '2022-01-01', NULL, '팀장', 'mgr211', 'Y', '입출고 및 재고관리', 'system_loader'),
-('L01OPSP1', '입고파트', 'L0101OPS', '파트', 'L0101', '2022-01-01', NULL, '파트장', 'mgr212', 'Y', NULL, 'system_loader'),
-('L01OPSP2', '출고파트', 'L0101OPS', '파트', 'L0101', '2022-01-01', NULL, '파트장', 'mgr213', 'Y', NULL, 'system_loader'),
+-- (L0101 사업장 담당자: '2309018' 고은별)
+('L0101CM', '센터운영', NULL, '센터장', 'L0101', '2022-01-01', NULL, '센터장', '2309018', 'Y', '인천 물류센터 총괄', 'system_loader'),
+('L0101OPS', '운영팀', 'L0101CM', '팀', 'L0101', '2022-01-01', NULL, '팀장', '2502043', 'Y', '입출고 및 재고관리', 'system_loader'),
+('L01OPSP1', '입고파트', 'L0101OPS', '파트', 'L0101', '2022-01-01', NULL, '파트장', '2503044', 'Y', NULL, 'system_loader'),
+('L01OPSP2', '출고파트', 'L0101OPS', '파트', 'L0101', '2022-01-01', NULL, '파트장', '2503045', 'Y', NULL, 'system_loader'),
 
 -- 5. 평택 반도체 캠퍼스 (F0301) 조직도
-('F0301FM', '캠퍼스총괄', NULL, '총괄', 'F0301', '2023-01-01', NULL, '부사장', 'mgr104', 'Y', '평택 캠퍼스 총괄', 'system_loader'),
-('F0301FAB1', 'FAB1 운영팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', 'mgr131', 'Y', '1번 FAB 라인 운영', 'system_loader'),
-('F0301FAB2', 'FAB2 운영팀', 'F0301FM', '팀', 'F0301', '2024-01-01', NULL, '팀장', 'mgr132', 'Y', '2번 FAB 라인 운영', 'system_loader'),
-('F0301TECH', '공정기술팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', 'mgr133', 'Y', '반도체 공정 기술 개발', 'system_loader'),
-('F0301ENV', '환경안전팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', 'mgr134', 'Y', '사업장 안전 및 환경 관리', 'system_loader');
+-- (F0301 사업장 담당자: '2302013' 송지아)
+('F0301FM', '캠퍼스총괄', NULL, '총괄', 'F0301', '2023-01-01', NULL, '부사장', '2302013', 'Y', '평택 캠퍼스 총괄', 'system_loader'),
+('F0301FAB1', 'FAB1 운영팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', '2504046', 'Y', '1번 FAB 라인 운영', 'system_loader'),
+('F0301FAB2', 'FAB2 운영팀', 'F0301FM', '팀', 'F0301', '2024-01-01', NULL, '팀장', '2505047', 'Y', '2번 FAB 라인 운영', 'system_loader'),
+('F0301TECH', '공정기술팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', '2506048', 'Y', '반도체 공정 기술 개발', 'system_loader'),
+('F0301ENV', '환경안전팀', 'F0301FM', '팀', 'F0301', '2023-01-01', NULL, '팀장', '2507049', 'Y', '사업장 안전 및 환경 관리', 'system_loader');
+
 
 
 -- 개인정보 --

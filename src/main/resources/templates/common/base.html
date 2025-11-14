@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE | $LAYOUT_TITLE">CLSOFTLAB</title>
+
+    <!-- Favicon -->
+	<link rel="icon" href="/assets/img/favicon.png" type="image/x-icon">
+	<link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
+	
+	<!-- Theme Script js -->
+	<script src="/assets/js/theme-script.js"></script>
+	
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+	
+	<!-- Feather CSS -->
+	<link rel="stylesheet" href="/assets/plugins/icons/feather/feather.css">
+	
+	<!-- Tabler Icon CSS -->
+    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
+    
+    <!-- Fontawesome CSS -->
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+	
+	<!-- Datetimepicker CSS -->
+	<link rel="stylesheet" href="/assets/css/bootstrap-datetimepicker.min.css">
+	
+	<!-- Bootstrap Tagsinput CSS -->
+	<link rel="stylesheet" href="/assets/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css">
+
+	<!-- Summernote CSS -->
+	<link rel="stylesheet" href="/assets/plugins/summernote/summernote-lite.min.css">
+
+	<!-- Daterangepikcer CSS -->
+	<link rel="stylesheet" href="/assets/plugins/daterangepicker/daterangepicker.css">
+
+	<!-- Color Picker Css -->
+	<link rel="stylesheet" href="/assets/plugins/flatpickr/flatpickr.min.css">
+	<link rel="stylesheet" href="/assets/plugins/@simonwep/pickr/themes/nano.min.css">
+
+	<!-- Main CSS -->
+	<link rel="stylesheet" href="/assets/css/style.css">
+	
+	<!-- DataTable CSS -->
+	<link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="/assets/css/custom-table.css">
+	
+	<!-- Select2 CSS -->
+	<link rel="stylesheet" href="/assets/css/select2.min.css">
+	<link rel="stylesheet" href="/assets/css/select2-bootstrap-5-theme.min.css">
+</head>
+
+<body>
+    <div id="global-loader">
+    	<div class="page-loader"></div>
+    </div>
+
+    <!-- Main Wrapper -->
+	<div class="main-wrapper">
+		<header th:replace="~{common/header :: header}"></header>
+
+		<div layout:fragment="content">
+		</div>
+	</div>
+	<!-- /Main Wrapper -->
+	
+	<th:block th:replace="~{common/scripts :: scripts}"></th:block>
+</body>
+</html>

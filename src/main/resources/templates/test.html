@@ -1,47 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/base}">
 
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>테스트 화면 | clsoftlab</title>
-	
-	<link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">
-
-	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
-
-	<link rel="stylesheet" href="assets/plugins/tabler-icons/tabler-icons.min.css">
-
-	<link rel="stylesheet" href="assets/plugins/fontawesome/css/fontawesome.min.css">
-	<link rel="stylesheet" href="assets/plugins/fontawesome/css/all.min.css">
-
-	<link rel="stylesheet" href="assets/css/style.css">
-
 </head>
 
 <body>
-	<div id="global-loader">
-		<div class="page-loader"></div>
-	</div>
-
-	<div class="main-wrapper">
-
-		<div class="header">
-			<div class="main-header">
-				<div class="header-left">
-					<a href="/" class="logo">
-						<img src="assets/img/logo.svg" alt="Logo">
-					</a>
-				</div>
-				<a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1">
-					<i class="ti ti-arrow-bar-to-left"></i>
-				</a>
-				<a id="mobile_btn" class="mobile_btn" href="#sidebar">
-					<span class="bar-icon"><span></span><span></span><span></span></span>
-				</a>
-			</div>
-		</div>
-		<div th:replace= "common/sidebar :: sidebar" >
+<div layout:fragment="content">
+		<div th:replace= "~{common/sidebar :: sidebar}" >
 		</div>
 		<div class="page-wrapper">
 			<div class="content">
@@ -70,17 +36,9 @@
 				</div>
 				</div>
 
-			<div class="footer d-sm-flex align-items-center justify-content-between border-top bg-white p-3">
-				<p class="mb-0">2025 &copy; clsoftlab</p>
-			</div>
-			</div>
+			<footer th:replace="~{common/footer :: footer}"></footer>
 		</div>
-	<script src="assets/js/jquery-3.7.1.min.js"></script>
-	<script src="assets/js/bootstrap.bundle.min.js"></script>
-	<script src="assets/js/jquery.slimscroll.min.js"></script>
-	<script src="https://unpkg.com/feather-icons"></script>
-	<script src="assets/js/script.js"></script>
-	
+	</div>
 </body>
 
 </html>

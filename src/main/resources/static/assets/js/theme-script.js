@@ -17,8 +17,8 @@ let themesettings = `
     <div class="sidebar-themesettings offcanvas offcanvas-end" id="theme-setting">
     <div class="offcanvas-header d-flex align-items-center justify-content-between bg-dark">
         <div>
-            <h3 class="mb-1 text-white">Theme Customizer</h3>
-            <p class="text-light">Choose your themes & layouts etc.</p>
+            <h3 class="mb-1 text-white">테마 설정</h3>
+            <p class="text-light">테마와 레이아웃을 선택하세요.</p>
         </div>
         <a href="#" class="custom-btn-close d-flex align-items-center justify-content-center text-white"  data-bs-dismiss="offcanvas"><i class="ti ti-x"></i></a>
     </div>
@@ -27,7 +27,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#layoutsetting" aria-expanded="true" aria-controls="collapsecustomicon1One">
-                        Select Layouts
+                        레이아웃 선택
                     </button>
                 </h2>
                 <div id="layoutsetting" class="accordion-collapse collapse show"  >
@@ -40,7 +40,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/default.svg" alt="img">
                                         </span>                                     
-                                        <span class="layout-type">Default</span>
+                                        <span class="layout-type">기본</span>
                                     </label>
                                 </div>
                             </div>
@@ -51,7 +51,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/mini.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Mini</span>
+                                        <span class="layout-type">미니</span>
                                     </label>
                                 </div>
                             </div>
@@ -62,7 +62,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/horizontal.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Horizontal</span>
+                                        <span class="layout-type">가로형</span>
                                     </label>
                                 </div>
                             </div>
@@ -73,7 +73,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/horizontal-single.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Horizontal Single</span>
+                                        <span class="layout-type">가로형 (단일)</span>
                                     </label>
                                 </div>
                             </div>
@@ -84,7 +84,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/horizontal-single.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Detached</span>
+                                        <span class="layout-type">분리형</span>
                                     </label>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/two-column.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Two Column</span>
+                                        <span class="layout-type">2단형</span>
                                     </label>
                                 </div>
                             </div>
@@ -106,7 +106,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/without-header.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Without Header</span>
+                                        <span class="layout-type">헤더 없음</span>
                                     </label>
                                 </div>
                             </div>
@@ -117,7 +117,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/overlay.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Overlay</span>
+                                        <span class="layout-type">오버레이</span>
                                     </label>
                                 </div>
                             </div>
@@ -128,7 +128,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/menu-aside.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Menu Aside</span>
+                                        <span class="layout-type">메뉴 분리형</span>
                                     </label>
                                 </div>
                             </div>
@@ -139,7 +139,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/stacked.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Menu Stacked</span>
+                                        <span class="layout-type">스택형</span>
                                     </label>
                                 </div>
                             </div>
@@ -150,7 +150,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/modern.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Modern</span>
+                                        <span class="layout-type">모던형</span>
                                     </label>
                                 </div>
                             </div>
@@ -161,17 +161,9 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/transparent.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Transparent</span>
+                                        <span class="layout-type">투명형</span>
                                     </label>
                                 </div>
-                            </div>
-                            <div class="col-4">
-                                <a href="layout-rtl.html" class="theme-layout mb-3">
-                                    <span class="d-block mb-2 layout-img">
-                                        <img src="assets/img/theme/rtl.svg" alt="img">
-                                    </span>                                    
-                                    <span class="layout-type">RTL</span>
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -180,7 +172,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarsetting" aria-expanded="true">
-                        Layout Width
+                        레이아웃 너비
                     </button>
                 </h2>
                 <div id="sidebarsetting" class="accordion-collapse collapse show">
@@ -189,12 +181,12 @@ let themesettings = `
                             <div class="theme-width m-1 me-2">
                                 <input type="radio" name="width" id="fluidWidth" value="fluid" checked>
                                 <label for="fluidWidth" class="d-block rounded fs-12">
-                                Fluid Layout
+                                꽉찬 화면
                                 </label>
                             </div>
                             <div class="theme-width m-1">
                                 <input type="radio" name="width" id="boxWidth" value="box">
-                                <label for="boxWidth" class="d-block rounded fs-12">Boxed Layout
+                                <label for="boxWidth" class="d-block rounded fs-12">박스형
                                 </label>
                             </div>
                         </div>  
@@ -204,7 +196,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#cardsetting" aria-expanded="true" aria-controls="collapsecustomicon1One">
-                        Card Layout
+                        카드 레이아웃
                     </button>
                 </h2>
                 <div id="cardsetting" class="accordion-collapse collapse show">
@@ -217,7 +209,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/bordered.svg" alt="img">
                                         </span>                                     
-                                        <span class="layout-type">Bordered</span>
+                                        <span class="layout-type">테두리</span>
                                     </label>
                                 </div>
                             </div>
@@ -228,7 +220,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/borderless.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Borderless</span>
+                                        <span class="layout-type">테두리 없음</span>
                                     </label>
                                 </div>
                             </div>
@@ -239,7 +231,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/shadow.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Only Shadow</span>
+                                        <span class="layout-type">그림자</span>
                                     </label>
                                 </div>
                             </div>
@@ -250,7 +242,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarsetting" aria-expanded="true">
-                        Sidebar Color
+                        사이드바 색상
                     </button>
                 </h2>
                 <div id="sidebarsetting" class="accordion-collapse collapse show">
@@ -297,7 +289,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#modesetting" aria-expanded="true">
-                        Color Mode
+                        컬러 모드
                     </button>
                 </h2>
                 <div id="modesetting" class="accordion-collapse collapse show">
@@ -307,7 +299,7 @@ let themesettings = `
                                 <div class="theme-mode">
                                     <input type="radio" name="theme" id="lightTheme" value="light" checked>
                                     <label for="lightTheme" class="p-2 rounded fw-medium w-100">                            
-                                        <span class="avatar avatar-md d-inline-flex rounded me-2"><i class="ti ti-sun-filled"></i></span>Light Mode
+                                        <span class="avatar avatar-md d-inline-flex rounded me-2"><i class="ti ti-sun-filled"></i></span>라이트 모드
                                     </label>
                                 </div>
                             </div>
@@ -315,7 +307,7 @@ let themesettings = `
                                 <div class="theme-mode">
                                     <input type="radio" name="theme" id="darkTheme" value="dark" >
                                     <label for="darkTheme" class="p-2 rounded fw-medium w-100">                         
-                                        <span class="avatar avatar-md d-inline-flex rounded me-2"><i class="ti ti-moon-filled"></i></span>Dark Mode
+                                        <span class="avatar avatar-md d-inline-flex rounded me-2"><i class="ti ti-moon-filled"></i></span>다크 모드
                                     </label>
                                 </div>
                             </div>
@@ -326,7 +318,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#sizesetting" aria-expanded="true" aria-controls="collapsecustomicon1One">
-                        Sidebar Size
+                        사이드바 크기
                     </button>
                 </h2>
                 <div id="sizesetting" class="accordion-collapse collapse show"  >
@@ -339,7 +331,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/default.svg" alt="img">
                                         </span>                                     
-                                        <span class="layout-type">Default</span>
+                                        <span class="layout-type">기본</span>
                                     </label>
                                 </div>
                             </div>
@@ -350,7 +342,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/compact.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Compact</span>
+                                        <span class="layout-type">축소형</span>
                                     </label>
                                 </div>
                             </div>
@@ -361,7 +353,7 @@ let themesettings = `
                                         <span class="d-block mb-2 layout-img">
                                             <img src="assets/img/theme/hoverview.svg" alt="img">
                                         </span>                                    
-                                        <span class="layout-type">Hover View</span>
+                                        <span class="layout-type">호버 확장</span>
                                     </label>
                                 </div>
                             </div>
@@ -372,7 +364,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#colorsetting" aria-expanded="true">
-                        Top Bar Color
+                        상단 바 색상
                     </button>
                 </h2>
                 <div id="colorsetting" class="accordion-collapse collapse show"	>
@@ -425,12 +417,12 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#topcolorsetting" aria-expanded="true">
-                        Top Bar Background
+                        상단 바 배경
                     </button>
                 </h2>
                 <div id="topcolorsetting" class="accordion-collapse collapse show"	>
                     <div class="accordion-body">
-                        <h6 class="mb-1 fw-medium">Pattern</h6>
+                        <h6 class="mb-1 fw-medium">패턴</h6>
                          <div class="d-flex align-items-center">
                             <div class="theme-topbarbg me-3 mb-2">
                                 <input type="radio" name="topbarbg" id="pattern1" value="pattern1" checked>
@@ -451,7 +443,7 @@ let themesettings = `
                                 </label>
                             </div>
                         </div>
-                        <h6 class="mb-1 fw-medium">Colors</h6>
+                        <h6 class="mb-1 fw-medium">색상</h6>
                          <div class="d-flex align-items-center">
                             <div class="theme-colorselect m-1 me-3">
                                 <input type="radio" name="topbarcolor" id="whiteTopbarcolor" value="white" checked>
@@ -488,7 +480,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarbgsetting" aria-expanded="true">
-                        Sidebar Background
+                        사이드바 배경
                     </button>
                 </h2>
                 <div id="sidebarbgsetting" class="accordion-collapse collapse show"	 >
@@ -537,7 +529,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarcolor" aria-expanded="true">
-                        Theme Colors
+                        테마 색상
                     </button>
                 </h2>
                 <div id="sidebarcolor" class="accordion-collapse collapse show"	 >
@@ -582,7 +574,7 @@ let themesettings = `
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button text-dark fs-16" type="button" data-bs-toggle="collapse" data-bs-target="#loadersetting" aria-expanded="true">
-                        Preloader
+                        로딩 화면
                     </button>
                 </h2>
                 <div id="loadersetting" class="accordion-collapse collapse show">
@@ -590,12 +582,12 @@ let themesettings = `
                         <div class="d-flex align-items-center">
                             <div class="theme-width me-2">
                                 <input type="radio" name="loader" id="enableLoader" value="enable" checked>
-                                <label for="enableLoader" class="d-block rounded fs-12">With Preloader
+                                <label for="enableLoader" class="d-block rounded fs-12">로딩 표시
                                 </label>
                             </div>
                             <div class="theme-width">
                                 <input type="radio" name="loader" id="disableLoader" value="disable">
-                                <label for="disableLoader" class="d-block rounded fs-12">Without Preloader
+                                <label for="disableLoader" class="d-block rounded fs-12">로딩 숨김
                                 </label>
                             </div>
                         </div>  
@@ -607,10 +599,7 @@ let themesettings = `
         <div class="p-3 pt-0">
             <div class="row gx-3">
                 <div class="col-6">
-                    <a href="#" id="resetbutton" class="btn btn-light close-theme w-100"><i class="ti ti-restore me-1"></i>Reset</a>
-                </div>
-                <div class="col-6">
-                    <a href="#" class="btn btn-primary w-100" data-bs-dismiss="offcanvas"><i class="ti ti-shopping-cart-plus me-1"></i>Buy Product</a>
+                    <a href="#" id="resetbutton" class="btn btn-light close-theme w-100"><i class="ti ti-restore me-1"></i>초기화</a>
                 </div>
             </div>
         </div>    
