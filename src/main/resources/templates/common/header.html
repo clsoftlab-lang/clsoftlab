@@ -1,7 +1,14 @@
 <div class="header" th:fragment="header">
     <div class="main-header">
 
-        <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+        <div class="header-left">
+			<a href="/" class="logo">
+				<img src="assets/img/logo.svg" alt="Logo">
+			</a>
+			<a href="/" class="dark-logo">
+				<img src="assets/img/logo-white.svg" alt="Logo">
+			</a>
+		</div>
 
         <a id="mobile_btn" class="mobile_btn" href="#sidebar">
             <span class="bar-icon">
@@ -89,7 +96,101 @@
                     </a>
                 </div>
 
-                <div class="d-flex align-items-center">
+                
+	            <div  class="sidebar sidebar-horizontal" id="horizontal-single">
+					<div class="sidebar-menu">
+						<div class="main-menu">
+							<ul class="nav-menu">
+								<li class="menu-title"><span>인사관리시스템</span></li>
+								
+								<li class="submenu">
+									<a href="#" >
+										<i class="ti ti-cash"></i>
+										<span> 급여 </span>
+										<span class="menu-arrow"></span> </a>
+									<ul style="display: none;">
+										<li><a th:href="@{/pay/pay-item}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item' || currentUrl.startsWith('/pay/pay-item?'))} ? 'active' : ''">급여 항목 관리</a></li>
+										<li><a th:href="@{/pay/pay-detail}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-detail' || currentUrl.startsWith('/pay/pay-detail?'))} ? 'active' : ''">월별 내역 관리</a></li>
+										<li><a th:href="@{/pay/pay-rule}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-rule' || currentUrl.startsWith('/pay/pay-rule?'))} ? 'active' : ''">계산 규칙 관리</a></li>
+										<li><a th:href="@{/pay/tax}" th:classappend="${currentUrl != null && (currentUrl == '/pay/tax' || currentUrl.startsWith('/pay/tax?'))} ? 'active' : ''">세율/구간 관리</a></li>
+										<li><a th:href="@{/pay/backpay-rule}" th:classappend="${currentUrl != null && (currentUrl == '/pay/backpay-rule' || currentUrl.startsWith('/pay/backpay-rule?'))} ? 'active' : ''">소급 규칙 관리</a></li>
+										<li><a th:href="@{/pay/pay-cycle}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-cycle' || currentUrl.startsWith('/pay/pay-cycle?'))} ? 'active' : ''">직군별 급여 주기 관리</a></li>
+										<li><a th:href="@{/pay/employee-allow}" th:classappend="${currentUrl != null && (currentUrl == '/pay/employee-allow' || currentUrl.startsWith('/pay/employee-allow?'))} ? 'active' : ''">사원별 정기 수당 설정</a></li>
+										<li><a th:href="@{/pay/base-pay}" th:classappend="${currentUrl != null && (currentUrl == '/pay/base-pay' || currentUrl.startsWith('/pay/base-pay?'))} ? 'active' : ''">기준 급여 관리</a></li>
+										<li><a th:href="@{/pay/standard-hours}" th:classappend="${currentUrl != null && (currentUrl == '/pay/standard-hours' || currentUrl.startsWith('/pay/standard-hours?'))} ? 'active' : ''">월별 소정 근로시간 관리</a></li>
+										<li><a th:href="@{/pay/standard-hours-employee}" th:classappend="${currentUrl != null && (currentUrl == '/pay/standard-hours-employee' || currentUrl.startsWith('/pay/standard-hours-employee?'))} ? 'active' : ''">사원별 예외 근로시간 관리</a></li>
+										<li><a th:href="@{/pay/pay-summary}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-summary' || currentUrl.startsWith('/pay/pay-summary?'))} ? 'active' : ''">정산 메인 관리</a></li>
+										<li><a th:href="@{/pay/retire-summary}" th:classappend="${currentUrl != null && (currentUrl == '/pay/retire-summary' || currentUrl.startsWith('/pay/retire-summary?'))} ? 'active' : ''">퇴직 정산 보조 화면</a></li>
+										<li><a th:href="@{/pay/retire-adjust}" th:classappend="${currentUrl != null && (currentUrl == '/pay/retire-adjust' || currentUrl.startsWith('/pay/retire-adjust?'))} ? 'active' : ''">퇴직금 가감</a></li>
+										<li><a th:href="@{/pay/pay-deduct}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-deduct' || currentUrl.startsWith('/pay/pay-deduct?'))} ? 'active' : ''">징계/병가 공제 항목 등록</a></li>
+										<li><a th:href="@{/pay/step-base}" th:classappend="${currentUrl != null && (currentUrl == '/pay/step-base' || currentUrl.startsWith('/pay/step-base?'))} ? 'active' : ''">호봉 기준 관리</a></li>
+										<li><a th:href="@{/pay/employee-step}" th:classappend="${currentUrl != null && (currentUrl == '/pay/employee-step' || currentUrl.startsWith('/pay/employee-step?'))} ? 'active' : ''">사원별 호봉 정보 관리</a></li>
+										<li><a th:href="@{/pay/bank-account}" th:classappend="${currentUrl != null && (currentUrl == '/pay/bank-account' || currentUrl.startsWith('/pay/bank-account?'))} ? 'active' : ''">급여 계좌 관리</a></li>
+										<li><a th:href="@{/pay/employee-withhold-rate}" th:classappend="${currentUrl != null && (currentUrl == '/pay/employee-withhold-rate' || currentUrl.startsWith('/pay/employee-withhold-rate?'))} ? 'active' : ''">사원별 원천징수 세율 관리</a></li>
+										<li><a th:href="@{/pay/employee-family}" th:classappend="${currentUrl != null && (currentUrl == '/pay/employee-family' || currentUrl.startsWith('/pay/employee-family?'))} ? 'active' : ''">사원 가족 정보 관리</a></li>
+										<li><a th:href="@{/pay/pay-round-history}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-round-history' || currentUrl.startsWith('/pay/pay-round-history?'))} ? 'active' : ''">급여 항목 절사 이력</a></li>
+										<li><a th:href="@{/pay/pay-certificate}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-certificate' || currentUrl.startsWith('/pay/pay-certificate?'))} ? 'active' : ''">지급명세표 관리</a></li>
+										<li><a th:href="@{/pay/club-item}" th:classappend="${currentUrl != null && (currentUrl == '/pay/club-item' || currentUrl.startsWith('/pay/club-item?'))} ? 'active' : ''">사내 회비 항목 관리</a></li>
+										<li><a th:href="@{/pay/employee-club}" th:classappend="${currentUrl != null && (currentUrl == '/pay/employee-club' || currentUrl.startsWith('/pay/employee-club?'))} ? 'active' : ''">사원별 회비 납부 설정</a></li>
+										<li><a th:href="@{/pay/club-pay-detail}" th:classappend="${currentUrl != null && (currentUrl == '/pay/club-pay-detail' || currentUrl.startsWith('/pay/club-pay-detail?'))} ? 'active' : ''">납부 내역 기록</a></li>
+										<li><a th:href="@{/pay/overtime}" th:classappend="${currentUrl != null && (currentUrl == '/pay/overtime' || currentUrl.startsWith('/pay/overtime?'))} ? 'active' : ''">근로자별 시간외근무 실적 관리</a></li>
+										<li><a th:href="@{/pay/simplified-tax-table}" th:classappend="${currentUrl != null && (currentUrl == '/pay/simplified-tax-table' || currentUrl.startsWith('/pay/simplified-tax-table'))} ? 'active' : ''">간이세액표 관리</a></li>
+										<li><a th:href="@{/pay/calc-order}" th:classappend="${currentUrl != null && (currentUrl == '/pay/calc-order' || currentUrl.startsWith('/pay/calc-order?'))} ? 'active' : ''">급여 항목 계산 순서 관리</a></li>
+										<li><a th:href="@{/pay/allow-cycle}" th:classappend="${currentUrl != null && (currentUrl == '/pay/allow-cycle' || currentUrl.startsWith('/pay/allow-cycle?'))} ? 'active' : ''">상여금별 계산 주기 관리</a></li>
+										<li><a th:href="@{/pay/gl-mapping}" th:classappend="${currentUrl != null && (currentUrl == '/pay/gl-mapping' || currentUrl.startsWith('/pay/gl-mapping?'))} ? 'active' : ''">급여 항목별 회계 계정 매핑 관리</a></li>
+										<li><a th:href="@{/pay/insurance-rate}" th:classappend="${currentUrl != null && (currentUrl == '/pay/insurance-rate' || currentUrl.startsWith('/pay/insurance-rate?'))} ? 'active' : ''">4대보험 요율 관리</a></li>
+										<li><a th:href="@{/pay/log-pay-calc}" th:classappend="${currentUrl != null && (currentUrl == '/pay/log-pay-calc' || currentUrl.startsWith('/pay/ilog-pay-calc?'))} ? 'active' : ''">급여 항목 계산 이력</a></li>
+									</ul>
+								</li>
+								
+								<li><a href="#"><i class="ti ti-chart-infographic"></i> <span>평가</span></a></li>
+								
+								<li class="submenu">
+									<a href="#" >
+										<i class="ti ti-users"></i>
+										<span> 인사 </span>
+										<span class="menu-arrow"></span>
+									</a>
+									<ul style="display: none;">
+										<li><a th:href="@{/hr/biz-place}" th:classappend="${currentUrl != null && (currentUrl == '/hr/biz-place' || currentUrl.startsWith('/hr/biz-place?'))} ? 'active' : ''">사업장 정보 관리</a></li>
+										<li><a th:href="@{/hr/org-unit}" th:classappend="${currentUrl != null && (currentUrl == '/hr/org-unit' || currentUrl.startsWith('/hr/org-unit?'))} ? 'active' : ''">사업장별 조직 관리</a></li>
+										<li><a th:href="@{/hr/employee-priv}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-priv' || currentUrl.startsWith('/hr/employee-priv?'))} ? 'active' : ''">개인 정보 관리</a></li>
+										<li><a th:href="@{/hr/employee-info}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-info' || currentUrl.startsWith('/hr/employee-info?'))} ? 'active' : ''">인사 정보 관리</a></li>
+										<li><a th:href="@{/hr/employee-cert}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-cert' || currentUrl.startsWith('/hr/employee-cert?'))} ? 'active' : ''">자격증 관리</a></li>
+										<li><a th:href="@{/hr/employee-lang}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-lang' || currentUrl.startsWith('/hr/employee-lang?'))} ? 'active' : ''">어학 관리</a></li>
+										<li><a th:href="@{/hr/employee-career}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-career' || currentUrl.startsWith('/hr/employee-career?'))} ? 'active' : ''">경력 관리</a></li>
+										<li><a th:href="@{/hr/employee-reward}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-reward' || currentUrl.startsWith('/hr/employee-reward?'))} ? 'active' : ''">포상 관리</a></li>
+										<li><a th:href="@{/hr/employee-edu}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-edu' || currentUrl.startsWith('/hr/employee-edu?'))} ? 'active' : ''">교육 이력 관리</a></li>
+										<li><a th:href="@{/hr/evaluation-result}" th:classappend="${currentUrl != null && (currentUrl == '/hr/evaluation-result' || currentUrl.startsWith('/hr/evaluation-result?'))} ? 'active' : ''">평가 관리</a></li>
+										<li><a th:href="@{/hr/employee-edu-history}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-edu-history' || currentUrl.startsWith('/hr/employee-edu-history?'))} ? 'active' : ''">학력 정보 관리</a></li>
+										<li><a th:href="@{/hr/employee-personal}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-personal' || currentUrl.startsWith('/hr/employee-personal?'))} ? 'active' : ''">인사 정보 관리</a></li>
+										<li><a th:href="@{/hr/union-member}" th:classappend="${currentUrl != null && (currentUrl == '/hr/union-member' || currentUrl.startsWith('/hr/union-member?'))} ? 'active' : ''">노조 가입 관리</a></li>
+										<li><a th:href="@{/hr/employee-workplace}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-workplace' || currentUrl.startsWith('/hr/employee-workplace?'))} ? 'active' : ''">근무지 관리</a></li>
+										<li><a th:href="@{/hr/employee-card}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-card' || currentUrl.startsWith('/hr/employee-card?'))} ? 'active' : ''">인사 카드 관리</a></li>
+									</ul>
+								</li>
+								
+								<li><a href="#"><i class="ti ti-user-off"></i> <span>퇴직</span></a></li>
+								<li><a href="#"><i class="ti ti-user-plus"></i> <span>발령</span></a></li>
+								<li><a href="#"><i class="ti ti-gift"></i> <span>복리후생</span></a></li>
+								<li><a href="#"><i class="ti ti-calendar-time"></i> <span>근태</span></a></li>
+								<li><a href="#"><i class="ti ti-building-cottage"></i> <span>휴양소</span></a></li>
+								<li><a href="#"><i class="ti ti-sitemap"></i> <span>조직관리</span></a></li>
+								<li><a href="#"><i class="ti ti-clipboard-check"></i> <span>결재</span></a></li>
+								<li><a href="#"><i class="ti ti-file-text"></i> <span>신청서비스</span></a></li>
+								<li><a href="#"><i class="ti ti-file-dollar"></i> <span>연말정산</span></a></li>
+								<li><a href="#"><i class="ti ti-settings"></i> <span>공통</span></a></li>
+								
+								<li>
+									<a th:href="@{/pay/pay-item/test}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item/test' || currentUrl.startsWith('/pay/pay-item/test?'))} ? 'active' : ''"><i class="ti ti-settings"></i> <span>그리드test</span></a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			
+			
+				<div class="d-flex align-items-center">
                     <div class="me-1">
                         <a href="#" class="btn btn-menubar btnFullscreen">
                             <i class="ti ti-maximize"></i>
@@ -260,7 +361,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+			</div>
         </div>
     </div>
 </div>
