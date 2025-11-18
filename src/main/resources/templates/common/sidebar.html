@@ -17,8 +17,8 @@
 				<div class="avatar avatar-lg online mb-3">
 					<img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 				</div>
-				<h6 class="fs-12 fw-normal mb-1">Adrian Herman</h6>
-				<p class="fs-10">System Admin</p>
+				<h6 class="fs-12 fw-normal mb-1">양한재</h6>
+				<p class="fs-10">시스템 관리자</p>
 			</div>
 			<div class="sidebar-nav mb-3">
 				<ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded nav-justified bg-transparent" role="tablist">
@@ -34,8 +34,8 @@
 					<img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 				</div>
 				<div class="text-start sidebar-profile-info ms-2">
-					<h6 class="fs-12 fw-normal mb-1">Adrian Herman</h6>
-					<p class="fs-10">System Admin</p>
+					<h6 class="fs-12 fw-normal mb-1">양한재</h6>
+					<p class="fs-10">시스템 관리자</p>
 				</div>
 			</div>
 			<div class="input-group input-group-flat d-inline-flex mb-4">
@@ -75,7 +75,7 @@
 					<li>
 						<ul>
 							<li class="submenu">
-								<a href="#" class="subdrop">
+								<a href="javascript:void(0);" th:classappend="${currentUrl != null && (currentUrl == '/pay' || currentUrl.startsWith('/pay/'))} ? 'active subdrop' : ''">
 									<i class="ti ti-cash"></i>
 									<span> 급여 </span>
 									<span class="menu-arrow"></span> </a>
@@ -114,10 +114,10 @@
 								</ul>
 							</li>
 					
-							<li><a href="#"><i class="ti ti-chart-infographic"></i> <span>평가</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-chart-infographic"></i> <span>평가</span></a></li>
 					
 							<li class="submenu">
-								<a href="#" class="subdrop">
+								<a href="javascript:void(0);" th:classappend="${currentUrl != null && (currentUrl == '/hr' || currentUrl.startsWith('/hr/'))} ? 'active subdrop' : ''">
 									<i class="ti ti-users"></i>
 									<span> 인사 </span>
 									<span class="menu-arrow"></span>
@@ -141,16 +141,16 @@
 								</ul>
 							</li>
 					
-							<li><a href="#"><i class="ti ti-user-off"></i> <span>퇴직</span></a></li>
-							<li><a href="#"><i class="ti ti-user-plus"></i> <span>발령</span></a></li>
-							<li><a href="#"><i class="ti ti-gift"></i> <span>복리후생</span></a></li>
-							<li><a href="#"><i class="ti ti-calendar-time"></i> <span>근태</span></a></li>
-							<li><a href="#"><i class="ti ti-building-cottage"></i> <span>휴양소</span></a></li>
-							<li><a href="#"><i class="ti ti-sitemap"></i> <span>조직관리</span></a></li>
-							<li><a href="#"><i class="ti ti-clipboard-check"></i> <span>결재</span></a></li>
-							<li><a href="#"><i class="ti ti-file-text"></i> <span>신청서비스</span></a></li>
-							<li><a href="#"><i class="ti ti-file-dollar"></i> <span>연말정산</span></a></li>
-							<li><a href="#"><i class="ti ti-settings"></i> <span>공통</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-user-off"></i> <span>퇴직</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-user-plus"></i> <span>발령</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-gift"></i> <span>복리후생</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-calendar-time"></i> <span>근태</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-building-cottage"></i> <span>휴양소</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-sitemap"></i> <span>조직관리</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-clipboard-check"></i> <span>결재</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-file-text"></i> <span>신청서비스</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-file-dollar"></i> <span>연말정산</span></a></li>
+							<li><a href="javascript:void(0);"><i class="ti ti-settings"></i> <span>공통</span></a></li>
 					
 							<li>
 								<a th:href="@{/pay/pay-item/test}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item/test' || currentUrl.startsWith('/pay/pay-item/test?'))} ? 'active' : ''"><i class="ti ti-settings"></i> <span>그리드test</span></a>
@@ -168,7 +168,7 @@
 					<li class="menu-title"><span>인사관리시스템</span></li>
 					
 					<li class="submenu">
-						<a href="#" >
+						<a href="javascript:void(0);" >
 							<i class="ti ti-cash"></i>
 							<span> 급여 </span>
 							<span class="menu-arrow"></span> </a>
@@ -314,13 +314,13 @@
 					</a>
 				</div>
 				<div class="sidebar-scroll">
-					<h6 class="mb-3">Welcome to SmartHR</h6>
+					<h6 class="mb-3">환영합니다, 양한재님</h6>
 					<div class="text-center rounded bg-light p-3 mb-4">
 						<div class="avatar avatar-lg online mb-3">
 							<img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 						</div>
-						<h6 class="fs-12 fw-normal mb-1">Adrian Herman</h6>
-						<p class="fs-10">System Admin</p>
+						<h6 class="fs-12 fw-normal mb-1">양한재</h6>
+						<p class="fs-10">시스템 관리자</p>
 					</div>
 					<div class="tab-content" id="v-pills-tabContent">
 						<div class="tab-pane fade active show" id="pay" role="tabpanel">
@@ -422,13 +422,13 @@
 			</div>
 			<div class="sidebar-right d-flex justify-content-between flex-column">
 				<div class="sidebar-scroll">
-					<h6 class="mb-3">Welcome to SmartHR</h6>
+					<h6 class="mb-3">환영합니다, 양한재님</h6>
 					<div class="sidebar-profile text-center rounded bg-light p-3 mb-4">
 						<div class="avatar avatar-lg online mb-3">
 							<img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 						</div>
-						<h6 class="fs-12 fw-normal mb-1">Adrian Herman</h6>
-						<p class="fs-10">System Admin</p>
+						<h6 class="fs-12 fw-normal mb-1">양한재</h6>
+						<p class="fs-10">시스템 관리자</p>
 					</div>
 					<div class="stack-menu">
 						<div class="nav flex-column align-items-center nav-pills" role="tablist">

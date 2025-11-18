@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/base}">
 
 <head>
-	<title>테스트 화면 | clsoftlab</title>
+	<title>HR 대시보드 | clsoftlab</title>
 </head>
 
 <body>
@@ -14,25 +14,243 @@
 
 				<div class="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
 					<div class="my-auto">
-						<h2 class="mb-1">개발 테스트 페이지</h2>
+						<h2 class="mb-1">HR 관리자 대시보드</h2> 
 						<nav>
 							<ol class="breadcrumb mb-0">
 								<li class="breadcrumb-item"><a href="#">Home</a></li>
-								<li class="breadcrumb-item active" aria-current="page">Main</li>
+								<li class="breadcrumb-item active" aria-current="page">관리자 대시보드</li>
 							</ol>
 						</nav>
 					</div>
+					<div class="d-flex my-xl-auto right-content align-items-center flex-wrap ">
+						<div class="ms-2 head-icons">
+							<a href="javascript:void(0);" class="" data-bs-toggle="tooltip" data-bs-placement="top" id="collapse-header">
+								<i class="ti ti-chevrons-up"></i>
+							</a>
+						</div>
+					</div>
 				</div>
-				<div class="card">
-					<div class="card-header">
-						<h5 class="card-title mb-0">환영합니다!</h5>
+				<div class="card border-0 mb-3">
+					<div class="card-body d-flex align-items-center justify-content-between flex-wrap pb-1">
+						<div class="d-flex align-items-center mb-3">
+							<span class="avatar avatar-xl flex-shrink-0">
+								<img src="assets/img/profiles/avatar-02.jpg" class="rounded-circle" alt="img">
+							</span>
+							<div class="ms-3">
+								<h3 class="mb-2">환영합니다, 양한재님</h3>
+								<p>
+									<span class="text-primary text-decoration-underline">4건</span>의 
+									보류 중인 <strong>결재</strong>가 있으며, 
+									<span class="text-primary text-decoration-underline">2건</span>의 
+									신규 <strong>연차</strong> 요청이 있습니다.
+								</p>
+							</div>
+						</div>
+						<div class="d-flex align-items-center flex-wrap mb-1">
+							<a href="#" class="btn btn-secondary btn-md me-2 mb-2"><i class="ti ti-square-rounded-plus me-1"></i>결재함 바로가기</a>
+							<a href="#" class="btn btn-primary btn-md mb-2"><i class="ti ti-square-rounded-plus me-1"></i>휴가 요청 보기</a>
+						</div>
 					</div>
-					<div class="card-body">
-						<p>이 페이지는 개발 테스트를 위한 기본 레이아웃 쉘(Shell)입니다.</p>
-						<p>개발 순서는 CLSOFTLAB 문서 순서대로 입니다.(급여 -> 평가-> 인사 -> ...)</p>
-						<p>TEST화면이고, 아직 db가 설계되지 않았으므로, 문서에 있는대로 임시 테이블을 만들어서 쓸 예정입니다.</p>
-						<p>개발 현황은 README.md에 일자 별로 정리할 예정입니다.</p>
+				</div>
+				<div class="row">
+					<div class="col-lg-4 col-md-6 d-flex">
+						<div class="card flex-fill">
+							<div class="card-body">
+								<span class="avatar rounded-circle bg-primary mb-2">
+									<i class="ti ti-users fs-16"></i>
+								</span>
+								<h6 class="fs-13 fw-medium text-default mb-1">총 직원수</h6>
+								<h3 class="mb-3">154 <span class="fs-12 fw-medium text-success"><i class="fa-solid fa-caret-up me-1"></i>+2</span></h3>
+								<a href="#" class="link-default">직원 목록 보기</a>
+							</div>
+						</div>
 					</div>
+					
+					<div class="col-lg-4 col-md-6 d-flex">
+						<div class="card flex-fill">
+							<div class="card-body">
+								<span class="avatar rounded-circle bg-warning mb-2">
+									<i class="ti ti-calendar-share fs-16"></i>
+								</span>
+								<h6 class="fs-13 fw-medium text-default mb-1">오늘 출근 / 연차</h6>
+								<h3 class="mb-3">142 / 8 <span class="fs-12 fw-medium text-danger"><i class="fa-solid fa-caret-down me-1"></i>-1.5%</span></h3>
+								<a href="#" class="link-default">근태 현황 보기</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-4 col-md-6 d-flex">
+						<div class="card flex-fill">
+							<div class="card-body">
+								<span class="avatar rounded-circle bg-danger mb-2">
+									<i class="ti ti-file-invoice fs-16"></i>
+								</span>
+								<h6 class="fs-13 fw-medium text-default mb-1">결재 대기</h6>
+								<h3 class="mb-3">4 <span class="fs-12 fw-medium text-danger">New</span></h3>
+								<a href="#" class="link-default">결재함 바로가기</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-4 col-md-6 d-flex">
+						<div class="card flex-fill">
+							<div class="card-body">
+								<span class="avatar rounded-circle bg-info mb-2">
+									<i class="ti ti-clipboard-check fs-16"></i>
+								</span>
+								<h6 class="fs-13 fw-medium text-default mb-1">평가 진행률</h6>
+								<h3 class="mb-3">123 / 154 <span class="fs-12 fw-medium text-success">(80%)</span></h3>
+								<a href="#" class="link-default">평가 관리 보기</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-4 col-md-6 d-flex">
+						<div class="card flex-fill">
+							<div class="card-body">
+								<span class="avatar rounded-circle bg-dark mb-2">
+									<i class="ti ti-user-star fs-16"></i>
+								</span>
+								<h6 class="fs-13 fw-medium text-default mb-1">신규 입사자 (당월)</h6>
+								<h3 class="mb-3">3 <span class="fs-12 fw-medium text-success">+1</span></h3>
+								<a href="#" class="link-default">채용 현황 보기</a>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-4 col-md-6 d-flex">
+						<div class="card flex-fill">
+							<div class="card-body">
+								<span class="avatar rounded-circle bg-success mb-2">
+									<i class="ti ti-users-group fs-16"></i>
+								</span>
+								<h6 class="fs-13 fw-medium text-default mb-1">채용 지원자 (진행중)</h6>
+								<h3 class="mb-3">98 <span class="fs-12 fw-medium text-success"><i class="fa-solid fa-caret-up me-1"></i>+5</span></h3>
+								<a href="#" class="link-default">지원자 목록 보기</a>
+							</div>
+						</div>
+					</div>
+					<div class="col-xxl-4 d-flex">
+						<div class="card flex-fill">
+							<div class="card-header pb-2 d-flex align-items-center justify-content-between flex-wrap">
+								<h5 class="mb-2">직원 현황 (Employee Status)</h5>
+								<a href="employees.html" class="btn btn-light btn-sm mb-2">모든 직원 보기</a>
+							</div>
+							<div class="card-body">
+								<div class="d-flex align-items-center justify-content-between mb-1">
+									<p class="fs-13 mb-3"><strong>총 직원수</strong></p>
+									<h3 class="mb-3">154명</h3>
+								</div>
+								<div class="progress-stacked emp-stack mb-3">
+									<div class="progress" role="progressbar" style="width: 70%">
+										<div class="progress-bar bg-warning"></div> </div>
+									<div class="progress" role="progressbar" style="width: 20%">
+										<div class="progress-bar bg-secondary"></div> </div>
+									<div class="progress" role="progressbar" style="width: 10%">
+										<div class="progress-bar bg-danger"></div> </div>
+								</div>
+								<div class="row gx-0 border mb-3">
+									<div class="col-6"><div class="p-2 border-end border-bottom"><p class="fs-13 mb-2">정규직 (70%)</p><h2 class="display-1">108</h2></div></div>
+									<div class="col-6"><div class="p-2 border-bottom text-end"><p class="fs-13 mb-2">계약직 (20%)</p><h2 class="display-1">31</h2></div></div>
+									<div class="col-6"><div class="p-2 border-end"><p class="fs-13 mb-2">수습 (10%)</p><h2 class="display-1">15</h2></div></div>
+									<div class="col-6"><div class="p-2 text-end"><p class="fs-13 mb-2">기타</p><h2 class="display-1">0</h2></div></div>
+								</div>
+
+								<h6 class="mb-2">최고 성과자 (Top Performer)</h6>
+								<div class="p-2 d-flex align-items-center justify-content-between border border-primary bg-primary-100 br-5 mb-4">
+									<div class="d-flex align-items-center overflow-hidden">
+										<span class="me-2"><i class="ti ti-award-filled text-primary fs-24"></i></span>
+										<a href="#" class="avatar avatar-md me-2">
+											<img src="assets/img/profiles/avatar-24.jpg" class="rounded-circle border border-white" alt="img">
+										</a>
+										<div>
+											<h6 class="text-truncate mb-1 fs-14 fw-medium"><a href="#">양한재</a></h6>
+											<p class="fs-13">개발팀</p>
+										</div>
+									</div>
+									<div class="text-end">
+										<p class="fs-13 mb-1">성과</p>
+										<h5 class="text-primary">99%</h5>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-xxl-4 col-xl-6 d-flex">
+						<div class="card flex-fill">
+							<div class="card-header pb-2 d-flex align-items-center justify-content-between flex-wrap">
+								<h5 class="mb-2">근태/연차 현황 (Attendance)</h5>
+								<div class="dropdown mb-2">
+									<a href="javascript:void(0);" class="btn btn-white border btn-sm d-inline-flex align-items-center" data-bs-toggle="dropdown">
+										<i class="ti ti-calendar me-1"></i>Today
+									</a>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="chartjs-wrapper-demo position-relative mb-4">
+									<canvas id="attendance"></canvas>
+									<div class="position-absolute text-center attendance-canvas">
+										<p class="fs-13 mb-1">총 출석</p>
+										<h3>142 / 154</h3>
+									</div>
+								</div>
+								<h6 class="mb-3">오늘 상태 요약 (총 154명)</h6>
+								<div class="d-flex align-items-center justify-content-between">
+									<p class="f-13 mb-2"><i class="ti ti-circle-filled text-success me-1"></i>정상 출근</p>
+									<p class="f-13 fw-medium text-gray-9 mb-2">88% (135명)</p>
+								</div>
+								<div class="d-flex align-items-center justify-content-between">
+									<p class="f-13 mb-2"><i class="ti ti-circle-filled text-warning me-1"></i><strong>연차/휴가</strong></p>
+									<p class="f-13 fw-medium text-gray-9 mb-2">5% (8명)</p>
+								</div>
+								<div class="d-flex align-items-center justify-content-between">
+									<p class="f-13 mb-2"><i class="ti ti-circle-filled text-secondary me-1"></i>지각</p>
+									<p class="f-13 fw-medium text-gray-9 mb-2">4% (7명)</p>
+								</div>
+								<div class="d-flex align-items-center justify-content-between mb-2">
+									<p class="f-13 mb-2"><i class="ti ti-circle-filled text-danger me-1"></i>결근</p>
+									<p class="f-13 fw-medium text-gray-9 mb-2">3% (4명)</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-xxl-4 col-xl-6 d-flex">
+						<div class="card flex-fill">
+							<div class="card-header pb-2 d-flex align-items-center justify-content-between flex-wrap">
+								<h5 class="mb-2">결재 대기 목록 (Approvals)</h5>
+							</div>
+							<div class="card-body">
+								<div class="d-flex align-items-center todo-item border p-2 br-5 mb-2">
+									<i class="ti ti-file-text me-2"></i>
+									<div class="form-check">
+										<label class="form-check-label fw-medium">[휴가] 박서준 (개발팀) - 연차 신청</label>
+									</div>
+								</div>
+								<div class="d-flex align-items-center todo-item border p-2 br-5 mb-2">
+									<i class="ti ti-file-text me-2"></i>
+									<div class="form-check">
+										<label class="form-check-label fw-medium">[품의] 최우식 (인사팀) - 신규 채용</label>
+									</div>
+								</div>
+								<div class="d-flex align-items-center todo-item border p-2 br-5 mb-2">
+									<i class="ti ti-file-text me-2"></i>
+									<div class="form-check">
+										<label class="form-check-label fw-medium">[증명] 김다미 (디자인팀) - 재직증명서</label>
+									</div>
+								</div>
+								<div class="d-flex align-items-center todo-item border p-2 br-5 mb-0">
+									<i class="ti ti-file-text me-2"></i>
+									<div class="form-check">
+										<label class="form-check-label fw-medium">[휴가] 전여빈 (개발팀) - 반차 신청</label>
+									</div>
+								</div>
+								<a href="attendance-report.html" class="btn btn-light btn-md w-100 mt-3">전체 결재 목록 보기</a>
+							</div>
+						</div>
+					</div>
+
 				</div>
 				</div>
 

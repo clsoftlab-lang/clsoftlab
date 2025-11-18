@@ -549,41 +549,41 @@ if ($('#chartDonut').length > 0) {
 
 
 	if($('#attendance').length > 0) {
-		var ctx = document.getElementById('attendance').getContext('2d');
-    var mySemiDonutChart = new Chart(ctx, {
-        type: 'doughnut', // Chart type
-        data: {
-            labels: ['Late','Present', 'Permission', 'Absent'],
-            datasets: [{
-                label: 'Semi Donut',
-                data: [40, 20, 30, 10],
-                backgroundColor: ['#0C4B5E', '#03C95A', '#FFC107', '#E70D0D'],
-                borderWidth: 5,
-				borderRadius: 10,
-                borderColor: '#fff', // Border between segments
-                hoverBorderWidth: 0,   // Border radius for curved edges
-                cutout: '60%',   
-            }]
-        },
-		options: {
-			rotation: -100,
-			circumference: 200,
-			layout: {
-				padding: {
-					top: -20,    // Set to 0 to remove top padding
-					bottom: -20, // Set to 0 to remove bottom padding
-				}
-			},
-			responsive: true,
-			maintainAspectRatio: false,
-			plugins: {
-				legend: {
-					display: false // Hide the legend
-				}
-			},
-		  }
-    });
-	}
+			var ctx = document.getElementById('attendance').getContext('2d');
+	    var mySemiDonutChart = new Chart(ctx, {
+	        type: 'doughnut', // Chart type
+	        data: {
+	            labels: ['정상 출근','연차/휴가', '지각', '결근'],
+	            datasets: [{
+	                label: 'Semi Donut',
+	                data: [135, 8, 7, 4],						
+	                backgroundColor: ['#03C95A', '#FFC107', '#0C4B5E', '#E70D0D'],
+	                borderWidth: 5,
+					borderRadius: 10,
+	                borderColor: '#fff', // Border between segments
+	                hoverBorderWidth: 0,   // Border radius for curved edges
+	                cutout: '60%',   
+	            }]
+	        },
+			options: {
+				rotation: -100,
+				circumference: 200,
+				layout: {
+					padding: {
+						top: -20,    // Set to 0 to remove top padding
+						bottom: -20, // Set to 0 to remove bottom padding
+					}
+				},
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						display: false // Hide the legend
+					}
+				},
+			  }
+	    });
+		}
 
 	if ($('#deal_chart').length > 0) {
 		
