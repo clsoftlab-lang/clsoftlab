@@ -3,21 +3,23 @@ package com.example.clsoftlab.repository.pay.specification;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.example.clsoftlab.entity.PayItem;
 
 public class PayItemSpecs {
 
-	public static Specification<PayItem> withItemName (String itemName) {
-		if (itemName == null || itemName.isEmpty()) {
+	public static Specification<PayItem> withItemCode (List<String> itemCode) {
+		if (CollectionUtils.isEmpty(itemCode)) {
 			return null;
 		}
 		
-		return (root, query, builder) -> builder.like(root.get("itemName"), "%"+itemName+"%");
+		return (root, query, builder) -> root.get("itemCode").in(itemCode);
 	}
 	
 	public static Specification<PayItem> withItemTypes (List<String> itemTypes) {
-		if(itemTypes == null || itemTypes.isEmpty()) {
+		if(CollectionUtils.isEmpty(itemTypes)) {
 			return null;
 		}
 		
@@ -25,7 +27,7 @@ public class PayItemSpecs {
 	}
 	
 	public static Specification<PayItem> withUseYn (String useYn) {
-		if(useYn == null || useYn.isEmpty()) {
+		if(!StringUtils.hasText(useYn)) {
 			return null;
 		}
 		

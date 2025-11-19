@@ -57,7 +57,6 @@ public class PayItem extends BaseEntity {
     
     public void update(PayItemRequestDto dto) {
         this.itemName = dto.getItemName();
-        this.itemType = dto.getItemType();
         this.taxYn = dto.getTaxYn();
         this.taxType = dto.getTaxType();
         this.taxPercent = dto.getTaxPercent();

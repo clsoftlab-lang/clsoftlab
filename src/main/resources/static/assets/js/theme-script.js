@@ -38,7 +38,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="defaultLayout" value="default" checked>
                                     <label for="defaultLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/default.svg" alt="img">
+                                            <img src="/assets/img/theme/default.svg" alt="img">
                                         </span>                                     
                                         <span class="layout-type">기본</span>
                                     </label>
@@ -49,7 +49,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="miniLayout" value="mini" >
                                     <label for="miniLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/mini.svg" alt="img">
+                                            <img src="/assets/img/theme/mini.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">미니</span>
                                     </label>
@@ -60,7 +60,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="horizontalLayout" value="horizontal" >
                                     <label for="horizontalLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/horizontal.svg" alt="img">
+                                            <img src="/assets/img/theme/horizontal.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">가로형</span>
                                     </label>
@@ -71,7 +71,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="horizontal-singleLayout" value="horizontal-single" >
                                     <label for="horizontal-singleLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/horizontal-single.svg" alt="img">
+                                            <img src="/assets/img/theme/horizontal-single.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">가로형 (단일)</span>
                                     </label>
@@ -82,7 +82,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="detachedLayout" value="detached" >
                                     <label for="detachedLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/horizontal-single.svg" alt="img">
+                                            <img src="/assets/img/theme/horizontal-single.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">분리형</span>
                                     </label>
@@ -93,7 +93,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="twocolumnLayout" value="twocolumn" >
                                     <label for="twocolumnLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/two-column.svg" alt="img">
+                                            <img src="/assets/img/theme/two-column.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">2단형</span>
                                     </label>
@@ -104,7 +104,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="without-headerLayout" value="without-header" >
                                     <label for="without-headerLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/without-header.svg" alt="img">
+                                            <img src="/assets/img/theme/without-header.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">헤더 없음</span>
                                     </label>
@@ -115,7 +115,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="horizontal-overlayLayout" value="horizontal-overlay" >
                                     <label for="horizontal-overlayLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/overlay.svg" alt="img">
+                                            <img src="/assets/img/theme/overlay.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">오버레이</span>
                                     </label>
@@ -126,7 +126,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="horizontal-sidemenuLayout" value="horizontal-sidemenu" >
                                     <label for="horizontal-sidemenuLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/menu-aside.svg" alt="img">
+                                            <img src="/assets/img/theme/menu-aside.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">메뉴 분리형</span>
                                     </label>
@@ -137,7 +137,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="stackedLayout" value="stacked" >
                                     <label for="stackedLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/stacked.svg" alt="img">
+                                            <img src="/assets/img/theme/stacked.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">스택형</span>
                                     </label>
@@ -148,7 +148,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="modernLayout" value="modern" >
                                     <label for="modernLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/modern.svg" alt="img">
+                                            <img src="/assets/img/theme/modern.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">모던형</span>
                                     </label>
@@ -159,7 +159,7 @@ let themesettings = `
                                     <input type="radio" name="LayoutTheme" id="transparentLayout" value="transparent" >
                                     <label for="transparentLayout">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/transparent.svg" alt="img">
+                                            <img src="/assets/img/theme/transparent.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">투명형</span>
                                     </label>
@@ -207,7 +207,7 @@ let themesettings = `
                                     <input type="radio" name="card" id="borderedCard" value="bordered" checked>
                                     <label for="borderedCard">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/bordered.svg" alt="img">
+                                            <img src="/assets/img/theme/bordered.svg" alt="img">
                                         </span>                                     
                                         <span class="layout-type">테두리</span>
                                     </label>
@@ -218,7 +218,7 @@ let themesettings = `
                                     <input type="radio" name="card" id="borderlessCard" value="borderless" >
                                     <label for="borderlessCard">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/borderless.svg" alt="img">
+                                            <img src="/assets/img/theme/borderless.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">테두리 없음</span>
                                     </label>
@@ -229,7 +229,7 @@ let themesettings = `
                                     <input type="radio" name="card" id="shadowCard" value="shadow" >
                                     <label for="shadowCard">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/shadow.svg" alt="img">
+                                            <img src="/assets/img/theme/shadow.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">그림자</span>
                                     </label>
@@ -329,7 +329,7 @@ let themesettings = `
                                     <input type="radio" name="size" id="defaultSize" value="default" checked>
                                     <label for="defaultSize">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/default.svg" alt="img">
+                                            <img src="/assets/img/theme/default.svg" alt="img">
                                         </span>                                     
                                         <span class="layout-type">기본</span>
                                     </label>
@@ -340,7 +340,7 @@ let themesettings = `
                                     <input type="radio" name="size" id="compactSize" value="compact" >
                                     <label for="compactSize">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/compact.svg" alt="img">
+                                            <img src="/assets/img/theme/compact.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">축소형</span>
                                     </label>
@@ -351,7 +351,7 @@ let themesettings = `
                                     <input type="radio" name="size" id="hoverviewSize" value="hoverview" >
                                     <label for="hoverviewSize">
                                         <span class="d-block mb-2 layout-img">
-                                            <img src="assets/img/theme/hoverview.svg" alt="img">
+                                            <img src="/assets/img/theme/hoverview.svg" alt="img">
                                         </span>                                    
                                         <span class="layout-type">호버 확장</span>
                                     </label>
@@ -427,19 +427,19 @@ let themesettings = `
                             <div class="theme-topbarbg me-3 mb-2">
                                 <input type="radio" name="topbarbg" id="pattern1" value="pattern1" checked>
                                 <label for="pattern1" class="d-block rounded">
-                                    <img src="assets/img/theme/pattern-01.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/pattern-01.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-topbarbg me-3 mb-2">
                                 <input type="radio" name="topbarbg" id="pattern2" value="pattern2">
                                 <label for="pattern2" class="d-block rounded">
-                                    <img src="assets/img/theme/pattern-02.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/pattern-02.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-topbarbg me-3 mb-2">
                                 <input type="radio" name="topbarbg" id="pattern3" value="pattern3">
                                 <label for="pattern3" class="d-block rounded">
-                                    <img src="assets/img/theme/pattern-03.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/pattern-03.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                         </div>
@@ -489,37 +489,37 @@ let themesettings = `
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg1" value="sidebarbg1">
                                 <label for="sidebarBg1" class="d-block rounded">
-                                    <img src="assets/img/theme/sidebar-bg-01.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-01.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg2" value="sidebarbg2">
                                 <label for="sidebarBg2" class="d-block rounded">
-                                    <img src="assets/img/theme/sidebar-bg-02.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-02.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg3" value="sidebarbg3">
                                 <label for="sidebarBg3" class="d-block rounded">
-                                    <img src="assets/img/theme/sidebar-bg-03.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-03.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg4" value="sidebarbg4">
                                 <label for="sidebarBg4" class="d-block rounded">
-                                    <img src="assets/img/theme/sidebar-bg-04.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-04.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg5" value="sidebarbg5">
                                 <label for="sidebarBg5" class="d-block rounded">
-                                    <img src="assets/img/theme/sidebar-bg-05.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-05.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg6" value="sidebarbg6">
                                 <label for="sidebarBg6" class="d-block rounded">
-                                    <img src="assets/img/theme/sidebar-bg-06.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-06.svg" alt="img" class="rounded">
                                 </label>
                             </div>
                         </div>

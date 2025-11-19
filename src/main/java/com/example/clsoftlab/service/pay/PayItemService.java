@@ -7,7 +7,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -34,12 +33,12 @@ public class PayItemService {
 	
 	
 	// 급여 항목 목록 검색
-	public Page<PayItemListDto> searchPayItem(String itemName, List<String> itemType, String useYn, int page, int size) {
+	public Page<PayItemListDto> searchPayItem(List<String> itemCode, List<String> itemType, String useYn, int page, int size) {
 	
-		Pageable pageable = PageRequest.of(page, size, Sort.by("itemName"));
+		Pageable pageable = PageRequest.of(page, size);
 		Specification<PayItem> spec = Specification.not(null);
 		
-		spec = spec.and(PayItemSpecs.withItemName(itemName))
+		spec = spec.and(PayItemSpecs.withItemCode(itemCode))
 				.and(PayItemSpecs.withItemTypes(itemType))
 				.and(PayItemSpecs.withUseYn(useYn));
 		return payItemRepository.findAll(spec,pageable).map(i -> modelMapper.map(i, PayItemListDto.class));
@@ -59,25 +58,24 @@ public class PayItemService {
 		}
 		
 		payItemRepository.save(modelMapper.map(payItem, PayItem.class));
-		return;
 	}
 	
 	// 급여 항목 수정
 	@Transactional
-	public void updatePayItem(String itemCode, PayItemRequestDto payItemDto) { 
+	public void updatePayItem(PayItemRequestDto dto) { 
 	
-		PayItem payItem = payItemRepository.findById(itemCode)
-				.orElseThrow(() -> new IllegalArgumentException("해당 항목을 찾을 수 없습니다. code=" + itemCode));
+		PayItem payItem = payItemRepository.findById(dto.getItemCode())
+				.orElseThrow(() -> new IllegalArgumentException("해당 항목을 찾을 수 없습니다. itemCod : " + dto.getItemCode()));
 
-		payItem.update(payItemDto);
+		payItem.update(dto);
 	}
 	
 	//DEDUCT만 검색
-	public Page<PayItemListDto> searchDeduct (String itemName, String useYn, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("itemCode"));
+	public Page<PayItemListDto> searchDeduct (List<String> itemCode, String useYn, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
 		
 		Specification<PayItem> spec = Specification.not(null);
-		spec = spec.and(PayItemSpecs.withItemName(itemName))
+		spec = spec.and(PayItemSpecs.withItemCode(itemCode))
 				.and(PayItemSpecs.withItemTypes(List.of("DEDUCT")))
 				.and(PayItemSpecs.withUseYn(useYn));
 		
