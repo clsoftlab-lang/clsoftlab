@@ -28365,33 +28365,12 @@ span.flatpickr-weekday {
   border-radius: 5px;
 }
 
-.header, .header-left, .sidebar-horizontal {
-    z-index: 9999 !important; 
-    overflow: visible !important; 
-}
-
-.sidebar-horizontal .sidebar-menu > ul > li .submenu ul {
-    z-index: 10000 !important; 
-}
-
-.page-wrapper {
-    position: relative !important;
-    z-index: 1 !important; 
-}
-
-.form-control, 
-.form-select, 
-.input-group,
-.select2-container {
-    position: relative !important;
-    z-index: 0 !important; 
-}
-
-.form-control:focus, 
-.form-select:focus {
-    z-index: 0 !important;
-}
 
 /* End:: swiper js */
+
+.header, .header-left, .sidebar-horizontal {
+    z-index: 1000 !important; 
+    overflow: visible !important; 
+}
 
 /*# sourceMappingURL=style.css.map */

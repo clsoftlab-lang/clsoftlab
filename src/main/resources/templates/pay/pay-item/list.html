@@ -6,10 +6,6 @@
 
 <body>
 	<div layout:fragment="content">
-		<div th:replace= "~{common/sidebar :: sidebar}" >
-		</div>
-		<div class="page-wrapper">
-			<div class="content">
 
 				<div class="card">
 					<div class="card-header">
@@ -30,7 +26,7 @@
 									<div class="col-md-3">
 									    <div class="form-group">
 									        <label for="itemTypeSelect">항목 유형</label>
-									        <select class="form-select multiple-select" name="itemTypes" id="itemTypeSelect" multiple="multiple">
+									        <select class="form-select" name="itemTypes" id="itemTypeSelect" multiple="multiple">
 									            <option value="PAY" th:selected="${itemTypes != null && #lists.contains(itemTypes, 'PAY')}">PAY</option>
 									            <option value="DEDUCT" th:selected="${itemTypes != null && #lists.contains(itemTypes, 'DEDUCT')}">DEDUCT</option>
 									            <option value="TAX" th:selected="${itemTypes != null && #lists.contains(itemTypes, 'TAX')}">TAX</option>
@@ -66,7 +62,7 @@
 					</div>
 					<div class="card-body">
 						<div class="table-responsive">
-							<table class="table table-striped table-hover datatable-resizable" id="dataTable">
+							<table class="table table-striped table-hover datatable-resizable w-100" id="dataTable">
 								<thead class="table-light">
 									<tr>
 										<th>항목코드</th>
@@ -106,7 +102,7 @@
 				                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				            </div>
 				            <div class="modal-body">
-				                <form id="addPayItem">
+				                <form id="addForm">
 				                    <div class="row">
 				                        <div class="col-md-4 mb-3">
 				                            <div class="form-group">
@@ -330,10 +326,7 @@
 				        </div>
 				    </div>
 				</div>				
-			</div>
 
-			<footer th:replace= "~{common/footer :: footer}" ></footer>
-		</div>
 	</div>
 	<th:block layout:fragment="script">
         <script src="/assets/js/pay/pay-item.js"></script>

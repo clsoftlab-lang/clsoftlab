@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
 		    const tableBody = document.querySelector('.table tbody');
-			const addPayItemForm = document.getElementById('addPayItem');
+			const addForm = document.getElementById('addForm');
 
 			
 		    if (tableBody) {
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 			async function addNewPayItem() {
-		    const formData = new FormData(addPayItemForm);
+		    const formData = new FormData(addForm);
 		    const data = Object.fromEntries(formData.entries());
 
 		    //  항목코드 형식 검사 (영어/숫자) ---
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		    
 		    // --- 서버 작업 시작 ---
 		    try {
-		        const response = await fetch(`/pay/pay-item/checkOverlap`);
+		        const response = await fetch(`/pay/pay-item/checkOverlap/${data.itemCode}`);
 						const checkResult = await response.text();
 		        
 		        if (checkResult == 'true') {
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		    }
 		    
 		    try {
-		        const url = `/pay/pay-item/${data.itemCode}`;
+		        const url = `/pay/pay-item`;
 		        const response = await fetch(url, {
 		            method: 'PUT', 
 		            headers: {

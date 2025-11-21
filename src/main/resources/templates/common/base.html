@@ -62,8 +62,15 @@
 	<div class="main-wrapper">
 		<header th:replace="~{common/header :: header}"></header>
 
-		<div layout:fragment="content">
-		</div>
+		<div th:replace="~{common/sidebar :: sidebar}"></div>
+		<div class="page-wrapper">
+            
+            <div class="content" layout:fragment="content">
+            </div>
+
+            <footer th:replace="~{common/footer :: footer}"></footer>
+            
+        </div>
 	</div>
 	<!-- /Main Wrapper -->
 	

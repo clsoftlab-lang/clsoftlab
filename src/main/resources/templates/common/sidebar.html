@@ -168,7 +168,7 @@
 					<li class="menu-title"><span>인사관리시스템</span></li>
 					
 					<li class="submenu">
-						<a href="javascript:void(0);" >
+						<a href="javascript:void(0);" th:classappend="${currentUrl != null && currentUrl.startsWith('/pay/')} ? 'subdrop' : ''">
 							<i class="ti ti-cash"></i>
 							<span> 급여 </span>
 							<span class="menu-arrow"></span> </a>

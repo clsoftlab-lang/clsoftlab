@@ -104,11 +104,11 @@
 								<li class="menu-title"><span>인사관리시스템</span></li>
 								
 								<li class="submenu">
-									<a href="#" >
+									<a href="#" th:classappend="${currentUrl != null && currentUrl.startsWith('/pay/')} ? 'active' : ''">
 										<i class="ti ti-cash"></i>
 										<span> 급여 </span>
 										<span class="menu-arrow"></span> </a>
-									<ul style="display: none;">
+									<ul>
 										<li><a th:href="@{/pay/pay-item}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item' || currentUrl.startsWith('/pay/pay-item?'))} ? 'active' : ''">급여 항목 관리</a></li>
 										<li><a th:href="@{/pay/pay-detail}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-detail' || currentUrl.startsWith('/pay/pay-detail?'))} ? 'active' : ''">월별 내역 관리</a></li>
 										<li><a th:href="@{/pay/pay-rule}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-rule' || currentUrl.startsWith('/pay/pay-rule?'))} ? 'active' : ''">계산 규칙 관리</a></li>
