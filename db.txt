@@ -3,93 +3,220 @@ create database clsoftlabnew default character set utf8mb4 collate utf8mb4_unico
 
 use clsoftlabnew;
 
+-- 공통 코드 테이블 --
+
+CREATE TABLE ZSYS_CODE_GROUP (
+    -- [식별자]
+    ZGROUP_ID     VARCHAR(20)   NOT NULL COMMENT '코드 그룹 ID (PK)',
+    
+    -- [기본 정보]
+    ZGROUP_NM     VARCHAR(100)  NOT NULL COMMENT '코드 그룹명',
+    ZUSE_YN       CHAR(1)       NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    ZORDER        INT           NOT NULL DEFAULT 0   COMMENT '정렬 순서',
+    ZREMARK       VARCHAR(300)  NULL     COMMENT '비고 (설명)',
+
+    -- [운영 제어]
+    IS_SYSTEM     CHAR(1)       NOT NULL DEFAULT 'N' COMMENT '시스템 전용 여부 (Y:개발자만 수정 가능, N:일반관리자 수정 가능)',
+    VERSION   	INT           	NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [Audit]
+    CREATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    CREATED_BY    VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    UPDATED_BY    VARCHAR(50)   NULL     COMMENT '수정자',
+
+    PRIMARY KEY (ZGROUP_ID)
+) COMMENT '공통코드 그룹 마스터';
+
+
+-- 더미 데이터 --
+INSERT INTO ZSYS_CODE_GROUP 
+(ZGROUP_ID, ZGROUP_NM, ZUSE_YN, ZORDER, ZREMARK, IS_SYSTEM, VERSION, CREATED_BY) 
+VALUES 
+-- [1] 인사 관련 (10~80번대)
+('HR_RANK',   '직급 구분',     'Y', 10, '사원, 대리, 과장 등 직급 체계', 'N', 1, 'SYSTEM'),
+('HR_DUTY',   '직무 구분',     'Y', 20, '개발, 기획, 디자인 등 수행 직무', 'N', 1, 'SYSTEM'),
+('HR_STATUS', '재직 상태',     'Y', 30, '재직, 휴직, 퇴직 등 근무 상태', 'Y', 1, 'SYSTEM'),
+
+-- [2] 시스템 관련 (90번대)
+('SYS_ROLE',  '시스템 권한',   'Y', 90, '시스템 메뉴 접근 권한(Role)',   'Y', 1, 'SYSTEM');
+
+-- 공통코드 상세 테이블 --
+CREATE TABLE ZSYS_CODE_DETAIL (
+    -- [식별자 - 복합키]
+    ZGROUP_ID     VARCHAR(20)   NOT NULL COMMENT '코드 그룹 ID (FK)',
+    ZCODE         VARCHAR(20)   NOT NULL COMMENT '상세 코드값 (PK)',
+
+    -- [기본 정보]
+    ZNAME         VARCHAR(100)  NOT NULL COMMENT '코드 명칭 (한글)',
+    ZNAME_EN      VARCHAR(100)  NULL     COMMENT '코드 명칭 (영문)',
+    
+    -- [기간 및 유효성 관리]
+    START_DT      DATE          NOT NULL DEFAULT '1900-01-01' COMMENT '시작일자',
+    END_DT        DATE          NOT NULL DEFAULT '9999-12-31' COMMENT '종료일자',
+    ZUSE_YN       CHAR(1)       NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    
+    -- [표시 정보]
+    ZORDER        INT           NOT NULL DEFAULT 0   COMMENT '정렬 순서',
+    ZREMARK       VARCHAR(300)  NULL     COMMENT '비고',
+
+    -- [운영 제어]
+    IS_SYSTEM     CHAR(1)       NOT NULL DEFAULT 'N' COMMENT '시스템 전용 여부 (Y:삭제불가 등 제어)',
+    OBJ_VERSION   INT           NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [Audit]
+    CREATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY    VARCHAR(50)   NOT NULL,
+    UPDATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_BY    VARCHAR(50)   NULL,
+
+    -- [키 설정]
+    PRIMARY KEY (ZGROUP_ID, ZCODE),
+    CONSTRAINT FK_ZSYS_CODE_GROUP FOREIGN KEY (ZGROUP_ID) REFERENCES ZSYS_CODE_GROUP (ZGROUP_ID)
+) COMMENT '공통코드 상세 내역';
+
+-- 더미 데이터 --
+INSERT INTO ZSYS_CODE_DETAIL 
+(ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, ZUSE_YN, IS_SYSTEM, CREATED_BY) 
+VALUES 
+-- -------------------------------------------------------
+-- [1] HR_RANK (직급) 
+-- -------------------------------------------------------
+('HR_RANK', '001', '사원', 'Staff',                  10, 'Y', 'N', 'SYSTEM'),
+('HR_RANK', '002', '대리', 'Assistant Manager',      20, 'Y', 'N', 'SYSTEM'),
+('HR_RANK', '003', '과장', 'Manager',                30, 'Y', 'N', 'SYSTEM'),
+('HR_RANK', '004', '차장', 'Deputy General Manager', 40, 'Y', 'N', 'SYSTEM'),
+('HR_RANK', '005', '부장', 'General Manager',        50, 'Y', 'N', 'SYSTEM'),
+('HR_RANK', '009', '임원', 'Executive',              90, 'Y', 'N', 'SYSTEM'),
+
+-- -------------------------------------------------------
+-- [2] HR_DUTY (직무) : 일반 분류
+-- -------------------------------------------------------
+('HR_DUTY', 'DEV',  '개발',     'Development', 10, 'Y', 'N', 'SYSTEM'),
+('HR_DUTY', 'PLAN', '기획',     'Planning',    20, 'Y', 'N', 'SYSTEM'),
+('HR_DUTY', 'DES',  '디자인',   'Design',      30, 'Y', 'N', 'SYSTEM'),
+('HR_DUTY', 'HR',   '인사/총무', 'HR/GA',       40, 'Y', 'N', 'SYSTEM'),
+('HR_DUTY', 'OP',   '운영',     'Operation',   50, 'Y', 'N', 'SYSTEM'),
+
+-- -------------------------------------------------------
+-- [3] HR_STATUS (재직 상태) : 로그인 허용 여부 로직과 연동됨 (IS_SYSTEM='Y')
+-- -------------------------------------------------------
+('HR_STATUS', '10', '재직', 'Active',  10, 'Y', 'Y', 'SYSTEM'), -- 로그인 가능
+('HR_STATUS', '20', '휴직', 'Leave',   20, 'Y', 'Y', 'SYSTEM'), -- 정책에 따라 처리
+('HR_STATUS', '99', '퇴직', 'Retired', 99, 'Y', 'Y', 'SYSTEM'), -- 로그인 불가
+
+-- -------------------------------------------------------
+-- [4] SYS_ROLE (권한) : 메뉴 접근 제어와 연동됨 (IS_SYSTEM='Y')
+-- -------------------------------------------------------
+('SYS_ROLE', 'ADMIN', '시스템 관리자', 'System Admin', 10, 'Y', 'Y', 'SYSTEM'),
+('SYS_ROLE', 'USER',  '일반 사용자',   'User',         20, 'Y', 'Y', 'SYSTEM'),
+('SYS_ROLE', 'GUEST', '게스트',       'Guest',        90, 'Y', 'Y', 'SYSTEM');
+
 -- 사원 마스터 (개발용 임시) --
 CREATE TABLE ZHR_EMP_MASTER (
-    -- 기본 키 컬럼 (PK)
+    -- [PK] 사번
     PERNR           VARCHAR(10)  NOT NULL COMMENT '사번 (PK)',
 
-    -- 기본 정보 (필수)
+    -- [기본 정보]
     ENAME           VARCHAR(50)  NOT NULL COMMENT '성명',
-    ENTRY_DT      DATE         NOT NULL COMMENT '입사일자 (근속년수 계산 근거)',
-    RETIRE_DT     DATE         NULL     COMMENT '퇴직일자 (정산 대상 식별 및 근속년수 계산 근거)',
+    ENTRY_DT        DATE         NOT NULL COMMENT '입사일자 (근속년수 계산)',
+    RETIRE_DT       DATE         NULL     COMMENT '퇴직일자 (퇴직 시 입력)',
+    
+    -- [인사 정보 - 공통코드 참조]
+    RANK_CD         VARCHAR(20)  NOT NULL COMMENT '직급 코드 (HR_RANK 참조: 001, 002...)',
+    DUTY_CD         VARCHAR(20)  NOT NULL COMMENT '직무 코드 (HR_DUTY 참조: DEV, PLAN...)',
+    EMP_STATUS      VARCHAR(20)  NOT NULL DEFAULT '10' COMMENT '재직 상태 (HR_STATUS 참조: 10=재직, 99=퇴직)',
 
-    -- 감사(Audit) 필드 (요청하신 DDL 형식을 따름)
+    -- [동시성 제어]
+    OBJ_VERSION     INT          NOT NULL DEFAULT 1 COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [Audit]
     CREATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
     CREATED_BY      VARCHAR(50)  NOT NULL COMMENT '생성자',
     UPDATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     UPDATED_BY      VARCHAR(50)  NULL     COMMENT '수정자',
 
-    -- 기본 키 설정
     PRIMARY KEY (PERNR)
 
-) COMMENT '사원 마스터 (급여 개발용 임시 테이블)';
+) COMMENT '사원 마스터 (인사 기본 정보)';
+
 
 -- 더미 데이터 --
-INSERT INTO ZHR_EMP_MASTER
-(PERNR, ENAME, ENTRY_DT, RETIRE_DT, CREATED_BY)
-VALUES
--- 2022년 입사자 (10명) --
--- 10명 중 5명 퇴직
-('2201001', '김철수', '2022-01-01', '2025-09-30', 'system_admin'), -- 퇴직자 1
-('2201002', '이영희', '2022-01-01', '2025-01-31', 'system_admin'), -- 퇴직자 2
-('2203003', '박민준', '2022-03-01', '2025-10-29', 'system_admin'), -- 퇴직자 3
-('2203004', '최서연', '2022-03-01', NULL, 'system_admin'),
-('2207005', '정지훈', '2022-07-01', '2025-02-28', 'system_admin'), -- 퇴직자 4
-('2207006', '윤서아', '2022-07-01', NULL, 'system_admin'),
-('2209007', '강도윤', '2022-09-01', NULL, 'system_admin'),
-('2210008', '임하윤', '2022-10-01', '2025-03-31', 'system_admin'), -- 퇴직자 5
-('2210009', '한지우', '2022-10-01', NULL, 'system_admin'),
-('2211010', '오시우', '2022-11-01', NULL, 'system_admin'),
+INSERT INTO ZHR_EMP_MASTER 
+(PERNR, ENAME, ENTRY_DT, RETIRE_DT, RANK_CD, DUTY_CD, EMP_STATUS, OBJ_VERSION, CREATED_BY) 
+VALUES 
+-- ==========================================
+-- [0] 특수 계정 (관리자용)
+-- ==========================================
 
--- 2023년 입사자 (10명) --
--- 10명 중 4명 퇴직
-('2301011', '신유나', '2023-01-01', '2025-06-30', 'system_admin'), -- 퇴직자 6
-('2301012', '장은우', '2023-01-01', '2025-04-30', 'system_admin'), -- 퇴직자 7
-('2302013', '송지아', '2023-02-01', NULL, 'system_admin'),
-('2304014', '권혁준', '2023-04-01', '2025-07-31', 'system_admin'), -- 퇴직자 8
-('2305015', '황수빈', '2023-05-01', NULL, 'system_admin'),
-('2305016', '안태현', '2023-05-01', NULL, 'system_admin'),
-('2308017', '문채원', '2023-08-01', '2025-08-31', 'system_admin'), -- 퇴직자 9
-('2309018', '고은별', '2023-09-01', NULL, 'system_admin'),
-('2310019', '배준호', '2023-10-01', NULL, 'system_admin'),
-('2312020', '조민서', '2023-12-01', NULL, 'system_admin'),
+('2018001', '양한재', '2018-03-01', NULL, '001', 'DEV', '10', 1, 'system_admin'),
 
--- 2024년 입사자 (20명) --
--- 20명 중 1명 퇴직
-('2401021', '유정민', '2024-01-01', '2025-10-15', 'system_admin'), -- 퇴직자 10
-('2401022', '홍예준', '2024-01-01', NULL, 'system_admin'),
-('2402023', '나소율', '2024-02-01', NULL, 'system_admin'),
-('2402024', '백시원', '2024-02-01', NULL, 'system_admin'),
-('2403025', '노하린', '2024-03-01', NULL, 'system_admin'),
-('2404026', '차유진', '2024-04-01', NULL, 'system_admin'),
-('2404027', '표지성', '2024-04-01', NULL, 'system_admin'),
-('2405028', '기태영', '2024-05-01', NULL, 'system_admin'),
-('2405029', '선우진', '2024-05-01', NULL, 'system_admin'),
-('2406030', '왕지현', '2024-06-01', NULL, 'system_admin'),
--- 10명 추가 --
-('2407031', '서재윤', '2024-07-01', NULL, 'system_admin'),
-('2407032', '방민호', '2024-07-01', NULL, 'system_admin'),
-('2408033', '편지후', '2024-08-01', NULL, 'system_admin'),
-('2409034', '성주원', '2024-09-01', NULL, 'system_admin'),
-('2409035', '위하늘', '2024-09-01', NULL, 'system_admin'),
-('2410036', '명지안', '2024-10-01', NULL, 'system_admin'),
-('2411037', '금예서', '2024-11-01', NULL, 'system_admin'),
-('2411038', '도윤재', '2024-11-01', NULL, 'system_admin'),
-('2412039', '채수현', '2024-12-01', NULL, 'system_admin'),
-('2412040', '하동균', '2024-12-01', NULL, 'system_admin'),
 
--- 2025년 입사자 (10명) --
--- 10명 추가 (모두 재직자)
-('2501041', '진세아', '2025-01-01', NULL, 'system_admin'),
-('2501042', '원태준', '2025-01-01', NULL, 'system_admin'),
-('2502043', '라희선', '2025-02-01', NULL, 'system_admin'),
-('2503044', '설강민', '2025-03-01', NULL, 'system_admin'),
-('2503045', '옥다은', '2025-03-01', NULL, 'system_admin'),
-('2504046', '경수호', '2025-04-01', NULL, 'system_admin'),
-('2505047', '봉준서', '2025-05-01', NULL, 'system_admin'),
-('2506048', '마동욱', '2025-06-01', NULL, 'system_admin'),
-('2507049', '엄지아', '2025-07-01', NULL, 'system_admin'),
-('2508050', '함유주', '2025-08-01', NULL, 'system_admin');
+-- ==========================================
+-- [1] 2022년 입사자 (경력직 포함 - 대리/과장급 혼재)
+-- ==========================================
+('2201001', '김철수', '2022-01-01', '2025-09-30', '003', 'DEV',  '99', 1, 'system_admin'), -- 퇴직(99)
+('2201002', '이영희', '2022-01-01', '2025-01-31', '002', 'DES',  '99', 1, 'system_admin'), -- 퇴직(99)
+('2203003', '박민준', '2022-03-01', '2025-10-29', '003', 'PLAN', '99', 1, 'system_admin'), -- 퇴직(99)
+('2203004', '최서연', '2022-03-01', NULL,         '003', 'HR',   '10', 1, 'system_admin'),
+('2207005', '정지훈', '2022-07-01', '2025-02-28', '002', 'OP',   '99', 1, 'system_admin'), -- 퇴직(99)
+('2207006', '윤서아', '2022-07-01', NULL,         '002', 'DEV',  '10', 1, 'system_admin'),
+('2209007', '강도윤', '2022-09-01', NULL,         '002', 'DEV',  '10', 1, 'system_admin'),
+('2210008', '임하윤', '2022-10-01', '2025-03-31', '002', 'PLAN', '99', 1, 'system_admin'), -- 퇴직(99)
+('2210009', '한지우', '2022-10-01', NULL,         '002', 'DES',  '10', 1, 'system_admin'),
+('2211010', '오시우', '2022-11-01', NULL,         '002', 'OP',   '10', 1, 'system_admin'),
+
+-- ==========================================
+-- [2] 2023년 입사자 (사원/대리급)
+-- ==========================================
+('2301011', '신유나', '2023-01-01', '2025-06-30', '001', 'HR',   '99', 1, 'system_admin'), -- 퇴직
+('2301012', '장은우', '2023-01-01', '2025-04-30', '002', 'DEV',  '99', 1, 'system_admin'), -- 퇴직
+('2302013', '송지아', '2023-02-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
+('2304014', '권혁준', '2023-04-01', '2025-07-31', '002', 'DEV',  '99', 1, 'system_admin'), -- 퇴직
+('2305015', '황수빈', '2023-05-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
+('2305016', '안태현', '2023-05-01', NULL,         '001', 'OP',   '10', 1, 'system_admin'),
+('2308017', '문채원', '2023-08-01', '2025-08-31', '001', 'HR',   '99', 1, 'system_admin'), -- 퇴직
+('2309018', '고은별', '2023-09-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2310019', '배준호', '2023-10-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2312020', '조민서', '2023-12-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
+
+-- ==========================================
+-- [3] 2024년 입사자 (대부분 사원)
+-- ==========================================
+('2401021', '유정민', '2024-01-01', '2025-10-15', '001', 'OP',   '99', 1, 'system_admin'), -- 퇴직
+('2401022', '홍예준', '2024-01-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2402023', '나소율', '2024-02-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
+('2402024', '백시원', '2024-02-01', NULL,         '001', 'HR',   '10', 1, 'system_admin'),
+('2403025', '노하린', '2024-03-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2404026', '차유진', '2024-04-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
+('2404027', '표지성', '2024-04-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2405028', '기태영', '2024-05-01', NULL,         '001', 'OP',   '10', 1, 'system_admin'),
+('2405029', '선우진', '2024-05-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2406030', '왕지현', '2024-06-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
+('2407031', '서재윤', '2024-07-01', NULL,         '001', 'HR',   '10', 1, 'system_admin'),
+('2407032', '방민호', '2024-07-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
+('2408033', '편지후', '2024-08-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2409034', '성주원', '2024-09-01', NULL,         '001', 'OP',   '10', 1, 'system_admin'),
+('2409035', '위하늘', '2024-09-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2410036', '명지안', '2024-10-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2411037', '금예서', '2024-11-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
+('2411038', '도윤재', '2024-11-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
+('2412039', '채수현', '2024-12-01', NULL,         '001', 'HR',   '10', 1, 'system_admin'),
+('2412040', '하동균', '2024-12-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+
+-- ==========================================
+-- [4] 2025년 입사자 (신입 사원)
+-- ==========================================
+('2501041', '진세아', '2025-01-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2501042', '원태준', '2025-01-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
+('2502043', '라희선', '2025-02-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
+('2503044', '설강민', '2025-03-01', NULL,         '001', 'HR',   '10', 1, 'system_admin'),
+('2503045', '옥다은', '2025-03-01', NULL,         '001', 'OP',   '10', 1, 'system_admin'),
+('2504046', '경수호', '2025-04-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2505047', '봉준서', '2025-05-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2506048', '마동욱', '2025-06-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
+('2507049', '엄지아', '2025-07-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
+('2508050', '함유주', '2025-08-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin');
 
 
 

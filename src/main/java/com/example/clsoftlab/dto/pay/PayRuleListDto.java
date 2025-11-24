@@ -16,6 +16,7 @@ public class PayRuleListDto {
 
 	private Long ruleId;
     private String itemCode;
+    private String itemName;
     private String ruleType;
     private String formula;
     private BigDecimal fixedValue;

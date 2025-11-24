@@ -48,6 +48,9 @@
 
     - api 목록 수정하기.
 
+    https://service-5122936462.us-west1.run.app/
+    관리자 메뉴 구현하기
+
     
 
 

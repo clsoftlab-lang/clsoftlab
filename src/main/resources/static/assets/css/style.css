@@ -23792,21 +23792,21 @@ table.dataTable > thead .sorting_desc_disabled:before {
   align-items: center;
   justify-content: center;
 }
-.dataTables_paginate .pagination li.previous.disabled, .dataTables_paginate .pagination li.prev {
+.dataTables_paginate .pagination li.previous.disabled, .dataTables_paginate .pagination li.previous {
   width: auto;
   margin: 0 10px 0 0;
 }
-.dataTables_paginate .pagination li.previous.disabled a, .dataTables_paginate .pagination li.prev a {
+.dataTables_paginate .pagination li.previous.disabled a, .dataTables_paginate .pagination li.previous a {
   background-color: transparent;
   border: 0;
   width: auto;
   padding: 0;
   font-size: 15px;
 }
-.dataTables_paginate .pagination li.previous.disabled a i, .dataTables_paginate .pagination li.prev a i {
+.dataTables_paginate .pagination li.previous.disabled a i, .dataTables_paginate .pagination li.previous a i {
   margin-right: 8px;
 }
-.dataTables_paginate .pagination li.previous.disabled a:hover, .dataTables_paginate .pagination li.prev a:hover {
+.dataTables_paginate .pagination li.previous.disabled a:hover, .dataTables_paginate .pagination li.previous a:hover {
   color: #03C95A;
 }
 .dataTables_paginate .pagination li.next.disabled, .dataTables_paginate .pagination li.next {

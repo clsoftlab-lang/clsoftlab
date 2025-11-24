@@ -398,11 +398,11 @@
 			            
 		        }
 		        
-		        const itemCodeField = editForm.querySelector('[name="itemCode"]');
-		        const payItemField = editForm.querySelector('[name="payItemDisplay"]');
-		        if (itemCodeField && payItemField && data.itemName && data.itemCode) {
-		        	itemCodeField.value = `${data.itemCode}`;
-		        	payItemField.value = `${data.itemName} (${data.itemCode})`;
+			        const itemCodeField = editForm.querySelector('[name="itemCode"]');
+			        const payItemField = editForm.querySelector('[name="payItemDisplay"]');
+			        if (itemCodeField && payItemField && data.itemName && data.itemCode) {
+			        	itemCodeField.value = `${data.itemCode}`;
+			        	payItemField.value = `${data.itemName} (${data.itemCode})`;
 		        }
 		        
 		    } catch (error) {
