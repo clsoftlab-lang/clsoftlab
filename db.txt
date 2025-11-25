@@ -218,6 +218,168 @@ VALUES
 ('2507049', '엄지아', '2025-07-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
 ('2508050', '함유주', '2025-08-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin');
 
+-- 계정 테이블 (로그인) --
+CREATE TABLE ZSYS_USER_ACCOUNT (
+    -- [1] 식별자 (사번 사용)
+    USER_ID         VARCHAR(50)  NOT NULL COMMENT '로그인 ID (사원:사번, 관리자:ID)',
+
+    -- [2] 기본 정보
+    PERNR           VARCHAR(10)  NULL     COMMENT '사번 (관리자는 NULL)',
+    USER_NM         VARCHAR(50)  NOT NULL COMMENT '사용자명',
+    PASSWD          VARCHAR(255) NOT NULL COMMENT '비밀번호 (암호화)',
+
+    -- [3] 상태 및 보안 관리
+    LOGIN_FAIL_CNT  INT          NOT NULL DEFAULT 0   COMMENT '실패 횟수',
+    IS_LOCKED       CHAR(1)      NOT NULL DEFAULT 'N' COMMENT '잠금 여부',
+    IS_USE          CHAR(1)      NOT NULL DEFAULT 'Y' COMMENT '사용 여부',
+    
+    -- [4] 이력 및 감사
+    LAST_LOGIN_DT   DATETIME     NULL     COMMENT '최근 로그인 일시',
+    CREATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY      VARCHAR(50)  NOT NULL,
+    UPDATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_BY      VARCHAR(50)  NULL,
+
+    PRIMARY KEY (USER_ID)
+) COMMENT '시스템 사용자 계정';
+
+-- ==========================================================
+-- [참고용] 시스템 사용자 계정 더미 데이터 (ZSYS_USER_ACCOUNT)
+-- * 실제 DB에는 PASSWD 컬럼이 BCrypt로 암호화되어 저장됨
+-- * 초기 비밀번호 규칙: 사번과 동일 (관리자는 1234)
+-- ==========================================================
+
+INSERT INTO ZSYS_USER_ACCOUNT 
+(USER_ID, PERNR, USER_NM, PASSWD, LOGIN_FAIL_CNT, IS_LOCKED, IS_USE, CREATED_AT, CREATED_BY) 
+VALUES 
+
+-- [0] 시스템 슈퍼 관리자
+('admin1',  NULL,      '시스템총괄', '{bcrypt}1234',    0, 'N', 'Y', NOW(), 'SYSTEM'),
+
+-- [1] 특수 관리자
+('2018001', '2018001', '양한재',     '{bcrypt}2018001', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+
+-- [2] 2022년 입사자
+('2201001', '2201001', '김철수',     '{bcrypt}2201001', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2201002', '2201002', '이영희',     '{bcrypt}2201002', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2203003', '2203003', '박민준',     '{bcrypt}2203003', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2203004', '2203004', '최서연',     '{bcrypt}2203004', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2207005', '2207005', '정지훈',     '{bcrypt}2207005', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2207006', '2207006', '윤서아',     '{bcrypt}2207006', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2209007', '2209007', '강도윤',     '{bcrypt}2209007', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2210008', '2210008', '임하윤',     '{bcrypt}2210008', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2210009', '2210009', '한지우',     '{bcrypt}2210009', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2211010', '2211010', '오시우',     '{bcrypt}2211010', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+
+-- [3] 2023년 입사자
+('2301011', '2301011', '신유나',     '{bcrypt}2301011', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2301012', '2301012', '장은우',     '{bcrypt}2301012', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2302013', '2302013', '송지아',     '{bcrypt}2302013', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2304014', '2304014', '권혁준',     '{bcrypt}2304014', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2305015', '2305015', '황수빈',     '{bcrypt}2305015', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2305016', '2305016', '안태현',     '{bcrypt}2305016', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2308017', '2308017', '문채원',     '{bcrypt}2308017', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2309018', '2309018', '고은별',     '{bcrypt}2309018', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2310019', '2310019', '배준호',     '{bcrypt}2310019', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2312020', '2312020', '조민서',     '{bcrypt}2312020', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+
+-- [4] 2024년 입사자
+('2401021', '2401021', '유정민',     '{bcrypt}2401021', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2401022', '2401022', '홍예준',     '{bcrypt}2401022', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2402023', '2402023', '나소율',     '{bcrypt}2402023', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2402024', '2402024', '백시원',     '{bcrypt}2402024', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2403025', '2403025', '노하린',     '{bcrypt}2403025', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2404026', '2404026', '차유진',     '{bcrypt}2404026', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2404027', '2404027', '표지성',     '{bcrypt}2404027', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2405028', '2405028', '기태영',     '{bcrypt}2405028', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2405029', '2405029', '선우진',     '{bcrypt}2405029', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2406030', '2406030', '왕지현',     '{bcrypt}2406030', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2407031', '2407031', '서재윤',     '{bcrypt}2407031', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2407032', '2407032', '방민호',     '{bcrypt}2407032', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2408033', '2408033', '편지후',     '{bcrypt}2408033', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2409034', '2409034', '성주원',     '{bcrypt}2409034', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2409035', '2409035', '위하늘',     '{bcrypt}2409035', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2410036', '2410036', '명지안',     '{bcrypt}2410036', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2411037', '2411037', '금예서',     '{bcrypt}2411037', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2411038', '2411038', '도윤재',     '{bcrypt}2411038', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2412039', '2412039', '채수현',     '{bcrypt}2412039', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2412040', '2412040', '하동균',     '{bcrypt}2412040', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+
+-- [5] 2025년 입사자 (신입)
+('2501041', '2501041', '진세아',     '{bcrypt}2501041', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2501042', '2501042', '원태준',     '{bcrypt}2501042', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2502043', '2502043', '라희선',     '{bcrypt}2502043', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2503044', '2503044', '설강민',     '{bcrypt}2503044', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2503045', '2503045', '옥다은',     '{bcrypt}2503045', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2504046', '2504046', '경수호',     '{bcrypt}2504046', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2505047', '2505047', '봉준서',     '{bcrypt}2505047', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2506048', '2506048', '마동욱',     '{bcrypt}2506048', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2507049', '2507049', '엄지아',     '{bcrypt}2507049', 0, 'N', 'Y', NOW(), 'SYSTEM'),
+('2508050', '2508050', '함유주',     '{bcrypt}2508050', 0, 'N', 'Y', NOW(), 'SYSTEM');
+
+-- 사용자 로그인 이력 테이블 --
+CREATE TABLE ZCM_LOGIN_LOG (
+    -- [1] 로그 식별자 (대용량 처리를 위해 BIGINT 사용)
+    LOG_ID              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '로그 시퀀스 (PK)',
+
+    -- [2] 로그인 시도 정보
+    LOGIN_ID            VARCHAR(50)  NOT NULL COMMENT '로그인 시도 ID (사번 또는 ID)',
+    LOGIN_TYPE          VARCHAR(20)  NOT NULL COMMENT '시도한 로그인 방식 (GENERAL/SSO/COOKIE)',
+    
+    -- [3] 접속 환경 정보 (보안 감사 필수)
+    IP_ADDRESS          VARCHAR(50)  NOT NULL COMMENT '접속 IP (IPv6 고려하여 50자)',
+    USER_AGENT          VARCHAR(500) NULL     COMMENT '브라우저 및 OS 정보 (User-Agent String)',
+    
+    -- [4] 로그인 결과
+    LOGIN_RESULT        VARCHAR(10)  NOT NULL COMMENT '결과 상태 (SUCCESS / FAIL / LOCKED)',
+    FAIL_REASON         VARCHAR(255) NULL     COMMENT '실패 시 사유 (예: 비밀번호 불일치, 계정 잠금)',
+
+    -- [5] 발생 일시
+    LOGIN_DT            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '로그인 시도 일시',
+
+    PRIMARY KEY (LOG_ID)
+) COMMENT '시스템 로그인 접속 이력';
+
+-- [성능 최적화] 검색을 위한 인덱스 설정 (선택 사항)
+-- 1. 사용자별 접속 이력 조회용
+CREATE INDEX IDX_LOGIN_LOG_01 ON ZCM_LOGIN_LOG (LOGIN_ID, LOGIN_DT);
+-- 2. 기간별 보안 감사용 (최근 로그 조회)
+CREATE INDEX IDX_LOGIN_LOG_02 ON ZCM_LOGIN_LOG (LOGIN_DT);
+
+-- 로그인 정책 및 방식 설정 테이블 --
+CREATE TABLE ZCM_LOGIN_CONFIG (
+    -- [1] 식별자
+    CONFIG_ID           VARCHAR(20)  NOT NULL COMMENT '설정 ID (예: GLOBAL)',
+
+    -- [2] 로그인 방식 제어
+    USE_MULTI_METHOD    CHAR(1)      NOT NULL DEFAULT 'N'       COMMENT '복수 로그인 방식 허용 여부',
+    USE_SSO             CHAR(1)      NOT NULL DEFAULT 'N'       COMMENT 'SSO 사용 여부 (UI 제어용)',
+    USE_COOKIE          CHAR(1)      NOT NULL DEFAULT 'N'       COMMENT '쿠키/자동 로그인 사용 여부',
+    USE_BIO_AUTH        CHAR(1)      NOT NULL DEFAULT 'N'       COMMENT '생체 인증 사용 여부',
+
+    -- [3] 보안 정책 설정
+    LOCK_AFTER_FAILURE  INT          NOT NULL DEFAULT 5         COMMENT '실패 잠금 기준 횟수',
+    LOG_SAVE_YN         CHAR(1)      NOT NULL DEFAULT 'Y'       COMMENT '로그인 로그 저장 여부',
+    LOG_RETENTION_MOS   INT          NOT NULL DEFAULT 12        COMMENT '로그 저장 기간 (개월)',
+
+    /* [보류] SSO 상세 설정 (필요 시 주석 해제) */
+    /*
+    SSO_AUTH_URL        VARCHAR(255) NULL     COMMENT 'SSO 인증 서버 URL',
+    SSO_CLIENT_ID       VARCHAR(100) NULL     COMMENT 'SSO Client ID',
+    SSO_REDIRECT_URI    VARCHAR(255) NULL     COMMENT 'SSO Redirect URI',
+    */
+
+    -- [4] 시스템 관리 필드 (버전 추가)
+    VERSION             BIGINT       NOT NULL DEFAULT 1         COMMENT '설정 버전 (낙관적 락용)',
+    
+    -- [5] 이력 및 감사
+    CREATED_AT          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY          VARCHAR(50)  NOT NULL,
+    UPDATED_AT          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_BY          VARCHAR(50)  NULL,
+
+    PRIMARY KEY (CONFIG_ID)
+) COMMENT '시스템 로그인 정책 및 방식 설정';
 
 
 -- 급여 --
