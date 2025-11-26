@@ -17,12 +17,9 @@ import jakarta.transaction.Transactional;
 @SpringBootTest
 public class UserAccountTest {
 
-    private final UserAccountService userAccountService;
+	@Autowired
+    private UserAccountService userAccountService;
 
-    @Autowired
-    public UserAccountTest(UserAccountService userAccountService) {
-    	this.userAccountService = userAccountService;
-	}
     
     @Test
     @Transactional
@@ -36,7 +33,7 @@ public class UserAccountTest {
         // [0] 별도 시스템 관리자 계정 (사번 없음)
         // ==========================================
         // ID: admin1, PW: 1234, Name: 시스템총괄, Pernr: null
-        dtoList.add(new UserAccountRequestDto("admin1", "1234", "시스템관리자1", null));
+        dtoList.add(new UserAccountRequestDto("admin1", "1234", "시스템관리자1", null, "ADMIN"));
 
 
         // ==========================================
@@ -44,7 +41,7 @@ public class UserAccountTest {
         // ==========================================
         
         // 0. 특수 관리자 (양한재)
-        addEmployee(dtoList, "2018001", "양한재");
+        dtoList.add(new UserAccountRequestDto("2018001", "2018001", "양한재", "2018001", "ADMIN"));
 
         // 1. 2022년 입사자
         addEmployee(dtoList, "2201001", "김철수");
@@ -129,6 +126,6 @@ public class UserAccountTest {
     // 편의 메서드: ID와 비밀번호를 사번으로 통일하여 리스트에 추가
     private void addEmployee(List<UserAccountRequestDto> list, String pernr, String name) {
         // UserAccountRequestDto 생성자 순서: (userId, password, userName, pernr)
-        list.add(new UserAccountRequestDto(pernr, pernr, name, pernr));
+        list.add(new UserAccountRequestDto(pernr, pernr, name, pernr, "USER"));
     }
 }

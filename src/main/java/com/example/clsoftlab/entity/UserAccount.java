@@ -3,12 +3,15 @@ package com.example.clsoftlab.entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +21,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicInsert
+@DynamicUpdate
+@Builder
 @Table(name = "ZSYS_USER_ACCOUNT")
 public class UserAccount extends BaseEntity {
 
@@ -37,19 +43,37 @@ public class UserAccount extends BaseEntity {
     private String password;
 
     // --- [3] 상태 및 보안 관리 ---
+    @Column(name = "SYS_ROLE", length = 20, nullable = false)
+    @ColumnDefault("'USER'") // 기본값
+    private String sysRole;
+    
     @Column(name = "LOGIN_FAIL_CNT", nullable = false)
     @ColumnDefault("0")
-    private Integer loginFailCnt = 0;
+    private Integer loginFailCnt;
 
     @Column(name = "IS_LOCKED", length = 1, nullable = false)
     @ColumnDefault("'N'")
-    private String isLocked = "N";
+    private String isLocked;
 
     @Column(name = "IS_USE", length = 1, nullable = false)
     @ColumnDefault("'Y'")
-    private String isUse = "Y";
+    private String isUse;
 
     // --- [4] 이력 및 감사 ---
     @Column(name = "LAST_LOGIN_DT")
     private LocalDateTime lastLoginDate;
+    
+    public void increaseFailCount () {
+    	this.loginFailCnt++;
+    }
+    
+    public void resetFailCount () {
+    	this.loginFailCnt = 0;
+    }
+    
+    public void lockAccount () {
+    	this.isLocked = "Y";
+    }
+    
+    
 }

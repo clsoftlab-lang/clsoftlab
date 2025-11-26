@@ -17,8 +17,8 @@
 				<div class="avatar avatar-lg online mb-3">
 					<img src="/assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 				</div>
-				<h6 class="fs-12 fw-normal mb-1">양한재</h6>
-				<p class="fs-10">시스템 관리자</p>
+				<h6 class="fs-12 fw-normal mb-1" th:text="${session.LOGIN_USER.userName}">양한재</h6>
+				<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.sysRole})|">시스템 관리자</p>
 			</div>
 			<div class="sidebar-nav mb-3">
 				<ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded nav-justified bg-transparent" role="tablist">
@@ -34,8 +34,8 @@
 					<img src="/assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 				</div>
 				<div class="text-start sidebar-profile-info ms-2">
-					<h6 class="fs-12 fw-normal mb-1">양한재</h6>
-					<p class="fs-10">시스템 관리자</p>
+					<h6 class="fs-12 fw-normal mb-1" th:text="${session.LOGIN_USER.userName}">양한재</h6>
+					<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.sysRole})|">시스템 관리자</p>
 				</div>
 			</div>
 			<div class="input-group input-group-flat d-inline-flex mb-4">
@@ -314,13 +314,13 @@
 					</a>
 				</div>
 				<div class="sidebar-scroll">
-					<h6 class="mb-3">환영합니다, 양한재님</h6>
+					<h6 class="mb-3" th:text="|환영합니다, ${session.LOGIN_USER.userName}님|">환영합니다, 양한재님</h6>
 					<div class="text-center rounded bg-light p-3 mb-4">
 						<div class="avatar avatar-lg online mb-3">
 							<img src="/assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 						</div>
-						<h6 class="fs-12 fw-normal mb-1">양한재</h6>
-						<p class="fs-10">시스템 관리자</p>
+						<h6 class="fs-12 fw-normal mb-1" th:text="${session.LOGIN_USER.userName}">양한재</h6>
+						<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.sysRole})|">시스템 관리자</p>
 					</div>
 					<div class="tab-content" id="v-pills-tabContent">
 						<div class="tab-pane fade active show" id="pay" role="tabpanel">
@@ -422,13 +422,13 @@
 			</div>
 			<div class="sidebar-right d-flex justify-content-between flex-column">
 				<div class="sidebar-scroll">
-					<h6 class="mb-3">환영합니다, 양한재님</h6>
+					<h6 class="mb-3" th:text="|환영합니다, ${session.LOGIN_USER.userName}님|">환영합니다, 양한재님</h6>
 					<div class="sidebar-profile text-center rounded bg-light p-3 mb-4">
 						<div class="avatar avatar-lg online mb-3">
 							<img src="/assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 						</div>
-						<h6 class="fs-12 fw-normal mb-1">양한재</h6>
-						<p class="fs-10">시스템 관리자</p>
+						<h6 class="fs-12 fw-normal mb-1" th:text="${session.LOGIN_USER.userName}">양한재</h6>
+						<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.sysRole})|">시스템 관리자</p>
 					</div>
 					<div class="stack-menu">
 						<div class="nav flex-column align-items-center nav-pills" role="tablist">

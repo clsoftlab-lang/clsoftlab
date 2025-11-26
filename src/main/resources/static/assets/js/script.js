@@ -675,3 +675,25 @@ Template Name: Smarthr - Bootstrap Admin Template
 	if($('#edit_customleave_select').length > 0) {
 		$('#edit_customleave_select').multiselect();
 	}
+	
+	
+	function logout() {
+	            if (!confirm("로그아웃 하시겠습니까?")) return;
+
+	            $.ajax({
+	                url: "/logout",
+	                type: "POST",
+	                success: function() {
+	                    // 1. 세션 스토리지(화면용 데이터) 삭제
+	                    sessionStorage.removeItem("loginUser"); 
+	                    
+	                    // 2. 로그인 페이지로 이동
+	                    window.location.href = "/login";
+	                },
+	                error: function() {
+	                    // 에러가 나더라도 강제로 이동
+	                    sessionStorage.removeItem("loginUser");
+	                    window.location.href = "/login";
+	                }
+	            });
+	        }

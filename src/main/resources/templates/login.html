@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+	<title>CLSOFTLAB</title>
+
+	<!-- Favicon -->
+	<link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.png">
+
+	<!-- Apple Touch Icon -->
+	<link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+
+	<!-- Feather CSS -->
+	<link rel="stylesheet" href="assets/plugins/icons/feather/feather.css">
+
+	<!-- Tabler Icon CSS -->
+    <link rel="stylesheet" href="assets/plugins/tabler-icons/tabler-icons.min.css">
+
+	<!-- Fontawesome CSS -->
+	<link rel="stylesheet" href="assets/plugins/fontawesome/css/fontawesome.min.css">
+	<link rel="stylesheet" href="assets/plugins/fontawesome/css/all.min.css">
+
+	<!-- Main CSS -->
+	<link rel="stylesheet" href="assets/css/style.css">
+
+</head>
+
+<body class="bg-linear-gradiant">
+
+	<div id="global-loader" style="display: none;">
+		<div class="page-loader"></div>
+	</div>
+
+	<!-- Main Wrapper -->
+	<div class="main-wrapper">
+		<div class="container-fuild">
+			<div class="w-100 overflow-hidden position-relative flex-wrap d-block vh-100">
+				<div class="row justify-content-center align-items-center vh-100 overflow-auto flex-wrap ">
+					<div class="col-md-4 mx-auto vh-100">
+						<form class="vh-100" id="loginForm">
+							<div class="vh-100 d-flex flex-column justify-content-between p-4 pb-0">
+								<div class=" mx-auto mb-5 text-center">
+									<img src="assets/img/logo.svg"
+										class="img-fluid" alt="Logo">
+								</div>
+								<div class="">
+									<div class="mb-3">
+										<label class="form-label">Id (사번)</label>
+										<div class="input-group">
+											<input type="text" value="" class="form-control border-end-0" name="userId" id="userId">
+											<span class="input-group-text border-start-0">
+												<i class="ti ti-mail"></i>
+											</span>
+										</div>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Password (비밀번호)</label>
+										<div class="pass-group">
+											<input type="password" class="pass-input form-control" name="password" id="password">
+											<span class="ti toggle-password ti-eye-off"></span>
+										</div>
+									</div>
+									<div class="d-flex align-items-center justify-content-between mb-3">
+										<div class="d-flex align-items-center">
+											<div class="form-check form-check-md mb-0">
+												<input class="form-check-input" id="remember_me" type="checkbox">
+												<label for="remember_me" class="form-check-label mt-0">아이디 저장</label>
+											</div>
+										</div>
+										<div class="text-end">
+											<a href="" class="link-danger">비밀번호 찾기</a>
+										</div>
+									</div>
+									<div class="mb-3">
+										<button type="submit" class="btn btn-primary w-100">로그인</button>
+									</div>
+								</div>
+								<div class="mt-5 pb-4 text-center">
+									<p class="mb-0 text-gray-9">2025 &copy; clsoftlab</p>
+								</div>
+							</div>
+						</form>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /Main Wrapper -->
+
+	<!-- jQuery -->
+	<script src="assets/js/jquery-3.7.1.min.js"></script>
+
+	<!-- Bootstrap Core JS -->
+	<script src="assets/js/bootstrap.bundle.min.js"></script>
+
+	<!-- Feather Icon JS -->
+	<script src="assets/js/feather.min.js"></script>
+
+	<!-- Custom JS -->
+	<script src="assets/js/script.js"></script>
+	<script src="assets/js/login.js"></script>
+	
+
+</body>
+
+</html>

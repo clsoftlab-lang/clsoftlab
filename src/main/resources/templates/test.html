@@ -33,7 +33,7 @@
 								<img src="assets/img/profiles/avatar-02.jpg" class="rounded-circle" alt="img">
 							</span>
 							<div class="ms-3">
-								<h3 class="mb-2">환영합니다, 양한재님</h3>
+								<h3 class="mb-2"th:text="|환영합니다, ${session.LOGIN_USER.userName}님|">환영합니다, 양한재님</h3>
 								<p>
 									<span class="text-primary text-decoration-underline">4건</span>의 
 									보류 중인 <strong>결재</strong>가 있으며, 
