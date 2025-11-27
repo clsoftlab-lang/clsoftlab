@@ -151,9 +151,22 @@
 							<li><a href="javascript:void(0);"><i class="ti ti-file-text"></i> <span>신청서비스</span></a></li>
 							<li><a href="javascript:void(0);"><i class="ti ti-file-dollar"></i> <span>연말정산</span></a></li>
 							<li><a href="javascript:void(0);"><i class="ti ti-settings"></i> <span>공통</span></a></li>
-					
 							<li>
 								<a th:href="@{/pay/pay-item/test}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item/test' || currentUrl.startsWith('/pay/pay-item/test?'))} ? 'active' : ''"><i class="ti ti-settings"></i> <span>그리드test</span></a>
+							</li>
+							<li th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}" class="submenu">
+							    <a href="javascript:void(0);" >
+							    	<i class="ti ti-user-shield"></i> 
+							    	<span>관리자 (HR)</span> 
+							    	<span class="menu-arrow"></span>
+						    	</a>
+							    <ul style="display: none;">
+							        <li><a th:href="@{/admin/employee-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/employee-manage' || currentUrl.startsWith('/admin/employee-manage?'))} ? 'active' : ''">사원 관리</a></li>
+							        <li><a th:href="@{/admin/auth-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/auth-manage' || currentUrl.startsWith('/admin/auth-manage?'))} ? 'active' : ''">권한 관리</a></li>
+							        <li><a th:href="@{/admin/menu-role}" th:classappend="${currentUrl != null && (currentUrl == '/admin/menu-role' || currentUrl.startsWith('/admin/menu-role?'))} ? 'active' : ''">메뉴 접근 롤 설정</a></li>
+							        <li><a th:href="@{/admin/common-code}" th:classappend="${currentUrl != null && (currentUrl == '/admin/common-code' || currentUrl.startsWith('/admin/common-code?'))} ? 'active' : ''">공통코드 관리</a></li>
+							        <li><a th:href="@{/admin/org-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/org-manage' || currentUrl.startsWith('/admin/org-manage?'))} ? 'active' : ''">조직 관리</a></li>
+							    </ul>
 							</li>
 						</ul>
 					</li>
@@ -244,9 +257,21 @@
 					<li><a href="#"><i class="ti ti-file-text"></i> <span>신청서비스</span></a></li>
 					<li><a href="#"><i class="ti ti-file-dollar"></i> <span>연말정산</span></a></li>
 					<li><a href="#"><i class="ti ti-settings"></i> <span>공통</span></a></li>
+					<li><a th:href="@{/pay/pay-item/test}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item/test' || currentUrl.startsWith('/pay/pay-item/test?'))} ? 'active' : ''"><i class="ti ti-settings"></i> <span>그리드test</span></a></li>
 					
-					<li>
-						<a th:href="@{/pay/pay-item/test}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item/test' || currentUrl.startsWith('/pay/pay-item/test?'))} ? 'active' : ''"><i class="ti ti-settings"></i> <span>그리드test</span></a>
+					<li th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}" class="submenu">
+					    <a href="javascript:void(0);" >
+					    	<i class="ti ti-user-shield"></i> 
+					    	<span>관리자 (HR)</span> 
+					    	<span class="menu-arrow"></span>
+				    	</a>
+					    <ul style="display: none;">
+					        <li><a th:href="@{/admin/employee-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/employee-manage' || currentUrl.startsWith('/admin/employee-manage?'))} ? 'active' : ''">사원 관리</a></li>
+					        <li><a th:href="@{/admin/auth-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/auth-manage' || currentUrl.startsWith('/admin/auth-manage?'))} ? 'active' : ''">권한 관리</a></li>
+					        <li><a th:href="@{/admin/menu-role}" th:classappend="${currentUrl != null && (currentUrl == '/admin/menu-role' || currentUrl.startsWith('/admin/menu-role?'))} ? 'active' : ''">메뉴 접근 롤 설정</a></li>
+					        <li><a th:href="@{/admin/common-code}" th:classappend="${currentUrl != null && (currentUrl == '/admin/common-code' || currentUrl.startsWith('/admin/common-code?'))} ? 'active' : ''">공통코드 관리</a></li>
+					        <li><a th:href="@{/admin/org-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/org-manage' || currentUrl.startsWith('/admin/org-manage?'))} ? 'active' : ''">조직 관리</a></li>
+					    </ul>
 					</li>
 				</ul>
 			</div>
@@ -301,6 +326,9 @@
 						<a href="#" class="nav-link" title="공통" >
 							<i class="ti ti-settings"></i>
 						</a>
+						<a th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}" href="#" class="nav-link" title="관리자 (HR)" data-bs-toggle="tab" data-bs-target="#admin">
+					    	<i class="ti ti-user-shield"></i> 
+				    	</a>
 					</div>
 				</div>
 			</div>
@@ -377,6 +405,16 @@
 								<li><a th:href="@{/hr/union-member}" th:classappend="${currentUrl != null && (currentUrl == '/hr/union-member' || currentUrl.startsWith('/hr/union-member?'))} ? 'active' : ''">노조 가입 관리</a></li>
 								<li><a th:href="@{/hr/employee-workplace}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-workplace' || currentUrl.startsWith('/hr/employee-workplace?'))} ? 'active' : ''">근무지 관리</a></li>
 								<li><a th:href="@{/hr/employee-card}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-card' || currentUrl.startsWith('/hr/employee-card?'))} ? 'active' : ''">인사 카드 관리</a></li>
+							</ul>
+						</div>
+						<div class="tab-pane fade" id="admin" role="tabpanel">
+							<ul>
+								<li class="menu-title"><span>관리자 (HR)</span></li>
+					        	<li><a th:href="@{/admin/employee-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/employee-manage' || currentUrl.startsWith('/admin/employee-manage?'))} ? 'active' : ''">사원 관리</a></li>
+					       		<li><a th:href="@{/admin/auth-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/auth-manage' || currentUrl.startsWith('/admin/auth-manage?'))} ? 'active' : ''">권한 관리</a></li>
+					      	  	<li><a th:href="@{/admin/menu-role}" th:classappend="${currentUrl != null && (currentUrl == '/admin/menu-role' || currentUrl.startsWith('/admin/menu-role?'))} ? 'active' : ''">메뉴 접근 롤 설정</a></li>
+					       	 	<li><a th:href="@{/admin/common-code}" th:classappend="${currentUrl != null && (currentUrl == '/admin/common-code' || currentUrl.startsWith('/admin/common-code?'))} ? 'active' : ''">공통코드 관리</a></li>
+					        	<li><a th:href="@{/admin/org-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/org-manage' || currentUrl.startsWith('/admin/org-manage?'))} ? 'active' : ''">조직 관리</a></li>
 							</ul>
 						</div>
 					</div>
@@ -537,6 +575,14 @@
 										<p>공통</p>
 									</a>
 								</div>
+								<div class="col-6" th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}">
+									<a href="#menu-admin" role="tab" class="nav-link" title="관리자 (HR)" data-bs-toggle="tab" data-bs-target="#menu-admin">
+										<span>
+											<i class="ti ti-user-shield"></i>
+										</span>
+										<p>관리자 (HR)</p>
+									</a>
+								</div>
 							</div>
 						</div>
 						<div class="tab-content">
@@ -592,6 +638,15 @@
 									<li><a th:href="@{/hr/union-member}" th:classappend="${currentUrl != null && (currentUrl == '/hr/union-member' || currentUrl.startsWith('/hr/union-member?'))} ? 'active' : ''">노조 가입 관리</a></li>
 									<li><a th:href="@{/hr/employee-workplace}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-workplace' || currentUrl.startsWith('/hr/employee-workplace?'))} ? 'active' : ''">근무지 관리</a></li>
 									<li><a th:href="@{/hr/employee-card}" th:classappend="${currentUrl != null && (currentUrl == '/hr/employee-card' || currentUrl.startsWith('/hr/employee-card?'))} ? 'active' : ''">인사 카드 관리</a></li>
+								</ul>
+							</div>
+							<div class="tab-pane fade" id="menu-admin" role="tabpanel">
+								<ul class="stack-submenu">
+									<li><a th:href="@{/admin/employee-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/employee-manage' || currentUrl.startsWith('/admin/employee-manage?'))} ? 'active' : ''">사원 관리</a></li>
+					       			<li><a th:href="@{/admin/auth-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/auth-manage' || currentUrl.startsWith('/admin/auth-manage?'))} ? 'active' : ''">권한 관리</a></li>
+					      	  		<li><a th:href="@{/admin/menu-role}" th:classappend="${currentUrl != null && (currentUrl == '/admin/menu-role' || currentUrl.startsWith('/admin/menu-role?'))} ? 'active' : ''">메뉴 접근 롤 설정</a></li>
+					       		 	<li><a th:href="@{/admin/common-code}" th:classappend="${currentUrl != null && (currentUrl == '/admin/common-code' || currentUrl.startsWith('/admin/common-code?'))} ? 'active' : ''">공통코드 관리</a></li>
+					        		<li><a th:href="@{/admin/org-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/org-manage' || currentUrl.startsWith('/admin/org-manage?'))} ? 'active' : ''">조직 관리</a></li>
 								</ul>
 							</div>
 						</div>

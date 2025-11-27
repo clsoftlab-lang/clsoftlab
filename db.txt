@@ -43,9 +43,12 @@ VALUES
 
 -- 공통코드 상세 테이블 --
 CREATE TABLE ZSYS_CODE_DETAIL (
-    -- [식별자 - 복합키]
+    -- [PK: 대리키 사용]
+    DETAIL_ID     BIGINT        NOT NULL AUTO_INCREMENT COMMENT '순번 (PK)',
+    
+    -- [실제 비즈니스 키]
     ZGROUP_ID     VARCHAR(20)   NOT NULL COMMENT '코드 그룹 ID (FK)',
-    ZCODE         VARCHAR(20)   NOT NULL COMMENT '상세 코드값 (PK)',
+    ZCODE         VARCHAR(20)   NOT NULL COMMENT '상세 코드값',
 
     -- [기본 정보]
     ZNAME         VARCHAR(100)  NOT NULL COMMENT '코드 명칭 (한글)',
@@ -67,13 +70,15 @@ CREATE TABLE ZSYS_CODE_DETAIL (
     -- [Audit]
     CREATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CREATED_BY    VARCHAR(50)   NOT NULL,
-    UPDATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_AT    DATETIME      NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UPDATED_BY    VARCHAR(50)   NULL,
 
-    -- [키 설정]
-    PRIMARY KEY (ZGROUP_ID, ZCODE),
-    CONSTRAINT FK_ZSYS_CODE_GROUP FOREIGN KEY (ZGROUP_ID) REFERENCES ZSYS_CODE_GROUP (ZGROUP_ID)
+    PRIMARY KEY (DETAIL_ID),
+    
+    -- 그룹ID + 코드 중복 방지
+    UNIQUE KEY UQ_CODE_DETAIL (ZGROUP_ID, ZCODE)
 ) COMMENT '공통코드 상세 내역';
+
 
 -- 더미 데이터 --
 INSERT INTO ZSYS_CODE_DETAIL 
@@ -111,6 +116,7 @@ VALUES
 ('SYS_ROLE', 'ADMIN', '시스템 관리자', 'System Admin', 10, 'Y', 'Y', 'SYSTEM'),
 ('SYS_ROLE', 'USER',  '일반 사용자',   'User',         20, 'Y', 'Y', 'SYSTEM'),
 ('SYS_ROLE', 'GUEST', '게스트',       'Guest',        90, 'Y', 'Y', 'SYSTEM');
+
 
 -- 사원 마스터 (개발용 임시) --
 CREATE TABLE ZHR_EMP_MASTER (

@@ -17,4 +17,7 @@ public class EmployeeMasterDto {
 	private String name;
 	private LocalDate entryDate;
     private LocalDate retireDate;
+    private String rankCode;
+    private String dutyCode;
+    private String empStatus;
 }

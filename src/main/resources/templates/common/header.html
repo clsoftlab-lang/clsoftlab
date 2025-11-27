@@ -180,11 +180,20 @@
 								<li><a href="#"><i class="ti ti-file-text"></i> <span>신청서비스</span></a></li>
 								<li><a href="#"><i class="ti ti-file-dollar"></i> <span>연말정산</span></a></li>
 								<li><a href="#"><i class="ti ti-settings"></i> <span>공통</span></a></li>
-								
-								<li>
-									<a th:href="@{/pay/pay-item/test}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item/test' || currentUrl.startsWith('/pay/pay-item/test?'))} ? 'active' : ''"><i class="ti ti-settings"></i> <span>그리드test</span></a>
+								<li th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}" class="submenu">
+								    <a href="#" >
+								    	<i class="ti ti-user-shield"></i> 
+								    	<span>관리자 (HR)</span> 
+								    	<span class="menu-arrow"></span>
+							    	</a>
+								    <ul style="display: none;">
+								        <li><a th:href="@{/admin/employee-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/employee-manage' || currentUrl.startsWith('/admin/employee-manage?'))} ? 'active' : ''">사원 관리</a></li>
+								        <li><a th:href="@{/admin/auth-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/auth-manage' || currentUrl.startsWith('/admin/auth-manage?'))} ? 'active' : ''">권한 관리</a></li>
+								        <li><a th:href="@{/admin/menu-role}" th:classappend="${currentUrl != null && (currentUrl == '/admin/menu-role' || currentUrl.startsWith('/admin/menu-role?'))} ? 'active' : ''">메뉴 접근 롤 설정</a></li>
+								        <li><a th:href="@{/admin/common-code}" th:classappend="${currentUrl != null && (currentUrl == '/admin/common-code' || currentUrl.startsWith('/admin/common-code?'))} ? 'active' : ''">공통코드 관리</a></li>
+								        <li><a th:href="@{/admin/org-manage}" th:classappend="${currentUrl != null && (currentUrl == '/admin/org-manage' || currentUrl.startsWith('/admin/org-manage?'))} ? 'active' : ''">조직 관리</a></li>
+								    </ul>
 								</li>
-							</ul>
 						</div>
 					</div>
 				</div>
