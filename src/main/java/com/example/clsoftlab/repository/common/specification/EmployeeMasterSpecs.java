@@ -17,12 +17,12 @@ public class EmployeeMasterSpecs {
 		return (root, query, builder) -> root.get("pernr").in(pernr);
 	}
 	
-	public static Specification<EmployeeMaster> withDutyCode (List<String> dutyCode) {
-		if (CollectionUtils.isEmpty(dutyCode)) {
+	public static Specification<EmployeeMaster> withDeptCode (List<String> deptCode) {
+		if (CollectionUtils.isEmpty(deptCode)) {
 			return null;
 		}
 		
-		return (root, query, builder) -> root.get("dutyCode").in(dutyCode);
+		return (root, query, builder) -> root.get("deptCode").in(deptCode);
 	}
 	
 	public static Specification<EmployeeMaster> withRankCode (List<String> rankCode) {

@@ -39,6 +39,9 @@ public class EmployeeMaster extends BaseEntity {
     @Column(name = "RETIRE_DT")
     private LocalDate retireDate;
     
+    @Column(name = "DEPT_CD", length = 20, nullable = false)
+    private String deptCode;
+    
     @Column(name = "RANK_CD", length = 20, nullable = false)
     private String rankCode;
 

@@ -2,39 +2,38 @@ package com.example.clsoftlab.controller.hr;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.clsoftlab.dto.hr.EmployeeCardDetailDto;
-import com.example.clsoftlab.dto.hr.EmployeeCardRequestDto;
+import com.example.clsoftlab.service.common.CodeDetailService;
 import com.example.clsoftlab.service.hr.EmployeeCardService;
 
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/hr/employee-card")
+@RequiredArgsConstructor
 public class EmployeeCardController {
 
 	private final EmployeeCardService employeeCardService;
-	
-	public EmployeeCardController(EmployeeCardService employeeCardService) {
-		this.employeeCardService = employeeCardService;
-	}
+	private final CodeDetailService codeDetailService;
 	
 	// 메인 페이지
 	@GetMapping("")
-	public String employCard () {
+	public String employCard (Model model) {
+		
+		model.addAttribute("deptCodeList", codeDetailService.findActiveCodesByGroupId("HR_DEPT"));
+		model.addAttribute("rankCodeList", codeDetailService.findActiveCodesByGroupId("HR_RANK"));
+		model.addAttribute("empStatusList", codeDetailService.findActiveCodesByGroupId("HR_STATUS"));
+		model.addAttribute("dutyCodeList", codeDetailService.findActiveCodesByGroupId("HR_DUTY"));
+		model.addAttribute("nationCodeList", codeDetailService.findActiveCodesByGroupId("HR_NATION"));
+		model.addAttribute("maritalCodeList", codeDetailService.findActiveCodesByGroupId("HR_MARITAL"));
+		model.addAttribute("militaryCodeList", codeDetailService.findActiveCodesByGroupId("HR_MILITARY"));
+		
 		return "hr/employee-card/list";
-	}
-	
-	// 인사카드 수정, 저장
-	@PutMapping("")
-	public ResponseEntity<Void> saveCard (@Valid @RequestBody EmployeeCardRequestDto dto) {
-		employeeCardService.saveCard(dto);
-		return ResponseEntity.ok().build();
 	}
 	
 	// 사번으로 조회

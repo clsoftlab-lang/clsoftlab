@@ -1,16 +1,19 @@
 package com.example.clsoftlab;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 
-import com.example.clsoftlab.dto.hr.EmployeePrivRequestDto;
-import com.example.clsoftlab.service.hr.EmployeePrivService;
+import com.example.clsoftlab.entity.EmployeeMaster;
+import com.example.clsoftlab.entity.EmployeePriv;
+import com.example.clsoftlab.repository.common.EmployeeMasterRepository;
+import com.example.clsoftlab.repository.hr.EmployeePrivRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -18,69 +21,120 @@ import jakarta.transaction.Transactional;
 public class EmployeePrivTest {
 
 	@Autowired
-	private EmployeePrivService employeePrivService;
-	
-	@Test
+    private EmployeeMasterRepository employeeMasterRepository;
+
+    @Autowired
+    private EmployeePrivRepository employeePrivRepository;
+    
+    @Test
+    @DisplayName("사원 개인정보 더미 데이터 적재 (암호화 적용)")
     @Transactional
-    @Commit // 테스트가 끝나도 롤백하지 않고 실제 DB에 커밋
-    void initializeDummyData() {
-        // 더미데이터 DTO 리스트 생성
-        List<EmployeePrivRequestDto> dtoList = Arrays.asList(
-        		// 1. 경영진 및 기획/지원부서 (서울 본사)
-        	    new EmployeePrivRequestDto("2010001", "김철수", "M", LocalDate.parse("1975-03-15"), "750315-1234567", "대한민국", "010-1111-0001", "cs.kim@company.com", "서울특별시 강남구 테헤란로 1", "15층", "기혼", "복무완료 / 육군 / 병장 / 1995.03-1997.05", "N", "김영희", "배우자", "010-1111-0002"),
-        	    new EmployeePrivRequestDto("2012011", "박영민", "M", LocalDate.parse("1980-11-20"), "801120-1234568", "대한민국", "010-2222-0011", "ym.park@company.com", "서울특별시 서초구 서초대로 2", null, "기혼", "복무완료 / 공군 / 중위 / 2003.01-2006.01", "N", "박은지", "배우자", "010-2222-0012"),
-        	    new EmployeePrivRequestDto("2015022", "이서연", "F", LocalDate.parse("1988-07-01"), "880701-2234561", "대한민국", "010-3333-0022", "sy.lee@company.com", "경기도 성남시 분당구 판교역로 3", "A동 501호", "미혼", null, "N", "이현우", "부", "010-3333-0023"),
-        	    new EmployeePrivRequestDto("2018013", "최민준", "M", LocalDate.parse("1990-01-25"), "900125-1234562", "대한민국", "010-4444-0013", "mj.choi@company.com", "서울특별시 송파구 올림픽로 4", null, "미혼", "복무완료 / 해군 / 하사 / 2010.03-2012.02", "N", "최경희", "모", "010-4444-0014"),
-        	    new EmployeePrivRequestDto("2020023", "정수빈", "F", LocalDate.parse("1995-09-10"), "950910-2234563", "대한민국", "010-5555-0023", "sb.jung@company.com", "인천광역시 연수구 컨벤시아대로 5", "101동 1102호", "미혼", null, "N", "정재호", "오빠", "010-5555-0024"),
-        	    new EmployeePrivRequestDto("2021032", "강지훈", "M", LocalDate.parse("1993-05-30"), "930530-1234564", "대한민국", "010-6666-0032", "jh.kang@company.com", "서울특별시 강동구 천호대로 6", null, "기혼", "복무완료 / 육군 / 병장 / 2013.06-2015.03", "N", "박서현", "배우자", "010-6666-0033"),
-        	    new EmployeePrivRequestDto("2022055", "윤채원", "F", LocalDate.parse("1998-02-18"), "980218-2234565", "대한민국", "010-7777-0055", "cw.yoon@company.com", "경기도 하남시 미사강변동로 7", "203호", "미혼", null, "N", "윤상현", "부", "010-7777-0056"),
+    @Commit // 테스트가 끝나도 롤백되지 않고 DB에 반영됨
+    void initEmployeePrivData() {
+        // 기존 데이터가 있다면 삭제 (중복 방지)
+        employeePrivRepository.deleteAllInBatch();
 
-        	    // 2. R&D 센터 (판교)
-        	    new EmployeePrivRequestDto("2021002", "오세훈", "M", LocalDate.parse("1978-12-01"), "781201-1234566", "대한민국", "010-8888-0002", "sh.oh@company.com", "경기도 성남시 분당구 대왕판교로 8", null, "기혼", "전문연구요원 / 2004.01-2007.01", "N", "이민정", "배우자", "010-8888-0003"),
-        	    new EmployeePrivRequestDto("2021041", "배현진", "F", LocalDate.parse("1992-08-15"), "920815-2234567", "대한민국", "010-9999-0041", "hj.bae@company.com", "경기도 용인시 수지구 포은대로 9", "가동 301호", "미혼", null, "N", "배성철", "부", "010-9999-0042"),
-        	    new EmployeePrivRequestDto("2021042", "임도현", "M", LocalDate.parse("1994-04-04"), "940404-1234568", "대한민국", "010-1234-0042", "dh.lim@company.com", "경기도 수원시 영통구 광교중앙로 10", null, "미혼", "복무완료 / 육군 / 상병 / 2014.05-2016.02", "N", "임정숙", "모", "010-1234-0043"),
-        	    new EmployeePrivRequestDto("2022043", "장하윤", "F", LocalDate.parse("1997-10-22"), "971022-2234569", "대한민국", "010-2345-0043", "hy.jang@company.com", "서울특별시 관악구 신림로 11", "2층", "미혼", null, "Y", "장민철", "오빠", "010-2345-0044"),
-        	    new EmployeePrivRequestDto("2022052", "신동민", "M", LocalDate.parse("1991-06-12"), "910612-1234561", "대한민국", "010-3456-0052", "dm.shin@company.com", "경기도 성남시 수정구 수정로 12", null, "기혼", "복무완료 / 공군 / 병장 / 2011.08-2013.08", "N", "최수지", "배우자", "010-3456-0053"),
-        	    new EmployeePrivRequestDto("2023053", "유지민", "F", LocalDate.parse("2000-04-11"), "000411-4234562", "대한민국", "010-4567-0053", "jm.yoo@company.com", "경기도 성남시 분당구 불정로 13", null, "미혼", null, "N", "유재석", "부", "010-4567-0054"),
-        	    new EmployeePrivRequestDto("2023101", "John Smith", "M", LocalDate.parse("1990-01-01"), "900101-5234563", "미국", "010-5678-0101", "john.smith@company.com", "경기도 성남시 분당구 판교로 14", "Apt 5B", "미혼", null, "N", "Jane Smith", "sister", "010-5678-0102"),
+        List<EmployeePriv> privList = new ArrayList<>();
 
-        	    // 3. 생산 및 품질 (수원/평택 공장)
-        	    new EmployeePrivRequestDto("2019101", "황민현", "M", LocalDate.parse("1982-08-09"), "820809-1234564", "대한민국", "010-1122-0101", "mh.hwang@company.com", "경기도 수원시 영통구 삼성로 15", null, "기혼", "복무완료 / 해병대 / 병장 / 2002.09-2004.08", "N", "강미나", "배우자", "010-1122-0102"),
-        	    new EmployeePrivRequestDto("2019112", "송강", "M", LocalDate.parse("1994-04-23"), "940423-1234565", "대한민국", "010-2233-0112", "kang.song@company.com", "경기도 화성시 동탄중앙로 16", "1204동 801호", "미혼", "복무완료 / 육군 / 병장 / 2014.07-2016.04", "N", "송지효", "누나", "010-2233-0113"),
-        	    new EmployeePrivRequestDto("2019113", "문가영", "F", LocalDate.parse("1996-07-10"), "960710-2234566", "대한민국", "010-3344-0113", "gy.moon@company.com", "경기도 수원시 팔달구 행궁로 17", null, "미혼", null, "N", "문상민", "오빠", "010-3344-0114"),
-        	    new EmployeePrivRequestDto("2020121", "안효섭", "M", LocalDate.parse("1995-04-17"), "950417-1234567", "캐나다", "010-4455-0121", "hs.ahn@company.com", "경기도 수원시 장안구 경수대로 18", null, "미혼", null, "N", "Ahn Dong-il", "Father", "010-4455-0122"),
-        	    new EmployeePrivRequestDto("2021114", "조유리", "F", LocalDate.parse("2001-10-22"), "011022-4234568", "대한민국", "010-5566-0114", "yr.cho@company.com", "경기도 오산시 역광장로 19", "가-101", "미혼", null, "N", "조미연", "언니", "010-5566-0115"),
-        	    new EmployeePrivRequestDto("2023131", "나인우", "M", LocalDate.parse("1994-09-17"), "940917-1234569", "대한민국", "010-6677-0131", "iw.na@company.com", "경기도 평택시 고덕국제대로 20", null, "미혼", "복무완료 / 육군 / 병장 / 2015.01-2016.10", "N", "나철수", "부", "010-6677-0132"),
-        	    new EmployeePrivRequestDto("2023133", "김지원", "F", LocalDate.parse("1992-10-19"), "921019-2234561", "대한민국", "010-7788-0133", "jw.kim@company.com", "경기도 평택시 중앙로 21", "3층 302호", "미혼", null, "N", "김진경", "모", "010-7788-0134"),
-        	    new EmployeePrivRequestDto("2024132", "이도현", "M", LocalDate.parse("1995-04-11"), "950411-1234562", "대한민국", "010-8899-0132", "dh.lee2@company.com", "충청남도 천안시 서북구 불당대로 22", null, "미혼", "복무완료 / 공군 / 병장 / 2017.08-2019.08", "N", "이병헌", "부", "010-8899-0133"),
-        	    new EmployeePrivRequestDto("2024134", "박은빈", "F", LocalDate.parse("1992-09-04"), "920904-2234563", "대한민국", "010-9900-0134", "eb.park@company.com", "경기도 평택시 비전5로 23", null, "미혼", null, "N", "박철민", "부", "010-9900-0135"),
-
-        	    // 4. 물류센터 (인천)
-        	    new EmployeePrivRequestDto("2022201", "한소희", "F", LocalDate.parse("1994-11-18"), "941118-2234564", "대한민국", "010-1212-0201", "sh.han@company.com", "인천광역시 중구 공항로 24", null, "미혼", null, "N", "한지민", "모", "010-1212-0202"),
-        	    new EmployeePrivRequestDto("2022211", "차은우", "M", LocalDate.parse("1997-03-30"), "970330-1234565", "대한민국", "010-2323-0211", "ew.cha@company.com", "인천광역시 서구 청라라임로 25", "102동 2504호", "미혼", "복무완료 / 육군 / 병장 / 2018.01-2019.10", "N", "차범근", "부", "010-2323-0212"),
-        	    new EmployeePrivRequestDto("2023212", "권나라", "F", LocalDate.parse("1991-03-13"), "910313-2234566", "대한민국", "010-3434-0212", "nr.kwon@company.com", "경기도 부천시 길주로 26", null, "미혼", null, "N", "권상우", "오빠", "010-3434-0213"),
-        	    new EmployeePrivRequestDto("2023213", "위하준", "M", LocalDate.parse("1991-08-05"), "910805-1234567", "대한민국", "010-4545-0213", "hj.wi@company.com", "경기도 김포시 김포한강1로 27", "B동 101호", "기혼", "복무완료 / 경찰청 / 수경 / 2012.02-2013.11", "N", "김고은", "배우자", "010-4545-0214"),
-
-        	    // 5. 신규 입사자
-        	    new EmployeePrivRequestDto("2025001", "박서준", "M", LocalDate.parse("1988-12-16"), "881216-1234568", "대한민국", "010-5656-1001", "sj.park@company.com", "서울특별시 마포구 월드컵북로 28", "오피스텔 707호", "미혼", "복무완료 / 교정시설 / 2008.07-2010.05", "N", "박용규", "부", "010-5656-1002"),
-        	    new EmployeePrivRequestDto("2025002", "김고은", "F", LocalDate.parse("1991-07-02"), "910702-2234569", "대한민국", "010-6767-1002", "ge.kim@company.com", "서울특별시 성동구 왕십리로 29", null, "기혼", null, "N", "위하준", "배우자", "010-4545-0213"),
-        	    new EmployeePrivRequestDto("2025003", "변우석", "M", LocalDate.parse("1991-10-31"), "911031-1234561", "대한민국", "010-7878-1003", "ws.byun@company.com", "경기도 고양시 일산동구 중앙로 30", "110동 1501호", "미혼", "복무완료 / 육군 / 병장 / 2011.11-2013.08", "N", "변정수", "누나", "010-7878-1004"),
-        	    new EmployeePrivRequestDto("2025004", "김혜윤", "F", LocalDate.parse("1996-11-10"), "961110-2234562", "대한민국", "010-8989-1004", "hy.kim@company.com", "서울특별시 광진구 아차산로 31", null, "미혼", null, "N", "김철민", "부", "010-8989-1005")
-        );
+        // ---------------------------------------------------------
+        // [데이터 생성 헬퍼]
+        // 사번, 주민번호, 성별, 생년월일, 국적, 폰, 이메일, 주소, 시도, 시군구, 결혼, 병역
+        // ---------------------------------------------------------
         
-        // 리스트를 순회하며 서비스의 등록 메서드 호출
-        dtoList.forEach(dto -> {
-            try {
-                // 이미 존재하는 데이터는 건너뛰기
-                if (!employeePrivService.checkOverlap(dto.getPernr())) {
-                    employeePrivService.addNewEmployeePriv(dto);
-                    System.out.println(dto.getPernr() + " 등록 성공");
-                } else {
-                    System.out.println(dto.getPernr() + "는 이미 존재하여 건너뜁니다.");
-                }
-            } catch (Exception e) {
-                System.err.println(dto.getPernr() + " 등록 실패: " + e.getMessage());
-            }
-        });
+        // [0] 관리자
+        addPriv(privList, "2018001", "850101-1234567", "M", "1985-01-01", "KR", "010-1111-2222", "admin@clsoft.com", "서울특별시 강남구 테헤란로 123", "서울특별시", "강남구", "20", "10");
+
+        // [1] 2022년 입사자
+        addPriv(privList, "2201001", "900505-1234567", "M", "1990-05-05", "KR", "010-3333-4444", "chulsoo@naver.com", "경기도 성남시 분당구 판교로 1", "경기도", "성남시", "20", "10");
+        addPriv(privList, "2201002", "920303-2345678", "F", "1992-03-03", "KR", "010-5555-6666", "younghee@daum.net", "서울특별시 송파구 올림픽로 300", "서울특별시", "송파구", "10", "00");
+        addPriv(privList, "2203003", "881212-1234567", "M", "1988-12-12", "KR", "010-7777-8888", "minjun@gmail.com", "서울특별시 서초구 반포대로 55", "서울특별시", "서초구", "20", "10");
+        addPriv(privList, "2203004", "950707-2345678", "F", "1995-07-07", "KR", "010-9999-0000", "seoyeon@naver.com", "서울특별시 마포구 마포대로 10", "서울특별시", "마포구", "10", "00");
+        addPriv(privList, "2207005", "930909-1234567", "M", "1993-09-09", "KR", "010-1212-3434", "jihoon@kakao.com", "경기도 용인시 수지구 포은대로 100", "경기도", "용인시", "10", "10");
+        addPriv(privList, "2207006", "960404-2345678", "F", "1996-04-04", "US", "010-5656-7878", "seoa_us@gmail.com", "서울특별시 용산구 이태원로 200", "서울특별시", "용산구", "10", "00");
+        addPriv(privList, "2209007", "911111-1234567", "M", "1991-11-11", "KR", "010-9090-8080", "doyoon@naver.com", "서울특별시 강동구 천호대로 99", "서울특별시", "강동구", "20", "10");
+        addPriv(privList, "2210008", "940202-2345678", "F", "1994-02-02", "KR", "010-3434-5656", "hayoon@daum.net", "인천광역시 연수구 컨벤시아대로 50", "인천광역시", "연수구", "10", "00");
+        addPriv(privList, "2210009", "970808-1234567", "M", "1997-08-08", "KR", "010-7878-9090", "jiwoo@gmail.com", "경기도 수원시 영통구 광교로 88", "경기도", "수원시", "10", "10");
+        addPriv(privList, "2211010", "981010-1234567", "M", "1998-10-10", "KR", "010-2323-4545", "siwoo@naver.com", "서울특별시 관악구 관악로 1", "서울특별시", "관악구", "10", "30");
+
+        // [2] 2023년 입사자
+        addPriv(privList, "2301011", "990101-2345678", "F", "1999-01-01", "KR", "010-1357-2468", "yuna@gmail.com", "서울특별시 동작구 상도로 77", "서울특별시", "동작구", "10", "00");
+        addPriv(privList, "2301012", "980505-1234567", "M", "1998-05-05", "KR", "010-2468-1357", "eunwoo@naver.com", "경기도 안양시 동안구 시민대로 200", "경기도", "안양시", "10", "10");
+        addPriv(privList, "2302013", "000202-4567890", "F", "2000-02-02", "KR", "010-9876-5432", "jia@daum.net", "서울특별시 영등포구 여의대로 10", "서울특별시", "영등포구", "10", "00");
+        addPriv(privList, "2304014", "950606-1234567", "M", "1995-06-06", "KR", "010-5432-9876", "hyukjun@kakao.com", "서울특별시 구로구 디지털로 300", "서울특별시", "구로구", "20", "10");
+        addPriv(privList, "2305015", "010303-4567890", "F", "2001-03-03", "CN", "010-1122-3344", "subin_cn@gmail.com", "서울특별시 광진구 능동로 120", "서울특별시", "광진구", "10", "00");
+        addPriv(privList, "2305016", "940404-1234567", "M", "1994-04-04", "KR", "010-2233-4455", "taehyun@naver.com", "서울특별시 중구 세종대로 110", "서울특별시", "중구", "10", "10");
+        addPriv(privList, "2308017", "960808-2345678", "F", "1996-08-08", "KR", "010-3344-5566", "chaewon@daum.net", "서울특별시 성북구 성북로 10", "서울특별시", "성북구", "10", "00");
+        addPriv(privList, "2309018", "970909-2345678", "F", "1997-09-09", "KR", "010-4455-6677", "eunbyul@gmail.com", "서울특별시 강북구 삼양로 50", "서울특별시", "강북구", "10", "00");
+        addPriv(privList, "2310019", "931010-1234567", "M", "1993-10-10", "KR", "010-5566-7788", "junho@kakao.com", "경기도 고양시 일산동구 중앙로 1", "경기도", "고양시", "20", "10");
+        addPriv(privList, "2312020", "991212-2345678", "F", "1999-12-12", "KR", "010-6677-8899", "minseo@naver.com", "서울특별시 은평구 통일로 200", "서울특별시", "은평구", "10", "00");
+
+        // [3] 2024년 입사자
+        addPriv(privList, "2401021", "000101-4567890", "F", "2000-01-01", "KR", "010-7788-9900", "jungmin@daum.net", "서울특별시 서대문구 연세로 50", "서울특별시", "서대문구", "10", "00");
+        addPriv(privList, "2401022", "980101-1234567", "M", "1998-01-01", "KR", "010-8899-0011", "yejun@gmail.com", "서울특별시 종로구 종로 1", "서울특별시", "종로구", "10", "30");
+        addPriv(privList, "2402023", "010202-4567890", "F", "2001-02-02", "KR", "010-9900-1122", "soyul@kakao.com", "서울특별시 성동구 왕십리로 222", "서울특별시", "성동구", "10", "00");
+        addPriv(privList, "2402024", "950202-1234567", "M", "1995-02-02", "KR", "010-0011-2233", "siwon@naver.com", "경기도 부천시 길주로 100", "경기도", "부천시", "20", "10");
+        addPriv(privList, "2403025", "020303-4567890", "F", "2002-03-03", "KR", "010-1122-3344", "harin@daum.net", "서울특별시 양천구 목동동로 200", "서울특별시", "양천구", "10", "00");
+        addPriv(privList, "2404026", "990404-2345678", "F", "1999-04-04", "KR", "010-2233-4455", "yujin@gmail.com", "서울특별시 강서구 공항대로 300", "서울특별시", "강서구", "10", "00");
+        addPriv(privList, "2404027", "940404-1234567", "M", "1994-04-04", "KR", "010-3344-5566", "jisung@kakao.com", "인천광역시 남동구 예술로 150", "인천광역시", "남동구", "10", "10");
+        addPriv(privList, "2405028", "960505-1234567", "M", "1996-05-05", "KR", "010-4455-6677", "taeyoung@naver.com", "경기도 광명시 철산로 20", "경기도", "광명시", "10", "10");
+        addPriv(privList, "2405029", "970505-1234567", "M", "1997-05-05", "KR", "010-5566-7788", "woojin@daum.net", "경기도 시흥시 시청로 1", "경기도", "시흥시", "10", "10");
+        addPriv(privList, "2406030", "000606-4567890", "F", "2000-06-06", "KR", "010-6677-8899", "jihyun@gmail.com", "서울특별시 금천구 벚꽃로 100", "서울특별시", "금천구", "10", "00");
+        addPriv(privList, "2407031", "980707-1234567", "M", "1998-07-07", "KR", "010-7788-9900", "jaeyoon@kakao.com", "서울특별시 노원구 노해로 400", "서울특별시", "노원구", "10", "30");
+        addPriv(privList, "2407032", "930707-1234567", "M", "1993-07-07", "KR", "010-8899-0011", "minho@naver.com", "서울특별시 도봉구 마들로 600", "서울특별시", "도봉구", "20", "10");
+        addPriv(privList, "2408033", "950808-1234567", "M", "1995-08-08", "KR", "010-9900-1122", "jihuu@daum.net", "경기도 의정부시 시민로 1", "경기도", "의정부시", "10", "10");
+        addPriv(privList, "2409034", "990909-2345678", "F", "1999-09-09", "KR", "010-0011-2233", "juwon@gmail.com", "경기도 파주시 시민회관길 20", "경기도", "파주시", "10", "00");
+        addPriv(privList, "2409035", "960909-1234567", "M", "1996-09-09", "KR", "010-1122-3344", "haneul@kakao.com", "경기도 김포시 사우중로 30", "경기도", "김포시", "10", "10");
+        addPriv(privList, "2410036", "011010-4567890", "F", "2001-10-10", "KR", "010-2233-4455", "jian@naver.com", "인천광역시 부평구 부평대로 50", "인천광역시", "부평구", "10", "00");
+        addPriv(privList, "2411037", "021111-4567890", "F", "2002-11-11", "KR", "010-3344-5566", "yeseo@daum.net", "인천광역시 서구 서곶로 300", "인천광역시", "서구", "10", "00");
+        addPriv(privList, "2411038", "941111-1234567", "M", "1994-11-11", "KR", "010-4455-6677", "yoonjae@gmail.com", "경기도 화성시 시청로 100", "경기도", "화성시", "20", "10");
+        addPriv(privList, "2412039", "031212-4567890", "F", "2003-12-12", "KR", "010-5566-7788", "suhyun@kakao.com", "경기도 오산시 성호대로 50", "경기도", "오산시", "10", "00");
+        addPriv(privList, "2412040", "921212-1234567", "M", "1992-12-12", "KR", "010-6677-8899", "dongkyun@naver.com", "경기도 평택시 중앙로 200", "경기도", "평택시", "10", "10");
+
+        // [4] 2025년 입사자
+        addPriv(privList, "2501041", "030101-4567890", "F", "2003-01-01", "KR", "010-7788-9900", "seah@daum.net", "충청남도 천안시 서북구 번영로 100", "충청남도", "천안시", "10", "00");
+        addPriv(privList, "2501042", "980101-1234567", "M", "1998-01-01", "KR", "010-8899-0011", "taejun@gmail.com", "충청남도 아산시 시민로 30", "충청남도", "아산시", "10", "30");
+        addPriv(privList, "2502043", "040202-4567890", "F", "2004-02-02", "KR", "010-9900-1122", "heeseon@kakao.com", "대전광역시 서구 둔산로 100", "대전광역시", "서구", "10", "00");
+        addPriv(privList, "2503044", "970303-1234567", "M", "1997-03-03", "KR", "010-0011-2233", "kangmin@naver.com", "대전광역시 유성구 대학로 99", "대전광역시", "유성구", "10", "10");
+        addPriv(privList, "2503045", "000303-4567890", "F", "2000-03-03", "KR", "010-1122-3344", "daeun@daum.net", "세종특별자치시 한누리대로 200", "세종특별자치시", null, "10", "00");
+        addPriv(privList, "2504046", "990404-1234567", "M", "1999-04-04", "KR", "010-2233-4455", "suho@gmail.com", "충청북도 청주시 상당구 상당로 50", "충청북도", "청주시", "10", "10");
+        addPriv(privList, "2505047", "950505-1234567", "M", "1995-05-05", "KR", "010-3344-5566", "junseo@kakao.com", "강원특별자치도 춘천시 시청길 10", "강원특별자치도", "춘천시", "10", "10");
+        addPriv(privList, "2506048", "940606-1234567", "M", "1994-06-06", "KR", "010-4455-6677", "dongwook@naver.com", "강원특별자치도 원주시 시청로 1", "강원특별자치도", "원주시", "20", "10");
+        addPriv(privList, "2507049", "020707-4567890", "F", "2002-07-07", "KR", "010-5566-7788", "jia@daum.net", "경상북도 포항시 남구 시청로 1", "경상북도", "포항시", "10", "00");
+        addPriv(privList, "2508050", "010808-4567890", "F", "2001-08-08", "KR", "010-6677-8899", "yuju@gmail.com", "경상남도 창원시 의창구 중앙대로 100", "경상남도", "창원시", "10", "00");
+
+        // DB에 저장 (이때 CryptoConverter가 동작하여 암호화됨)
+        employeePrivRepository.saveAll(privList);
+    }
+
+		private void addPriv(List<EmployeePriv> list, String pernr, String ssn, String gender, String birthDate,
+                         String nation, String phone, String email, String addr, String sido, String sigungu,
+                         String marital, String military) {
+        
+        // Master 엔티티가 있어야 @MapsId가 작동함 (FK 연결)
+        EmployeeMaster master = employeeMasterRepository.findById(pernr).orElse(null);
+        if (master == null) {
+            System.out.println("Skip: Master not found for " + pernr);
+            return;
+        }
+
+        // 주민번호 하이픈 제거 (DB에는 숫자만 저장)
+        String cleanSsn = ssn != null ? ssn.replace("-", "") : null;
+
+        EmployeePriv priv = EmployeePriv.builder()
+                .employee(master) // @MapsId 연결
+                .ssn(cleanSsn)    // 평문(숫자만) -> 저장 시 암호화
+                .gender(gender)
+                .birthDate(LocalDate.parse(birthDate))
+                .nationCode(nation)
+                .phoneNo(phone)
+                .email(email)
+                .addrMain(addr)
+                .sido(sido)
+                .sigungu(sigungu)
+                .maritalCode(marital)
+                .militaryCode(military)
+                .build();
+
+        list.add(priv);
     }
 }

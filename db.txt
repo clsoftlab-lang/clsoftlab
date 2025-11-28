@@ -31,15 +31,22 @@ CREATE TABLE ZSYS_CODE_GROUP (
 
 -- 더미 데이터 --
 INSERT INTO ZSYS_CODE_GROUP 
-(ZGROUP_ID, ZGROUP_NM, ZUSE_YN, ZORDER, ZREMARK, IS_SYSTEM, VERSION, CREATED_BY) 
+(ZGROUP_ID, ZGROUP_NM, ZUSE_YN, ZORDER, ZREMARK, IS_SYSTEM, CREATED_BY) 
 VALUES 
--- [1] 인사 관련 (10~80번대)
-('HR_RANK',   '직급 구분',     'Y', 10, '사원, 대리, 과장 등 직급 체계', 'N', 1, 'SYSTEM'),
-('HR_DUTY',   '직무 구분',     'Y', 20, '개발, 기획, 디자인 등 수행 직무', 'N', 1, 'SYSTEM'),
-('HR_STATUS', '재직 상태',     'Y', 30, '재직, 휴직, 퇴직 등 근무 상태', 'Y', 1, 'SYSTEM'),
+-- 1. 조직 및 인사 기초 (10~40)
+('HR_DEPT',     '부서 코드',    'Y', 10, '본부, 팀 단위 조직 구성', 'N', 'SYSTEM'),
+('HR_RANK',     '직급 코드',    'Y', 20, '사원~임원 위계 체계',     'N', 'SYSTEM'),
+('HR_DUTY',     '직무 코드',    'Y', 30, '실제 수행 업무(Job/Skill)', 'N', 'SYSTEM'),
+('HR_EMPTYPE',  '고용 형태',    'Y', 40, '정규직, 계약직, 파견직 등', 'N', 'SYSTEM'),
 
--- [2] 시스템 관련 (90번대)
-('SYS_ROLE',  '시스템 권한',   'Y', 90, '시스템 메뉴 접근 권한(Role)',   'Y', 1, 'SYSTEM');
+-- 2. 상태 및 개인정보 (50~70)
+('HR_STATUS',   '재직 상태',    'Y', 50, '재직, 휴직, 퇴직 상태 관리', 'Y', 'SYSTEM'),
+('HR_NATION',   '국적 코드',    'Y', 51, 'ISO 국가코드 준수 권장',    'N', 'SYSTEM'),
+('HR_MARITAL',  '결혼 상태',    'Y', 60, '미혼, 기혼 등',             'N', 'SYSTEM'),
+('HR_MILITARY', '병역 구분',    'Y', 70, '군별 및 면제 사유',         'N', 'SYSTEM'),
+
+-- 3. 시스템 관리 (90)
+('SYS_ROLE',    '시스템 권한',  'Y', 90, '메뉴 접근 및 기능 제어 권한', 'Y', 'SYSTEM');
 
 -- 공통코드 상세 테이블 --
 CREATE TABLE ZSYS_CODE_DETAIL (
@@ -82,40 +89,74 @@ CREATE TABLE ZSYS_CODE_DETAIL (
 
 -- 더미 데이터 --
 INSERT INTO ZSYS_CODE_DETAIL 
-(ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, ZUSE_YN, IS_SYSTEM, CREATED_BY) 
+(ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, IS_SYSTEM, CREATED_BY) 
 VALUES 
--- -------------------------------------------------------
--- [1] HR_RANK (직급) 
--- -------------------------------------------------------
-('HR_RANK', '001', '사원', 'Staff',                  10, 'Y', 'N', 'SYSTEM'),
-('HR_RANK', '002', '대리', 'Assistant Manager',      20, 'Y', 'N', 'SYSTEM'),
-('HR_RANK', '003', '과장', 'Manager',                30, 'Y', 'N', 'SYSTEM'),
-('HR_RANK', '004', '차장', 'Deputy General Manager', 40, 'Y', 'N', 'SYSTEM'),
-('HR_RANK', '005', '부장', 'General Manager',        50, 'Y', 'N', 'SYSTEM'),
-('HR_RANK', '009', '임원', 'Executive',              90, 'Y', 'N', 'SYSTEM'),
+-- [1] HR_DEPT (부서)
+('HR_DEPT', 'MGT',      '경영지원본부', 'Management Div', 10, 'N', 'SYSTEM'),
+('HR_DEPT', 'HR',       '인사팀',       'HR Team',        11, 'N', 'SYSTEM'),
+('HR_DEPT', 'FIN',      '재무회계팀',   'Finance Team',   12, 'N', 'SYSTEM'),
+('HR_DEPT', 'DEV',      '기술연구소',   'R&D Center',     20, 'N', 'SYSTEM'),
+('HR_DEPT', 'DEV_SVR',  '서버개발팀',   'Server Dev',     21, 'N', 'SYSTEM'),
+('HR_DEPT', 'DEV_WEB',  '웹개발팀',     'Web Dev',        22, 'N', 'SYSTEM'),
+('HR_DEPT', 'DEV_AI',   'AI데이터팀',   'AI/Data Team',   23, 'N', 'SYSTEM'),
+('HR_DEPT', 'BIZ',      '사업본부',     'Business Div',   30, 'N', 'SYSTEM'),
+('HR_DEPT', 'BIZ_SAL',  '영업팀',       'Sales Team',     31, 'N', 'SYSTEM'),
+('HR_DEPT', 'BIZ_MKT',  '마케팅팀',     'Marketing Team', 32, 'N', 'SYSTEM'),
 
--- -------------------------------------------------------
--- [2] HR_DUTY (직무) : 일반 분류
--- -------------------------------------------------------
-('HR_DUTY', 'DEV',  '개발',     'Development', 10, 'Y', 'N', 'SYSTEM'),
-('HR_DUTY', 'PLAN', '기획',     'Planning',    20, 'Y', 'N', 'SYSTEM'),
-('HR_DUTY', 'DES',  '디자인',   'Design',      30, 'Y', 'N', 'SYSTEM'),
-('HR_DUTY', 'HR',   '인사/총무', 'HR/GA',       40, 'Y', 'N', 'SYSTEM'),
-('HR_DUTY', 'OP',   '운영',     'Operation',   50, 'Y', 'N', 'SYSTEM'),
+-- [2] HR_RANK (직급)
+('HR_RANK', '001', '사원', 'Staff',              10, 'N', 'SYSTEM'),
+('HR_RANK', '002', '대리', 'Assistant Manager',  20, 'N', 'SYSTEM'),
+('HR_RANK', '003', '과장', 'Manager',            30, 'N', 'SYSTEM'),
+('HR_RANK', '004', '차장', 'Deputy General Mgr', 40, 'N', 'SYSTEM'),
+('HR_RANK', '005', '부장', 'General Manager',    50, 'N', 'SYSTEM'),
+('HR_RANK', '009', '임원', 'Executive',          90, 'N', 'SYSTEM'),
 
--- -------------------------------------------------------
--- [3] HR_STATUS (재직 상태) : 로그인 허용 여부 로직과 연동됨 (IS_SYSTEM='Y')
--- -------------------------------------------------------
-('HR_STATUS', '10', '재직', 'Active',  10, 'Y', 'Y', 'SYSTEM'), -- 로그인 가능
-('HR_STATUS', '20', '휴직', 'Leave',   20, 'Y', 'Y', 'SYSTEM'), -- 정책에 따라 처리
-('HR_STATUS', '99', '퇴직', 'Retired', 99, 'Y', 'Y', 'SYSTEM'), -- 로그인 불가
+-- [3] HR_DUTY (직무)
+('HR_DUTY', 'SW_BE',  '백엔드 개발',    'Backend Dev',  10, 'N', 'SYSTEM'),
+('HR_DUTY', 'SW_FE',  '프론트엔드 개발', 'Frontend Dev', 20, 'N', 'SYSTEM'),
+('HR_DUTY', 'SW_APP', '모바일 앱 개발', 'Mobile App',   30, 'N', 'SYSTEM'),
+('HR_DUTY', 'PO',     '서비스 기획',    'Product Owner',40, 'N', 'SYSTEM'),
+('HR_DUTY', 'UIUX',   'UI/UX 디자인',  'Designer',     50, 'N', 'SYSTEM'),
+('HR_DUTY', 'HR_M',   '인사/채용',     'HR Manager',   60, 'N', 'SYSTEM'),
+('HR_DUTY', 'ACC',    '회계/세무',     'Accountant',   70, 'N', 'SYSTEM'),
+('HR_DUTY', 'SALES',  '기술 영업',     'Tech Sales',   80, 'N', 'SYSTEM'),
 
--- -------------------------------------------------------
--- [4] SYS_ROLE (권한) : 메뉴 접근 제어와 연동됨 (IS_SYSTEM='Y')
--- -------------------------------------------------------
-('SYS_ROLE', 'ADMIN', '시스템 관리자', 'System Admin', 10, 'Y', 'Y', 'SYSTEM'),
-('SYS_ROLE', 'USER',  '일반 사용자',   'User',         20, 'Y', 'Y', 'SYSTEM'),
-('SYS_ROLE', 'GUEST', '게스트',       'Guest',        90, 'Y', 'Y', 'SYSTEM');
+-- [4] HR_EMPTYPE (고용 형태)
+('HR_EMPTYPE', 'REG', '정규직', 'Regular',    10, 'N', 'SYSTEM'),
+('HR_EMPTYPE', 'CON', '계약직', 'Contract',   20, 'N', 'SYSTEM'),
+('HR_EMPTYPE', 'INT', '인턴',   'Intern',     30, 'N', 'SYSTEM'),
+('HR_EMPTYPE', 'PAR', '파견직', 'Dispatched', 40, 'N', 'SYSTEM'),
+
+-- [5] HR_STATUS (재직 상태)
+('HR_STATUS', '10', '재직', 'Active',   10, 'Y', 'SYSTEM'),
+('HR_STATUS', '20', '휴직', 'On Leave', 20, 'Y', 'SYSTEM'),
+('HR_STATUS', '99', '퇴직', 'Retired',  99, 'Y', 'SYSTEM'),
+
+-- [6] HR_NATION (국적)
+('HR_NATION', 'KR', '대한민국', 'Korea, Rep.', 1, 'N', 'SYSTEM'),
+('HR_NATION', 'US', '미국',     'USA',         2, 'N', 'SYSTEM'),
+('HR_NATION', 'CN', '중국',     'China',       3, 'N', 'SYSTEM'),
+('HR_NATION', 'JP', '일본',     'Japan',       4, 'N', 'SYSTEM'),
+('HR_NATION', 'VN', '베트남',   'Vietnam',     5, 'N', 'SYSTEM'),
+('HR_NATION', 'ZZ', '기타',     'Others',      99,'N', 'SYSTEM'),
+
+-- [7] HR_MARITAL (결혼 상태)
+('HR_MARITAL', '10', '미혼', 'Single',   10, 'N', 'SYSTEM'),
+('HR_MARITAL', '20', '기혼', 'Married',  20, 'N', 'SYSTEM'),
+('HR_MARITAL', '30', '이혼', 'Divorced', 30, 'N', 'SYSTEM'),
+('HR_MARITAL', '40', '사별', 'Widowed',  40, 'N', 'SYSTEM'),
+
+-- [8] HR_MILITARY (병역 구분)
+('HR_MILITARY', '00', '비대상',   'N/A',         10, 'N', 'SYSTEM'),
+('HR_MILITARY', '10', '만기전역', 'Discharged',  20, 'N', 'SYSTEM'),
+('HR_MILITARY', '11', '복무중',   'Serving',     21, 'N', 'SYSTEM'),
+('HR_MILITARY', '20', '면제',     'Exempted',    30, 'N', 'SYSTEM'),
+('HR_MILITARY', '30', '미필',     'Unfulfilled', 40, 'N', 'SYSTEM'),
+
+-- [9] SYS_ROLE (시스템 권한)
+('SYS_ROLE', 'ADMIN',  '슈퍼 관리자', 'Super Admin', 10, 'Y', 'SYSTEM'),
+('SYS_ROLE', 'HR_MNG', '인사 관리자', 'HR Manager',  20, 'Y', 'SYSTEM'),
+('SYS_ROLE', 'USER',   '일반 사용자', 'User',        30, 'Y', 'SYSTEM');
 
 
 -- 사원 마스터 (개발용 임시) --
@@ -125,13 +166,16 @@ CREATE TABLE ZHR_EMP_MASTER (
 
     -- [기본 정보]
     ENAME           VARCHAR(50)  NOT NULL COMMENT '성명',
-    ENTRY_DT        DATE         NOT NULL COMMENT '입사일자 (근속년수 계산)',
-    RETIRE_DT       DATE         NULL     COMMENT '퇴직일자 (퇴직 시 입력)',
     
     -- [인사 정보 - 공통코드 참조]
-    RANK_CD         VARCHAR(20)  NOT NULL COMMENT '직급 코드 (HR_RANK 참조: 001, 002...)',
-    DUTY_CD         VARCHAR(20)  NOT NULL COMMENT '직무 코드 (HR_DUTY 참조: DEV, PLAN...)',
-    EMP_STATUS      VARCHAR(20)  NOT NULL DEFAULT '10' COMMENT '재직 상태 (HR_STATUS 참조: 10=재직, 99=퇴직)',
+    DEPT_CD         VARCHAR(20)  NOT NULL COMMENT '부서 코드 (HR_DEPT 참조)', -- [NEW] 부서 추가
+    RANK_CD         VARCHAR(20)  NOT NULL COMMENT '직급 코드 (HR_RANK 참조)',
+    DUTY_CD         VARCHAR(20)  NOT NULL COMMENT '직무 코드 (HR_DUTY 참조)',
+    EMP_STATUS      VARCHAR(20)  NOT NULL DEFAULT '10' COMMENT '재직 상태 (HR_STATUS 참조)',
+
+    -- [날짜 정보]
+    ENTRY_DT        DATE         NOT NULL COMMENT '입사일자',
+    RETIRE_DT       DATE         NULL     COMMENT '퇴직일자',
 
     -- [동시성 제어]
     OBJ_VERSION     INT          NOT NULL DEFAULT 1 COMMENT '데이터 버전 (낙관적 락)',
@@ -139,7 +183,7 @@ CREATE TABLE ZHR_EMP_MASTER (
     -- [Audit]
     CREATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
     CREATED_BY      VARCHAR(50)  NOT NULL COMMENT '생성자',
-    UPDATED_AT      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_AT      DATETIME     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
     UPDATED_BY      VARCHAR(50)  NULL     COMMENT '수정자',
 
     PRIMARY KEY (PERNR)
@@ -149,80 +193,79 @@ CREATE TABLE ZHR_EMP_MASTER (
 
 -- 더미 데이터 --
 INSERT INTO ZHR_EMP_MASTER 
-(PERNR, ENAME, ENTRY_DT, RETIRE_DT, RANK_CD, DUTY_CD, EMP_STATUS, OBJ_VERSION, CREATED_BY) 
+(PERNR, ENAME, ENTRY_DT, RETIRE_DT, DEPT_CD, RANK_CD, DUTY_CD, EMP_STATUS, OBJ_VERSION, CREATED_BY) 
 VALUES 
 -- ==========================================
 -- [0] 특수 계정 (관리자용)
 -- ==========================================
-
-('2018001', '양한재', '2018-03-01', NULL, '001', 'DEV', '10', 1, 'system_admin'),
-
+-- 관리자: 기술연구소(DEV) 소속 / 부장(005) / 백엔드(SW_BE)
+('2018001', '양한재', '2018-03-01', NULL, 'DEV', '005', 'SW_BE', '10', 1, 'system_admin'),
 
 -- ==========================================
--- [1] 2022년 입사자 (경력직 포함 - 대리/과장급 혼재)
+-- [1] 2022년 입사자 (경력직 포함 - 대리/과장급)
 -- ==========================================
-('2201001', '김철수', '2022-01-01', '2025-09-30', '003', 'DEV',  '99', 1, 'system_admin'), -- 퇴직(99)
-('2201002', '이영희', '2022-01-01', '2025-01-31', '002', 'DES',  '99', 1, 'system_admin'), -- 퇴직(99)
-('2203003', '박민준', '2022-03-01', '2025-10-29', '003', 'PLAN', '99', 1, 'system_admin'), -- 퇴직(99)
-('2203004', '최서연', '2022-03-01', NULL,         '003', 'HR',   '10', 1, 'system_admin'),
-('2207005', '정지훈', '2022-07-01', '2025-02-28', '002', 'OP',   '99', 1, 'system_admin'), -- 퇴직(99)
-('2207006', '윤서아', '2022-07-01', NULL,         '002', 'DEV',  '10', 1, 'system_admin'),
-('2209007', '강도윤', '2022-09-01', NULL,         '002', 'DEV',  '10', 1, 'system_admin'),
-('2210008', '임하윤', '2022-10-01', '2025-03-31', '002', 'PLAN', '99', 1, 'system_admin'), -- 퇴직(99)
-('2210009', '한지우', '2022-10-01', NULL,         '002', 'DES',  '10', 1, 'system_admin'),
-('2211010', '오시우', '2022-11-01', NULL,         '002', 'OP',   '10', 1, 'system_admin'),
+('2201001', '김철수', '2022-01-01', '2025-09-30', 'DEV_SVR', '003', 'SW_BE',  '99', 1, 'system_admin'), -- 퇴직
+('2201002', '이영희', '2022-01-01', '2025-01-31', 'BIZ_MKT', '002', 'UIUX',   '99', 1, 'system_admin'), -- 퇴직
+('2203003', '박민준', '2022-03-01', '2025-10-29', 'BIZ',     '003', 'PO',     '99', 1, 'system_admin'), -- 퇴직
+('2203004', '최서연', '2022-03-01', NULL,         'HR',      '003', 'HR_M',   '10', 1, 'system_admin'),
+('2207005', '정지훈', '2022-07-01', '2025-02-28', 'FIN',     '002', 'ACC',    '99', 1, 'system_admin'), -- 퇴직
+('2207006', '윤서아', '2022-07-01', NULL,         'DEV_WEB', '002', 'SW_FE',  '10', 1, 'system_admin'),
+('2209007', '강도윤', '2022-09-01', NULL,         'DEV_SVR', '002', 'SW_BE',  '10', 1, 'system_admin'),
+('2210008', '임하윤', '2022-10-01', '2025-03-31', 'BIZ',     '002', 'PO',     '99', 1, 'system_admin'), -- 퇴직
+('2210009', '한지우', '2022-10-01', NULL,         'BIZ_MKT', '002', 'UIUX',   '10', 1, 'system_admin'),
+('2211010', '오시우', '2022-11-01', NULL,         'MGT',     '002', 'ACC',    '10', 1, 'system_admin'),
 
 -- ==========================================
 -- [2] 2023년 입사자 (사원/대리급)
 -- ==========================================
-('2301011', '신유나', '2023-01-01', '2025-06-30', '001', 'HR',   '99', 1, 'system_admin'), -- 퇴직
-('2301012', '장은우', '2023-01-01', '2025-04-30', '002', 'DEV',  '99', 1, 'system_admin'), -- 퇴직
-('2302013', '송지아', '2023-02-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
-('2304014', '권혁준', '2023-04-01', '2025-07-31', '002', 'DEV',  '99', 1, 'system_admin'), -- 퇴직
-('2305015', '황수빈', '2023-05-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
-('2305016', '안태현', '2023-05-01', NULL,         '001', 'OP',   '10', 1, 'system_admin'),
-('2308017', '문채원', '2023-08-01', '2025-08-31', '001', 'HR',   '99', 1, 'system_admin'), -- 퇴직
-('2309018', '고은별', '2023-09-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2310019', '배준호', '2023-10-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2312020', '조민서', '2023-12-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
+('2301011', '신유나', '2023-01-01', '2025-06-30', 'HR',      '001', 'HR_M',   '99', 1, 'system_admin'), -- 퇴직
+('2301012', '장은우', '2023-01-01', '2025-04-30', 'DEV_AI',  '002', 'SW_BE',  '99', 1, 'system_admin'), -- 퇴직
+('2302013', '송지아', '2023-02-01', NULL,         'BIZ',     '001', 'PO',     '10', 1, 'system_admin'),
+('2304014', '권혁준', '2023-04-01', '2025-07-31', 'DEV',     '002', 'SW_APP', '99', 1, 'system_admin'), -- 퇴직
+('2305015', '황수빈', '2023-05-01', NULL,         'BIZ_MKT', '001', 'UIUX',   '10', 1, 'system_admin'),
+('2305016', '안태현', '2023-05-01', NULL,         'MGT',     '001', 'ACC',    '10', 1, 'system_admin'),
+('2308017', '문채원', '2023-08-01', '2025-08-31', 'HR',      '001', 'HR_M',   '99', 1, 'system_admin'), -- 퇴직
+('2309018', '고은별', '2023-09-01', NULL,         'DEV_WEB', '001', 'SW_FE',  '10', 1, 'system_admin'),
+('2310019', '배준호', '2023-10-01', NULL,         'DEV_SVR', '001', 'SW_BE',  '10', 1, 'system_admin'),
+('2312020', '조민서', '2023-12-01', NULL,         'BIZ_SAL', '001', 'SALES',  '10', 1, 'system_admin'),
 
 -- ==========================================
 -- [3] 2024년 입사자 (대부분 사원)
 -- ==========================================
-('2401021', '유정민', '2024-01-01', '2025-10-15', '001', 'OP',   '99', 1, 'system_admin'), -- 퇴직
-('2401022', '홍예준', '2024-01-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2402023', '나소율', '2024-02-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
-('2402024', '백시원', '2024-02-01', NULL,         '001', 'HR',   '10', 1, 'system_admin'),
-('2403025', '노하린', '2024-03-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2404026', '차유진', '2024-04-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
-('2404027', '표지성', '2024-04-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2405028', '기태영', '2024-05-01', NULL,         '001', 'OP',   '10', 1, 'system_admin'),
-('2405029', '선우진', '2024-05-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2406030', '왕지현', '2024-06-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
-('2407031', '서재윤', '2024-07-01', NULL,         '001', 'HR',   '10', 1, 'system_admin'),
-('2407032', '방민호', '2024-07-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
-('2408033', '편지후', '2024-08-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2409034', '성주원', '2024-09-01', NULL,         '001', 'OP',   '10', 1, 'system_admin'),
-('2409035', '위하늘', '2024-09-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2410036', '명지안', '2024-10-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2411037', '금예서', '2024-11-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
-('2411038', '도윤재', '2024-11-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
-('2412039', '채수현', '2024-12-01', NULL,         '001', 'HR',   '10', 1, 'system_admin'),
-('2412040', '하동균', '2024-12-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
+('2401021', '유정민', '2024-01-01', '2025-10-15', 'FIN',     '001', 'ACC',    '99', 1, 'system_admin'), -- 퇴직
+('2401022', '홍예준', '2024-01-01', NULL,         'DEV_WEB', '001', 'SW_FE',  '10', 1, 'system_admin'),
+('2402023', '나소율', '2024-02-01', NULL,         'BIZ_MKT', '001', 'UIUX',   '10', 1, 'system_admin'),
+('2402024', '백시원', '2024-02-01', NULL,         'HR',      '001', 'HR_M',   '10', 1, 'system_admin'),
+('2403025', '노하린', '2024-03-01', NULL,         'DEV_AI',  '001', 'SW_BE',  '10', 1, 'system_admin'),
+('2404026', '차유진', '2024-04-01', NULL,         'BIZ',     '001', 'PO',     '10', 1, 'system_admin'),
+('2404027', '표지성', '2024-04-01', NULL,         'DEV_SVR', '001', 'SW_BE',  '10', 1, 'system_admin'),
+('2405028', '기태영', '2024-05-01', NULL,         'MGT',     '001', 'ACC',    '10', 1, 'system_admin'),
+('2405029', '선우진', '2024-05-01', NULL,         'DEV',     '001', 'SW_APP', '10', 1, 'system_admin'),
+('2406030', '왕지현', '2024-06-01', NULL,         'BIZ_MKT', '001', 'UIUX',   '10', 1, 'system_admin'),
+('2407031', '서재윤', '2024-07-01', NULL,         'HR',      '001', 'HR_M',   '10', 1, 'system_admin'),
+('2407032', '방민호', '2024-07-01', NULL,         'BIZ_SAL', '001', 'SALES',  '10', 1, 'system_admin'),
+('2408033', '편지후', '2024-08-01', NULL,         'DEV_WEB', '001', 'SW_FE',  '10', 1, 'system_admin'),
+('2409034', '성주원', '2024-09-01', NULL,         'FIN',     '001', 'ACC',    '10', 1, 'system_admin'),
+('2409035', '위하늘', '2024-09-01', NULL,         'DEV_AI',  '001', 'SW_BE',  '10', 1, 'system_admin'),
+('2410036', '명지안', '2024-10-01', NULL,         'DEV_SVR', '001', 'SW_BE',  '10', 1, 'system_admin'),
+('2411037', '금예서', '2024-11-01', NULL,         'BIZ_MKT', '001', 'UIUX',   '10', 1, 'system_admin'),
+('2411038', '도윤재', '2024-11-01', NULL,         'BIZ',     '001', 'PO',     '10', 1, 'system_admin'),
+('2412039', '채수현', '2024-12-01', NULL,         'HR',      '001', 'HR_M',   '10', 1, 'system_admin'),
+('2412040', '하동균', '2024-12-01', NULL,         'DEV',     '001', 'SW_APP', '10', 1, 'system_admin'),
 
 -- ==========================================
 -- [4] 2025년 입사자 (신입 사원)
 -- ==========================================
-('2501041', '진세아', '2025-01-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2501042', '원태준', '2025-01-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
-('2502043', '라희선', '2025-02-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
-('2503044', '설강민', '2025-03-01', NULL,         '001', 'HR',   '10', 1, 'system_admin'),
-('2503045', '옥다은', '2025-03-01', NULL,         '001', 'OP',   '10', 1, 'system_admin'),
-('2504046', '경수호', '2025-04-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2505047', '봉준서', '2025-05-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin'),
-('2506048', '마동욱', '2025-06-01', NULL,         '001', 'PLAN', '10', 1, 'system_admin'),
-('2507049', '엄지아', '2025-07-01', NULL,         '001', 'DES',  '10', 1, 'system_admin'),
-('2508050', '함유주', '2025-08-01', NULL,         '001', 'DEV',  '10', 1, 'system_admin');
+('2501041', '진세아', '2025-01-01', NULL,         'DEV_WEB', '001', 'SW_FE',  '10', 1, 'system_admin'),
+('2501042', '원태준', '2025-01-01', NULL,         'BIZ',     '001', 'PO',     '10', 1, 'system_admin'),
+('2502043', '라희선', '2025-02-01', NULL,         'BIZ_MKT', '001', 'UIUX',   '10', 1, 'system_admin'),
+('2503044', '설강민', '2025-03-01', NULL,         'HR',      '001', 'HR_M',   '10', 1, 'system_admin'),
+('2503045', '옥다은', '2025-03-01', NULL,         'FIN',     '001', 'ACC',    '10', 1, 'system_admin'),
+('2504046', '경수호', '2025-04-01', NULL,         'DEV_AI',  '001', 'SW_BE',  '10', 1, 'system_admin'),
+('2505047', '봉준서', '2025-05-01', NULL,         'DEV_SVR', '001', 'SW_BE',  '10', 1, 'system_admin'),
+('2506048', '마동욱', '2025-06-01', NULL,         'BIZ_SAL', '001', 'SALES',  '10', 1, 'system_admin'),
+('2507049', '엄지아', '2025-07-01', NULL,         'BIZ_MKT', '001', 'UIUX',   '10', 1, 'system_admin'),
+('2508050', '함유주', '2025-08-01', NULL,         'DEV',     '001', 'SW_APP', '10', 1, 'system_admin');
 
 -- 계정 테이블 (로그인) --
 CREATE TABLE ZSYS_USER_ACCOUNT (
@@ -249,6 +292,7 @@ CREATE TABLE ZSYS_USER_ACCOUNT (
 
     PRIMARY KEY (USER_ID)
 ) COMMENT '시스템 사용자 계정';
+
 
 -- ==========================================================
 -- [참고용] 시스템 사용자 계정 더미 데이터 (ZSYS_USER_ACCOUNT)
@@ -2174,6 +2218,7 @@ INSERT INTO ZHR_CLUB_ITEM (ZCLUB_CD, ZCLUB_NM, ZAMOUNT, ZUSE_YN, ZNOTE, CREATED_
 ('DONA_CHILD', '결식아동 후원금', 30000, 'Y', '매월 정기 후원', 'admin'),
 ('GYM_FEE', '사내 헬스장 이용료', 10000, 'Y', '헬스장 관리 및 기구 유지보수', 'system_batch');
 
+
 -- 사원별 회비 납부 설정 --
 CREATE TABLE ZHR_EMP_CLUB (
     ZHR_EMP_CLUB_ID BIGINT          NOT NULL AUTO_INCREMENT COMMENT '사원별 회비 설정 ID (PK)',
@@ -3323,78 +3368,114 @@ VALUES
 
 -- 개인정보 --
 CREATE TABLE ZHR_EMP_PRIV (
-    -- 비즈니스 키 컬럼 (PK)
-    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번 (PK)',
+    -- [PK & FK] 사번 (마스터 테이블과 1:1)
+    PERNR           VARCHAR(10)   NOT NULL COMMENT '사번 (PK, FK)',
 
-    -- 데이터 컬럼
-    ENAME           VARCHAR(50)     NOT NULL COMMENT '성명',
-    GENDER          CHAR(1)         NOT NULL COMMENT '성별 (M/F)',
-    BIRTHDATE       DATE            NOT NULL COMMENT '생년월일',
-    SSN             VARCHAR(255)    NOT NULL COMMENT '주민등록번호 (암호화 저장)',
-    NATIONALITY     VARCHAR(30)     NOT NULL DEFAULT '대한민국' COMMENT '국적',
-    PHONE_NO        VARCHAR(20)     NOT NULL COMMENT '연락처',
-    EMAIL           VARCHAR(100)    NULL     COMMENT '이메일',
-    ADDR            VARCHAR(255)    NULL     COMMENT '주소',
-    ADDR_DETAIL		VARCHAR(255)	NULL	 COMMENT '상세주소',
-    MARITAL_STATUS  VARCHAR(10)     NULL     COMMENT '결혼여부',
-    MILITARY_INFO   VARCHAR(100)    NULL     COMMENT '병역사항',
-    DISABILITY_YN   CHAR(1)         NULL     DEFAULT 'N' COMMENT '장애여부 (Y/N)',
-    EMERGENCY_NAME  VARCHAR(50)     NULL     COMMENT '비상연락인 이름',
-    EMERGENCY_REL   VARCHAR(20)     NULL     COMMENT '비상연락인 관계',
-    EMERGENCY_PHONE VARCHAR(20)     NULL     COMMENT '비상연락인 연락처',
+    -- [민감 개인정보]
+    SSN             VARCHAR(255)  NOT NULL COMMENT '주민등록번호 (암호화)',
+    GENDER          CHAR(1)       NOT NULL COMMENT '성별 (M/F)',
+    BIRTHDATE       DATE          NOT NULL COMMENT '생년월일',
+    
+    -- [국적 - 공통코드 HR_NATION]
+    NATION_CD       VARCHAR(20)   NOT NULL DEFAULT 'KR' COMMENT '국적 (HR_NATION)',
+    
+    -- [연락처 정보]
+    PHONE_NO        VARCHAR(20)   NOT NULL COMMENT '휴대전화',
+    HOME_TEL        VARCHAR(20)   NULL     COMMENT '자택전화',
+    EMAIL           VARCHAR(100)  NULL     COMMENT '개인 이메일',
+    
+    -- [거주지 정보]
+    ZPOSTCODE       VARCHAR(5)      NULL     COMMENT '우편번호 (Kakao API)',
+    ZSIDO           VARCHAR(50)     NULL     COMMENT '시/도 (Kakao API, 검색용)',
+    ZSIGUNGU        VARCHAR(50)     NULL     COMMENT '시/군/구 (Kakao API, 검색용)',
+    ZADDR_MAIN      VARCHAR(150)    NOT NULL COMMENT '기본 주소 (Kakao API)',
+    ZADDR_DETAIL    VARCHAR(100)    NULL     COMMENT '상세 주소 (사용자 입력)',
+    
+    -- [신상 정보 - 공통코드 적용]
+    MARITAL_CD      VARCHAR(20)   NULL DEFAULT '10' COMMENT '결혼상태 (HR_MARITAL: 10미혼, 20기혼...)',
+    MILITARY_CD     VARCHAR(20)   NULL DEFAULT '00' COMMENT '병역구분 (HR_MILITARY: 00비대상, 10만기...)',
+    DISABILITY_YN   CHAR(1)       NULL DEFAULT 'N'  COMMENT '장애여부 (Y/N)',
+    
+    -- [비상 연락망]
+    EMERGENCY_NAME  VARCHAR(50)   NULL     COMMENT '비상연락인 이름',
+    EMERGENCY_REL   VARCHAR(20)   NULL     COMMENT '비상연락인 관계',
+    EMERGENCY_PHONE VARCHAR(20)   NULL     COMMENT '비상연락인 연락처',
 
-    -- 감사(Audit) 컬럼
-    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
-    UPDATED_AT      DATETIME        NULL     COMMENT '수정 일시',
-    UPDATED_BY      VARCHAR(50)     NULL     COMMENT '수정자',
+    -- [Audit]
+    CREATED_AT      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY      VARCHAR(50)   NOT NULL,
+    UPDATED_AT      DATETIME      NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_BY      VARCHAR(50)   NULL,
 
-    -- 기본 키 설정
     PRIMARY KEY (PERNR),
-
-    -- 제약 조건 설정
-    CHECK (GENDER IN ('M', 'F')),
-    CHECK (DISABILITY_YN IN ('Y', 'N')),
-
-    -- 검색 성능 향상을 위한 인덱스
-    INDEX IDX_EMP_PRIV_ENAME (ENAME) -- 성명 검색
-
-) COMMENT '사원 개인정보 테이블';
+    CONSTRAINT FK_EMP_PRIV_MASTER FOREIGN KEY (PERNR) REFERENCES ZHR_EMP_MASTER (PERNR) ON DELETE CASCADE
+) COMMENT '사원 개인정보 (민감정보)';
 
 
-INSERT INTO ZHR_EMP_PRIV (PERNR, ENAME, GENDER, BIRTHDATE, SSN, NATIONALITY, PHONE_NO, EMAIL, ADDR, ADDR_DETAIL, MARITAL_STATUS, MILITARY_INFO, DISABILITY_YN, EMERGENCY_NAME, EMERGENCY_REL, EMERGENCY_PHONE, CREATED_AT, CREATED_BY, UPDATED_AT, UPDATED_BY) VALUES
-('2010001', '김철수', 'M', '1975-03-15', 'dtD4w/8I+pogQP7V9WyPuP5tMgGnlG1BE1F/gu3GeaE=', '대한민국', '010-1111-0001', 'cs.kim@company.com', '서울특별시 강남구 테헤란로 1', '15층', '기혼', '복무완료 / 육군 / 병장 / 1995.03-1997.05', 'N', '김영희', '배우자', '010-1111-0002', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
-('2012011', '박영민', 'M', '1980-11-20', 'S99Yi9BZsTdjoRMZYt2uOtEPUnwmcx0c1sO6UzYAefg=', '대한민국', '010-2222-0011', 'ym.park@company.com', '서울특별시 서초구 서초대로 2', NULL, '기혼', '복무완료 / 공군 / 중위 / 2003.01-2006.01', 'N', '박은지', '배우자', '010-2222-0012', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
-('2015022', '이서연', 'F', '1988-07-01', 'R2QTYgFZenugjW4jja+jQHdJJtmRbnIOH7XJGxaSgGA=', '대한민국', '010-3333-0022', 'sy.lee@company.com', '경기도 성남시 분당구 판교역로 3', 'A동 501호', '미혼', NULL, 'N', '이현우', '부', '010-3333-0023', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
-('2018013', '최민준', 'M', '1990-01-25', 'tMyZOMcN8C3c1ZXvXgNqf4xNGCvKRadN8TREvbMMRxM=', '대한민국', '010-4444-0013', 'mj.choi@company.com', '서울특별시 송파구 올림픽로 4', NULL, '미혼', '복무완료 / 해군 / 하사 / 2010.03-2012.02', 'N', '최경희', '모', '010-4444-0014', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
-('2019101', '황민현', 'M', '1982-08-09', 'Z6s0UINbh8XgAzxiyVcw8xs9oAGMoICyJYUhKCoT9f8=', '대한민국', '010-1122-0101', 'mh.hwang@company.com', '경기도 수원시 영통구 삼성로 15', NULL, '기혼', '복무완료 / 해병대 / 병장 / 2002.09-2004.08', 'N', '강미나', '배우자', '010-1122-0102', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2019112', '송강', 'M', '1994-04-23', 'oJX+7Dt6FAfm9D0PMOwl71aAOWdZtxacENIrC0/kud0=', '대한민국', '010-2233-0112', 'kang.song@company.com', '경기도 화성시 동탄중앙로 16', '1204동 801호', '미혼', '복무완료 / 육군 / 병장 / 2014.07-2016.04', 'N', '송지효', '누나', '010-2233-0113', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2019113', '문가영', 'F', '1996-07-10', '2YAvAfYXUi34LgqIF0yRhkNvAdsiNTvLXhxqfHHDonA=', '대한민국', '010-3344-0113', 'gy.moon@company.com', '경기도 수원시 팔달구 행궁로 17', NULL, '미혼', NULL, 'N', '문상민', '오빠', '010-3344-0114', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2020023', '정수빈', 'F', '1995-09-10', '3YTOL8s32geCgR6S0eC2Hz0fdiCJUnrDXmUhVw4rSeg=', '대한민국', '010-5555-0023', 'sb.jung@company.com', '인천광역시 연수구 컨벤시아대로 5', '101동 1102호', '미혼', NULL, 'N', '정재호', '오빠', '010-5555-0024', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
-('2020121', '안효섭', 'M', '1995-04-17', 'HrNXd6GLQTrk+OyC6SwPPh37znUyj5UpQsY13IEZah0=', '캐나다', '010-4455-0121', 'hs.ahn@company.com', '경기도 수원시 장안구 경수대로 18', NULL, '미혼', NULL, 'N', 'Ahn Dong-il', 'Father', '010-4455-0122', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2021002', '오세훈', 'M', '1978-12-01', 'kI8nkPvOs1NM1CffXXiJ1FMhBKrDUIkJ+3xuQym4RbM=', '대한민국', '010-8888-0002', 'sh.oh@company.com', '경기도 성남시 분당구 대왕판교로 8', NULL, '기혼', '전문연구요원 / 2004.01-2007.01', 'N', '이민정', '배우자', '010-8888-0003', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2021032', '강지훈', 'M', '1993-05-30', 'NSf06uaDd84y75Kj1wshFzkqh4KdBCfuMBCvLFCyhTM=', '대한민국', '010-6666-0032', 'jh.kang@company.com', '서울특별시 강동구 천호대로 6', NULL, '기혼', '복무완료 / 육군 / 병장 / 2013.06-2015.03', 'N', '박서현', '배우자', '010-6666-0033', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
-('2021041', '배현진', 'F', '1992-08-15', 'U9AbUGcrtKj43myjTLY8+d6YxaATRtnSry6Bzjx5FNs=', '대한민국', '010-9999-0041', 'hj.bae@company.com', '경기도 용인시 수지구 포은대로 9', '가동 301호', '미혼', NULL, 'N', '배성철', '부', '010-9999-0042', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2021042', '임도현', 'M', '1994-04-04', 'zfIz7f6YiMnJjoNsA9iy9zSyBXhxfE6e8j5hlKZH1zA=', '대한민국', '010-1234-0042', 'dh.lim@company.com', '경기도 수원시 영통구 광교중앙로 10', NULL, '미혼', '복무완료 / 육군 / 상병 / 2014.05-2016.02', 'N', '임정숙', '모', '010-1234-0043', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2021114', '조유리', 'F', '2001-10-22', '/Yv+4utWGdSIsjUJiUapPhCKunjTeiZNOilhr02okUI=', '대한민국', '010-5566-0114', 'yr.cho@company.com', '경기도 오산시 역광장로 19', '가-101', '미혼', NULL, 'N', '조미연', '언니', '010-5566-0115', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2022043', '장하윤', 'F', '1997-10-22', '5JDpS4yEXe50BgTmWxBcsqXL3zZTl+ewqkssYEKHbzU=', '대한민국', '010-2345-0043', 'hy.jang@company.com', '서울특별시 관악구 신림로 11', '2층', '미혼', NULL, 'Y', '장민철', '오빠', '010-2345-0044', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2022052', '신동민', 'M', '1991-06-12', 'TyJFBpRFcA4Q3SC1LJilwgRuuIv7+gAsWy8yABep3f8=', '대한민국', '010-3456-0052', 'dm.shin@company.com', '경기도 성남시 수정구 수정로 12', NULL, '기혼', '복무완료 / 공군 / 병장 / 2011.08-2013.08', 'N', '최수지', '배우자', '010-3456-0053', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2022055', '윤채원', 'F', '1998-02-18', 'ear4R+iGDvrpUK642QU925QWG8UznObbZm86oHKOSlo=', '대한민국', '010-7777-0055', 'cw.yoon@company.com', '경기도 하남시 미사강변동로 7', '203호', '미혼', NULL, 'N', '윤상현', '부', '010-7777-0056', '2025-10-01 12:18:48', 'system', '2025-10-01 12:18:48', 'system'),
-('2022201', '한소희', 'F', '1994-11-18', 'TQCYtVRHaYKPf5olm2vPVjoMlVIPEzxfYGdrnLSyydk=', '대한민국', '010-1212-0201', 'sh.han@company.com', '인천광역시 중구 공항로 24', NULL, '미혼', NULL, 'N', '한지민', '모', '010-1212-0202', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2022211', '차은우', 'M', '1997-03-30', 'bXwrf5R1HJgUziD/QDABZ+sIyoVhH7iqvmG1PT1vMVg=', '대한민국', '010-2323-0211', 'ew.cha@company.com', '인천광역시 서구 청라라임로 25', '102동 2504호', '미혼', '복무완료 / 육군 / 병장 / 2018.01-2019.10', 'N', '차범근', '부', '010-2323-0212', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2023053', '유지민', 'F', '2000-04-11', 'AcnoTi/NfBAveRovW7+Qp9evha5TyHy2bkoGhGnoqoo=', '대한민국', '010-4567-0053', 'jm.yoo@company.com', '경기도 성남시 분당구 불정로 13', NULL, '미혼', NULL, 'N', '유재석', '부', '010-4567-0054', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2023101', 'John Smith', 'M', '1990-01-01', 'I7rl0aoMA4a4aRIlYw3jj3CDZ/o04rq2SNmISkN7fdk=', '미국', '010-5678-0101', 'john.smith@company.com', '경기도 성남시 분당구 판교로 14', 'Apt 5B', '미혼', NULL, 'N', 'Jane Smith', 'sister', '010-5678-0102', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2023131', '나인우', 'M', '1994-09-17', 'fI+n2CqfyNKM2ouxtIqIUNQidgjDx/hcClrKYaIl+1k=', '대한민국', '010-6677-0131', 'iw.na@company.com', '경기도 평택시 고덕국제대로 20', NULL, '미혼', '복무완료 / 육군 / 병장 / 2015.01-2016.10', 'N', '나철수', '부', '010-6677-0132', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2023133', '김지원', 'F', '1992-10-19', '958RA0Dgac3jUMRXyooIBOusyJux2J7DXPWrebkYA3Y=', '대한민국', '010-7788-0133', 'jw.kim@company.com', '경기도 평택시 중앙로 21', '3층 302호', '미혼', NULL, 'N', '김진경', '모', '010-7788-0134', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2023212', '권나라', 'F', '1991-03-13', 'Yh548yy1KUzCrpZANf8EfdNjR5ik7dFpWoOedBG5hJg=', '대한민국', '010-3434-0212', 'nr.kwon@company.com', '경기도 부천시 길주로 26', NULL, '미혼', NULL, 'N', '권상우', '오빠', '010-3434-0213', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2023213', '위하준', 'M', '1991-08-05', 'fOrr2yBB7wX4StY9m47pWI7zT7V/1Gx0b3psB6sUczs=', '대한민국', '010-4545-0213', 'hj.wi@company.com', '경기도 김포시 김포한강1로 27', 'B동 101호', '기혼', '복무완료 / 경찰청 / 수경 / 2012.02-2013.11', 'N', '김고은', '배우자', '010-4545-0214', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2024132', '이도현', 'M', '1995-04-11', 'iqxVmYw04UIBUdlribydtDOBdSFVQSdk4eDzYOmz1og=', '대한민국', '010-8899-0132', 'dh.lee2@company.com', '충청남도 천안시 서북구 불당대로 22', NULL, '미혼', '복무완료 / 공군 / 병장 / 2017.08-2019.08', 'N', '이병헌', '부', '010-8899-0133', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2024134', '박은빈', 'F', '1992-09-04', '4YrKpGb0f9RLatgjEWAwKyGtxGIQ1WILOiDwqrpVoyc=', '대한민국', '010-9900-0134', 'eb.park@company.com', '경기도 평택시 비전5로 23', NULL, '미혼', NULL, 'N', '박철민', '부', '010-9900-0135', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2025001', '박서준', 'M', '1988-12-16', 'koNR1p18c7GyCEN3kJ7XBtPEJN324EQcLOK5epONMQs=', '대한민국', '010-5656-1001', 'sj.park@company.com', '서울특별시 마포구 월드컵북로 28', '오피스텔 707호', '미혼', '복무완료 / 교정시설 / 2008.07-2010.05', 'N', '박용규', '부', '010-5656-1002', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2025002', '김고은', 'F', '1991-07-02', 'NAsF14MBZzCvId2fLxVo4Bv4SnxlrW/54CUak981RqI=', '대한민국', '010-6767-1002', 'ge.kim@company.com', '서울특별시 성동구 왕십리로 29', NULL, '기혼', NULL, 'N', '위하준', '배우자', '010-4545-0213', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2025003', '변우석', 'M', '1991-10-31', 'lQW2Cz3v7I9XhmTghpNxdorCrKb8Ur0yNA38vTKUh+Y=', '대한민국', '010-7878-1003', 'ws.byun@company.com', '경기도 고양시 일산동구 중앙로 30', '110동 1501호', '미혼', '복무완료 / 육군 / 병장 / 2011.11-2013.08', 'N', '변정수', '누나', '010-7878-1004', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system'),
-('2025004', '김혜윤', 'F', '1996-11-10', 'ginxsQ6DNb4xLbHDH3reEzBu11MkyvnheEA/xvo0VUY=', '대한민국', '010-8989-1004', 'hy.kim@company.com', '서울특별시 광진구 아차산로 31', NULL, '미혼', NULL, 'N', '김철민', '부', '010-8989-1005', '2025-10-01 12:18:49', 'system', '2025-10-01 12:18:49', 'system');
 
+INSERT INTO ZHR_EMP_PRIV 
+(PERNR, SSN, GENDER, BIRTHDATE, NATION_CD, PHONE_NO, EMAIL, ZADDR_MAIN, ZSIDO, ZSIGUNGU, MARITAL_CD, MILITARY_CD, CREATED_BY) 
+VALUES 
+-- [0] 관리자
+('2018001', '850101-1234567', 'M', '1985-01-01', 'KR', '010-1111-2222', 'admin@clsoft.com',   '서울특별시 강남구 테헤란로 123', '서울특별시', '강남구', '20', '10', 'system'),
+
+-- [1] 2022년 입사자
+('2201001', '900505-1234567', 'M', '1990-05-05', 'KR', '010-3333-4444', 'chulsoo@naver.com',  '경기도 성남시 분당구 판교로 1', '경기도', '성남시', '20', '10', 'system'),
+('2201002', '920303-2345678', 'F', '1992-03-03', 'KR', '010-5555-6666', 'younghee@daum.net',  '서울특별시 송파구 올림픽로 300', '서울특별시', '송파구', '10', '00', 'system'),
+('2203003', '881212-1234567', 'M', '1988-12-12', 'KR', '010-7777-8888', 'minjun@gmail.com',   '서울특별시 서초구 반포대로 55', '서울특별시', '서초구', '20', '10', 'system'),
+('2203004', '950707-2345678', 'F', '1995-07-07', 'KR', '010-9999-0000', 'seoyeon@naver.com',  '서울특별시 마포구 마포대로 10', '서울특별시', '마포구', '10', '00', 'system'),
+('2207005', '930909-1234567', 'M', '1993-09-09', 'KR', '010-1212-3434', 'jihoon@kakao.com',   '경기도 용인시 수지구 포은대로 100', '경기도', '용인시', '10', '10', 'system'),
+('2207006', '960404-2345678', 'F', '1996-04-04', 'US', '010-5656-7878', 'seoa_us@gmail.com',  '서울특별시 용산구 이태원로 200', '서울특별시', '용산구', '10', '00', 'system'),
+('2209007', '911111-1234567', 'M', '1991-11-11', 'KR', '010-9090-8080', 'doyoon@naver.com',   '서울특별시 강동구 천호대로 99', '서울특별시', '강동구', '20', '10', 'system'),
+('2210008', '940202-2345678', 'F', '1994-02-02', 'KR', '010-3434-5656', 'hayoon@daum.net',    '인천광역시 연수구 컨벤시아대로 50', '인천광역시', '연수구', '10', '00', 'system'),
+('2210009', '970808-1234567', 'M', '1997-08-08', 'KR', '010-7878-9090', 'jiwoo@gmail.com',    '경기도 수원시 영통구 광교로 88', '경기도', '수원시', '10', '10', 'system'),
+('2211010', '981010-1234567', 'M', '1998-10-10', 'KR', '010-2323-4545', 'siwoo@naver.com',    '서울특별시 관악구 관악로 1', '서울특별시', '관악구', '10', '30', 'system'),
+
+-- [2] 2023년 입사자
+('2301011', '990101-2345678', 'F', '1999-01-01', 'KR', '010-1357-2468', 'yuna@gmail.com',     '서울특별시 동작구 상도로 77', '서울특별시', '동작구', '10', '00', 'system'),
+('2301012', '980505-1234567', 'M', '1998-05-05', 'KR', '010-2468-1357', 'eunwoo@naver.com',   '경기도 안양시 동안구 시민대로 200', '경기도', '안양시', '10', '10', 'system'),
+('2302013', '000202-4567890', 'F', '2000-02-02', 'KR', '010-9876-5432', 'jia@daum.net',       '서울특별시 영등포구 여의대로 10', '서울특별시', '영등포구', '10', '00', 'system'),
+('2304014', '950606-1234567', 'M', '1995-06-06', 'KR', '010-5432-9876', 'hyukjun@kakao.com',  '서울특별시 구로구 디지털로 300', '서울특별시', '구로구', '20', '10', 'system'),
+('2305015', '010303-4567890', 'F', '2001-03-03', 'CN', '010-1122-3344', 'subin_cn@gmail.com', '서울특별시 광진구 능동로 120', '서울특별시', '광진구', '10', '00', 'system'),
+('2305016', '940404-1234567', 'M', '1994-04-04', 'KR', '010-2233-4455', 'taehyun@naver.com',  '서울특별시 중구 세종대로 110', '서울특별시', '중구', '10', '10', 'system'),
+('2308017', '960808-2345678', 'F', '1996-08-08', 'KR', '010-3344-5566', 'chaewon@daum.net',   '서울특별시 성북구 성북로 10', '서울특별시', '성북구', '10', '00', 'system'),
+('2309018', '970909-2345678', 'F', '1997-09-09', 'KR', '010-4455-6677', 'eunbyul@gmail.com',  '서울특별시 강북구 삼양로 50', '서울특별시', '강북구', '10', '00', 'system'),
+('2310019', '931010-1234567', 'M', '1993-10-10', 'KR', '010-5566-7788', 'junho@kakao.com',    '경기도 고양시 일산동구 중앙로 1', '경기도', '고양시', '20', '10', 'system'),
+('2312020', '991212-2345678', 'F', '1999-12-12', 'KR', '010-6677-8899', 'minseo@naver.com',   '서울특별시 은평구 통일로 200', '서울특별시', '은평구', '10', '00', 'system'),
+
+-- [3] 2024년 입사자
+('2401021', '000101-4567890', 'F', '2000-01-01', 'KR', '010-7788-9900', 'jungmin@daum.net',   '서울특별시 서대문구 연세로 50', '서울특별시', '서대문구', '10', '00', 'system'),
+('2401022', '980101-1234567', 'M', '1998-01-01', 'KR', '010-8899-0011', 'yejun@gmail.com',    '서울특별시 종로구 종로 1', '서울특별시', '종로구', '10', '30', 'system'),
+('2402023', '010202-4567890', 'F', '2001-02-02', 'KR', '010-9900-1122', 'soyul@kakao.com',    '서울특별시 성동구 왕십리로 222', '서울특별시', '성동구', '10', '00', 'system'),
+('2402024', '950202-1234567', 'M', '1995-02-02', 'KR', '010-0011-2233', 'siwon@naver.com',    '경기도 부천시 길주로 100', '경기도', '부천시', '20', '10', 'system'),
+('2403025', '020303-4567890', 'F', '2002-03-03', 'KR', '010-1122-3344', 'harin@daum.net',     '서울특별시 양천구 목동동로 200', '서울특별시', '양천구', '10', '00', 'system'),
+('2404026', '990404-2345678', 'F', '1999-04-04', 'KR', '010-2233-4455', 'yujin@gmail.com',    '서울특별시 강서구 공항대로 300', '서울특별시', '강서구', '10', '00', 'system'),
+('2404027', '940404-1234567', 'M', '1994-04-04', 'KR', '010-3344-5566', 'jisung@kakao.com',   '인천광역시 남동구 예술로 150', '인천광역시', '남동구', '10', '10', 'system'),
+('2405028', '960505-1234567', 'M', '1996-05-05', 'KR', '010-4455-6677', 'taeyoung@naver.com', '경기도 광명시 철산로 20', '경기도', '광명시', '10', '10', 'system'),
+('2405029', '970505-1234567', 'M', '1997-05-05', 'KR', '010-5566-7788', 'woojin@daum.net',    '경기도 시흥시 시청로 1', '경기도', '시흥시', '10', '10', 'system'),
+('2406030', '000606-4567890', 'F', '2000-06-06', 'KR', '010-6677-8899', 'jihyun@gmail.com',   '서울특별시 금천구 벚꽃로 100', '서울특별시', '금천구', '10', '00', 'system'),
+('2407031', '980707-1234567', 'M', '1998-07-07', 'KR', '010-7788-9900', 'jaeyoon@kakao.com',  '서울특별시 노원구 노해로 400', '서울특별시', '노원구', '10', '30', 'system'),
+('2407032', '930707-1234567', 'M', '1993-07-07', 'KR', '010-8899-0011', 'minho@naver.com',    '서울특별시 도봉구 마들로 600', '서울특별시', '도봉구', '20', '10', 'system'),
+('2408033', '950808-1234567', 'M', '1995-08-08', 'KR', '010-9900-1122', 'jihuu@daum.net',     '경기도 의정부시 시민로 1', '경기도', '의정부시', '10', '10', 'system'),
+('2409034', '990909-2345678', 'F', '1999-09-09', 'KR', '010-0011-2233', 'juwon@gmail.com',    '경기도 파주시 시민회관길 20', '경기도', '파주시', '10', '00', 'system'),
+('2409035', '960909-1234567', 'M', '1996-09-09', 'KR', '010-1122-3344', 'haneul@kakao.com',   '경기도 김포시 사우중로 30', '경기도', '김포시', '10', '10', 'system'),
+('2410036', '011010-4567890', 'F', '2001-10-10', 'KR', '010-2233-4455', 'jian@naver.com',     '인천광역시 부평구 부평대로 50', '인천광역시', '부평구', '10', '00', 'system'),
+('2411037', '021111-4567890', 'F', '2002-11-11', 'KR', '010-3344-5566', 'yeseo@daum.net',     '인천광역시 서구 서곶로 300', '인천광역시', '서구', '10', '00', 'system'),
+('2411038', '941111-1234567', 'M', '1994-11-11', 'KR', '010-4455-6677', 'yoonjae@gmail.com',  '경기도 화성시 시청로 100', '경기도', '화성시', '20', '10', 'system'),
+('2412039', '031212-4567890', 'F', '2003-12-12', 'KR', '010-5566-7788', 'suhyun@kakao.com',   '경기도 오산시 성호대로 50', '경기도', '오산시', '10', '00', 'system'),
+('2412040', '921212-1234567', 'M', '1992-12-12', 'KR', '010-6677-8899', 'dongkyun@naver.com', '경기도 평택시 중앙로 200', '경기도', '평택시', '10', '10', 'system'),
+
+-- [4] 2025년 입사자
+('2501041', '030101-4567890', 'F', '2003-01-01', 'KR', '010-7788-9900', 'seah@daum.net',      '충청남도 천안시 서북구 번영로 100', '충청남도', '천안시', '10', '00', 'system'),
+('2501042', '980101-1234567', 'M', '1998-01-01', 'KR', '010-8899-0011', 'taejun@gmail.com',   '충청남도 아산시 시민로 30', '충청남도', '아산시', '10', '30', 'system'),
+('2502043', '040202-4567890', 'F', '2004-02-02', 'KR', '010-9900-1122', 'heeseon@kakao.com',  '대전광역시 서구 둔산로 100', '대전광역시', '서구', '10', '00', 'system'),
+('2503044', '970303-1234567', 'M', '1997-03-03', 'KR', '010-0011-2233', 'kangmin@naver.com',  '대전광역시 유성구 대학로 99', '대전광역시', '유성구', '10', '10', 'system'),
+('2503045', '000303-4567890', 'F', '2000-03-03', 'KR', '010-1122-3344', 'daeun@daum.net',     '세종특별자치시 한누리대로 200', '세종특별자치시', NULL, '10', '00', 'system'),
+('2504046', '990404-1234567', 'M', '1999-04-04', 'KR', '010-2233-4455', 'suho@gmail.com',     '충청북도 청주시 상당구 상당로 50', '충청북도', '청주시', '10', '10', 'system'),
+('2505047', '950505-1234567', 'M', '1995-05-05', 'KR', '010-3344-5566', 'junseo@kakao.com',   '강원특별자치도 춘천시 시청길 10', '강원특별자치도', '춘천시', '10', '10', 'system'),
+('2506048', '940606-1234567', 'M', '1994-06-06', 'KR', '010-4455-6677', 'dongwook@naver.com', '강원특별자치도 원주시 시청로 1', '강원특별자치도', '원주시', '20', '10', 'system'),
+('2507049', '020707-4567890', 'F', '2002-07-07', 'KR', '010-5566-7788', 'jia@daum.net',       '경상북도 포항시 남구 시청로 1', '경상북도', '포항시', '10', '00', 'system'),
+('2508050', '010808-4567890', 'F', '2001-08-08', 'KR', '010-6677-8899', 'yuju@gmail.com',     '경상남도 창원시 의창구 중앙대로 100', '경상남도', '창원시', '10', '00', 'system');
 
 -- Emp_Priv 로그 --
 CREATE TABLE ZHR_EMP_PRIV_LOG (

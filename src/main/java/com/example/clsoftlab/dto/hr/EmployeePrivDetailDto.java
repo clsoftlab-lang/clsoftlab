@@ -11,19 +11,35 @@ import lombok.Setter;
 @NoArgsConstructor
 public class EmployeePrivDetailDto {
 
-    private String pernr;
+	private String pernr;
     private String name;
+    private String deptCode;
+    private String rankCode;
+    private String dutyCode;
+    private LocalDate entryDate;
+    private String empStatus;
     private String gender;
-    private LocalDate birthdate;
-    private String ssn;
-    private String nationality;
+    private LocalDate birthDate; 
+    
+    private String ssn;         
+    private String nationCode;  
+    
     private String phoneNo;
+    private String homeTel;     
     private String email;
-    private String addr;
+    
+    // --- 주소 세분화 (addr -> 4개 필드) ---
+    private String zipCode;
+    private String sido;
+    private String sigungu;
+    private String addrMain;
     private String addrDetail;
-    private String maritalStatus;
-    private String militaryInfo;
+    // -----------------------------------
+
+    private String maritalCode; 
+    private String militaryCode; 
     private String disabilityYn;
+    
     private String emergencyName;
     private String emergencyRel;
     private String emergencyPhone;
@@ -33,16 +49,14 @@ public class EmployeePrivDetailDto {
     }
     
     private String maskSsn(String ssn) {
-        if (ssn == null) {
-            return null;
+        if (ssn == null) return null;
+        
+        String cleanSsn = ssn.replace("-", "");
+        
+        if (cleanSsn.length() < 7) {
+            return ssn; 
         }
-        StringBuilder maskedAccount = new StringBuilder(ssn);
-
-        // 123456 - 1******
-        for (int i = 8; i <= 13; i++) {
-            maskedAccount.setCharAt(i, '*');
-        }
-
-        return maskedAccount.toString();
+        
+        return cleanSsn.substring(0, 6) + "-" + cleanSsn.charAt(6) + "******";
     }
 }

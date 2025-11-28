@@ -18,11 +18,8 @@
                             <div class="form-group">
                                 <label class="form-label">이름/사번</label>
                                 <div class="input-icon">
-                                    <span class="input-icon-addon">
-                                        <i class="ti ti-user"></i>
-                                    </span>
                                     <select name="pernr" multiple="multiple" class="form-control" id="searchEmployeeSelect">
-	                                	<option th:each="e : ${searchEmployeeList}" th:value="${e.pernr}" th:text="|${e.name} (${e.pernr})|" th:selected="${pernr != null && #lists.contains(pernr, e.pernr)}"></option>
+	                                	<option th:each="e : ${employeeList}" th:value="${e.pernr}" th:text="|${e.name} (${e.pernr})|" th:selected="${pernr != null && #lists.contains(pernr, e.pernr)}"></option>
                                     </select>
                                 </div>
                             </div>
@@ -31,9 +28,8 @@
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label class="form-label">부서</label>
-                                <select class="form-control" name="dutyCode" multiple="multiple" id="searchDutyCodeSelect">
-                                    <option value="">전체</option>
-                                    <option th:each="d : ${dutyCodeList}" th:value="${d.code}" th:text="${d.name}" th:selected="${dutyCode != null && #lists.contains(dutyCode, d.code)}"></option>
+                                <select class="form-control" name="deptCode" multiple="multiple" id="searchDeptCodeSelect">
+                                    <option th:each="d : ${deptCodeList}" th:value="${d.code}" th:text="${d.name}" th:selected="${deptCode != null && #lists.contains(deptCode, d.code)}"></option>
                                 </select>
                             </div>
                         </div>
@@ -42,8 +38,7 @@
                             <div class="form-group">
                                 <label class="form-label">직급</label>
                                 <select class="form-select" name="rankCode" multiple="multiple" id="searchRankCodeSelect">
-                                    <option value="">전체</option>
-                                    <option th:each="rank : ${rankList}" th:value="${rank.code}" th:text="${rank.name}" th:selected="${rankCode != null && #lists.contains(rankCode, rank.code)}"></option>
+                                    <option th:each="rank : ${rankCodeList}" th:value="${rank.code}" th:text="${rank.name}" th:selected="${rankCode != null && #lists.contains(rankCode, rank.code)}"></option>
                                 </select>
                             </div>
                         </div>
@@ -52,7 +47,6 @@
                             <div class="form-group">
                                 <label class="form-label">재직 상태</label>
                                 <select class="form-select" name="empStatus" multiple="multiple" id="searchEmpStatusSelect">
-                                    <option value="">전체</option>
                                     <option th:each="e : ${empStatusList}" th:value="${e.code}" th:text="${e.name}" th:selected="${empStatus != null && #lists.contains(empStatus, e.code)}"></option>
                                 </select>
                             </div>
@@ -81,8 +75,9 @@
                                 <th>이름</th>
                                 <th>부서</th>
                                 <th>직급</th>
+                                <th>직무</th>
                                 <th>입사일</th>
-                                <th>재직 상태</th>
+                                <th>상태</th>
                                 <th class="text-center">관리</th>
                             </tr>
                         </thead>
@@ -90,18 +85,15 @@
                             <tr th:each="emp : ${employeeMaster}">
                                 <td th:text="${emp.pernr}"></td>
                                 <td th:text="${emp.name}"></td>
-                                <td th:text="${emp.dutyCode}"></td>
+                                <td th:text="${emp.deptCode}"></td>
                                 <td th:text="${emp.rankCode}"></td>
+                                <td th:text="${emp.dutyCode}"></td>
                                 <td th:text="${#temporals.format(emp.entryDate, 'yyyy-MM-dd')}"></td>
-                                
-                                <td>
-                                    <span class="badge bg-success-lt" th:if="${emp.empStatus == '10'}">재직</span>
-                                    <span class="badge bg-secondary-lt" th:if="${emp.empStatus == '99'}">퇴직</span>
-                                    <span class="badge bg-warning-lt" th:if="${emp.empStatus == '20'}">휴직</span>
-                                </td>
+                                <td th:text="${emp.empStatus}"></td>
                                 
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-ghost-primary" >
+                                    <button class="btn btn-sm btn-primary" th:data-pernr="${emp.pernr}"
+                                            onclick="openEmployeeCard(this.getAttribute('data-pernr'))" >
                                         상세보기
                                     </button>
                                 </td>
@@ -112,6 +104,16 @@
             </div>
         </div>
     </div>
-
+	<th:block layout:fragment="script">
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+        const deptList = /*[[${deptCodeList}]]*/ [];
+        const rankList = /*[[${rankCodeList}]]*/ [];
+        const dutyList = /*[[${dutyCodeList}]]*/ []; 
+        const statusList = /*[[${empStatusList}]]*/ [];
+        /*]]>*/
+        </script>
+        <script src="/assets/js/admin/employee-manage.js"></script>
+    </th:block>
 </body>
 </html>

@@ -25,23 +25,28 @@ public class EmployeeManageController {
 	
 	// 검색어로 page 조회
 	@GetMapping("")
-	public String searchEmployee (@RequestParam(required = false) List<String> pernr, @RequestParam(required = false) List<String> dutyCode,
+	public String searchEmployee (@RequestParam(required = false) List<String> pernr, @RequestParam(required = false) List<String> deptCode,
 			@RequestParam(required = false) List<String> rankCode, @RequestParam(required = false) List<String> empStatus, 
 			@RequestParam(required = false, defaultValue = "0") Integer page, Model model) {
 		int size = 1000;
 		
-		Page<EmployeeMasterDto> employeePage = employeeMasterService.searchEmployee(pernr, dutyCode, rankCode, empStatus, page, size);
+		Page<EmployeeMasterDto> employeePage = employeeMasterService.searchEmployee(pernr, deptCode, rankCode, empStatus, page, size);
 		
 		model.addAttribute("employeeMaster", employeePage.getContent());
 		model.addAttribute("pernr", pernr);
-		model.addAttribute("dutyCode", dutyCode);
+		model.addAttribute("deptCode", deptCode);
 		model.addAttribute("rankCode", rankCode);
 		model.addAttribute("empStatus", empStatus);
 		model.addAttribute("employeeMasterPage", employeePage);
 		model.addAttribute("employeeList", employeeMasterService.findAll());
+		model.addAttribute("deptCodeList", codeDetailService.findActiveCodesByGroupId("HR_DEPT"));
+		model.addAttribute("rankCodeList", codeDetailService.findActiveCodesByGroupId("HR_RANK"));
+		model.addAttribute("empStatusList", codeDetailService.findActiveCodesByGroupId("HR_STATUS"));
 		model.addAttribute("dutyCodeList", codeDetailService.findActiveCodesByGroupId("HR_DUTY"));
 		model.addAttribute("rankCodeList", codeDetailService.findActiveCodesByGroupId("HR_RANK"));
 		model.addAttribute("empStatusList", codeDetailService.findActiveCodesByGroupId("HR_STATUS"));
+		model.addAttribute("dutyCodeList", codeDetailService.findActiveCodesByGroupId("HR_DUTY"));
+		System.out.println(codeDetailService.findActiveCodesByGroupId("HR_DEPT"));
 		
 		return "admin/employee-manage/list";
 	}

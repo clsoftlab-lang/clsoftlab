@@ -15,16 +15,14 @@ import com.example.clsoftlab.entity.EmployeeMaster;
 import com.example.clsoftlab.repository.common.EmployeeMasterRepository;
 import com.example.clsoftlab.repository.common.specification.EmployeeMasterSpecs;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class EmployeeMasterService {
 
 	private final EmployeeMasterRepository employeeMasterRepository;
 	private final ModelMapper modelMapper;
-	
-	public EmployeeMasterService(EmployeeMasterRepository employeeMasterRepository, ModelMapper modelMapper) {
-		this.employeeMasterRepository = employeeMasterRepository;
-		this.modelMapper = modelMapper;
-	}
 	
 	// 전체 List 조회 (검색용)
 	public List<EmployeeMasterDto> findAll () {
@@ -47,14 +45,14 @@ public class EmployeeMasterService {
 	}
 	
 	// 검색어로 page 조회
-	public Page<EmployeeMasterDto> searchEmployee (List<String> pernr, List<String> dutyCode, 
+	public Page<EmployeeMasterDto> searchEmployee (List<String> pernr, List<String> deptCode, 
 			List<String> rankCode, List<String> empStatus,
 			int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 		Specification<EmployeeMaster> spec = Specification.not(null);
 		
 		spec = spec.and(EmployeeMasterSpecs.withPernr(pernr))
-				.and(EmployeeMasterSpecs.withDutyCode(dutyCode))
+				.and(EmployeeMasterSpecs.withDeptCode(deptCode))
 				.and(EmployeeMasterSpecs.withRankCode(rankCode))
 				.and(EmployeeMasterSpecs.withEmpStatus(empStatus));
 		
