@@ -44,8 +44,6 @@ public class EmployeePriv extends BaseEntity {
     @JoinColumn(name = "PERNR")
     private EmployeeMaster employee;
 
-    // 성명(ENAME)은 마스터 테이블에 있으므로 제거 (정규화)
-
     @Column(name = "GENDER", nullable = false, length = 1)
     private String gender;
 
@@ -123,8 +121,8 @@ public class EmployeePriv extends BaseEntity {
         this.homeTel = dto.getHomeTel();
         this.email = dto.getEmail();
         
-        // 주소 관련 (DTO 필드명: zipCode -> Entity 필드명: postCode 매핑 주의)
-        this.postCode = dto.getZipCode(); 
+        // 주소 관련
+        this.postCode = dto.getPostCode(); 
         this.sido = dto.getSido();
         this.sigungu = dto.getSigungu();
         this.addrMain = dto.getAddrMain();

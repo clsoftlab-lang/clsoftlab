@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +13,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class EmployeePrivRequestDto {
 
 	@NotBlank(message = "사번은 필수 입력 항목입니다.")
@@ -47,7 +45,7 @@ public class EmployeePrivRequestDto {
 
     // --- 주소 (카카오 API) ---
     @Size(max = 5, message = "우편번호는 최대 5자입니다.")
-    private String zipCode; // ZPOSTCODE
+    private String postCode; // ZPOSTCODE
 
     @Size(max = 50, message = "시/도는 최대 50자입니다.")
     private String sido;    // ZSIDO
@@ -80,5 +78,18 @@ public class EmployeePrivRequestDto {
 
     @Size(max = 20, message = "비상연락인 연락처는 최대 20자까지 입력 가능합니다.")
     private String emergencyPhone;
+    
+    public void setPhoneNo(String phoneNo) {
+        this.phoneNo = (phoneNo != null) ? phoneNo.replaceAll("[^0-9]", "") : null;
+    }
+    
+    public void setHomeTel(String homeTel) {
+    
+    	this.homeTel = (homeTel != null) ? homeTel.replaceAll("[^0-9]", "") : null;
+    }
+    
+    public void setEmergencyPhone(String emergencyPhone) {
+    	this.emergencyPhone = (emergencyPhone != null) ? emergencyPhone.replaceAll("[^0-9]", "") : null;
+    }
 
 }

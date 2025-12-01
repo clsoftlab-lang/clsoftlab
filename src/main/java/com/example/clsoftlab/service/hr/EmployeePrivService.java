@@ -89,7 +89,7 @@ public class EmployeePrivService {
 		logIfChanged(logs, employeePriv, "email", employeePriv.getEmail(), dto.getEmail());
 		
 		// 주소 필드 로그
-		logIfChanged(logs, employeePriv, "postCode", employeePriv.getPostCode(), dto.getZipCode());
+		logIfChanged(logs, employeePriv, "postCode", employeePriv.getPostCode(), dto.getPostCode());
 		logIfChanged(logs, employeePriv, "addrMain", employeePriv.getAddrMain(), dto.getAddrMain());
 		logIfChanged(logs, employeePriv, "addrDetail", employeePriv.getAddrDetail(), dto.getAddrDetail());
 		

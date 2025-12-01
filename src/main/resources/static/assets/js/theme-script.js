@@ -427,19 +427,19 @@ let themesettings = `
                             <div class="theme-topbarbg me-3 mb-2">
                                 <input type="radio" name="topbarbg" id="pattern1" value="pattern1" checked>
                                 <label for="pattern1" class="d-block rounded">
-                                    <img src="/assets/img/theme/pattern-01.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/pattern-01.png" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-topbarbg me-3 mb-2">
                                 <input type="radio" name="topbarbg" id="pattern2" value="pattern2">
                                 <label for="pattern2" class="d-block rounded">
-                                    <img src="/assets/img/theme/pattern-02.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/pattern-02.png" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-topbarbg me-3 mb-2">
                                 <input type="radio" name="topbarbg" id="pattern3" value="pattern3">
                                 <label for="pattern3" class="d-block rounded">
-                                    <img src="/assets/img/theme/pattern-03.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/pattern-03.png" alt="img" class="rounded">
                                 </label>
                             </div>
                         </div>
@@ -489,37 +489,37 @@ let themesettings = `
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg1" value="sidebarbg1">
                                 <label for="sidebarBg1" class="d-block rounded">
-                                    <img src="/assets/img/theme/sidebar-bg-01.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-01.png" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg2" value="sidebarbg2">
                                 <label for="sidebarBg2" class="d-block rounded">
-                                    <img src="/assets/img/theme/sidebar-bg-02.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-02.png" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg3" value="sidebarbg3">
                                 <label for="sidebarBg3" class="d-block rounded">
-                                    <img src="/assets/img/theme/sidebar-bg-03.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-03.png" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg4" value="sidebarbg4">
                                 <label for="sidebarBg4" class="d-block rounded">
-                                    <img src="/assets/img/theme/sidebar-bg-04.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-04.png" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg5" value="sidebarbg5">
                                 <label for="sidebarBg5" class="d-block rounded">
-                                    <img src="/assets/img/theme/sidebar-bg-05.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-05.png" alt="img" class="rounded">
                                 </label>
                             </div>
                             <div class="theme-sidebarbg me-3 mb-3">
                                 <input type="radio" name="sidebarbg" id="sidebarBg6" value="sidebarbg6">
                                 <label for="sidebarBg6" class="d-block rounded">
-                                    <img src="/assets/img/theme/sidebar-bg-06.svg" alt="img" class="rounded">
+                                    <img src="/assets/img/theme/sidebar-bg-06.png" alt="img" class="rounded">
                                 </label>
                             </div>
                         </div>

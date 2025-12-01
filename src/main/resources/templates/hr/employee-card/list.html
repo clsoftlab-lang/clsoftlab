@@ -82,7 +82,9 @@
 		                        </div>
 		                        <div class="col-md-2">
 		                            <label class="form-label fw-bold text-muted small">재직 상태</label>
-		                            <span id="viewStatusBadge" class="badge bg-secondary-lt">Unknown</span>
+		                            <div class="form-control-plaintext pt-6">
+								        <span id="viewStatusBadge" class="badge bg-secondary-lt">Unknown</span>
+								    </div>
 		                        </div>
 		                    </div>
 		
@@ -145,22 +147,21 @@
 		                            <div class="row g-3 mb-4">
 		                                <div class="col-md-3">
 		                                    <label class="form-label required">휴대전화</label>
-		                                    <input type="tel" class="form-control" name="phoneNo" disabled>
+		                                    <input type="tel" class="form-control" oninput="autoHyphenMulti(this)" maxlength="13" name="phoneNo" disabled> 
 		                                </div>
 		                                <div class="col-md-3">
 		                                    <label class="form-label">자택전화</label>
-		                                    <input type="tel" class="form-control" name="homeTel" disabled>
+		                                    <input type="tel" class="form-control" oninput="autoHyphenMulti(this)" maxlength="13" name="homeTel" disabled>
 		                                </div>
 		                                <div class="col-md-6">
 		                                    <label class="form-label">개인 이메일</label>
 		                                    <input type="email" class="form-control" name="email" disabled>
 		                                </div>
 		
-		                                <!-- 주소 (Kakao API) -->
 		                                <div class="col-md-3">
 		                                    <label class="form-label">우편번호</label>
 		                                    <div class="input-group">
-		                                        <input type="text" class="form-control" name="zipCode" id="zipCode" disabled>
+		                                        <input type="text" class="form-control" name="postCode" id="postCode" disabled>
 		                                        <button type="button" class="btn btn-outline-primary" id="btnAddrSearch" onclick="execDaumPostcode()" disabled>검색</button>
 		                                    </div>
 		                                </div>
@@ -176,7 +177,6 @@
 		                                <input type="hidden" name="sigungu" id="sigungu">
 		                            </div>
 		
-		                            <!-- 섹션 3: 기타 정보 -->
 		                            <h5 class="mb-3 text-primary"><i class="ti ti-info-circle"></i> 기타 정보</h5>
 		                            <div class="row g-3">
 		                                <div class="col-md-2">
@@ -201,7 +201,7 @@
 		                                </div>
 		                                <div class="col-md-4">
 		                                    <label class="form-label">비상연락처</label>
-		                                    <input type="tel" class="form-control" name="emergencyPhone" disabled>
+		                                    <input type="tel" class="form-control" name="emergencyPhone" oninput="autoHyphenMulti(this)" maxlength="13" disabled>
 		                                </div>
 		                            </div>
 		                        </div>

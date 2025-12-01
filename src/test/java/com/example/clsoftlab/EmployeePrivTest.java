@@ -126,7 +126,7 @@ public class EmployeePrivTest {
                 .gender(gender)
                 .birthDate(LocalDate.parse(birthDate))
                 .nationCode(nation)
-                .phoneNo(phone)
+                .phoneNo(phone.replace("-", ""))
                 .email(email)
                 .addrMain(addr)
                 .sido(sido)

@@ -33,20 +33,24 @@ CREATE TABLE ZSYS_CODE_GROUP (
 INSERT INTO ZSYS_CODE_GROUP 
 (ZGROUP_ID, ZGROUP_NM, ZUSE_YN, ZORDER, ZREMARK, IS_SYSTEM, CREATED_BY) 
 VALUES 
--- 1. 조직 및 인사 기초 (10~40)
+-- 조직 및 인사 기초 
 ('HR_DEPT',     '부서 코드',    'Y', 10, '본부, 팀 단위 조직 구성', 'N', 'SYSTEM'),
 ('HR_RANK',     '직급 코드',    'Y', 20, '사원~임원 위계 체계',     'N', 'SYSTEM'),
 ('HR_DUTY',     '직무 코드',    'Y', 30, '실제 수행 업무(Job/Skill)', 'N', 'SYSTEM'),
 ('HR_EMPTYPE',  '고용 형태',    'Y', 40, '정규직, 계약직, 파견직 등', 'N', 'SYSTEM'),
 
--- 2. 상태 및 개인정보 (50~70)
+-- 상태 및 개인정보 
 ('HR_STATUS',   '재직 상태',    'Y', 50, '재직, 휴직, 퇴직 상태 관리', 'Y', 'SYSTEM'),
 ('HR_NATION',   '국적 코드',    'Y', 51, 'ISO 국가코드 준수 권장',    'N', 'SYSTEM'),
 ('HR_MARITAL',  '결혼 상태',    'Y', 60, '미혼, 기혼 등',             'N', 'SYSTEM'),
 ('HR_MILITARY', '병역 구분',    'Y', 70, '군별 및 면제 사유',         'N', 'SYSTEM'),
 
--- 3. 시스템 관리 (90)
+-- 인사 발령 유형
+('HR_APPTYPE', '인사 발령 유형', 'Y', 80, '채용, 승진, 전보, 휴직, 퇴직 등 발령 구분', 'Y', 'SYSTEM'),
+('HR_APPR_STAT', '발령 결재 상태', 'Y', 90, '임시저장, 상신, 승인, 반려 등 결재 진행 상태', 'Y', 'SYSTEM'),
+-- 시스템 관리 
 ('SYS_ROLE',    '시스템 권한',  'Y', 90, '메뉴 접근 및 기능 제어 권한', 'Y', 'SYSTEM');
+
 
 -- 공통코드 상세 테이블 --
 CREATE TABLE ZSYS_CODE_DETAIL (
@@ -91,7 +95,7 @@ CREATE TABLE ZSYS_CODE_DETAIL (
 INSERT INTO ZSYS_CODE_DETAIL 
 (ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, IS_SYSTEM, CREATED_BY) 
 VALUES 
--- [1] HR_DEPT (부서)
+-- HR_DEPT (부서)
 ('HR_DEPT', 'MGT',      '경영지원본부', 'Management Div', 10, 'N', 'SYSTEM'),
 ('HR_DEPT', 'HR',       '인사팀',       'HR Team',        11, 'N', 'SYSTEM'),
 ('HR_DEPT', 'FIN',      '재무회계팀',   'Finance Team',   12, 'N', 'SYSTEM'),
@@ -103,7 +107,7 @@ VALUES
 ('HR_DEPT', 'BIZ_SAL',  '영업팀',       'Sales Team',     31, 'N', 'SYSTEM'),
 ('HR_DEPT', 'BIZ_MKT',  '마케팅팀',     'Marketing Team', 32, 'N', 'SYSTEM'),
 
--- [2] HR_RANK (직급)
+-- HR_RANK (직급)
 ('HR_RANK', '001', '사원', 'Staff',              10, 'N', 'SYSTEM'),
 ('HR_RANK', '002', '대리', 'Assistant Manager',  20, 'N', 'SYSTEM'),
 ('HR_RANK', '003', '과장', 'Manager',            30, 'N', 'SYSTEM'),
@@ -111,7 +115,7 @@ VALUES
 ('HR_RANK', '005', '부장', 'General Manager',    50, 'N', 'SYSTEM'),
 ('HR_RANK', '009', '임원', 'Executive',          90, 'N', 'SYSTEM'),
 
--- [3] HR_DUTY (직무)
+-- HR_DUTY (직무)
 ('HR_DUTY', 'SW_BE',  '백엔드 개발',    'Backend Dev',  10, 'N', 'SYSTEM'),
 ('HR_DUTY', 'SW_FE',  '프론트엔드 개발', 'Frontend Dev', 20, 'N', 'SYSTEM'),
 ('HR_DUTY', 'SW_APP', '모바일 앱 개발', 'Mobile App',   30, 'N', 'SYSTEM'),
@@ -121,18 +125,18 @@ VALUES
 ('HR_DUTY', 'ACC',    '회계/세무',     'Accountant',   70, 'N', 'SYSTEM'),
 ('HR_DUTY', 'SALES',  '기술 영업',     'Tech Sales',   80, 'N', 'SYSTEM'),
 
--- [4] HR_EMPTYPE (고용 형태)
+-- HR_EMPTYPE (고용 형태)
 ('HR_EMPTYPE', 'REG', '정규직', 'Regular',    10, 'N', 'SYSTEM'),
 ('HR_EMPTYPE', 'CON', '계약직', 'Contract',   20, 'N', 'SYSTEM'),
 ('HR_EMPTYPE', 'INT', '인턴',   'Intern',     30, 'N', 'SYSTEM'),
 ('HR_EMPTYPE', 'PAR', '파견직', 'Dispatched', 40, 'N', 'SYSTEM'),
 
--- [5] HR_STATUS (재직 상태)
+-- HR_STATUS (재직 상태)
 ('HR_STATUS', '10', '재직', 'Active',   10, 'Y', 'SYSTEM'),
 ('HR_STATUS', '20', '휴직', 'On Leave', 20, 'Y', 'SYSTEM'),
 ('HR_STATUS', '99', '퇴직', 'Retired',  99, 'Y', 'SYSTEM'),
 
--- [6] HR_NATION (국적)
+-- HR_NATION (국적)
 ('HR_NATION', 'KR', '대한민국', 'Korea, Rep.', 1, 'N', 'SYSTEM'),
 ('HR_NATION', 'US', '미국',     'USA',         2, 'N', 'SYSTEM'),
 ('HR_NATION', 'CN', '중국',     'China',       3, 'N', 'SYSTEM'),
@@ -140,20 +144,36 @@ VALUES
 ('HR_NATION', 'VN', '베트남',   'Vietnam',     5, 'N', 'SYSTEM'),
 ('HR_NATION', 'ZZ', '기타',     'Others',      99,'N', 'SYSTEM'),
 
--- [7] HR_MARITAL (결혼 상태)
+--  HR_MARITAL (결혼 상태)
 ('HR_MARITAL', '10', '미혼', 'Single',   10, 'N', 'SYSTEM'),
 ('HR_MARITAL', '20', '기혼', 'Married',  20, 'N', 'SYSTEM'),
 ('HR_MARITAL', '30', '이혼', 'Divorced', 30, 'N', 'SYSTEM'),
 ('HR_MARITAL', '40', '사별', 'Widowed',  40, 'N', 'SYSTEM'),
 
--- [8] HR_MILITARY (병역 구분)
+--  HR_MILITARY (병역 구분)
 ('HR_MILITARY', '00', '비대상',   'N/A',         10, 'N', 'SYSTEM'),
 ('HR_MILITARY', '10', '만기전역', 'Discharged',  20, 'N', 'SYSTEM'),
 ('HR_MILITARY', '11', '복무중',   'Serving',     21, 'N', 'SYSTEM'),
 ('HR_MILITARY', '20', '면제',     'Exempted',    30, 'N', 'SYSTEM'),
 ('HR_MILITARY', '30', '미필',     'Unfulfilled', 40, 'N', 'SYSTEM'),
 
--- [9] SYS_ROLE (시스템 권한)
+-- HR_APPTYPE (발령 유형)
+('HR_APPTYPE', '10', '채용', 'Hiring',            10, 'Y', 'SYSTEM'),
+('HR_APPTYPE', '20', '승진', 'Promotion',         20, 'Y', 'SYSTEM'),
+('HR_APPTYPE', '30', '전보', 'Transfer',          30, 'Y', 'SYSTEM'),
+('HR_APPTYPE', '40', '파견', 'Dispatch',          40, 'Y', 'SYSTEM'),
+('HR_APPTYPE', '50', '휴직', 'Leave of Absence',  50, 'Y', 'SYSTEM'),
+('HR_APPTYPE', '60', '복직', 'Reinstatement',     60, 'Y', 'SYSTEM'),
+('HR_APPTYPE', '90', '퇴직', 'Retirement',        90, 'Y', 'SYSTEM'),
+
+-- HR_APPR_STAT (발령 상태)
+('HR_APPR_STAT', '10', '임시저장', 'Temporary Save', 10, 'Y', 'SYSTEM'), -- 작성 중, 수정 가능
+('HR_APPR_STAT', '20', '결재중',   'In Progress',    20, 'Y', 'SYSTEM'), -- 결재 상신 함, 수정 불가
+('HR_APPR_STAT', '30', '승인',     'Approved',       30, 'Y', 'SYSTEM'), -- 최종 승인 (발령 확정 대상)
+('HR_APPR_STAT', '40', '반려',     'Rejected',       40, 'Y', 'SYSTEM'), -- 거절됨 (재작성 필요)
+('HR_APPR_STAT', '99', '취소',     'Canceled',       99, 'Y', 'SYSTEM'), -- 기안자가 스스로 회수함
+
+--  SYS_ROLE (시스템 권한)
 ('SYS_ROLE', 'ADMIN',  '슈퍼 관리자', 'Super Admin', 10, 'Y', 'SYSTEM'),
 ('SYS_ROLE', 'HR_MNG', '인사 관리자', 'HR Manager',  20, 'Y', 'SYSTEM'),
 ('SYS_ROLE', 'USER',   '일반 사용자', 'User',        30, 'Y', 'SYSTEM');
@@ -3411,8 +3431,6 @@ CREATE TABLE ZHR_EMP_PRIV (
     CONSTRAINT FK_EMP_PRIV_MASTER FOREIGN KEY (PERNR) REFERENCES ZHR_EMP_MASTER (PERNR) ON DELETE CASCADE
 ) COMMENT '사원 개인정보 (민감정보)';
 
-
-
 INSERT INTO ZHR_EMP_PRIV 
 (PERNR, SSN, GENDER, BIRTHDATE, NATION_CD, PHONE_NO, EMAIL, ZADDR_MAIN, ZSIDO, ZSIGUNGU, MARITAL_CD, MILITARY_CD, CREATED_BY) 
 VALUES 
@@ -3501,6 +3519,434 @@ CREATE TABLE ZHR_EMP_PRIV_LOG (
     INDEX IDX_LOG_CREATED_AT (CREATED_AT)
 
 ) COMMENT '사원 개인정보 변경 이력 로그 테이블';
+
+
+-- 발령 규칙 -- 
+CREATE TABLE ZHR_APPOINT_RULE (
+    -- [식별자]
+    ZRULE_ID     VARCHAR(10)  NOT NULL COMMENT '발령 기준 ID (PK)',
+    
+    -- [기본 정보]
+    ZRULE_NM     VARCHAR(100) NOT NULL COMMENT '발령 기준명',
+    ZRULE_TYPE   VARCHAR(20)  NOT NULL COMMENT '발령 유형 (공통코드 HR_APPTYPE 참조)',
+    ZCOND_DESC   VARCHAR(200) NULL     COMMENT '기준 설명',
+    
+    -- [제어 정보]
+    ZUSE_YN      CHAR(1)      NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    
+    -- [동시성 제어]
+    OBJ_VERSION  INT          NOT NULL DEFAULT 1   COMMENT '데이터 버전',
+    
+    -- [Audit]
+    CREATED_AT   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY   VARCHAR(50)  NOT NULL,
+    UPDATED_AT   DATETIME     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_BY   VARCHAR(50)  NULL,
+    
+    PRIMARY KEY (ZRULE_ID)
+) COMMENT '인사 발령 기준 관리 (Rule)';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_APPOINT_RULE 
+(ZRULE_ID, ZRULE_NM, ZRULE_TYPE, ZCOND_DESC, CREATED_BY) 
+VALUES 
+-- ========================================================
+-- 1. [채용] Type: 10 (ID: H1xx)
+-- ========================================================
+('H101', '신규 채용',      '10', '공채 및 수시 신입 사원 채용', 'SYSTEM'),
+('H102', '경력 채용',      '10', '경력직 사원 채용 및 처우 산정', 'SYSTEM'),
+('H103', '계약직 채용',    '10', '프로젝트 및 기간제 근로자 채용', 'SYSTEM'),
+('H104', '인턴 채용',      '10', '채용 연계형 및 체험형 인턴', 'SYSTEM'),
+
+-- ========================================================
+-- 2. [승진] Type: 20 (ID: P2xx)
+-- ========================================================
+('P201', '정기 승진',      '20', '정기 인사평가 결과에 따른 직급 상승', 'SYSTEM'),
+('P202', '특별 승진',      '20', '우수 성과자 및 발탁 승진', 'SYSTEM'),
+('P203', '직급 재산정',    '20', '오류 수정 및 경력 재인정에 따른 직급 조정', 'SYSTEM'),
+
+-- ========================================================
+-- 3. [전보] Type: 30 (ID: M3xx)
+-- ========================================================
+('M301', '부서 이동',      '30', '조직 개편 및 순환 근무에 따른 소속 변경', 'SYSTEM'),
+('M302', '보직 변경',      '30', '팀장, 파트장 등 직책의 임명 및 해임', 'SYSTEM'),
+('M303', '계열사 전출',    '30', '타 계열사로 이동 (전출)', 'SYSTEM'),
+('M304', '계열사 전입',    '30', '타 계열사에서 이동 (전입)', 'SYSTEM'),
+
+-- ========================================================
+-- 4. [파견] Type: 40 (ID: D4xx)
+-- ========================================================
+('D401', '국내 파견',      '40', '계열사 및 협력사 국내 파견 근무', 'SYSTEM'),
+('D402', '해외 파견',      '40', '해외 법인 및 지사 주재원 파견', 'SYSTEM'),
+('D403', '파견 복귀',      '40', '파견 기간 종료에 따른 원소속 복귀', 'SYSTEM'),
+
+-- ========================================================
+-- 5. [휴직] Type: 50 (ID: L5xx)
+-- ========================================================
+('L501', '육아 휴직',      '50', '만 8세 이하 자녀 양육을 위한 휴직', 'SYSTEM'),
+('L502', '질병 휴직',      '50', '개인 질병 및 부상 치료를 위한 휴직', 'SYSTEM'),
+('L503', '가사 휴직',      '50', '가족 돌봄 및 가사 사정으로 인한 휴직', 'SYSTEM'),
+('L504', '출산 휴가',      '50', '출산 전후 법정 휴가', 'SYSTEM'),
+
+-- ========================================================
+-- 6. [복직] Type: 60 (ID: R6xx)
+-- ========================================================
+('R601', '만기 복직',      '60', '휴직 기간 만료에 따른 정상 복직', 'SYSTEM'),
+('R602', '조기 복직',      '60', '휴직 사유 소멸로 인한 조기 복귀', 'SYSTEM'),
+
+-- ========================================================
+-- 7. [퇴직] Type: 90 (ID: E9xx)
+-- ========================================================
+('E901', '의원 면직',      '90', '개인 사유(이직 등)에 의한 자발적 퇴직', 'SYSTEM'),
+('E902', '정년 퇴직',      '90', '사규에 정해진 정년 도래에 따른 자동 퇴직', 'SYSTEM'),
+('E903', '계약 만료',      '90', '근로 계약 기간 종료에 따른 퇴직', 'SYSTEM'),
+('E904', '권고 사직',      '90', '회사 사정에 의한 퇴직 권고', 'SYSTEM'),
+('E905', '징계 해고',      '90', '징계 위원회 결의에 따른 해고', 'SYSTEM');
+
+-- 발령 항목 정의 --
+CREATE TABLE ZHR_APPOINT_FIELDDEF (
+    -- [PK: 대리키]
+    FIELDDEF_ID  BIGINT       NOT NULL AUTO_INCREMENT COMMENT '항목 정의 ID (PK)',
+
+    -- [비즈니스 키 (UK)]
+    ZRULE_TYPE   VARCHAR(20)  NOT NULL COMMENT '발령 유형 (공통코드 HR_APPTYPE 참조)',
+    ZFIELD_CD    VARCHAR(20)  NOT NULL COMMENT '항목 코드 (TO_DEPT, TO_RANK 등)',
+
+    -- [표시 정보]
+    ZFIELD_NM    VARCHAR(100) NOT NULL COMMENT '항목 명칭 (화면 라벨)',
+    ZDATA_TYPE   VARCHAR(20)  NOT NULL DEFAULT 'STRING' COMMENT '데이터 타입 (STRING, NUMBER, DATE, CODE)',
+    ZREQUIRED    CHAR(1)      NOT NULL DEFAULT 'N' COMMENT '필수 입력 여부 (Y/N)',
+    ZORDER       INT          NOT NULL DEFAULT 0   COMMENT '화면 출력 순서',
+
+    -- [동시성 제어]
+    OBJ_VERSION  INT          NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [Audit]
+    CREATED_AT   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY   VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT   DATETIME     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY   VARCHAR(50)  NULL     COMMENT '수정자',
+
+    PRIMARY KEY (FIELDDEF_ID),
+    -- [중복 방지 제약조건]
+    UNIQUE KEY UQ_APPOINT_FIELDDEF (ZRULE_TYPE, ZFIELD_CD)
+) COMMENT '인사 발령 항목 정의 (Field Definition)';
+
+-- 더미데이터 -- 
+INSERT INTO ZHR_APPOINT_FIELDDEF 
+(ZRULE_TYPE, ZFIELD_CD, ZFIELD_NM, ZDATA_TYPE, ZREQUIRED, ZORDER, CREATED_BY) 
+VALUES 
+
+-- ========================================================
+-- [10] 채용 (Hiring)
+-- ========================================================
+('10', 'TO_DEPT',    '배치 부서',   'CODE',   'Y', 10, 'SYSTEM'),
+('10', 'TO_RANK',    '부여 직급',   'CODE',   'Y', 20, 'SYSTEM'),
+('10', 'TO_DUTY',    '부여 직무',   'CODE',   'Y', 30, 'SYSTEM'),
+('10', 'TO_SALARY',  '계약 연봉',   'NUMBER', 'Y', 40, 'SYSTEM'),
+('10', 'PROB_END',   '수습 종료일', 'DATE',   'N', 50, 'SYSTEM'),
+
+-- ========================================================
+-- [20] 승진 (Promotion)
+-- ========================================================
+('20', 'TO_RANK',    '승진 직급',   'CODE',   'Y', 10, 'SYSTEM'),
+('20', 'TO_SALARY',  '조정 연봉',   'NUMBER', 'N', 20, 'SYSTEM'),
+('20', 'NOTE',       '평가 코멘트', 'STRING', 'N', 30, 'SYSTEM'),
+
+-- ========================================================
+-- [30] 전보 (Transfer)
+-- ========================================================
+('30', 'TO_DEPT',    '이동 부서',   'CODE',   'Y', 10, 'SYSTEM'),
+('30', 'TO_DUTY',    '변경 직무',   'CODE',   'N', 20, 'SYSTEM'),
+('30', 'TO_LOC',     '근무지',     'STRING', 'N', 30, 'SYSTEM'),
+
+-- ========================================================
+-- [40] 파견 (Dispatch)
+-- ========================================================
+('40', 'DISP_LOC',   '파견 기관',   'STRING', 'Y', 10, 'SYSTEM'),
+('40', 'START_DATE', '파견 시작일', 'DATE',   'Y', 20, 'SYSTEM'),
+('40', 'END_DATE',   '파견 종료일', 'DATE',   'Y', 30, 'SYSTEM'),
+
+-- ========================================================
+-- [50] 휴직 (Leave)
+-- ========================================================
+('50', 'LEAVE_RSN',  '휴직 사유',   'STRING', 'Y', 10, 'SYSTEM'),
+('50', 'START_DATE', '휴직 시작일', 'DATE',   'Y', 20, 'SYSTEM'),
+('50', 'END_DATE',   '휴직 종료일', 'DATE',   'Y', 30, 'SYSTEM'),
+
+-- ========================================================
+-- [60] 복직 (Reinstatement)
+-- ========================================================
+('60', 'TO_DEPT',    '복직 부서',   'CODE',   'Y', 10, 'SYSTEM'),
+('60', 'TO_RANK',    '복직 직급',   'CODE',   'Y', 20, 'SYSTEM'),
+
+-- ========================================================
+-- [90] 퇴직 (Retirement)
+-- ========================================================
+('90', 'RET_TYPE',   '퇴직 구분',   'CODE',   'Y', 10, 'SYSTEM'),
+('90', 'RET_RSN',    '퇴직 사유',   'STRING', 'Y', 20, 'SYSTEM'),
+('90', 'LAST_DATE',  '마지막 근무일', 'DATE', 'Y', 30, 'SYSTEM');
+
+
+-- 발령 품의 -- 
+CREATE TABLE ZHR_APPOINT_REQ (
+    -- [식별자]
+    ZREQ_ID      VARCHAR(20)  NOT NULL COMMENT '발령 품의 ID (PK) - 예: REQ2025030101',
+
+    -- [기본 정보]
+    ZTITLE       VARCHAR(100) NOT NULL COMMENT '품의 제목 - 예: 2025년 상반기 정기 인사',
+    ZDESC        VARCHAR(500) NULL     COMMENT '품의 내용 및 사유',
+    
+    -- [운영 정보]
+    ZREQ_DATE    DATE         NOT NULL COMMENT '기안 일자',
+    ZREQ_BY      VARCHAR(20)  NOT NULL COMMENT '기안자 사번',
+    ZSTATUS      VARCHAR(10)  NOT NULL DEFAULT '10' COMMENT '진행 상태 (공통코드 HR_APPR_STAT 참조)',
+    
+    -- [동시성 제어]
+    OBJ_VERSION  INT          NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [Audit]
+    CREATED_AT   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY   VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT   DATETIME     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY   VARCHAR(50)  NULL     COMMENT '수정자',
+
+    PRIMARY KEY (ZREQ_ID)
+) COMMENT '인사 발령 품의서 (Header)';
+
+INSERT INTO ZHR_APPOINT_REQ 
+(ZREQ_ID, ZTITLE, ZDESC, ZREQ_DATE, ZREQ_BY, ZSTATUS, CREATED_BY) 
+VALUES 
+-- ==========================================================
+-- 1. [작성 중] (Status: 10 - 임시저장)
+-- 상황: 인사 담당자가 3월 정기 승진 명단을 작성하고 있는 상태. 아직 결재 안 올림.
+-- ==========================================================
+('REQ20250301001', '2025년 3월 정기 승진 품의 (작성중)', 
+ '2024년 고과 우수자에 대한 정기 승진 건입니다. (현재 대상자 취합 중)', 
+ '2025-03-01', '2018001', '10', '2018001'),
+
+-- ==========================================================
+-- 2. [결재 중] (Status: 20 - 상신)
+-- 상황: 부서 이동 건을 작성해서 결재를 올림. (수정/삭제 불가능해야 함)
+-- ==========================================================
+('REQ20250228001', '2월 수시 인사 이동', 
+ '조직 개편에 따른 개발팀 인원 재배치 건 (결재 진행 중)', 
+ '2025-02-28', '2018001', '20', '2018001'),
+
+-- ==========================================================
+-- 3. [승인 완료] (Status: 30 - 확정)
+-- 상황: 이미 처리가 끝난 1월 신입사원 채용 건. (발령 이력이 확정됨)
+-- ==========================================================
+('REQ20250101001', '2025년 제15기 신입사원 채용 발령', 
+ '2025년 상반기 공개 채용 합격자 20명 배치 완료', 
+ '2025-01-01', '2018001', '30', 'SYSTEM'),
+
+-- ==========================================================
+-- 4. [반려] (Status: 40 - 거절)
+-- 상황: 특별 승진을 올렸으나, 임원 결재 단계에서 거절됨. (사유 수정 후 재상신 필요)
+-- ==========================================================
+('REQ20250215001', '개발 1팀 특별 승진 품의', 
+ '프로젝트 성공에 따른 특별 승진 요청 -> [반려사유] TO 부족으로 인한 반려', 
+ '2025-02-15', '2018001', '40', '2018001'),
+
+-- ==========================================================
+-- 5. [취소] (Status: 99 - 회수)
+-- 상황: 기안자가 올렸다가 내용 오류를 발견하고 스스로 회수한 문서.
+-- ==========================================================
+('REQ20250210001', '총무팀 파견 근무 요청', 
+ '본사 총무팀 지원 파견 요청 건 (기안자 회수)', 
+ '2025-02-10', '2018001', '99', '2018001');
+
+
+-- 발령 이력 --
+CREATE TABLE ZHR_APPOINT_HIST (
+    -- [식별자]
+    ZHIST_ID     VARCHAR(20)  NOT NULL COMMENT '발령 이력 ID (PK) - 예: HIS20250301001',
+
+    -- [참조 정보 (논리적 연결)]
+    ZREQ_ID      VARCHAR(20)  NOT NULL COMMENT '발령 품의 ID (Header 참조)',
+    PERNR        VARCHAR(20)  NOT NULL COMMENT '대상자 사번 (ZHR_EMP_MASTER 참조)',
+    ZRULE_ID     VARCHAR(10)  NOT NULL COMMENT '적용된 발령 기준 ID (ZHR_APPOINT_RULE 참조)',
+
+    -- [발령 정보]
+    ZEFF_DATE    DATE         NOT NULL COMMENT '발령 시행일 (Effective Date)',
+    ZREMARK      VARCHAR(300) NULL     COMMENT '비고 (개인별 특이사항)',
+    
+    -- [상태 제어]
+    IS_CANCELED  CHAR(1)      NOT NULL DEFAULT 'N' COMMENT '발령 철회 여부 (Y:철회, N:정상)',
+    
+    -- [동시성 제어 (추가됨)]
+    OBJ_VERSION  INT          NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
+    
+    -- [Audit]
+    CREATED_AT   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY   VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT   DATETIME     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY   VARCHAR(50)  NULL     COMMENT '수정자',
+
+    PRIMARY KEY (ZHIST_ID),
+    
+    -- [성능 향상 인덱스]
+    INDEX IDX_APPOINT_HIST_REQ (ZREQ_ID),    -- 품의서별 조회용
+    INDEX IDX_APPOINT_HIST_PERNR (PERNR),    -- 개인별 이력 조회용
+    INDEX IDX_APPOINT_HIST_DATE (ZEFF_DATE)  -- 날짜별 발령 조회용
+) COMMENT '인사 발령 이력 상세 (Line Item)';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_APPOINT_HIST 
+(ZHIST_ID, ZREQ_ID, PERNR, ZRULE_ID, ZEFF_DATE, ZREMARK, IS_CANCELED, OBJ_VERSION, CREATED_BY) 
+VALUES 
+
+-- ==================================================================================
+-- 1. [승인 완료] 2025년 1월 신입 채용 (REQ20250101001)
+-- Rule: H101 (신규 채용)
+-- 대상: 2501041(진세아), 2501042(원태준) - 실제 마스터의 입사일과 일치시킴
+-- ==================================================================================
+('HIS20250101001', 'REQ20250101001', '2501041', 'H101', '2025-01-01', '2025년 공채 15기 웹개발', 'N', 1, 'SYSTEM'),
+('HIS20250101002', 'REQ20250101001', '2501042', 'H101', '2025-01-01', '2025년 공채 15기 기획',   'N', 1, 'SYSTEM'),
+
+-- ==================================================================================
+-- 2. [결재 중] 2월 수시 인사 이동 (REQ20250228001)
+-- Rule: M301 (부서 이동)
+-- 대상: 2207006(윤서아), 2209007(강도윤) - 기존 부서에서 이동
+-- ==================================================================================
+('HIS20250228001', 'REQ20250228001', '2207006', 'M301', '2025-02-28', '웹개발팀 -> 모바일앱팀 지원', 'N', 1, '2018001'),
+('HIS20250228002', 'REQ20250228001', '2209007', 'M301', '2025-02-28', '서버팀 -> AI데이터팀 이동',   'N', 1, '2018001'),
+
+-- ==================================================================================
+-- 3. [작성 중] 2025년 3월 정기 승진 (REQ20250301001)
+-- Rule: P201 (정기 승진)
+-- 대상: 2210009(한지우), 2211010(오시우) - 대리 승진 대상
+-- 특이사항: 2305015(황수빈)은 명단에 넣었다가 '취소(Y)' 처리함 (발령 제외)
+-- ==================================================================================
+('HIS20250301001', 'REQ20250301001', '2210009', 'P201', '2025-03-01', '2024년 고과 우수 (사원->대리)', 'N', 1, '2018001'),
+('HIS20250301002', 'REQ20250301001', '2211010', 'P201', '2025-03-01', '2024년 고과 우수 (사원->대리)', 'N', 1, '2018001'),
+-- [철회 예시] 작성 중 제외된 인원
+('HIS20250301003', 'REQ20250301001', '2305015', 'P201', '2025-03-01', '승진 연한 미달로 인한 제외',    'Y', 1, '2018001'),
+
+-- ==================================================================================
+-- 4. [반려됨] 개발 1팀 특별 승진 (REQ20250215001)
+-- Rule: P202 (특별 승진)
+-- 대상: 2302013(송지아) - 우수 성과자 추천했으나 반려됨
+-- ==================================================================================
+('HIS20250215001', 'REQ20250215001', '2302013', 'P202', '2025-02-15', '신규 서비스 런칭 공로 추천', 'N', 1, '2018001'),
+
+-- ==================================================================================
+-- 5. [취소됨] 총무팀 파견 근무 요청 (REQ20250210001)
+-- Rule: D401 (국내 파견)
+-- 대상: 2405028(기태영) - 기안자가 품의 자체를 회수함
+-- ==================================================================================
+('HIS20250210001', 'REQ20250210001', '2405028', 'D401', '2025-02-10', '본사 지원 파견', 'N', 1, '2018001');
+
+
+-- 발령 상세 --
+CREATE TABLE ZHR_APPOINT_DETAIL (
+    -- [PK: 대리키]
+    DETAIL_ID    BIGINT       NOT NULL AUTO_INCREMENT COMMENT '발령 상세 ID (PK)',
+
+    -- [비즈니스 키 (UK 구성용)]
+    ZHIST_ID     VARCHAR(20)  NOT NULL COMMENT '발령 이력 ID (ZHR_APPOINT_HIST 참조)',
+    ZFIELD_CD    VARCHAR(20)  NOT NULL COMMENT '항목 코드 (ZHR_APPOINT_FIELDDEF 참조)',
+
+    -- [변경 값]
+    ZVALUE_OLD   VARCHAR(255) NULL     COMMENT '변경 전 값 (Before)',
+    ZVALUE       VARCHAR(255) NULL     COMMENT '변경 후 값 (After)',
+
+    -- [동시성 제어 (추가됨)]
+    OBJ_VERSION  INT          NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [Audit]
+    CREATED_AT   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY   VARCHAR(50)  NOT NULL COMMENT '생성자',
+    UPDATED_AT   DATETIME     NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY   VARCHAR(50)  NULL     COMMENT '수정자',
+
+    PRIMARY KEY (DETAIL_ID),
+
+    -- [중복 방지 & 성능] 이력 하나에 동일 항목 중복 불가
+    UNIQUE KEY UQ_APPOINT_DETAIL (ZHIST_ID, ZFIELD_CD)
+) COMMENT '인사 발령 상세 항목 값 (Vertical Data)';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_APPOINT_DETAIL 
+(ZHIST_ID, ZFIELD_CD, ZVALUE_OLD, ZVALUE, CREATED_BY) 
+VALUES 
+
+-- ==================================================================================
+-- 1. [승인 완료] 2025년 1월 신입 채용 (REQ20250101001)
+-- Rule Type: 10 (채용) -> Fields: TO_DEPT, TO_RANK, TO_DUTY, TO_SALARY, PROB_END
+-- ==================================================================================
+
+-- 1-1. 진세아 (HIS20250101001) : 웹개발팀 / 사원 / 프론트엔드
+('HIS20250101001', 'TO_DEPT',   NULL, 'DEV_WEB', 'SYSTEM'),
+('HIS20250101001', 'TO_RANK',   NULL, '001',     'SYSTEM'),
+('HIS20250101001', 'TO_DUTY',   NULL, 'SW_FE',   'SYSTEM'),
+('HIS20250101001', 'TO_SALARY', NULL, '4000',    'SYSTEM'),
+('HIS20250101001', 'PROB_END',  NULL, '2025-03-31', 'SYSTEM'), -- 수습 3개월
+
+-- 1-2. 원태준 (HIS20250101002) : 사업본부 / 사원 / 기획
+('HIS20250101002', 'TO_DEPT',   NULL, 'BIZ',     'SYSTEM'),
+('HIS20250101002', 'TO_RANK',   NULL, '001',     'SYSTEM'),
+('HIS20250101002', 'TO_DUTY',   NULL, 'PO',      'SYSTEM'),
+('HIS20250101002', 'TO_SALARY', NULL, '4200',    'SYSTEM'),
+('HIS20250101002', 'PROB_END',  NULL, '2025-03-31', 'SYSTEM'),
+
+
+-- ==================================================================================
+-- 2. [결재 중] 2월 수시 인사 이동 (REQ20250228001)
+-- Rule Type: 30 (전보) -> Fields: TO_DEPT, TO_DUTY, TO_LOC
+-- ==================================================================================
+
+-- 2-1. 윤서아 (HIS20250228001) : 웹개발팀(DEV_WEB) -> 기술연구소(DEV) / 모바일앱 개발로 직무 변경
+('HIS20250228001', 'TO_DEPT', 'DEV_WEB', 'DEV',    '2018001'),
+('HIS20250228001', 'TO_DUTY', 'SW_FE',   'SW_APP', '2018001'),
+
+-- 2-2. 강도윤 (HIS20250228002) : 서버개발팀(DEV_SVR) -> AI데이터팀(DEV_AI) / 직무 유지
+('HIS20250228002', 'TO_DEPT', 'DEV_SVR', 'DEV_AI', '2018001'),
+('HIS20250228002', 'TO_DUTY', 'SW_BE',   'SW_BE',  '2018001'), -- 직무는 같지만 명시적 기록
+
+
+-- ==================================================================================
+-- 3. [작성 중] 2025년 3월 정기 승진 (REQ20250301001)
+-- Rule Type: 20 (승진) -> Fields: TO_RANK, TO_SALARY, NOTE
+-- ==================================================================================
+
+-- 3-1. 한지우 (HIS20250301001) : 대리(002) -> 과장(003) 승진
+('HIS20250301001', 'TO_RANK',   '002',  '003',  '2018001'),
+('HIS20250301001', 'TO_SALARY', '5500', '6300', '2018001'),
+('HIS20250301001', 'NOTE',      NULL,   '성과 평가 S등급 달성', '2018001'),
+
+-- 3-2. 오시우 (HIS20250301002) : 대리(002) -> 과장(003) 승진
+('HIS20250301002', 'TO_RANK',   '002',  '003',  '2018001'),
+('HIS20250301002', 'TO_SALARY', '5400', '6200', '2018001'),
+
+-- 3-3. [취소된 건] 황수빈 (HIS20250301003) : 사원(001) -> 대리(002) 시도했으나 취소됨
+-- * 취소되었더라도 작성 당시의 데이터는 남아있음 (이력 관리 목적)
+('HIS20250301003', 'TO_RANK',   '001',  '002',  '2018001'),
+('HIS20250301003', 'TO_SALARY', '4000', '4800', '2018001'),
+('HIS20250301003', 'NOTE',      NULL,   '승진 연한 부족으로 대상 제외', '2018001'),
+
+
+-- ==================================================================================
+-- 4. [반려됨] 특별 승진 (REQ20250215001)
+-- Rule Type: 20 (승진)
+-- ==================================================================================
+
+-- 4-1. 송지아 (HIS20250215001) : 사원(001) -> 대리(002) 특진 시도
+('HIS20250215001', 'TO_RANK',   '001',  '002',  '2018001'),
+('HIS20250215001', 'TO_SALARY', '3800', '4500', '2018001'),
+('HIS20250215001', 'NOTE',      NULL,   '신규 프로젝트 런칭 공로', '2018001'),
+
+
+-- ==================================================================================
+-- 5. [취소됨] 파견 근무 (REQ20250210001)
+-- Rule Type: 40 (파견) -> Fields: DISP_LOC, START_DATE, END_DATE
+-- ==================================================================================
+
+-- 5-1. 기태영 (HIS20250210001) : 파견 기안 올렸다가 회수함
+('HIS20250210001', 'DISP_LOC',   NULL, '판교 테크노밸리 협력사', '2018001'),
+('HIS20250210001', 'START_DATE', NULL, '2025-03-01',          '2018001'),
+('HIS20250210001', 'END_DATE',   NULL, '2025-08-31',          '2018001');
 
 -- 사원 인사 정보 --
 CREATE TABLE ZHR_EMP_INFO (
@@ -3601,6 +4047,8 @@ CREATE TABLE ZHR_EMP_CERT (
     UNIQUE KEY UK_EMP_CERT (PERNR, ZSEQ)
 
 ) COMMENT '사원 자격증 정보 테이블';
+
+
 
 -- 더미데이터 --
 

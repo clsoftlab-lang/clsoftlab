@@ -95,7 +95,13 @@ async function loadCardData(pernr) {
             const field = form.querySelector(`[name="${key}"]`);
             if (field) {
                 // Checkbox, Radio 처리 필요 시 추가 로직 작성
-                field.value = data[key];
+				let value = data[key];
+				
+				if (['phoneNo', 'homeTel', 'emergencyPhone'].includes(key)) {
+	                value = formatPhoneNumber(value); 
+	            }
+				
+                field.value = value;
             }
         }
 
@@ -163,6 +169,28 @@ function toggleEditMode(isEdit) {
             el.disabled = !isEdit;
         }
     });
+	
+	const requiredLabels = form.querySelectorAll('.form-label.required');
+
+    requiredLabels.forEach(label => {
+        // 이미 추가된 별표가 있는지 확인 (중복 추가 방지)
+        const existingStar = label.querySelector('.required-star');
+
+        if (isEdit) {
+            // 수정 모드: 별표가 없으면 추가
+            if (!existingStar) {
+                const star = document.createElement('span');
+                star.className = 'text-danger required-star ms-1'; // Bootstrap 클래스 활용
+                star.innerText = '*';
+                label.appendChild(star);
+            }
+        } else {
+            // 조회 모드: 별표가 있으면 삭제
+            if (existingStar) {
+                existingStar.remove();
+            }
+        }
+    });
 
     // 버튼 그룹 전환
     if (isEdit) {
@@ -180,18 +208,20 @@ async function savePrivInfo() {
     const form = document.getElementById('editForm');
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
+	
+	const ssnInput = form.querySelector('input[name="ssn"]');
+	    if (ssnInput) {
+	        data.ssn = ssnInput.value;
+			console.log(ssnInput.value);
+	    }
 
     // 유효성 검사
     if (!data.pernr) { alert('사원 번호가 없습니다.'); return; }
     if (!data.phoneNo) { alert('휴대전화번호는 필수입니다.'); return; }
 
-    // 마스킹된 SSN은 전송하지 않음
-    if (data.ssn && data.ssn.includes('*')) {
-        delete data.ssn;
-    }
 
     try {
-        const response = await fetch('/hr/employee-card/priv', {
+        const response = await fetch('/hr/employee-priv', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -215,14 +245,99 @@ async function savePrivInfo() {
 // ----------------------------------------------------
 function execDaumPostcode() {
     new daum.Postcode({
+		shorthand : false,
         oncomplete: function(data) {
             var addr = (data.userSelectedType === 'R') ? data.roadAddress : data.jibunAddress;
             
-            document.getElementById('zipCode').value = data.zonecode;
+            document.getElementById('postCode').value = data.zonecode;
             document.getElementById("addrMain").value = addr;
             document.getElementById("sido").value = data.sido;
             document.getElementById("sigungu").value = data.sigungu;
+			
+			document.getElementById("addrDetail").value = '';
             document.getElementById("addrDetail").focus();
         }
     }).open();
+}
+
+
+const autoHyphenMulti = (target) => {
+    let value = target.value.replace(/[^0-9]/g, '');
+
+    let result = '';
+
+    if (value.startsWith('02')) {
+        // [서울] 02로 시작하는 경우
+        
+        // 최대 10자리까지만 허용 (02-1234-5678)
+        if (value.length > 10) value = value.substring(0, 10);
+
+        if (value.length < 10) {
+            // 9자리 이하일 때 (예: 021234567 -> 02-123-4567)
+            // 숫자가 차오를 때는 2-3-4 패턴으로 보여주다가
+            result = value.replace(/(\d{2})(\d{3})(\d{4})/, '$1-$2-$3');
+            
+            // 아직 3번째 그룹(뒷자리)이 완성되지 않았을 때(입력 중)를 위한 코드
+            if (value.length < 9) {
+                 result = value.replace(/(\d{2})(\d{0,4})(\d{0,4})/, '$1-$2-$3');
+            }
+        } else {
+            // 10자리일 때 (예: 0212345678 -> 02-1234-5678)
+            result = value.replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
+
+    } else {
+        // [그 외] 010, 031, 051 등
+        
+        // 최대 11자리까지만 허용
+        if (value.length > 11) value = value.substring(0, 11);
+
+        if (value.length < 11) {
+            // 10자리 이하 (예: 0311234567 -> 031-123-4567)
+            result = value.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+            
+             // 입력 중 코드
+            if (value.length < 10) {
+                result = value.replace(/(\d{0,3})(\d{0,4})(\d{0,4})/, '$1-$2-$3');
+            }
+        } else {
+            // 11자리 (예: 01012345678 -> 010-1234-5678)
+            result = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
+    }
+
+    // 3. 뒤에 남는 하이픈(--) 제거 후 반영
+    target.value = result.replace(/-{1,2}$/g, "");
+}
+
+// [Util] 전화번호 포맷팅 코어 함수 (문자열 -> 문자열)
+function formatPhoneNumber(input) {
+    if(!input) return '';
+    
+    const value = input.toString().replace(/[^0-9]/g, '');
+    let result = '';
+
+    // 2. 서울(02) vs 그 외 구분 로직
+    if (value.startsWith('02')) {
+        // 서울: 02-xxxx-xxxx (최대 10자리)
+        if (value.length < 10) { 
+            // 02-123-4567 (9자리)
+            result = value.replace(/(\d{2})(\d{3})(\d{4})/, '$1-$2-$3');
+        } else { 
+            // 02-1234-5678 (10자리)
+            result = value.replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3'); 
+        }
+    } else {
+        // 그 외: 010-xxxx-xxxx (최대 11자리)
+        if (value.length < 11) {
+            // 031-123-4567 (10자리)
+            result = value.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+        } else {
+            // 010-1234-5678 (11자리)
+            result = value.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
+    }
+    
+    // 포맷팅이 안 먹히는 짧은 숫자 등의 경우 원본 반환 (혹은 하이픈 제거 처리)
+    return result || value; 
 }

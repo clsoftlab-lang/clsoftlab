@@ -29,7 +29,7 @@ public class EmployeePrivDetailDto {
     private String email;
     
     // --- 주소 세분화 (addr -> 4개 필드) ---
-    private String zipCode;
+    private String postCode;
     private String sido;
     private String sigungu;
     private String addrMain;
