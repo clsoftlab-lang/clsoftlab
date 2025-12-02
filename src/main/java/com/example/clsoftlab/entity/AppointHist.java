@@ -1,14 +1,23 @@
 package com.example.clsoftlab.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
@@ -30,14 +39,24 @@ public class AppointHist extends BaseEntity {
     @Column(name = "ZHIST_ID", length = 20, nullable = false)
     private String id; // 발령 이력 ID (PK)
 
-    @Column(name = "ZREQ_ID", length = 20, nullable = false)
-    private String reqId; // 발령 품의 ID (Header 참조)
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ZREQ_ID", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private AppointReq appointReq;
 
-    @Column(name = "PERNR", length = 20, nullable = false)
-    private String pernr; // 대상자 사번
+    // 2. [참조] 발령 기준 (Rule) 연결 (화면 출력용)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ZRULE_ID", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private AppointRule appointRule;
 
-    @Column(name = "ZRULE_ID", length = 10, nullable = false)
-    private String ruleId; // 적용된 발령 기준 ID
+    // 3. [자식] 발령 상세 (Detail) 리스트
+    @OneToMany(mappedBy = "appointHist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AppointDetail> details = new ArrayList<>();
+
+    // 4. [대상자] 사원 (Employee) 연결 (이름, 부서 등 조회용)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PERNR", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private EmployeeMaster employee;
+
 
     @Column(name = "ZEFF_DATE", nullable = false)
     private LocalDate effDate; // 발령 시행일

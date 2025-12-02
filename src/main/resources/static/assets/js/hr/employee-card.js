@@ -20,42 +20,27 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof militaryList !== 'undefined') militaryList.forEach(c => codeMaps.military[c.code] = c.name);
 
     // 2. 초기 로드 (URL 파라미터 or 로그인 유저)
-    const urlParams = new URLSearchParams(window.location.search);
-    // URL에 pernr이 있으면 그 사람을, 없으면 로그인한 본인을 조회
-    const targetPernr = urlParams.get('pernr') || loginUserPernr;
+	const urlParams = new URLSearchParams(window.location.search);
+    let targetPernr = urlParams.get('pernr');
 
-    if (targetPernr) {
-        loadCardData(targetPernr);
-    }
+	const isManager = document.getElementById('searchKeyword') !== null;
 
-    // 3. 검색 엔터키 이벤트
-    const searchInput = document.getElementById('searchKeyword');
-    if (searchInput) {
-        searchInput.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                searchCard();
-            }
-        });
-    }
-});
+	// "URL에 사번이 있고" + "내 사번이 아닌데" + "관리자도 아니라면" -> 차단
+	   if (targetPernr && targetPernr !== loginUserPernr && !isManager) {
+	       alert('타인의 정보를 조회할 권한이 없습니다.\n본인 정보로 이동합니다.');
+	       // 본인 사번 URL로 페이지 새로고침(이동)
+	       window.location.href = location.pathname + '?pernr=' + loginUserPernr;
+	       return;
+	   }
 
-document.addEventListener('DOMContentLoaded', function () {
-    
-    // 코드 리스트를 Map으로 변환 (검색 속도 향상)
-    if (typeof deptList !== 'undefined') deptList.forEach(c => codeMaps.dept[c.code] = c.name);
-    if (typeof rankList !== 'undefined') rankList.forEach(c => codeMaps.rank[c.code] = c.name);
-    if (typeof dutyList !== 'undefined') dutyList.forEach(c => codeMaps.duty[c.code] = c.name);
-    if (typeof statusList !== 'undefined') statusList.forEach(c => codeMaps.status[c.code] = c.name);
+	   // 사번이 없으면 본인 사번 기본값
+	   if (!targetPernr) {
+	   		targetPernr = loginUserPernr;
+		}
 
-    // 2. 초기 로드 (URL 파라미터 or 로그인 유저)
-    const urlParams = new URLSearchParams(window.location.search);
-    // URL에 pernr이 있으면 그 사람을, 없으면 로그인한 본인을 조회
-    const targetPernr = urlParams.get('pernr') || loginUserPernr;
-
-    if (targetPernr) {
-        loadCardData(targetPernr);
-    }
+	   if (targetPernr) {
+	       loadCardData(targetPernr);
+	   }
 
     // 3. 검색 엔터키 이벤트
     const searchInput = document.getElementById('searchKeyword');
@@ -67,8 +52,20 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+	
+	// 4. 발령 이력 탭 클릭 시 데이터 로드 (Lazy Loading)
+	const tabJoin = document.getElementById('tab-join');
+    if (tabJoin) {
+        tabJoin.addEventListener('shown.bs.tab', function () {
+            // 현재 조회된 사번 (검색창 값 우선, 없으면 로그인 유저)
+			const searchInput = document.getElementById('searchKeyword');
+			            
+            // [수정] 검색창이 없는 경우(일반 사용자)를 대비해 안전하게 체크
+            const currentPernr = (searchInput && searchInput.value) ? searchInput.value : loginUserPernr;
+            loadAppointHistory(currentPernr);
+        });
+    }
 });
-
 
 
 async function loadCardData(pernr) {
@@ -149,6 +146,138 @@ function searchCard() {
         return;
     }
     loadCardData(keyword);
+}
+
+async function loadAppointHistory(pernr) {
+    const container = document.getElementById('appointTimeline');
+    if (!pernr || !container) return;
+
+    try {
+        // 로딩 표시
+        container.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                <div class="mt-2 small">이력을 불러오는 중...</div>
+            </div>`;
+
+        // API 호출
+        const response = await fetch(`/hr/employee-appoint/history/${pernr}`);
+        if (!response.ok) throw new Error('이력 조회 실패');
+        
+        const historyList = await response.json();
+
+        if (!historyList || historyList.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-5">발령 이력이 없습니다.</div>';
+            return;
+        }
+
+        // HTML 조립
+        let html = '';
+        historyList.forEach(hist => {
+            html += renderTimelineItem(hist);
+        });
+
+        // 마지막 라인 마감 (템플릿 스타일 유지)
+        html += `
+            <div class="d-flex align-items-center">
+                <div class="flex-fill ps-3 pb-0 timeline-hrline"></div>
+            </div>`;
+
+        container.innerHTML = html;
+
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = '<div class="text-center text-danger py-5">정보를 불러오지 못했습니다.</div>';
+    }
+}
+
+/**
+ * 타임라인 아이템 렌더링 
+ */
+function renderTimelineItem(hist) {
+    // 1. 상세 변경 내역 (Details)
+    let detailsHtml = '';
+    if (hist.details && hist.details.length > 0) {
+        detailsHtml = '<ul class="list-unstyled mb-0 mt-2 text-muted small">';
+        hist.details.forEach(det => {
+            const label = det.fieldName || det.fieldCode; // 필드명 없으면 코드로
+			
+			let oldName = det.valueOld;
+	        let newName = det.value;
+	
+	        // fieldCode에 따라 매핑할 코드 리스트 결정
+	        if (det.fieldCode.includes('DEPT')) { // 부서 (TO_DEPT)
+	            oldName = codeMaps.dept[det.valueOld] || det.valueOld;
+	            newName = codeMaps.dept[det.value] || det.value;
+	        } 
+	        else if (det.fieldCode.includes('RANK')) { // 직급 (TO_RANK)
+	            oldName = codeMaps.rank[det.valueOld] || det.valueOld;
+	            newName = codeMaps.rank[det.value] || det.value;
+	        }
+	        else if (det.fieldCode.includes('DUTY')) { // 직무 (TO_DUTY)
+	            oldName = codeMaps.duty[det.valueOld] || det.valueOld;
+	            newName = codeMaps.duty[det.value] || det.value;
+	        }
+	        else if (det.fieldCode.includes('SALARY')) { // 연봉 (숫자 포맷)
+	            if(det.valueOld) oldName = Number(det.valueOld).toLocaleString();
+	            if(det.value) newName = Number(det.value).toLocaleString();
+	        }
+            
+            // Old -> New 표시 로직
+			let valueDisplay = '';
+            if (oldName) {
+                valueDisplay = `${oldName} <i class="ti ti-arrow-right mx-1"></i> <b>${newName}</b>`;
+            } else {
+                valueDisplay = `<b>${newName}</b>`;
+            }
+            
+            detailsHtml += `<li>• ${label} : ${valueDisplay}</li>`;
+        });
+        detailsHtml += '</ul>';
+    }
+
+    // 2. 비고 (Remark)
+    if(hist.remark) {
+        detailsHtml += `<div class="mt-2 text-info small bg-light p-2 rounded"><i class="ti ti-note me-1"></i> ${hist.remark}</div>`;
+    }
+
+    // 3. 스타일링 (취소, 점 색상)
+    const isCanceled = (hist.isCanceled === 'Y');
+    const opacityClass = isCanceled ? 'opacity-50' : '';
+    const badgeHtml = isCanceled ? '<span class="badge bg-danger ms-1">철회됨</span>' : '';
+    
+    // 발령 유형별 점 색상 (10:채용-초록, 20:승진-파랑, 30:전보-주황, 90:퇴직-빨강)
+    let dotColorClass = 'text-gray-2';
+    if (hist.ruleType === '10') dotColorClass = 'text-success';
+    else if (hist.ruleType === '20') dotColorClass = 'text-primary';
+    else if (hist.ruleType === '30') dotColorClass = 'text-warning';
+    else if (hist.ruleType === '90') dotColorClass = 'text-danger';
+
+    // 4. HTML 반환 (User Template Structure)
+    return `
+        <div class="d-flex align-items-center ${opacityClass}">
+            <!-- [Left] Date & Dot -->
+            <div class="d-flex align-items-center active-time">
+                <span class="timeline-date text-dark fw-bold" style="min-width: 90px;">${hist.effDate}</span>
+                <span class="timeline-border d-flex align-items-center justify-content-center bg-white">
+                    <i class="ti ti-point-filled ${dotColorClass} fs-18"></i>
+                </span>
+            </div>
+            
+            <!-- [Right] Content -->
+            <div class="flex-fill ps-3 pb-4 timeline-hrline">
+                <div class="mt-4">
+                    <p class="fw-medium text-gray-9 mb-1" style="font-size: 1.05rem;">
+                        ${hist.ruleName} ${badgeHtml}
+                        <span class="text-muted fw-normal ms-1 small">(${hist.reqTitle})</span>
+                    </p>
+                    <div class="ms-1">
+                        ${detailsHtml}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 

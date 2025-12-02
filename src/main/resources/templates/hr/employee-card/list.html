@@ -206,9 +206,19 @@
 		                            </div>
 		                        </div>
 		                        
-		                        <div class="tab-pane fade" id="joinInfo" role="tabpanel">
-		                            <p class="text-muted p-3">발령 이력 탭 준비중...</p>
-		                        </div>
+		                        <!-- [TAB 2] 발령 이력 (Timeline Template) -->
+								<div class="tab-pane fade" id="joinInfo" role="tabpanel">
+								    <div class="card">
+								        <!-- JS가 데이터를 주입할 컨테이너 -->
+								        <div class="card-body schedule-timeline" id="appointTimeline">
+								            <!-- 로딩 중 표시 -->
+								            <div class="text-center py-5">
+								                <div class="spinner-border text-primary" role="status"></div>
+								                <div class="mt-2 text-muted">이력을 불러오는 중...</div>
+								            </div>
+								        </div>
+								    </div>
+								</div>
 		                        
 		                        <div class="tab-pane fade" id="familyInfo" role="tabpanel">
 		                            <p class="text-muted p-3">가족 정보 탭 준비중...</p>
