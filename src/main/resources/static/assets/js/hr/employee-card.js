@@ -5,12 +5,14 @@ const codeMaps = {
     status: {},
     nation: {},   
     marital: {},  
-    military: {}  
+    military: {},
+	relation: {}, 
+	job: {}
 };
 
 document.addEventListener('DOMContentLoaded', function () {
     
-    // 코드 리스트를 Map으로 변환 (검색 속도 향상)
+    // 코드 리스트를 Map으로 변환
     if (typeof deptList !== 'undefined') deptList.forEach(c => codeMaps.dept[c.code] = c.name);
     if (typeof rankList !== 'undefined') rankList.forEach(c => codeMaps.rank[c.code] = c.name);
     if (typeof dutyList !== 'undefined') dutyList.forEach(c => codeMaps.duty[c.code] = c.name);
@@ -18,8 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	if (typeof nationList !== 'undefined') nationList.forEach(c => codeMaps.nation[c.code] = c.name);
 	if (typeof maritalList !== 'undefined') maritalList.forEach(c => codeMaps.marital[c.code] = c.name);
     if (typeof militaryList !== 'undefined') militaryList.forEach(c => codeMaps.military[c.code] = c.name);
+	if (typeof relationList !== 'undefined') relationList.forEach(c => codeMaps.relation[c.code] = c.name);
+    if (typeof jobList !== 'undefined') jobList.forEach(c => codeMaps.job[c.code] = c.name);
 
-    // 2. 초기 로드 (URL 파라미터 or 로그인 유저)
+    // 초기 로드 (URL 파라미터 or 로그인 유저)
 	const urlParams = new URLSearchParams(window.location.search);
     let targetPernr = urlParams.get('pernr');
 
@@ -42,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	       loadCardData(targetPernr);
 	   }
 
-    // 3. 검색 엔터키 이벤트
+    // 검색 엔터키 이벤트
     const searchInput = document.getElementById('searchKeyword');
     if (searchInput) {
         searchInput.addEventListener("keypress", function(event) {
@@ -53,20 +57,51 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 	
-	// 4. 발령 이력 탭 클릭 시 데이터 로드 (Lazy Loading)
-	const tabJoin = document.getElementById('tab-join');
+	// 발령 이력 탭 클릭 시 데이터 로드 (Lazy Loading)
+    const tabJoin = document.getElementById('tab-join');
     if (tabJoin) {
         tabJoin.addEventListener('shown.bs.tab', function () {
-            // 현재 조회된 사번 (검색창 값 우선, 없으면 로그인 유저)
-			const searchInput = document.getElementById('searchKeyword');
-			            
-            // [수정] 검색창이 없는 경우(일반 사용자)를 대비해 안전하게 체크
-            const currentPernr = (searchInput && searchInput.value) ? searchInput.value : loginUserPernr;
+            const currentPernr = getCurrentPernr();
             loadAppointHistory(currentPernr);
         });
     }
+
+    // 가족 정보 탭 클릭 시 데이터 로드
+    const tabFamily = document.getElementById('tab-family');
+    if (tabFamily) {
+        tabFamily.addEventListener('shown.bs.tab', function () {
+            const currentPernr = getCurrentPernr();
+            loadFamilyData(currentPernr);
+        });
+    }
+	
+    // 탭 변경 시 '정보 수정' 버튼 표시/숨김 제어
+    const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabEls.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+            const activeTabId = event.target.id; // 클릭한 탭의 ID (tab-basic, tab-join, tab-family)
+            const btnEdit = document.getElementById('btnEditMode');
+            const btnGroup = document.getElementById('editBtnGroup');
+
+            toggleEditMode(false); 
+
+            if (activeTabId === 'tab-basic') {
+                if (btnEdit) btnEdit.style.display = 'block';
+            } else {
+                if (btnEdit) btnEdit.style.display = 'none';
+                if (btnGroup) btnGroup.style.display = 'none'; 
+            }
+        });
+    });
+	
+	
 });
 
+function getCurrentPernr() {
+    const searchInput = document.getElementById('searchKeyword');
+    // 검색창 값이 있으면(관리자 검색) 그 값, 없으면 로그인 유저(일반 사용자)
+    return (searchInput && searchInput.value) ? searchInput.value : loginUserPernr;
+}
 
 async function loadCardData(pernr) {
     if (!pernr) return;
@@ -278,6 +313,58 @@ function renderTimelineItem(hist) {
             </div>
         </div>
     `;
+}
+
+// [TAB 3] 가족 정보 로드
+async function loadFamilyData(pernr) {
+    const $tbody = $('#familyTableBody');
+    const $noMsg = $('#noFamilyMsg');
+
+    if (!pernr) {
+		return;
+	}
+
+    try {
+        // 로딩 중 표시 (테이블 초기화)
+        $tbody.html('<tr><td colspan="4" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>');
+        $noMsg.hide();
+
+        const response = await fetch(`/hr/employee-family/simple/${pernr}`); 
+        
+        if (!response.ok) {
+            throw new Error('가족 정보 조회 실패');
+        }
+
+        const familyList = await response.json();
+        
+        $tbody.empty(); // 로딩 스피너 제거
+
+        if (!familyList || familyList.length === 0) {
+            $noMsg.show();
+            return;
+        }
+
+        let html = '';
+        familyList.forEach(item => {
+			
+			const relationTxt = codeMaps.relation[item.familyType] || item.familyType || '-'; 
+            const jobTxt      = codeMaps.job[item.jobType]         || item.jobType    || '-';
+
+			html += `
+			                <tr>
+			                    <td class="fw-bold">${item.familyName}</td>
+			                    <td>${relationTxt}</td> <td>${item.birthDate}</td>
+			                    <td>${jobTxt}</td>
+			                </tr>
+			            `;
+        });
+
+        $tbody.html(html);
+
+    } catch (error) {
+        console.error(error);
+        $tbody.html('<tr><td colspan="4" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
+    }
 }
 
 

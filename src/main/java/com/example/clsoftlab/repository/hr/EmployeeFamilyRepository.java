@@ -1,4 +1,4 @@
-package com.example.clsoftlab.repository.pay;
+package com.example.clsoftlab.repository.hr;
 
 import java.util.List;
 
@@ -22,4 +22,7 @@ public interface EmployeeFamilyRepository extends JpaRepository<EmployeeFamily, 
 			+ "JOIN e.employee em "
 			+ "ORDER BY em.name")
 	public List<EmployeeMaster> getEmployeeList ();
+	
+	// 사번으로 가족 정보 조회
+	public List<EmployeeFamily> findAllByEmployee_PernrOrderByFamilySeq (String pernr);
 }

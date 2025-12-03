@@ -1,8 +1,9 @@
-package com.example.clsoftlab.controller.pay;
+package com.example.clsoftlab.controller.hr;
 
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,25 +14,24 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
-import com.example.clsoftlab.dto.pay.EmployeeFamilyDetailDto;
-import com.example.clsoftlab.dto.pay.EmployeeFamilyRequestDto;
+import com.example.clsoftlab.dto.common.UserAccountResponseDto;
+import com.example.clsoftlab.dto.hr.EmployeeFamilyDetailDto;
+import com.example.clsoftlab.dto.hr.EmployeeFamilyRequestDto;
 import com.example.clsoftlab.service.common.EmployeeMasterService;
 import com.example.clsoftlab.service.pay.EmployeeFamilyService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/pay/employee-family")
+@RequestMapping("/hr/employee-family")
+@RequiredArgsConstructor
 public class EmployeeFamilyController {
 
 	private final EmployeeFamilyService employeeFamilyService;
 	private final EmployeeMasterService employeeMasterService;
-	
-	public EmployeeFamilyController(EmployeeFamilyService employeeFamilyService, EmployeeMasterService employeeMasterService) {
-		this.employeeFamilyService = employeeFamilyService;
-		this.employeeMasterService = employeeMasterService;
-	}
 	
 	// 검색어로 목록 조회
 	@GetMapping("")
@@ -81,4 +81,24 @@ public class EmployeeFamilyController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
+	//관리자용 list 조회
+	@GetMapping("/simple/{pernr}")
+	public ResponseEntity<?> findById (@PathVariable String pernr, @SessionAttribute(name = "LOGIN_USER", required = false) UserAccountResponseDto sessionUser) {
+		
+		if (sessionUser == null) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+	    }
+
+	    boolean isMyData = sessionUser.getUserId().equals(pernr);
+	    
+	    boolean isAdminOrHr = "ADMIN".equals(sessionUser.getSysRole()) 
+	                       || "HR_MNG".equals(sessionUser.getSysRole());
+
+	    if (!isMyData && !isAdminOrHr) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("타인의 정보를 조회할 권한이 없습니다.");
+	    }
+		
+		return ResponseEntity.ok(employeeFamilyService.getEmployeeSimpleFamilyList(pernr));
+				
+	}
 }

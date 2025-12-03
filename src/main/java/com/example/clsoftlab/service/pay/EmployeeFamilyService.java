@@ -10,19 +10,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.example.clsoftlab.controller.pay.BackpayRuleController;
 import com.example.clsoftlab.dto.common.EmployeeMasterDto;
-import com.example.clsoftlab.dto.pay.EmployeeFamilyDetailDto;
-import com.example.clsoftlab.dto.pay.EmployeeFamilyRequestDto;
+import com.example.clsoftlab.dto.hr.EmployeeFamilyDetailDto;
+import com.example.clsoftlab.dto.hr.EmployeeFamilyRequestDto;
+import com.example.clsoftlab.dto.hr.EmployeeFamilySimpleDto;
 import com.example.clsoftlab.entity.EmployeeFamily;
 import com.example.clsoftlab.repository.common.EmployeeMasterRepository;
-import com.example.clsoftlab.repository.pay.EmployeeFamilyRepository;
-import com.example.clsoftlab.repository.pay.specification.EmployeeFamilySpecs;
+import com.example.clsoftlab.repository.hr.EmployeeFamilyRepository;
+import com.example.clsoftlab.repository.hr.specification.EmployeeFamilySpecs;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeFamilyService {
 
 
@@ -30,12 +32,6 @@ public class EmployeeFamilyService {
 	private final EmployeeMasterRepository employeeMasterRepository;
 	private final ModelMapper modelMapper;
 	
-	public EmployeeFamilyService(EmployeeFamilyRepository employeeFamilyRepository, EmployeeMasterRepository employeeMasterRepository,
-			ModelMapper modelMapper, BackpayRuleController backpayRuleController) {
-		this.employeeFamilyRepository = employeeFamilyRepository;
-		this.employeeMasterRepository = employeeMasterRepository;
-		this.modelMapper = modelMapper;
-	}
 	
 	// 검색어로 조회
 	public Page<EmployeeFamilyDetailDto> searchEmployeeFamily (List<String> empNo, String familyName, List<String> familyType, int page, int size) {
@@ -54,7 +50,7 @@ public class EmployeeFamilyService {
 	@Transactional
 	public void addNewEmployeeFamily (EmployeeFamilyRequestDto dto) {
 		EmployeeFamily employeeFamily = modelMapper.map(dto, EmployeeFamily.class);
-		employeeFamily.setEmployee(employeeMasterRepository.getReferenceById(dto.getEmpNo()));
+		employeeFamily.setEmployee(employeeMasterRepository.getReferenceById(dto.getPernr()));
 		employeeFamilyRepository.save(employeeFamily);
 	}
 	
@@ -81,6 +77,13 @@ public class EmployeeFamilyService {
 	public List<EmployeeMasterDto> getEmployeeList () {
 		return employeeFamilyRepository.getEmployeeList().stream()
 				.map(i -> modelMapper.map(i, EmployeeMasterDto.class))
+				.toList();
+	}
+	
+	// 가족 관계 list 조회 (관리자용)
+	public List<EmployeeFamilySimpleDto> getEmployeeSimpleFamilyList (String pernr) {
+		return employeeFamilyRepository.findAllByEmployee_PernrOrderByFamilySeq(pernr).stream()
+				.map(i -> modelMapper.map(i, EmployeeFamilySimpleDto.class))
 				.toList();
 	}
 }

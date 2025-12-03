@@ -220,9 +220,31 @@
 								    </div>
 								</div>
 		                        
+		                        <!-- 가족 관계 탭 -->
 		                        <div class="tab-pane fade" id="familyInfo" role="tabpanel">
-		                            <p class="text-muted p-3">가족 정보 탭 준비중...</p>
-		                        </div>
+								    <h5 class="mb-3 text-primary"><i class="ti ti-users"></i> 가족 관계</h5>
+								    
+								    <div class="card">
+								        <div class="table-responsive">
+								            <table class="table table-vcenter card-table table-hover">
+								                <thead>
+								                    <tr>
+								                        <th>성명</th>
+								                        <th>관계</th>
+								                        <th>생년월일</th>
+								                        <th>직업</th>
+								                </thead>
+								                <tbody id="familyTableBody">
+								                    </tbody>
+								            </table>
+								        </div>
+								        
+								        <div id="noFamilyMsg" class="text-center p-5 text-muted" style="display:none;">
+								            <i class="ti ti-mood-empty fs-2 d-block mb-2"></i>
+								            등록된 가족 정보가 없습니다.
+								        </div>
+								    </div>
+								</div>
 		                    </div>
 		                </form>
 		            </div>
@@ -240,6 +262,8 @@
         const nationList = /*[[${nationCodeList}]]*/ [];
         const maritalList = /*[[${maritalCodeList}]]*/ [];
         const militaryList = /*[[${militaryCodeList}]]*/ [];
+        const relationList = /*[[${relationCodeList}]]*/ [];
+        const jobList      = /*[[${jobCodeList}]]*/ [];
         </script>
         <script src="/assets/js/hr/employee-card.js"></script>
     </th:block> 

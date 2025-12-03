@@ -1,4 +1,4 @@
-package com.example.clsoftlab.repository.pay.specification;
+package com.example.clsoftlab.repository.hr.specification;
 
 import java.util.List;
 
