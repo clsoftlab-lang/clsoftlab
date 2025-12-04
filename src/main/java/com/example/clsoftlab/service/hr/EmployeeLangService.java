@@ -11,35 +11,37 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.hr.EmployeeLangDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeeLangRequestDto;
+import com.example.clsoftlab.dto.hr.EmployeeLangSimpleDto;
 import com.example.clsoftlab.entity.EmployeeLang;
 import com.example.clsoftlab.repository.hr.EmployeeLangRepository;
-import com.example.clsoftlab.service.common.FileService;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeLangService {
 
 	private final EmployeeLangRepository employeeLangRepository;
 	private final ModelMapper modelMapper;
 	
-	public EmployeeLangService(EmployeeLangRepository employeeLangRepository, ModelMapper modelMapper,
-			FileService fileService) {
-		this.employeeLangRepository = employeeLangRepository;
-		this.modelMapper = modelMapper;
-	}
-	
-	// 사번으로 목록 조회
+	// 사번으로 page 조회
 	public Page<EmployeeLangDetailDto> searchEmployeeLang (String pernr, int page , int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("seq").ascending());
+		Pageable pageable = PageRequest.of(page, size);
 		
 		return employeeLangRepository.findByPernr(pernr, pageable)
 				.map(i -> modelMapper.map(i, EmployeeLangDetailDto.class));
+	}
+	
+	// 사번으로 simple List 조회
+	public List<EmployeeLangSimpleDto> getSimpleList (String pernr) {
+		return employeeLangRepository.findAllByPernrOrderBySeq(pernr).stream()
+				.map(i -> modelMapper.map(i, EmployeeLangSimpleDto.class))
+				.toList();
 	}
 	
 	// 새 어학 리스트 저장
@@ -48,7 +50,7 @@ public class EmployeeLangService {
 		
 		Set<Integer> langSeqs = new HashSet<>();
 		
-		List<EmployeeLang> originalLang = employeeLangRepository.findByPernr(pernr);
+		List<EmployeeLang> originalLang = employeeLangRepository.findAllByPernrOrderBySeq(pernr);
 		
 		// 순차 검사
 		for (EmployeeLangRequestDto dto : newDtoList) {

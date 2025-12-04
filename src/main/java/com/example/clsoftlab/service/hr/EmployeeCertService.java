@@ -11,30 +11,27 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.hr.EmployeeCertDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeeCertRequestDto;
+import com.example.clsoftlab.dto.hr.EmployeeCertSimpleDto;
 import com.example.clsoftlab.entity.EmployeeCert;
 import com.example.clsoftlab.repository.hr.EmployeeCertRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeCertService {
 
 	private final EmployeeCertRepository employeeCertRepository;
 	private final ModelMapper modelMapper;
 	
-	public EmployeeCertService(EmployeeCertRepository employeeCertRepository, ModelMapper modelMapper) {
-		this.employeeCertRepository = employeeCertRepository;
-		this.modelMapper = modelMapper;
-	}
-	
 	// 상세 정보 조회
 	public Page<EmployeeCertDetailDto> searchEmployeeCert (String pernr, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("seq").ascending());
+		Pageable pageable = PageRequest.of(page, size);
 		
 		return employeeCertRepository.findByPernr(pernr, pageable)
 				.map(i -> modelMapper.map(i, EmployeeCertDetailDto.class));
@@ -47,7 +44,7 @@ public class EmployeeCertService {
 		Set<String> certNames = new HashSet<>();
 	    Set<Integer> certSeqs = new HashSet<>();
 		
-		List<EmployeeCert> originalCerts = employeeCertRepository.findByPernr(pernr);
+		List<EmployeeCert> originalCerts = employeeCertRepository.findAllByPernrOrderBySeq(pernr);
 		
 		// 중복 검사
 		for (EmployeeCertRequestDto dto : newDtoList) {
@@ -95,6 +92,13 @@ public class EmployeeCertService {
 	        throw new IllegalArgumentException("이미 등록된 자격증이거나 순번이 중복됩니다. (DB 오류)");
 	    }
 		
+	}
+	
+	// 사번으로 심플 리스트 조회 (card페이지 용)
+	public List<EmployeeCertSimpleDto> getSimpleDtoList (String pernr) {
+		return employeeCertRepository.findAllByPernrOrderBySeq(pernr).stream()
+				.map(i -> modelMapper.map(i, EmployeeCertSimpleDto.class))
+				.toList();
 	}
 	
 }

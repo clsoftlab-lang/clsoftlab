@@ -28,6 +28,7 @@ CREATE TABLE ZSYS_CODE_GROUP (
     PRIMARY KEY (ZGROUP_ID)
 ) COMMENT '공통코드 그룹 마스터';
 
+
 -- 더미 데이터 --
 INSERT INTO ZSYS_CODE_GROUP 
 (ZGROUP_ID, ZGROUP_NM, ZUSE_YN, ZORDER, ZREMARK, IS_SYSTEM, CREATED_BY) 
@@ -50,9 +51,17 @@ VALUES
 ('HR_JOB_TYPE',  '가족 직업 구분', 'Y', 110, '소득 공제 판단용 직업 분류',  'N', 'SYSTEM'),
 ('HR_SCH_TYPE',  '학력/학교 구분', 'Y', 120, '학자금 지원 기준 학교 급수',  'N', 'SYSTEM'),
 
--- [자격증 정보 관련 (NEW)]
+-- [자격증 정보 관련]
 ('HR_CERT_CD',   '자격증 목록',    'Y', 130, '국가기술자격 및 어학 시험',   'N', 'SYSTEM'),
-('HR_CERT_RANK', '자격 등급',      'Y', 140, '기사, 산업기사, 기술사 등',   'N', 'SYSTEM');
+('HR_CERT_RANK', '자격 등급',      'Y', 140, '기사, 산업기사, 기술사 등',   'N', 'SYSTEM'),
+
+-- [어학 정보 관련]
+('HR_LANG',      '어학 언어 구분',  'Y', 200, '영어, 일본어, 중국어 등',    'N', 'SYSTEM'),
+('HR_LANG_TEST', '어학 시험 종류',  'Y', 210, 'TOEIC, OPIc, JPT 등',       'N', 'SYSTEM'),
+('HR_LANG_LVL',  '어학 구사 수준',  'Y', 220, '회화/독해 능력 수준',        'N', 'SYSTEM'),
+
+-- [경력 정보 관련 ]
+('HR_CAREER_TYPE', '경력 근무 형태', 'Y', 150, '정규직, 계약직, 프리랜서 등', 'N', 'SYSTEM');
 
 
 -- 공통코드 상세 테이블 --
@@ -95,146 +104,98 @@ CREATE TABLE ZSYS_CODE_DETAIL (
 
 
 -- 더미 데이터 --
-INSERT INTO ZSYS_CODE_DETAIL 
-(ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, ZREMARK, IS_SYSTEM, CREATED_BY) 
-VALUES 
--- HR_DEPT (부서)
-('HR_DEPT', 'MGT',      '경영지원본부', 'Management Div', 10, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'HR',       '인사팀',       'HR Team',        11, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'FIN',      '재무회계팀',   'Finance Team',   12, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'DEV',      '기술연구소',   'R&D Center',     20, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'DEV_SVR',  '서버개발팀',   'Server Dev',     21, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'DEV_WEB',  '웹개발팀',     'Web Dev',        22, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'DEV_AI',   'AI데이터팀',   'AI/Data Team',   23, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'BIZ',      '사업본부',     'Business Div',   30, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'BIZ_SAL',  '영업팀',       'Sales Team',     31, NULL, 'N', 'SYSTEM'),
-('HR_DEPT', 'BIZ_MKT',  '마케팅팀',     'Marketing Team', 32, NULL, 'N', 'SYSTEM'),
+INSERT INTO ZSYS_CODE_DETAIL (ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, IS_SYSTEM, CREATED_BY) VALUES 
+-- HR_DEPT
+('HR_DEPT', 'MGT', '경영지원본부', 'Management', 10, 'N', 'SYSTEM'),
+('HR_DEPT', 'HR', '인사팀', 'HR Team', 11, 'N', 'SYSTEM'),
+('HR_DEPT', 'FIN', '재무회계팀', 'Finance', 12, 'N', 'SYSTEM'),
+('HR_DEPT', 'DEV', '기술연구소', 'R&D', 20, 'N', 'SYSTEM'),
+('HR_DEPT', 'DEV_SVR', '서버개발팀', 'Server', 21, 'N', 'SYSTEM'),
+('HR_DEPT', 'DEV_WEB', '웹개발팀', 'Web', 22, 'N', 'SYSTEM'),
+('HR_DEPT', 'DEV_AI', 'AI데이터팀', 'AI/Data', 23, 'N', 'SYSTEM'),
+('HR_DEPT', 'BIZ', '사업본부', 'Business', 30, 'N', 'SYSTEM'),
+('HR_DEPT', 'BIZ_SAL', '영업팀', 'Sales', 31, 'N', 'SYSTEM'),
+('HR_DEPT', 'BIZ_MKT', '마케팅팀', 'Marketing', 32, 'N', 'SYSTEM'),
 
--- HR_RANK (직급)
-('HR_RANK', '001', '사원', 'Staff',               10, NULL, 'N', 'SYSTEM'),
-('HR_RANK', '002', '대리', 'Assistant Manager',   20, NULL, 'N', 'SYSTEM'),
-('HR_RANK', '003', '과장', 'Manager',             30, NULL, 'N', 'SYSTEM'),
-('HR_RANK', '004', '차장', 'Deputy General Mgr',  40, NULL, 'N', 'SYSTEM'),
-('HR_RANK', '005', '부장', 'General Manager',     50, NULL, 'N', 'SYSTEM'),
-('HR_RANK', '009', '임원', 'Executive',           90, NULL, 'N', 'SYSTEM'),
+-- HR_RANK
+('HR_RANK', '001', '사원', 'Staff', 10, 'N', 'SYSTEM'),
+('HR_RANK', '002', '대리', 'Assistant', 20, 'N', 'SYSTEM'),
+('HR_RANK', '003', '과장', 'Manager', 30, 'N', 'SYSTEM'),
+('HR_RANK', '004', '차장', 'Deputy GM', 40, 'N', 'SYSTEM'),
+('HR_RANK', '005', '부장', 'General Mgr', 50, 'N', 'SYSTEM'),
+('HR_RANK', '009', '임원', 'Executive', 90, 'N', 'SYSTEM'),
 
--- HR_DUTY (직무)
-('HR_DUTY', 'SW_BE',  '백엔드 개발',    'Backend Dev',  10, NULL, 'N', 'SYSTEM'),
-('HR_DUTY', 'SW_FE',  '프론트엔드 개발', 'Frontend Dev', 20, NULL, 'N', 'SYSTEM'),
-('HR_DUTY', 'SW_APP', '모바일 앱 개발', 'Mobile App',   30, NULL, 'N', 'SYSTEM'),
-('HR_DUTY', 'PO',     '서비스 기획',    'Product Owner',40, NULL, 'N', 'SYSTEM'),
-('HR_DUTY', 'UIUX',   'UI/UX 디자인',   'Designer',     50, NULL, 'N', 'SYSTEM'),
-('HR_DUTY', 'HR_M',   '인사/채용',      'HR Manager',   60, NULL, 'N', 'SYSTEM'),
-('HR_DUTY', 'ACC',    '회계/세무',      'Accountant',   70, NULL, 'N', 'SYSTEM'),
-('HR_DUTY', 'SALES',  '기술 영업',      'Tech Sales',   80, NULL, 'N', 'SYSTEM'),
+-- HR_DUTY
+('HR_DUTY', 'SW_BE', '백엔드 개발', 'Backend', 10, 'N', 'SYSTEM'),
+('HR_DUTY', 'SW_FE', '프론트엔드', 'Frontend', 20, 'N', 'SYSTEM'),
+('HR_DUTY', 'SW_APP', '모바일 앱', 'Mobile App', 30, 'N', 'SYSTEM'),
+('HR_DUTY', 'PO', '서비스 기획', 'PO', 40, 'N', 'SYSTEM'),
+('HR_DUTY', 'UIUX', 'UI/UX 디자인', 'Designer', 50, 'N', 'SYSTEM'),
+('HR_DUTY', 'HR_M', '인사/채용', 'HR Manager', 60, 'N', 'SYSTEM'),
+('HR_DUTY', 'ACC', '회계/세무', 'Accountant', 70, 'N', 'SYSTEM'),
+('HR_DUTY', 'SALES', '기술 영업', 'Tech Sales', 80, 'N', 'SYSTEM'),
 
--- HR_EMPTYPE (고용 형태)
-('HR_EMPTYPE', 'REG', '정규직', 'Regular',    10, NULL, 'N', 'SYSTEM'),
-('HR_EMPTYPE', 'CON', '계약직', 'Contract',   20, NULL, 'N', 'SYSTEM'),
-('HR_EMPTYPE', 'INT', '인턴',   'Intern',     30, NULL, 'N', 'SYSTEM'),
-('HR_EMPTYPE', 'PAR', '파견직', 'Dispatched', 40, NULL, 'N', 'SYSTEM'),
+-- HR_STATUS
+('HR_STATUS', '10', '재직', 'Active', 10, 'Y', 'SYSTEM'),
+('HR_STATUS', '20', '휴직', 'On Leave', 20, 'Y', 'SYSTEM'),
+('HR_STATUS', '99', '퇴직', 'Retired', 99, 'Y', 'SYSTEM'),
 
--- HR_STATUS (재직 상태)
-('HR_STATUS', '10', '재직', 'Active',   10, NULL, 'Y', 'SYSTEM'),
-('HR_STATUS', '20', '휴직', 'On Leave', 20, NULL, 'Y', 'SYSTEM'),
-('HR_STATUS', '99', '퇴직', 'Retired',  99, NULL, 'Y', 'SYSTEM'),
+-- HR_NATION
+('HR_NATION', 'KR', '대한민국', 'Korea', 1, 'N', 'SYSTEM'),
+('HR_NATION', 'US', '미국', 'USA', 2, 'N', 'SYSTEM'),
+('HR_NATION', 'CN', '중국', 'China', 3, 'N', 'SYSTEM'),
+('HR_NATION', 'JP', '일본', 'Japan', 4, 'N', 'SYSTEM'),
 
--- HR_NATION (국적)
-('HR_NATION', 'KR', '대한민국', 'Korea, Rep.', 1, NULL, 'N', 'SYSTEM'),
-('HR_NATION', 'US', '미국',     'USA',         2, NULL, 'N', 'SYSTEM'),
-('HR_NATION', 'CN', '중국',     'China',       3, NULL, 'N', 'SYSTEM'),
-('HR_NATION', 'JP', '일본',     'Japan',       4, NULL, 'N', 'SYSTEM'),
-('HR_NATION', 'VN', '베트남',   'Vietnam',     5, NULL, 'N', 'SYSTEM'),
-('HR_NATION', 'ZZ', '기타',     'Others',      99,NULL, 'N', 'SYSTEM'),
+-- HR_CERT_CD 
+('HR_CERT_CD', 'IT001', '정보처리기사', 'Info Proc Eng', 10, 'N', 'SYSTEM'),
+('HR_CERT_CD', 'IT002', '정보보안기사', 'Info Sec Eng', 20, 'N', 'SYSTEM'),
+('HR_CERT_CD', 'IT003', 'SQLD', 'SQL Developer', 30, 'N', 'SYSTEM'),
+('HR_CERT_CD', 'IT004', 'AWS SAA', 'AWS Solutions', 40, 'N', 'SYSTEM'),
+('HR_CERT_CD', 'FN001', 'CPA(공인회계사)', 'CPA', 80, 'N', 'SYSTEM'),
+('HR_CERT_CD', 'FN002', '전산세무1급', 'Tax Acc 1', 90, 'N', 'SYSTEM'),
+('HR_CERT_CD', 'ETC99', '기타(직접입력)', 'Others', 999, 'Y', 'SYSTEM'),
 
--- HR_MARITAL (결혼 상태)
-('HR_MARITAL', '10', '미혼', 'Single',   10, NULL, 'N', 'SYSTEM'),
-('HR_MARITAL', '20', '기혼', 'Married',  20, NULL, 'N', 'SYSTEM'),
-('HR_MARITAL', '30', '이혼', 'Divorced', 30, NULL, 'N', 'SYSTEM'),
-('HR_MARITAL', '40', '사별', 'Widowed',  40, NULL, 'N', 'SYSTEM'),
+-- HR_CERT_RANK
+('HR_CERT_RANK', '10', '기술사/전문직', 'Professional', 10, 'N', 'SYSTEM'),
+('HR_CERT_RANK', '20', '기사', 'Engineer', 20, 'N', 'SYSTEM'),
+('HR_CERT_RANK', '30', '산업기사', 'Ind. Engineer', 30, 'N', 'SYSTEM'),
+('HR_CERT_RANK', '40', '기능사', 'Technician', 40, 'N', 'SYSTEM'),
+('HR_CERT_RANK', '50', '1급', 'Level 1', 50, 'N', 'SYSTEM'),
+('HR_CERT_RANK', '99', '기타', 'Others', 99, 'Y', 'SYSTEM'),
 
--- HR_MILITARY (병역 구분)
-('HR_MILITARY', '00', '비대상',   'N/A',         10, NULL, 'N', 'SYSTEM'),
-('HR_MILITARY', '10', '만기전역', 'Discharged',  20, NULL, 'N', 'SYSTEM'),
-('HR_MILITARY', '11', '복무중',   'Serving',     21, NULL, 'N', 'SYSTEM'),
-('HR_MILITARY', '20', '면제',     'Exempted',    30, NULL, 'N', 'SYSTEM'),
-('HR_MILITARY', '30', '미필',     'Unfulfilled', 40, NULL, 'N', 'SYSTEM'),
+-- HR_LANG / HR_LANG_TEST / HR_LANG_LVL
+('HR_LANG', 'EN', '영어', 'English', 10, 'N', 'SYSTEM'),
+('HR_LANG', 'JP', '일본어', 'Japanese', 20, 'N', 'SYSTEM'),
+('HR_LANG', 'CN', '중국어', 'Chinese', 30, 'N', 'SYSTEM'),
+('HR_LANG', 'ES', '스페인어', 'Spanish', 40, 'N', 'SYSTEM'),
+('HR_LANG', 'FR', '프랑스어', 'French', 50, 'N', 'SYSTEM'),
+('HR_LANG', 'DE', '독일어', 'German', 60, 'N', 'SYSTEM'),
+('HR_LANG', 'VN', '베트남어', 'Vietnamese', 80, 'N', 'SYSTEM'),
 
--- HR_APPTYPE (발령 유형)
-('HR_APPTYPE', '10', '채용', 'Hiring',            10, NULL, 'Y', 'SYSTEM'),
-('HR_APPTYPE', '20', '승진', 'Promotion',         20, NULL, 'Y', 'SYSTEM'),
-('HR_APPTYPE', '30', '전보', 'Transfer',          30, NULL, 'Y', 'SYSTEM'),
-('HR_APPTYPE', '40', '파견', 'Dispatch',          40, NULL, 'Y', 'SYSTEM'),
-('HR_APPTYPE', '50', '휴직', 'Leave of Absence',  50, NULL, 'Y', 'SYSTEM'),
-('HR_APPTYPE', '60', '복직', 'Reinstatement',     60, NULL, 'Y', 'SYSTEM'),
-('HR_APPTYPE', '90', '퇴직', 'Retirement',        90, NULL, 'Y', 'SYSTEM'),
+('HR_LANG_TEST', 'TE01', 'TOEIC', 'TOEIC', 10, 'N', 'SYSTEM'),
+('HR_LANG_TEST', 'TE02', 'TOEIC Speaking', 'TOEIC Speaking', 20, 'N', 'SYSTEM'),
+('HR_LANG_TEST', 'TE03', 'OPIc', 'OPIc', 30, 'N', 'SYSTEM'),
+('HR_LANG_TEST', 'TE04', 'TOEFL', 'TOEFL', 40, 'N', 'SYSTEM'),
+('HR_LANG_TEST', 'JP01', 'JPT', 'JPT', 60, 'N', 'SYSTEM'),
+('HR_LANG_TEST', 'JP02', 'JLPT', 'JLPT', 70, 'N', 'SYSTEM'),
+('HR_LANG_TEST', 'CN01', 'HSK', 'HSK', 80, 'N', 'SYSTEM'),
+('HR_LANG_TEST', 'CN02', 'TSC', 'TSC', 90, 'N', 'SYSTEM'),
+('HR_LANG_TEST', 'ETC', '기타(직접입력)', 'Others', 999, 'Y', 'SYSTEM'),
 
--- HR_APPR_STAT (발령 상태)
-('HR_APPR_STAT', '10', '임시저장', 'Temporary Save', 10, NULL, 'Y', 'SYSTEM'),
-('HR_APPR_STAT', '20', '결재중',   'In Progress',    20, NULL, 'Y', 'SYSTEM'),
-('HR_APPR_STAT', '30', '승인',     'Approved',       30, NULL, 'Y', 'SYSTEM'),
-('HR_APPR_STAT', '40', '반려',     'Rejected',       40, NULL, 'Y', 'SYSTEM'),
-('HR_APPR_STAT', '99', '취소',     'Canceled',       99, NULL, 'Y', 'SYSTEM'),
+('HR_LANG_LVL', '10', '원어민 수준', 'Native', 10, 'N', 'SYSTEM'),
+('HR_LANG_LVL', '20', '최상(비즈니스)', 'Fluent', 20, 'N', 'SYSTEM'),
+('HR_LANG_LVL', '30', '상(일상회화)', 'Advanced', 30, 'N', 'SYSTEM'),
+('HR_LANG_LVL', '40', '중(의사전달)', 'Intermediate', 40, 'N', 'SYSTEM'),
+('HR_LANG_LVL', '50', '하(기초)', 'Basic', 50, 'N', 'SYSTEM'),
 
--- SYS_ROLE (시스템 권한)
-('SYS_ROLE', 'ADMIN',  '슈퍼 관리자', 'Super Admin', 10, NULL, 'Y', 'SYSTEM'),
-('SYS_ROLE', 'HR_MNG', '인사 관리자', 'HR Manager',  20, NULL, 'Y', 'SYSTEM'),
-('SYS_ROLE', 'USER',   '일반 사용자', 'User',        30, NULL, 'Y', 'SYSTEM'),
-
--- HR_REL_TYPE (가족 관계)
-('HR_REL_TYPE', '10', '배우자',      'Spouse',         10, '법률상 배우자', 'Y', 'SYSTEM'),
-('HR_REL_TYPE', '20', '자녀',        'Child',          20, '직계비속 (입양 포함)', 'Y', 'SYSTEM'),
-('HR_REL_TYPE', '30', '부',          'Father',         30, '직계존속', 'Y', 'SYSTEM'),
-('HR_REL_TYPE', '31', '모',          'Mother',         31, '직계존속', 'Y', 'SYSTEM'),
-('HR_REL_TYPE', '32', '조부',        'Grandfather',    32, '직계존속', 'N', 'SYSTEM'),
-('HR_REL_TYPE', '33', '조모',        'Grandmother',    33, '직계존속', 'N', 'SYSTEM'),
-('HR_REL_TYPE', '34', '손자녀',      'Grandchild',     34, '직계비속', 'N', 'SYSTEM'),
-('HR_REL_TYPE', '40', '형제자매',    'Sibling',        40, '형제, 자매, 남매', 'N', 'SYSTEM'),
-('HR_REL_TYPE', '90', '위탁아동',    'Foster Child',   90, '가정 위탁 아동', 'N', 'SYSTEM'),
-('HR_REL_TYPE', '99', '기타',        'Others',         99, '동거인 등', 'N', 'SYSTEM'),
-
--- HR_JOB_TYPE (가족 직업)
-('HR_JOB_TYPE', '10', '직장인',      'Employee',       10, '근로소득 발생', 'N', 'SYSTEM'),
-('HR_JOB_TYPE', '20', '사업자',      'Business Owner', 20, '사업소득 발생', 'N', 'SYSTEM'),
-('HR_JOB_TYPE', '30', '일용직',      'Daily Worker',   30, '분리과세 소득', 'N', 'SYSTEM'),
-('HR_JOB_TYPE', '40', '학생',        'Student',        40, '소득 없음 (공제 대상)', 'N', 'SYSTEM'),
-('HR_JOB_TYPE', '50', '주부',        'Housewife',      50, '소득 없음 (공제 대상)', 'N', 'SYSTEM'),
-('HR_JOB_TYPE', '60', '무직',        'Unemployed',     60, '소득 없음 (공제 대상)', 'N', 'SYSTEM'),
-('HR_JOB_TYPE', '99', '기타',        'Others',         99, NULL, 'N', 'SYSTEM'),
-
--- HR_SCH_TYPE (학교 구분 - 비고 NULL 처리 완료)
-('HR_SCH_TYPE', 'PRE', '미취학',      'Preschool',      10, NULL, 'N', 'SYSTEM'),
-('HR_SCH_TYPE', 'KIN', '유치원',      'Kindergarten',   20, NULL, 'N', 'SYSTEM'),
-('HR_SCH_TYPE', 'ELE', '초등학교',    'Elementary Sch', 30, NULL, 'N', 'SYSTEM'),
-('HR_SCH_TYPE', 'MID', '중학교',      'Middle School',  40, NULL, 'N', 'SYSTEM'),
-('HR_SCH_TYPE', 'HIG', '고등학교',    'High School',    50, NULL, 'N', 'SYSTEM'),
-('HR_SCH_TYPE', 'UNI', '대학교',      'University',     60, NULL, 'N', 'SYSTEM'),
-('HR_SCH_TYPE', 'GRA', '대학원',      'Graduate Sch',   70, NULL, 'N', 'SYSTEM'),
-('HR_SCH_TYPE', 'DIS', '장애인학교',  'Special Sch',    80, NULL, 'N', 'SYSTEM'),
-('HR_SCH_TYPE', 'ETC', '기타',        'Others',         99, NULL, 'N', 'SYSTEM'),
-
--- HR_CERT_CD (자격증 목록)
-('HR_CERT_CD', 'IT001', '정보처리기사',       'Info Proc Eng',  10, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'IT002', '정보보안기사',       'Info Sec Eng',   20, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'IT003', 'SQLD',               'SQL Developer',  30, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'IT004', 'AWS SAA',            'AWS Solutions',  40, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'LG001', 'TOEIC',              'TOEIC',          50, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'LG002', 'TOEIC Speaking',     'TOEIC Speaking', 60, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'LG003', 'OPIc',               'OPIc',           70, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'FN001', 'CPA(공인회계사)',    'CPA',            80, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'FN002', '전산세무1급',        'Tax Acc 1',      90, NULL, 'N', 'SYSTEM'),
-('HR_CERT_CD', 'ETC99', '기타(직접입력)',     'Others',         999, '목록에 없는 자격증', 'Y', 'SYSTEM'),
-
--- HR_CERT_RANK (자격 등급: 기사 등급 + 급수 + 기타)
-('HR_CERT_RANK', '10', '기술사/전문직', 'Professional',   10, NULL, 'N', 'SYSTEM'),
-('HR_CERT_RANK', '20', '기사',          'Engineer',       20, NULL, 'N', 'SYSTEM'),
-('HR_CERT_RANK', '30', '산업기사',      'Ind. Engineer',  30, NULL, 'N', 'SYSTEM'),
-('HR_CERT_RANK', '40', '기능사',        'Technician',     40, NULL, 'N', 'SYSTEM'),
-('HR_CERT_RANK', '50', '1급',           'Level 1',        50, NULL, 'N', 'SYSTEM'),
-('HR_CERT_RANK', '51', '2급',           'Level 2',        51, NULL, 'N', 'SYSTEM'),
-('HR_CERT_RANK', '52', '3급',           'Level 3',        52, NULL, 'N', 'SYSTEM'),
-('HR_CERT_RANK', '90', '등급없음',      'None',           90, NULL, 'N', 'SYSTEM'),
-('HR_CERT_RANK', '99', '기타(직접입력)', 'Others',         99, '목록에 없는 등급', 'Y', 'SYSTEM');
+--  HR_CAREER_TYPE (경력 근무 형태)
+('HR_CAREER_TYPE', '10', '정규직',      'Regular',      10,  'N', 'SYSTEM'),
+('HR_CAREER_TYPE', '20', '계약직',      'Contract',     20,  'N', 'SYSTEM'),
+('HR_CAREER_TYPE', '30', '파견직',      'Dispatch',     30, 'N', 'SYSTEM'),
+('HR_CAREER_TYPE', '40', '인턴',        'Intern',       40, 'N', 'SYSTEM'),
+('HR_CAREER_TYPE', '50', '프리랜서',    'Freelancer',   50,  'N', 'SYSTEM'),
+('HR_CAREER_TYPE', '60', '아르바이트',  'Part-time',    60,  'N', 'SYSTEM'),
+('HR_CAREER_TYPE', '99', '기타',        'Others',       99,  'N', 'SYSTEM');
 
 -- 사원 마스터 (개발용 임시) --
 CREATE TABLE ZHR_EMP_MASTER (
@@ -749,6 +710,7 @@ VALUES
 ('DED004', 'FIXED', 80000.00, NULL, '2024-01-01', '9999-12-31', 'Y', '기숙사 2인실 사용료 공제', 'hr_manager'),
 ('DED005', 'FIXED', 20000.00, NULL, '2024-01-01', '9999-12-31', 'Y', '사내 복지기금(상조회비 등) 공제', 'hr_manager'),
 ('DED006', 'SQL', NULL, 'SELECT F_GET_PRIVATE_PENSION_PAYMENT(EMP_ID, PAY_YM) FROM DUAL', '2024-01-01', '9999-12-31', 'Y', '개인연금 대납 공제액 조회', 'hr_manager');
+
 
 -- 세율/구간 관리 --  
 CREATE TABLE ZHR_TAX_TABLE (
@@ -4176,319 +4138,574 @@ CREATE TABLE ZHR_EMP_CERT (
 
 -- 더미데이터 --
 INSERT INTO ZHR_EMP_CERT 
-(PERNR, ZSEQ, ZCERT_CD, ZCERT_NAME, ZCERT_RANK, ZCERT_SCORE, ZCERT_ORG, ZCERT_NO, ZGET_DATE, ZEXP_DATE, ZJOB_REL, ZALLOW_YN, ZCONFIRM_YN, ZREMARK, CREATED_BY) 
+(PERNR, ZSEQ, ZCERT_CD, ZCERT_NAME, ZCERT_RANK, ZCERT_SCORE, ZCERT_ORG, ZCERT_NO, ZGET_DATE, ZEXP_DATE, ZALLOW_YN, ZCONFIRM_YN, ZREMARK, CREATED_BY) 
+VALUES 
+-- 양한재: 정보처리기사, AWS SAA, PMP
+('2018001', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '10-12345678', '2010-06-01', '9999-12-31', 'Y', 'Y', '특급 기술자', 'system'),
+('2018001', 2, 'IT004', 'AWS SAA', '90', NULL, 'AWS', 'AWS-SAA-1234', '2023-05-15', '2026-05-14', 'Y', 'Y', '프로젝트 리더', 'system'),
+('2018001', 3, 'ETC99', 'PMP', '10', NULL, 'PMI', 'PMP-8888', '2019-01-01', '2025-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 김철수 (퇴직): 정보처리기사, SQLD
+('2201001', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '08-111111', '2008-05-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+('2201001', 2, 'IT003', 'SQLD', '90', 70.00, '한국데이터산업진흥원', 'SQL-15-001', '2015-09-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 이영희 (마케팅): GTQ 1급, 검색광고마케터 1급
+('2201002', 1, 'ETC99', 'GTQ 1급', '50', NULL, 'KPC', 'GTQ-15-001', '2020-05-01', '9999-12-31', 'N', 'Y', '디자인', 'system'),
+('2201002', 2, 'ETC99', '검색광고마케터 1급', '50', NULL, 'KAIT', 'SA-21-001', '2021-03-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 박민준 (사업): PMP, 정보처리기사
+('2203003', 1, 'ETC99', 'PMP', '10', NULL, 'PMI', '2021-06-01', '2024-06-01', '2024-06-01', 'N', 'Y', '갱신 필요', 'system'),
+('2203003', 2, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '15-888888', '2015-08-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 정지훈 (재무): CPA
+('2207005', 1, 'FN001', 'CPA(공인회계사)', '10', NULL, '금융감독원', 'CPA-22-001', '2021-09-01', '9999-12-31', 'Y', 'Y', '전문직 수당', 'system'),
+
+-- 최서연 (인사): 노무사
+('2203004', 1, 'ETC99', '공인노무사', '10', NULL, '한국산업인력공단', 'HR-15-777', '2015-11-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 윤서아 (개발): 정보처리기사, SQLD
+('2207006', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '18-222222', '2018-08-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+('2207006', 2, 'IT003', 'SQLD', '90', 84.00, '한국데이터산업진흥원', 'SQL-21-999', '2021-05-05', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 강도윤 (보안): 정보보안기사
+('2209007', 1, 'IT002', '정보보안기사', '20', 75.00, 'KISA', 'SEC-20-111', '2020-11-01', '9999-12-31', 'Y', 'Y', '보안파트', 'system'),
+
+-- 임하윤 (사업): 유통관리사 2급
+('2210008', 1, 'ETC99', '유통관리사 2급', '51', NULL, '대한상공회의소', 'DIST-19-01', '2019-05-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 한지우 (마케팅): 사회조사분석사 2급
+('2210009', 1, 'ETC99', '사회조사분석사 2급', '51', NULL, '한국산업인력공단', 'SR-20-001', '2020-08-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 오시우 (경영): 전산세무/회계
+('2211010', 1, 'FN002', '전산세무1급', '50', NULL, '한국세무사회', 'TAX-19-55', '2019-08-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+('2211010', 2, 'ETC99', '재경관리사', '90', NULL, '삼일회계법인', 'FIN-20-88', '2020-12-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 신유나 (인사): HRM전문가, ERP정보관리사
+('2301011', 1, 'ETC99', 'HRM전문가', '90', NULL, '한국공인노무사회', 'HRM-21-01', '2021-05-01', '9999-12-31', 'Y', 'N', '자격증 사본 미제출', 'system'),
+('2301011', 2, 'ETC99', 'ERP정보관리사(인사)', '50', NULL, 'KPC', 'ERP-22-01', '2022-02-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 장은우 (AI): 빅데이터, ADsP
+('2301012', 1, 'ETC99', '빅데이터분석기사', '20', NULL, '한국데이터산업진흥원', 'BD-22-001', '2022-06-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+('2301012', 2, 'ETC99', 'ADsP', '90', NULL, '한국데이터산업진흥원', 'ADSP-21-55', '2021-03-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 송지아 (사업): 무역영어 1급
+('2302013', 1, 'ETC99', '무역영어 1급', '50', NULL, '대한상공회의소', 'TR-21-001', '2021-09-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 황수빈 (마케팅): 컴퓨터그래픽스운용기능사
+('2305015', 1, 'ETC99', '컴퓨터그래픽스운용기능사', '40', NULL, '한국산업인력공단', 'CG-20-001', '2020-06-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 안태현 (경영): 전산회계 1급
+('2305016', 1, 'FN002', '전산회계1급', '50', NULL, '한국세무사회', 'ACC-21-33', '2021-05-01', '9999-12-31', 'Y', 'N', NULL, 'system'),
+
+-- 문채원 (인사): 직업상담사 2급
+('2308017', 1, 'ETC99', '직업상담사 2급', '51', NULL, '한국산업인력공단', 'JC-19-001', '2019-11-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 고은별 (웹): 정보처리산업기사
+('2309018', 1, 'IT001', '정보처리산업기사', '30', NULL, '한국산업인력공단', '19-444444', '2019-05-01', '9999-12-31', 'Y', 'N', '기사 자격 취득 예정', 'system'),
+
+-- 배준호 (서버): AWS SAA
+('2310019', 1, 'IT004', 'AWS SAA', '90', NULL, 'AWS', 'AWS-22-099', '2022-10-01', '2025-09-30', 'Y', 'Y', '만료일 확인 필요', 'system'),
+
+-- 조민서 (영업): 운전면허
+('2312020', 2, 'ETC99', '1종보통운전면허', '90', NULL, '경찰청', 'DL-11-222', '2018-01-01', '2028-01-01', 'N', 'Y', '영업용', 'system'),
+
+-- 유정민 (재무): 전산회계 1급
+('2401021', 1, 'FN002', '전산회계1급', '50', NULL, '한국세무사회', 'ACC-23-01', '2023-02-01', '9999-12-31', 'Y', 'N', '1급 준비중', 'system'),
+
+-- 홍예준 (웹): 정보처리기사
+('2401022', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '23-555111', '2023-11-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 나소율 (마케팅): 브랜드관리사 2급
+('2402023', 1, 'ETC99', '브랜드관리사 2급', '51', NULL, '브랜드협회', 'BM-23-01', '2023-07-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 백시원 (신입): 전산세무
+('2402024', 3, 'FN002', '전산세무1급', '50', NULL, '한국세무사회', 'TAX-22-11', '2022-05-01', '9999-12-31', 'N', 'Y', '인사팀이지만 보유', 'system'),
+
+-- 노하린 (AI): SQLD
+('2403025', 1, 'IT003', 'SQLD', '90', 92.00, '데이터산업진흥원', 'SQL-23-888', '2023-09-01', '9999-12-31', 'Y', 'N', '우수 합격', 'system'),
+
+-- 차유진 (사업): 물류관리사
+('2404026', 1, 'ETC99', '물류관리사', '10', NULL, '한국산업인력공단', 'LOG-22-01', '2022-08-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 표지성 (서버): 정보처리기사, 정보기기운용기능사
+('2404027', 1, 'ETC99', '정보기기운용기능사', '40', NULL, '한국산업인력공단', 'TECH-12-33', '2012-01-01', '9999-12-31', 'N', 'N', '고교시절 취득', 'system'),
+('2404027', 2, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '20-555555', '2020-08-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 선우진 (앱): 정보처리기사
+('2405029', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '22-111111', '2022-11-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 왕지현 (마케팅): Google Analytics
+('2406030', 1, 'ETC99', 'Google Analytics (GA4)', '99', NULL, 'Google', 'GA-24-001', '2024-01-01', '2025-01-01', 'Y', 'Y', '갱신 필요', 'system'),
+
+-- 서재윤 (인사): 공인노무사 1차
+('2407031', 1, 'ETC99', '공인노무사 1차', '99', NULL, '한국산업인력공단', 'HR1-23-01', '2023-06-01', '9999-12-31', 'N', 'Y', '1차 합격', 'system'),
+
+-- 방민호 (영업): 유통관리사 2급
+('2407032', 1, 'ETC99', '유통관리사 2급', '51', NULL, '대한상공회의소', 'DIST-23-01', '2023-05-01', '9999-12-31', 'Y', 'N', NULL, 'system'),
+
+-- 편지후 (웹): 정보처리산업기사
+('2408033', 1, 'IT001', '정보처리산업기사', '30', NULL, '한국산업인력공단', '21-888888', '2021-08-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 성주원 (재무): 재경관리사
+('2409034', 1, 'ETC99', '재경관리사', '90', NULL, '삼일회계법인', 'FIN-23-01', '2023-12-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 위하늘 (AI): ADsP
+('2409035', 1, 'ETC99', 'ADsP', '90', NULL, '데이터산업진흥원', 'ADSP-23-01', '2023-03-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 명지안 (서버): 정보보안기사
+('2410036', 1, 'IT002', '정보보안기사', '20', NULL, 'KISA', 'SEC-23-01', '2023-11-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 금예서 (마케팅): 검색광고마케터 1급
+('2411037', 1, 'ETC99', '검색광고마케터 1급', '50', NULL, 'KAIT', 'SA-24-01', '2024-03-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 도윤재 (사업): 국제무역사 1급
+('2411038', 1, 'ETC99', '국제무역사 1급', '50', NULL, '한국무역협회', 'TR-22-01', '2022-08-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 채수현 (인사): ERP정보관리사(인사)
+('2412039', 1, 'ETC99', 'ERP정보관리사(인사)', '50', NULL, 'KPC', 'ERP-23-05', '2023-05-01', '9999-12-31', 'N', 'Y', NULL, 'system'),
+
+-- 하동균 (앱): 정보처리기사
+('2412040', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '19-123456', '2019-08-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 진세아 (웹): 정보처리기사
+('2501041', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '24-000123', '2024-11-01', '9999-12-31', 'Y', 'Y', '자격증 사본 미제출', 'system'),
+
+-- 원태준 (사업): 유통관리사 2급
+('2501042', 1, 'ETC99', '유통관리사 2급', '51', NULL, '대한상공회의소', 'DIST-24-01', '2024-05-01', '9999-12-31', 'Y', 'N', NULL, 'system'),
+
+-- 라희선 (마케팅): GTQ 1급
+('2502043', 1, 'ETC99', 'GTQ 1급', '50', NULL, 'KPC', 'GTQ-23-01', '2023-10-01', '9999-12-31', 'N', 'Y', '디자인', 'system'),
+
+-- 설강민 (인사): 사회조사분석사 2급
+('2503044', 1, 'ETC99', '사회조사분석사 2급', '51', NULL, '한국산업인력공단', 'SR-24-01', '2024-08-01', '9999-12-31', 'N', 'N', NULL, 'system'),
+
+-- 경수호 (AI): SQLP
+('2504046', 1, 'IT003', 'SQLP', '90', 70.00, '데이터산업진흥원', 'SQLP-24-01', '2024-12-01', '9999-12-31', 'Y', 'Y', '전문가 자격', 'system'),
+
+-- 봉준서 (서버): AWS SOA
+('2505047', 1, 'IT004', 'AWS SOA', '90', NULL, 'AWS', 'AWS-SO-01', '2025-01-01', '2028-01-01', 'Y', 'Y', NULL, 'system'),
+
+-- 엄지아 (마케팅): 웹디자인기능사
+('2507049', 1, 'ETC99', '웹디자인기능사', '40', NULL, '한국산업인력공단', 'WEB-23-01', '2023-12-01', '9999-12-31', 'Y', 'Y', NULL, 'system'),
+
+-- 함유주 (앱): AWS SAA
+('2508050', 1, 'IT004', 'AWS SAA', '90', NULL, 'AWS', 'AWS-25-001', '2025-07-01', '2028-06-30', 'Y', 'Y', '신규 취득 승인 대기', 'system');
+
+-- 어학 --
+CREATE TABLE ZHR_EMP_LANG (
+    LANG_ID            BIGINT          NOT NULL AUTO_INCREMENT COMMENT '어학 ID (PK)',
+    PERNR              VARCHAR(10)     NOT NULL COMMENT '사번 (FK)',
+    ZSEQ               INT             NOT NULL COMMENT '순번',
+
+    -- [핵심] 언어 및 시험 코드화
+    ZLANG_CD           VARCHAR(20)     NOT NULL COMMENT '언어 코드 (Common Code: HR_LANG - EN, JP, CN 등)',
+    ZTEST_CD           VARCHAR(20)     NULL     COMMENT '시험 코드 (Common Code: HR_LANG_TEST - TOEIC, OPIC, ETC)',
+    ZTEST_NAME         VARCHAR(50)     NULL     COMMENT '시험명 (기타 입력 시 사용)',
+
+    -- [성적] 점수와 등급
+    ZSCORE             VARCHAR(20)     NULL     COMMENT '점수/등급 (예: 950, AL, IH)',
+    
+    -- [일자]
+    ZGET_DATE          DATE            NOT NULL COMMENT '취득일자',
+    ZEXP_DATE          DATE            NULL     COMMENT '만료일자 (공인어학성적용)',
+
+    -- [수준] 회화/독해 수준 (자체 평가용)
+    ZSPEAK_LVL         VARCHAR(10)     NULL     COMMENT '회화 수준 (Common Code: HR_LANG_LVL)',
+    ZREAD_LVL          VARCHAR(10)     NULL     COMMENT '독해 수준 (Common Code: HR_LANG_LVL)',
+
+    ZATTACH_ID         VARCHAR(100)    NULL     COMMENT '첨부파일 ID',
+    ZREMARK            VARCHAR(200)    NULL     COMMENT '비고',
+    
+    -- [동시성 제어]
+    VERSION            INT             NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 잠금)',
+
+    -- [Audit]
+    CREATED_AT         DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY         VARCHAR(50)     NOT NULL,
+    UPDATED_AT         DATETIME        NULL     ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_BY         VARCHAR(50)     NULL,
+
+    PRIMARY KEY (LANG_ID),
+    UNIQUE KEY UK_EMP_LANG_01 (PERNR, ZSEQ),
+
+    CONSTRAINT FK_ZHR_EMP_LANG_MASTER 
+        FOREIGN KEY (PERNR) REFERENCES ZHR_EMP_MASTER(PERNR) ON DELETE CASCADE
+
+) COMMENT '사원 어학 능력 정보';
+
+-- 더미 데이터 --
+INSERT INTO ZHR_EMP_LANG 
+(PERNR, ZSEQ, ZLANG_CD, ZTEST_CD, ZTEST_NAME, ZSCORE, ZGET_DATE, ZEXP_DATE, ZSPEAK_LVL, ZREAD_LVL, ZREMARK, CREATED_BY) 
 VALUES 
 
 -- ============================================================
--- [1. 필수] 2018001 양한재 (기술연구소 부장) - 고스펙 리더
+-- [1. 필수] 2018001 양한재 (기술연구소 부장) - 영어 능통, 일본어 가능
 -- ============================================================
-('2018001', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '10-12345678', '2010-06-01', '9999-12-31', 'Y', 'Y', 'Y', '기술 등급 특급 보유', 'system_admin'),
-('2018001', 2, 'IT004', 'AWS SAA', '90', NULL, 'AWS', 'AWS-SAA-1234', '2023-05-15', '2026-05-14', 'Y', 'Y', 'Y', '클라우드 프로젝트 리딩', 'system_admin'),
-('2018001', 3, 'ETC99', 'PMP', '10', NULL, 'PMI', 'PMP-8888', '2019-01-01', '2025-12-31', 'Y', 'N', 'Y', 'PM 전문 자격', 'system_admin'),
-('2018001', 4, 'LG003', 'OPIc', '90', NULL, 'ACTFL', 'OP-24-001', '2024-01-10', '2026-01-09', 'N', 'N', 'Y', 'Grade: AL', 'system_admin'),
+('2018001', 1, 'EN', 'TE03', 'OPIc', 'AL', '2023-05-10', '2025-05-09', '20', '20', '해외 컨퍼런스 발표 가능', 'system_admin'),
+('2018001', 2, 'JP', 'JP02', 'JLPT', 'N2', '2015-12-01', NULL, '40', '30', '기술 문서 독해 가능', 'system_admin'),
 
 -- ============================================================
--- [2. 필수] 2201001 김철수 (퇴직자) - 기본 자격증
+-- [2. 필수] 2201001 김철수 (퇴직자) - 만료된 성적
 -- ============================================================
-('2201001', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '08-111111', '2008-05-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
-('2201001', 2, 'IT003', 'SQLD', '90', 70.00, '한국데이터산업진흥원', 'SQL-15-001', '2015-09-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
-
--- ============================================================
--- [3] 재무/회계/경영지원 (FIN, MGT) - 전문직 및 회계 자격증
--- ============================================================
--- 2207005 정지훈 (재무)
-('2207005', 1, 'FN001', 'CPA(공인회계사)', '10', NULL, '금융감독원', 'CPA-22-001', '2021-09-01', '9999-12-31', 'Y', 'Y', 'Y', '전문직 수당 지급', 'system_admin'),
-('2207005', 2, 'LG001', 'TOEIC', '90', 950.00, 'ETS', 'TE-20-001', '2020-01-01', '2022-01-01', 'N', 'N', 'Y', '입사시 제출(만료)', 'system_admin'),
-
--- 2211010 오시우 (경영)
-('2211010', 1, 'FN002', '전산세무1급', '50', NULL, '한국세무사회', 'TAX-19-55', '2019-08-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
-('2211010', 2, 'ETC99', '재경관리사', '90', NULL, '삼일회계법인', 'FIN-20-88', '2020-12-01', '9999-12-31', 'Y', 'Y', 'Y', NULL, 'system_admin'),
-
--- 2305016 안태현 (경영)
-('2305016', 1, 'FN002', '전산회계1급', '50', NULL, '한국세무사회', 'ACC-21-33', '2021-05-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
-
--- 2401021 유정민 (재무)
-('2401021', 1, 'FN002', '전산세무2급', '51', NULL, '한국세무사회', 'TAX-23-01', '2023-02-01', '9999-12-31', 'Y', 'N', 'Y', '1급 준비중', 'system_admin'),
-
--- 2405028 기태영 (경영)
-('2405028', 1, 'FN001', 'CPA(공인회계사) 1차', '99', NULL, '금융감독원', 'CPA1-23-99', '2023-06-01', '9999-12-31', 'Y', 'N', 'Y', '1차 합격', 'system_admin'),
-
--- 2503045 옥다은 (재무)
-('2503045', 1, 'FN002', '전산세무1급', '50', NULL, '한국세무사회', 'TAX-24-77', '2024-11-01', '9999-12-31', 'Y', 'Y', 'N', '자격증 사본 미제출', 'system_admin'),
+('2201001', 1, 'EN', 'TE01', 'TOEIC', '850', '2019-03-01', '2021-02-28', '40', '30', '만료됨', 'system_admin'),
 
 -- ============================================================
--- [4] 개발 직군 (DEV, DEV_WEB, DEV_SVR, DEV_AI)
+-- [3] 해외영업/마케팅 (BIZ, BIZ_SAL, BIZ_MKT) - 제2외국어 및 고득점
 -- ============================================================
--- 2207006 윤서아 (웹)
-('2207006', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '18-222222', '2018-08-01', '9999-12-31', 'Y', 'Y', 'Y', NULL, 'system_admin'),
-('2207006', 2, 'IT003', 'SQLD', '90', 84.00, '한국데이터산업진흥원', 'SQL-21-999', '2021-05-05', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
+-- 2312020 조민서 (영업) - 영어, 중국어
+('2312020', 1, 'EN', 'TE02', 'TOEIC Speaking', '180', '2024-01-15', '2026-01-14', '20', '20', 'Level 7 (AM)', 'system_admin'),
+('2312020', 2, 'CN', 'CN02', 'TSC', 'Level 4', '2023-08-20', '2025-08-19', '40', '40', '일상 회화', 'system_admin'),
 
--- 2209007 강도윤 (서버)
-('2209007', 1, 'IT002', '정보보안기사', '20', 75.00, 'KISA', 'SEC-20-111', '2020-11-01', '9999-12-31', 'Y', 'Y', 'Y', '보안파트 겸직', 'system_admin'),
-('2209007', 2, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '16-123123', '2016-08-01', '9999-12-31', 'Y', 'Y', 'Y', NULL, 'system_admin'),
+-- 2305015 황수빈 (마케팅) - 중국어 특기자
+('2305015', 1, 'CN', 'CN01', 'HSK', '6급 240', '2023-11-05', '2025-11-04', '20', '10', '중국 유학 경험', 'system_admin'),
+('2305015', 2, 'EN', 'TE01', 'TOEIC', '780', '2023-02-01', '2025-01-31', '40', '30', NULL, 'system_admin'),
 
--- 2301012 장은우 (AI)
-('2301012', 1, 'ETC99', '빅데이터분석기사', '20', NULL, '한국데이터산업진흥원', 'BD-22-001', '2022-06-01', '9999-12-31', 'Y', 'N', 'Y', '데이터 분석 전문', 'system_admin'),
-('2301012', 2, 'ETC99', 'ADsP', '90', NULL, '한국데이터산업진흥원', 'ADSP-21-55', '2021-03-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
+-- 2210009 한지우 (마케팅) - 영어, 스페인어
+('2210009', 1, 'EN', 'TE03', 'OPIc', 'IH', '2022-12-10', '2024-12-09', '30', '20', NULL, 'system_admin'),
+('2210009', 2, 'ES', 'ES01', 'DELE', 'B2', '2021-05-01', NULL, '40', '30', '스페인어권 담당', 'system_admin'),
 
--- 2304014 권혁준 (앱)
-('2304014', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '17-333333', '2017-08-01', '9999-12-31', 'Y', 'Y', 'Y', NULL, 'system_admin'),
+-- 2407032 방민호 (영업) - 영어
+('2407032', 1, 'EN', 'TE01', 'TOEIC', '920', '2024-03-01', '2026-02-28', '30', '20', '고득점', 'system_admin'),
+('2407032', 2, 'EN', 'TE02', 'TOEIC Speaking', '150', '2024-04-01', '2026-03-31', '30', '30', 'Level 6 (IM3)', 'system_admin'),
 
--- 2309018 고은별 (웹)
-('2309018', 1, 'IT001', '정보처리산업기사', '30', NULL, '한국산업인력공단', '19-444444', '2019-05-01', '9999-12-31', 'Y', 'N', 'Y', '기사 자격 취득 예정', 'system_admin'),
+-- 2506048 마동욱 (영업) - 영어, 베트남어
+('2506048', 1, 'EN', 'TE03', 'OPIc', 'IM2', '2025-01-10', '2027-01-09', '40', '30', NULL, 'system_admin'),
+('2506048', 2, 'VN', 'ETC', 'OPIc Vietnamese', 'IM1', '2025-02-01', '2027-01-31', '40', '50', '베트남어 기초', 'system_admin'),
 
--- 2310019 배준호 (서버)
-('2310019', 1, 'IT004', 'AWS SAA', '90', NULL, 'AWS', 'AWS-22-099', '2022-10-01', '2025-09-30', 'Y', 'Y', 'Y', '만료일 확인 필요', 'system_admin'),
-
--- 2401022 홍예준 (웹)
-('2401022', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '23-555111', '2023-11-01', '9999-12-31', 'Y', 'Y', 'Y', NULL, 'system_admin'),
-
--- 2403025 노하린 (AI)
-('2403025', 1, 'IT003', 'SQLD', '90', 92.00, '한국데이터산업진흥원', 'SQL-23-888', '2023-09-01', '9999-12-31', 'Y', 'N', 'Y', '우수 합격', 'system_admin'),
-
--- 2404027 표지성 (서버)
-('2404027', 1, 'ETC99', '정보기기운용기능사', '40', NULL, '한국산업인력공단', 'TECH-12-33', '2012-01-01', '9999-12-31', 'N', 'N', 'Y', '고교시절 취득', 'system_admin'),
-('2404027', 2, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '20-555555', '2020-08-01', '9999-12-31', 'Y', 'Y', 'Y', NULL, 'system_admin'),
-
--- 2501041 진세아 (웹)
-('2501041', 1, 'IT001', '정보처리기사', '20', NULL, '한국산업인력공단', '24-000123', '2024-11-01', '9999-12-31', 'Y', 'Y', 'N', '자격증 사본 미제출', 'system_admin'),
-
--- 2504046 경수호 (AI)
-('2504046', 1, 'IT003', 'SQLP', '90', 70.00, '한국데이터산업진흥원', 'SQLP-24-01', '2024-12-01', '9999-12-31', 'Y', 'Y', 'N', '전문가 자격', 'system_admin'),
-
--- 2505047 봉준서 (서버)
-('2505047', 1, 'IT004', 'AWS SOA', '90', NULL, 'AWS', 'AWS-SO-01', '2025-01-01', '2028-01-01', 'Y', 'Y', 'Y', NULL, 'system_admin'),
-
--- 2508050 함유주 (앱)
-('2508050', 1, 'IT004', 'AWS SAA', '90', NULL, 'AWS', 'AWS-25-001', '2025-07-01', '2028-06-30', 'Y', 'Y', 'N', '신규 취득 승인 대기', 'system_admin'),
+-- 2507049 엄지아 (마케팅) - 프랑스어
+('2507049', 1, 'FR', 'FR01', 'DELF/DALF', 'B1', '2024-11-01', NULL, '40', '40', '프랑스 교환학생', 'system_admin'),
 
 -- ============================================================
--- [5] 인사/영업/마케팅 (HR, BIZ, BIZ_MKT) - 어학 및 기타
+-- [4] 인사/경영지원 (HR, MGT) - 어학 능력 우수자 다수
 -- ============================================================
--- 2203004 최서연 (인사)
-('2203004', 1, 'ETC99', '공인노무사', '10', NULL, '한국산업인력공단', 'HR-15-777', '2015-11-01', '9999-12-31', 'Y', 'Y', 'Y', '업무 연관성 높음', 'system_admin'),
-('2203004', 2, 'LG003', 'OPIc', '90', NULL, 'ACTFL', 'OP-23-555', '2023-03-01', '2025-02-28', 'Y', 'N', 'Y', 'Grade: AL', 'system_admin'),
+-- 2203004 최서연 (인사 과장)
+('2203004', 1, 'EN', 'TE01', 'TOEIC', '950', '2023-06-01', '2025-05-31', '20', '10', '업무 활용도 높음', 'system_admin'),
+('2203004', 2, 'JP', 'JP01', 'JPT', '800', '2022-09-01', '2024-08-31', '30', '30', NULL, 'system_admin'),
+
+-- 2402024 백시원 (인사 신입) - Super Rookie
+('2402024', 1, 'EN', 'TE01', 'TOEIC', '985', '2023-12-15', '2025-12-14', '20', '10', '거의 만점', 'system_admin'),
+('2402024', 2, 'EN', 'TE03', 'OPIc', 'AL', '2024-01-05', '2026-01-04', '10', '10', '원어민 수준', 'system_admin'),
+('2402024', 3, 'DE', 'DE01', 'Goethe-Zertifikat', 'B1', '2023-08-01', NULL, '40', '40', '독일어 가능', 'system_admin'),
 
 -- 2301011 신유나 (인사)
-('2301011', 1, 'ETC99', 'HRM전문가', '90', NULL, '한국공인노무사회', 'HRM-21-01', '2021-05-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
+('2301011', 1, 'EN', 'TE02', 'TOEIC Speaking', '160', '2023-02-20', '2025-02-19', '30', '30', 'Level 6', 'system_admin'),
 
--- 2402024 백시원 (인사 - 신입 고스펙)
-('2402024', 1, 'LG001', 'TOEIC', '90', 980.00, 'ETS', 'TE-23-999', '2023-12-01', '2025-11-30', 'N', 'N', 'Y', '만점 임박', 'system_admin'),
-('2402024', 2, 'LG002', 'TOEIC Speaking', '90', 180.00, 'ETS', 'TS-23-888', '2023-11-01', '2025-10-31', 'N', 'N', 'Y', 'Level 7', 'system_admin'),
-('2402024', 3, 'FN002', '전산세무1급', '50', NULL, '한국세무사회', 'TAX-22-11', '2022-05-01', '9999-12-31', 'N', 'N', 'Y', '인사팀이지만 보유', 'system_admin'),
+-- 2211010 오시우 (경영)
+('2211010', 1, 'EN', 'TE01', 'TOEIC', '700', '2022-10-01', '2024-09-30', '40', '40', '승진 요건 충족', 'system_admin'),
 
--- 2503044 설강민 (인사)
-('2503044', 1, 'ETC99', '사회조사분석사 2급', '51', NULL, '한국산업인력공단', 'SR-24-001', '2024-08-01', '9999-12-31', 'N', 'N', 'Y', NULL, 'system_admin'),
+-- 2305016 안태현 (경영)
+('2305016', 1, 'JP', 'JP02', 'JLPT', 'N1', '2021-07-01', NULL, '20', '10', '일본어 능통', 'system_admin'),
 
--- 2312020 조민서 (영업)
-('2312020', 1, 'LG003', 'OPIc', '90', NULL, 'ACTFL', 'OP-23-111', '2023-10-01', '2025-09-30', 'Y', 'N', 'Y', 'Grade: IH', 'system_admin'),
-('2312020', 2, 'ETC99', '자동차운전면허(1종보통)', '90', NULL, '경찰청', 'DL-11-222', '2018-01-01', '2028-01-01', 'Y', 'N', 'Y', '영업 활동용', 'system_admin'),
+-- ============================================================
+-- [5] 개발 직군 (DEV) - 독해 위주, 점수는 다양함
+-- ============================================================
+-- 2207006 윤서아 (웹개발)
+('2207006', 1, 'EN', 'TE03', 'OPIc', 'IM1', '2022-05-01', '2024-04-30', '40', '30', NULL, 'system_admin'),
 
--- 2407032 방민호 (영업)
-('2407032', 1, 'LG002', 'TOEIC Speaking', '90', 160.00, 'ETS', 'TS-24-001', '2024-01-01', '2026-01-01', 'Y', 'N', 'Y', 'Level 6', 'system_admin'),
-('2407032', 2, 'ETC99', '유통관리사 2급', '51', NULL, '대한상공회의소', 'DIST-23-01', '2023-05-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
+-- 2209007 강도윤 (서버개발)
+('2209007', 1, 'EN', 'TE01', 'TOEIC', '820', '2022-11-11', '2024-11-10', '40', '30', NULL, 'system_admin'),
 
--- 2506048 마동욱 (영업)
-('2506048', 1, 'LG001', 'TOEIC', '90', 850.00, 'ETS', 'TE-25-001', '2025-01-01', '2027-01-01', 'Y', 'N', 'Y', NULL, 'system_admin'),
+-- 2301012 장은우 (AI개발) - 논문 독해 능력
+('2301012', 1, 'EN', 'TE04', 'TOEFL', '105', '2023-02-01', '2025-01-31', '30', '20', '원서 독해 우수', 'system_admin'),
+('2301012', 2, 'EN', 'TE05', 'TEPS', '450', '2023-01-01', '2025-01-01', '30', '20', NULL, 'system_admin'),
 
--- 2201002 이영희 (마케팅 - 퇴직)
-('2201002', 1, 'ETC99', 'GTQ 1급', '50', NULL, 'KPC', 'GTQ-15-001', '2015-05-01', '9999-12-31', 'Y', 'N', 'Y', '디자인 업무', 'system_admin'),
-('2201002', 2, 'LG003', 'OPIc', '90', NULL, 'ACTFL', 'OP-20-001', '2020-01-01', '2022-01-01', 'N', 'N', 'Y', '만료됨', 'system_admin'),
+-- 2304014 권혁준 (앱개발)
+('2304014', 1, 'EN', 'TE03', 'OPIc', 'IL', '2023-03-15', '2025-03-14', '50', '40', '회화는 약함', 'system_admin'),
 
--- 2210009 한지우 (마케팅)
-('2210009', 1, 'ETC99', '검색광고마케터 1급', '50', NULL, 'KAIT', 'SA-21-001', '2021-03-01', '9999-12-31', 'Y', 'Y', 'Y', NULL, 'system_admin'),
+-- 2309018 고은별 (웹개발)
+('2309018', 1, 'JP', 'JP02', 'JLPT', 'N3', '2020-12-01', NULL, '40', '40', '취미 일본어', 'system_admin'),
 
--- 2305015 황수빈 (마케팅)
-('2305015', 1, 'ETC99', '컴퓨터그래픽스운용기능사', '40', NULL, '한국산업인력공단', 'CG-20-001', '2020-06-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin'),
-('2305015', 2, 'LG001', 'HSK 5급', '99', 210.00, '중국국가한반', 'HSK-22-001', '2022-01-01', '2024-01-01', 'Y', 'N', 'Y', '중국어 능통', 'system_admin'),
+-- 2310019 배준호 (서버개발)
+('2310019', 1, 'EN', 'TE06', 'G-TELP', 'Level 2 65', '2023-09-01', '2025-08-31', '40', '30', NULL, 'system_admin'),
 
+-- 2401022 홍예준 (웹개발)
+('2401022', 1, 'EN', 'TE01', 'TOEIC', '880', '2023-12-01', '2025-11-30', '30', '30', '입사 성적', 'system_admin'),
+
+-- 2403025 노하린 (AI개발)
+('2403025', 1, 'EN', 'TE07', 'IELTS', '7.0', '2024-01-20', '2026-01-19', '20', '20', '유학 준비 경험', 'system_admin'),
+
+-- 2404027 표지성 (서버개발)
+('2404027', 1, 'EN', 'TE01', 'TOEIC', '650', '2023-05-01', '2025-04-30', '50', '40', NULL, 'system_admin'),
+
+-- 2501041 진세아 (웹개발)
+('2501041', 1, 'EN', 'TE03', 'OPIc', 'IH', '2024-11-15', '2026-11-14', '30', '30', NULL, 'system_admin'),
+
+-- 2504046 경수호 (AI개발)
+('2504046', 1, 'EN', 'TE01', 'TOEIC', '910', '2024-12-01', '2026-11-30', '30', '20', NULL, 'system_admin'),
+
+-- 2505047 봉준서 (서버개발)
+('2505047', 1, 'EN', 'ETC', 'IT English', 'Pass', '2025-03-01', NULL, '40', '30', '사내 어학 과정 이수', 'system_admin'),
+
+-- 2508050 함유주 (앱개발)
+('2508050', 1, 'JP', 'JP03', 'SJPT', 'Level 3', '2025-06-01', '2027-05-31', '40', '40', NULL, 'system_admin'),
+
+-- ============================================================
+-- [6] 재무/회계 (FIN) - 꼼꼼한 성격, 점수 관리
+-- ============================================================
+-- 2207005 정지훈 (재무 - 22년 입사)
+('2207005', 1, 'EN', 'TE01', 'TOEIC', '890', '2022-05-01', '2024-04-30', '40', '20', NULL, 'system_admin'),
+
+-- 2401021 유정민 (재무)
+('2401021', 1, 'EN', 'TE02', 'TOEIC Speaking', '140', '2023-11-01', '2025-10-31', '40', '40', 'Level 5 (IM2)', 'system_admin'),
+
+-- 2409034 성주원 (재무)
+('2409034', 1, 'CN', 'CN03', 'BCT', 'Level 2', '2024-07-01', '2026-06-30', '50', '40', '비즈니스 중국어 기초', 'system_admin'),
+
+-- 2503045 옥다은 (재무)
+('2503045', 1, 'EN', 'TE01', 'TOEIC', '935', '2025-01-01', '2027-01-01', '30', '20', NULL, 'system_admin'),
+
+-- ============================================================
+-- [7] 기타 사원들 (다양한 언어 및 기타 시험)
+-- ============================================================
 -- 2402023 나소율 (마케팅)
-('2402023', 1, 'ETC99', '사회분석사', '90', NULL, '통계청', 'STAT-23-01', '2023-11-01', '9999-12-31', 'N', 'N', 'Y', NULL, 'system_admin'),
+('2402023', 1, 'RU', 'ETC', 'TORFL', '1급', '2023-05-01', NULL, '40', '30', '러시아어 전공', 'system_admin'),
 
 -- 2406030 왕지현 (마케팅)
-('2406030', 1, 'ETC99', '구글애널리틱스(GA4)', '90', NULL, 'Google', 'GA-24-001', '2024-05-01', '2025-05-01', 'Y', 'Y', 'Y', '1년 유효', 'system_admin'),
+('2406030', 1, 'EN', 'TE03', 'OPIc', 'AL', '2024-04-01', '2026-03-31', '20', '20', '영어 능통', 'system_admin'),
+('2406030', 2, 'FR', 'FR01', 'DELF/DALF', 'A2', '2023-01-01', NULL, '50', '50', '기초 프랑스어', 'system_admin'),
 
 -- 2411037 금예서 (마케팅)
-('2411037', 1, 'LG003', 'OPIc', '90', NULL, 'ACTFL', 'OP-24-111', '2024-10-01', '2026-10-01', 'Y', 'N', 'Y', 'Grade: IM2', 'system_admin'),
+('2411037', 1, 'EN', 'TE01', 'TOEIC', '800', '2024-09-01', '2026-08-31', '40', '30', NULL, 'system_admin'),
+
+-- 2411038 도윤재 (사업)
+('2411038', 1, 'EN', 'TE02', 'TOEIC Speaking', '170', '2024-10-01', '2026-09-30', '30', '30', 'Level 6 (IH)', 'system_admin'),
+
+-- 2501042 원태준 (사업)
+('2501042', 1, 'JP', 'JP01', 'JPT', '650', '2024-12-01', '2026-11-30', '40', '40', NULL, 'system_admin'),
 
 -- 2502043 라희선 (마케팅)
-('2502043', 1, 'ETC99', '웹디자인기능사', '40', NULL, '한국산업인력공단', 'WEB-24-001', '2024-12-01', '9999-12-31', 'Y', 'N', 'N', '자격증 원본 미확인', 'system_admin'),
+('2502043', 1, 'EN', 'TE03', 'OPIc', 'IM3', '2025-01-01', '2027-01-01', '40', '30', NULL, 'system_admin'),
 
--- 2507049 엄지아 (마케팅)
-('2507049', 1, 'ETC99', '브랜드관리사 2급', '51', NULL, '브랜드협회', 'BM-25-001', '2025-06-01', '9999-12-31', 'Y', 'N', 'Y', NULL, 'system_admin');
+-- 2503044 설강민 (인사)
+('2503044', 1, 'EN', 'TE01', 'TOEIC', '870', '2024-12-15', '2026-12-14', '40', '30', NULL, 'system_admin'),
 
-
-CREATE TABLE ZHR_EMP_LANG (
-    -- 기본 키 컬럼 (PK)
-    LANG_ID        BIGINT         NOT NULL AUTO_INCREMENT COMMENT '어학 능력 고유 ID (PK)',
-
-    -- 사원 및 어학 정보
-    PERNR          VARCHAR(10)    NOT NULL COMMENT '사번',
-    ZSEQ           INT            NOT NULL COMMENT '어학 순번',
-    ZLANG          VARCHAR(20)    NOT NULL COMMENT '외국어 명 (영어, 일본어 등)',
-    ZEXAM_NAME     VARCHAR(50)    NOT NULL COMMENT '시험명 (TOEIC, JLPT 등)',
-    ZSCORE         VARCHAR(20)    NOT NULL COMMENT '성적 (문자형으로 통합 저장)',
-    ZGET_DATE      DATE           NOT NULL COMMENT '취득일자',
-    ZEXP_DATE      DATE           NULL COMMENT '유효기간 (선택)',
-    ZSPEAK_LVL     VARCHAR(10)    NULL COMMENT '회화 수준 (하, 중, 상, 원어민 등)',
-    ZREAD_LVL      VARCHAR(10)    NULL COMMENT '독해 수준 (하, 중, 상 등)',
-    ZATTACH_ID     VARCHAR(100)   NULL COMMENT '첨부파일 참조 ID',
-    ZREMARK        VARCHAR(200)   NULL COMMENT '비고',
-
-    -- 감사(Audit) 필드
-    CREATED_AT     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY     VARCHAR(50)    NOT NULL COMMENT '생성자',
-    UPDATED_AT     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-    UPDATED_BY     VARCHAR(50)    NULL COMMENT '수정자',
-    
-    -- 기본 키 설정
-    PRIMARY KEY (LANG_ID),
-
-    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 순번)
-    UNIQUE KEY UK_EMP_LANG (PERNR, ZSEQ)
-
-) COMMENT '사원 어학 능력 정보 테이블';
-
-
-INSERT INTO ZHR_EMP_LANG
-(PERNR, ZSEQ, ZLANG, ZEXAM_NAME, ZSCORE, ZGET_DATE, ZEXP_DATE, ZSPEAK_LVL, ZREAD_LVL, ZREMARK, CREATED_BY, UPDATED_BY)
-VALUES
--- 재무팀 (FIN)
-('2012011', 1, '영어', 'TOEIC', '880', '2024-03-15', '2026-03-14', '중', '상', 'IR 자료 작성용', 'system', NULL),
-('2012011', 2, '일본어', 'JLPT', 'N2', '2023-12-03', NULL, '중', '상', '일본 투자사 관련 문서 검토', 'system', NULL),
-('2012011', 3, '중국어', 'HSK', '4급', '2025-05-25', '2027-05-24', '하', '중', '기초 회계 용어 가능', 'system', NULL),
-('2023133', 1, '영어', 'TOEIC', '950', '2024-06-12', '2026-06-11', '상', '상', '원래 자격증 테이블에 있던 데이터', 'system', NULL),
-
--- 마케팅팀 (MKTG)
-('2015022', 1, '영어', 'OPIc', 'IH', '2025-01-20', '2027-01-19', '상', '상', NULL, 'system', NULL),
-('2015022', 2, '일본어', 'JPT', '850', '2024-08-11', NULL, '중', '상', '일본 시장 조사', 'system', NULL),
-('2020023', 1, '영어', 'TOEIC Speaking', 'IM3', '2023-11-05', '2025-11-04', '중', '중', '만료 임박', 'system', NULL),
-('2023053', 1, '중국어', 'HSK', '5급', '2025-02-28', '2027-02-27', '중', '상', NULL, 'system', NULL),
-
--- 연구소 (RND)
-('2018013', 1, '영어', 'TOEFL iBT', '105', '2023-08-25', '2025-08-24', '상', '상', '만료됨', 'system', NULL),
-('2018013', 2, '일본어', 'JLPT', 'N1', '2022-12-04', NULL, '중', '상', '기술 문서 독해', 'system', NULL),
-('2021002', 1, '영어', 'PMP', 'Pass', '2023-06-17', '2026-06-16', '상', '상', 'PM 자격증 내 어학 증빙', 'system', NULL),
-('2022211', 1, '영어', 'G-TELP Level 2', '75', '2024-03-20', '2026-03-19', '중', '중', NULL, 'system', NULL),
-('2023101', 1, '영어', 'TOEIC', '910', '2025-05-19', '2027-05-18', '상', '상', NULL, 'system', NULL),
-('2024132', 1, '독일어', 'TestDaF', 'TDN 4', '2024-11-10', NULL, '중', '상', '독일 파트너사 협업', 'system', NULL),
-
--- 생산/품질관리 (PROD/QC)
-('2019112', 1, '영어', '자체평가', 'Level 3', '2023-05-15', NULL, '하', '중', '해외 장비 매뉴얼 독해 가능', 'system', NULL),
-('2021042', 1, '베트남어', 'TCT', 'B2', '2024-08-25', '2026-08-24', '중', '중', '베트남 공장 파견 대비', 'system', NULL),
-('2022052', 1, '영어', 'TOEIC', '750', '2024-02-28', '2026-02-27', '중', '중', NULL, 'system', NULL),
-
--- 인사팀 (HR)
-('2019113', 1, '영어', 'OPIc', 'IH', '2024-07-20', '2026-07-19', '상', '상', '해외 인력 채용 목적', 'system', NULL),
-('2022043', 1, '일본어', 'JLPT', 'N3', '2025-01-14', NULL, '하', '중', NULL, 'system', NULL),
-('2023212', 1, '영어', 'TOEIC', '800', '2023-08-11', '2025-08-10', '중', '상', '만료됨', 'system', NULL),
-
--- 영업팀 (SALE)
-('2019101', 1, '영어', 'OPIc', 'IM2', '2024-11-20', '2026-11-19', '중', '중', NULL, 'system', NULL),
-('2019101', 2, '중국어', 'TSC', 'Level 4', '2025-04-10', '2027-04-09', '중', '하', '중화권 영업', 'system', NULL),
-('2022055', 1, '영어', 'OPIc', 'AL', '2024-05-10', '2026-05-09', '원어민', '상', '북미지역 영업 총괄', 'system', NULL),
-('2022055', 2, '스페인어', 'DELE', 'B2', '2023-05-22', NULL, '상', '상', '남미 시장 개척', 'system', NULL),
-('2021032', 1, '영어', '회화', '중급', '2025-04-17', NULL, '중', '중', '자체 회화 능력', 'system', NULL),
-('2023213', 1, '영어', '무역영어 1급', 'Pass', '2024-06-03', NULL, '상', '상', '자격증 연계', 'system', NULL),
-('2023213', 2, '중국어', 'HSK', '6급', '2025-08-01', '2027-07-31', '상', '상', NULL, 'system', NULL),
-('2025001', 1, '일본어', 'BJT', 'J2', '2024-07-12', NULL, '중', '상', '비즈니스 회화 가능', 'system', NULL),
-
--- 디자인팀 (DSGN)
-('2020121', 1, '영어', 'TOEIC', '920', '2024-07-12', '2026-07-11', '상', '상', '해외 레퍼런스 수집', 'system', NULL),
-('2025002', 1, '프랑스어', 'DELF', 'B1', '2025-04-01', NULL, '중', '중', '유럽 디자인 트렌드 리서치', 'system', NULL),
-
--- 고객서비스팀 (CS)
-('2021114', 1, '일본어', 'JLPT', 'N2', '2024-10-27', NULL, '중', '상', '일본 고객 응대', 'system', NULL),
-('2022201', 1, '영어', 'OPIc', 'IM1', '2024-01-19', '2026-01-18', '중', '중', NULL, 'system', NULL),
-
--- 경영팀 (MGMNT)
-('2010001', 1, '영어', 'TOEIC', '985', '2025-09-07', '2027-09-06', '원어민', '원어민', '경영진', 'system', NULL),
-('2010001', 2, '일본어', '회화', '상급', '2025-01-01', NULL, '상', '상', '일본 JV 미팅', 'system', NULL);
+-- 2209007 강도윤 (서버 - 추가)
+('2209007', 2, 'EN', 'ETC', 'IT Technical Writing', 'Pass', '2023-01-01', NULL, '50', '30', '기술 문서 작성 과정', 'system_admin');
 
 
 CREATE TABLE ZHR_EMP_CAREER (
-    -- 기본 키 컬럼 (PK)
-    CAREER_ID       BIGINT        NOT NULL AUTO_INCREMENT COMMENT '경력 고유 ID (PK)',
+    CAREER_ID          BIGINT          NOT NULL AUTO_INCREMENT COMMENT '경력 ID (PK)',
+    PERNR              VARCHAR(10)     NOT NULL COMMENT '사번 (FK)',
+    ZSEQ               INT             NOT NULL COMMENT '경력 순번',
 
-    -- 사원 및 경력 정보
-    PERNR           VARCHAR(10)   NOT NULL COMMENT '사번',
-    ZSEQ            INT           NOT NULL COMMENT '경력 순번',
-    ZCAREER_TYPE    VARCHAR(1)    NOT NULL COMMENT '경력 구분 (I: 사내, E: 사외)',
-    ZCOMP_NAME      VARCHAR(100)  NOT NULL COMMENT '회사명',
-    ZDEPT           VARCHAR(100)  NULL COMMENT '부서명',
-    ZPOSITION       VARCHAR(100)  NOT NULL COMMENT '직무/직책',
-    ZSTART_DATE     DATE          NOT NULL COMMENT '시작일',
-    ZEND_DATE       DATE          NULL COMMENT '종료일',
-    ZPERIOD_MONTH   INT           NULL COMMENT '근무 개월 수 (자동 계산 후 저장)',
-    ZRESIGN_REASON  VARCHAR(100)  NULL COMMENT '퇴사사유',
-    ZATTACH_ID      VARCHAR(100)  NULL COMMENT '첨부파일 참조 ID',
-    ZREMARK         VARCHAR(200)  NULL COMMENT '비고',
-
-    -- 감사(Audit) 필드
-    CREATED_AT      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY      VARCHAR(50)   NOT NULL COMMENT '생성자',
-    UPDATED_AT      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-    UPDATED_BY      VARCHAR(50)   NULL COMMENT '수정자',
+    -- [핵심] 경력 구분 및 회사 정보
+    ZCAREER_TYPE       VARCHAR(20)     NOT NULL COMMENT '근무 형태 (Common Code: HR_CAREER_TYPE - 정규직, 계약직, 인턴, 프리랜서)',
+    ZCOMP_NAME         VARCHAR(100)    NOT NULL COMMENT '회사명',
+    ZDEPT_NAME         VARCHAR(100)    NULL     COMMENT '근무 부서명',
     
-    -- 기본 키 설정
+    -- [직무 정보]
+    ZJOB_RANK          VARCHAR(50)     NULL     COMMENT '최종 직위/직급 (과장, 대리 등)',
+    ZJOB_DUTY          VARCHAR(100)    NULL     COMMENT '담당 직무 (예: 서버 개발, 회계 결산)',
+    ZJOB_DESC          VARCHAR(500)    NULL     COMMENT '업무 상세 내용 (프로젝트 등)',
+
+    -- [기간]
+    ZSTART_DATE        DATE            NOT NULL COMMENT '입사일',
+    ZEND_DATE          DATE            NOT NULL COMMENT '퇴사일',
+    -- ZPERIOD_MONTH는 제거함 (DTO에서 계산)
+
+    -- [HR 산정용]
+    ZLAST_SALARY       BIGINT          NULL     COMMENT '최종 연봉 (단위: 원)',
+    ZRESIGN_REASON     VARCHAR(200)    NULL     COMMENT '퇴사 사유',
+    
+    -- [경력 인정]
+    ZRECOG_RATIO       INT             DEFAULT 100 COMMENT '경력 인정 비율 (0~100%)',
+    
+    ZATTACH_ID         VARCHAR(100)    NULL     COMMENT '경력증명서 파일 ID',
+    ZREMARK            VARCHAR(200)    NULL     COMMENT '비고',
+
+	-- [동시성 제어]
+    VERSION            INT             NOT NULL DEFAULT 0 COMMENT '데이터 버전 (낙관적 잠금)',
+    -- [Audit]
+    CREATED_AT         DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY         VARCHAR(50)     NOT NULL,
+    UPDATED_AT         DATETIME        NULL     ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_BY         VARCHAR(50)     NULL,
+
     PRIMARY KEY (CAREER_ID),
+    UNIQUE KEY UK_EMP_CAREER_01 (PERNR, ZSEQ),
 
-    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 순번)
-    UNIQUE KEY UK_EMP_CAREER (PERNR, ZSEQ)
+    CONSTRAINT FK_ZHR_EMP_CAREER_MASTER 
+        FOREIGN KEY (PERNR) REFERENCES ZHR_EMP_MASTER(PERNR) ON DELETE CASCADE
 
-) COMMENT '사원 경력 이력 정보 테이블';
+) COMMENT '사원 입사 전 경력 정보';
 
 -- 더미 데이터 --
-INSERT INTO ZHR_EMP_CAREER
-(PERNR, ZSEQ, ZCAREER_TYPE, ZCOMP_NAME, ZDEPT, ZPOSITION, ZSTART_DATE, ZEND_DATE, ZPERIOD_MONTH, ZRESIGN_REASON, ZREMARK, CREATED_BY, UPDATED_BY)
-VALUES
--- 경영팀 (MGMNT)
-('2010001', 1, 'E', '글로벌 컨설팅', '전략컨설팅 본부', '선임 컨설턴트', '2005-03-01', '2009-12-31', 58, '이직', '주요 M&A 프로젝트 수행', 'system', NULL),
-('2010001', 2, 'I', '(주)넥스트코어', '기획조정실', '실장', '2010-01-04', '2015-12-31', 72, NULL, '신사업 기획 총괄', 'system', NULL),
-('2010001', 3, 'I', '(주)넥스트코어', '경영지원본부', '본부장 (상무)', '2016-01-01', '2022-12-31', 84, NULL, '전사 경영관리 총괄', 'system', NULL),
-('2010001', 4, 'I', '(주)넥스트코어', '대표이사', 'CEO', '2023-01-01', NULL, NULL, NULL, '현 재직', 'system', NULL),
+INSERT INTO ZHR_EMP_CAREER 
+(PERNR, ZSEQ, ZCAREER_TYPE, ZCOMP_NAME, ZDEPT_NAME, ZJOB_RANK, ZJOB_DUTY, ZJOB_DESC, ZSTART_DATE, ZEND_DATE, ZLAST_SALARY, ZRESIGN_REASON, ZRECOG_RATIO, ZATTACH_ID, ZREMARK, CREATED_BY) 
+VALUES 
 
--- 재무팀 (FIN)
-('2012011', 1, 'E', '삼정회계법인', '감사 본부', '사원', '2010-01-10', '2011-12-31', 24, '이직', '제조업 회계감사 담당', 'system', NULL),
-('2012011', 2, 'I', '(주)넥스트코어', '재무팀', '대리', '2012-01-02', '2018-12-31', 84, NULL, '결산 및 세무 담당', 'system', NULL),
-('2012011', 3, 'I', '(주)넥스트코어', '재무팀', '과장', '2019-01-01', NULL, NULL, NULL, '팀 리더', 'system', NULL),
-('2023133', 1, 'E', '하나증권', 'IB 사업부', '연구원', '2021-07-01', '2023-05-31', 23, '이직', NULL, 'system', NULL),
-('2023133', 2, 'I', '(주)넥스트코어', '재무팀', '사원', '2023-06-01', NULL, NULL, NULL, 'IR 및 공시 담당', 'system', NULL),
+-- ============================================================
+-- [1] 2018001 양한재 (기술연구소 부장) - 2018-03 입사
+-- ============================================================
+('2018001', 1, '10', '삼성SDS', '공공SI사업부', '대리', 'Java 개발', '공공기관 차세대 프로젝트 PL 수행', '2005-03-01', '2010-02-28', 55000000, '이직', 100, NULL, '우수사원 표창', 'system_admin'),
+('2018001', 2, '10', 'NAVER', '검색서비스팀', '과장', '백엔드 개발', '대용량 트래픽 처리 및 검색 엔진 최적화', '2010-03-15', '2015-03-14', 72000000, '개인 역량 강화', 100, NULL, NULL, 'system_admin'),
+('2018001', 3, '10', '우아한형제들', '주문시스템팀', '팀장', '아키텍트', 'MSA 전환 프로젝트 총괄', '2015-04-01', '2018-01-31', 85000000, '스카우트 제의', 100, NULL, '성과급 포함', 'system_admin'),
 
--- 마케팅팀 (MKTG)
-('2015022', 1, 'E', '제일기획', 'AP 2팀', 'AE', '2012-02-01', '2015-01-31', 36, '이직', '디지털 광고 캠페인', 'system', NULL),
-('2015022', 2, 'I', '(주)넥스트코어', '마케팅팀', '대리', '2015-02-02', NULL, NULL, NULL, '글로벌 마케팅 담당', 'system', NULL),
-('2020023', 1, 'I', '(주)넥스트코어', '마케팅팀', '사원', '2020-03-01', NULL, NULL, NULL, '콘텐츠 마케팅', 'system', NULL),
+-- ============================================================
+-- [2] 2201001 김철수 (개발 - 퇴직자) - 2022-01 입사
+-- ============================================================
+('2201001', 1, '10', 'LG CNS', '금융사업부', '사원', 'Web 개발', '은행 인터넷 뱅킹 유지보수', '2015-01-01', '2018-12-31', 45000000, '업무 변경 희망', 100, NULL, NULL, 'system_admin'),
+('2201001', 2, '10', '카카오뱅크', '여신개발팀', '대리', '서버 개발', '대출 심사 프로세스 개발', '2019-01-15', '2021-11-30', 60000000, '이직', 100, NULL, NULL, 'system_admin'),
 
--- 연구소 (RND)
-('2018013', 1, 'E', '네이버랩스', 'AI 연구소', '연구원', '2015-08-01', '2017-12-31', 29, '이직', '자연어 처리 모델 개발', 'system', NULL),
-('2018013', 2, 'I', '(주)넥스트코어', '연구소', '선임연구원', '2018-01-02', '2023-12-31', 72, NULL, '음성인식 기술 개발 리드', 'system', NULL),
-('2018013', 3, 'I', '(주)넥스트코어', '연구소', '책임연구원', '2024-01-01', NULL, NULL, NULL, 'AI 개발 파트장', 'system', NULL),
-('2021002', 1, 'E', 'LG CNS', '솔루션 사업부', '개발자', '2018-07-01', '2021-05-31', 35, '이직', '금융 프로젝트 참여', 'system', NULL),
-('2021002', 2, 'I', '(주)넥스트코어', '연구소', '선임연구원', '2021-06-01', NULL, NULL, NULL, 'PM 역할 수행', 'system', NULL),
+-- ============================================================
+-- [3] 2207005 정지훈 (재무회계) - 2022-07 입사
+-- ============================================================
+('2207005', 1, '10', '삼일회계법인', '감사본부', 'Associate', '회계감사', '제조업/유통업 외부감사 수행', '2018-09-01', '2020-08-31', 58000000, '인더스트리 전환', 100, NULL, 'CPA 자격 보유', 'system_admin'),
+('2207005', 2, '10', '현대자동차', '재경본부', '대리', '원가회계', '차종별 원가 분석 및 결산', '2020-09-20', '2022-06-15', 65000000, '연봉 협상', 100, NULL, NULL, 'system_admin'),
 
--- 인사팀 (HR)
-('2019113', 1, 'E', '사람인 HR', 'HR컨설팅팀', '컨설턴트', '2017-01-15', '2019-10-31', 34, '이직', '조직문화 컨설팅 수행', 'system', NULL),
-('2019113', 2, 'I', '(주)넥스트코어', '인사팀', '대리', '2019-11-01', NULL, NULL, NULL, 'HRD, 교육 담당', 'system', NULL),
-('2023212', 1, 'I', '(주)넥스트코어', '인사팀', '사원', '2023-08-10', NULL, NULL, NULL, '급여 및 평가보상', 'system', NULL),
+-- ============================================================
+-- [4] 2203004 최서연 (인사) - 2022-03 입사
+-- ============================================================
+('2203004', 1, '10', '사람인HR', '헤드헌팅사업부', '컨설턴트', '인재 추천', 'IT 개발 직군 전문 채용', '2016-01-01', '2018-12-31', 42000000, '인사팀 전직', 100, NULL, NULL, 'system_admin'),
+('2203004', 2, '10', '쿠팡', 'Recruiting팀', '과장', 'Tech Recruiter', '개발자 대규모 채용 리딩', '2019-01-01', '2022-02-15', 68000000, '이직', 100, NULL, NULL, 'system_admin'),
 
--- 영업팀 (SALE)
-('2019101', 1, 'E', '코오롱글로벌', '해외영업1팀', '사원', '2017-07-01', '2019-09-30', 27, '이직', '동남아 시장 담당', 'system', NULL),
-('2019101', 2, 'I', '(주)넥스트코어', '영업팀', '대리', '2019-10-01', NULL, NULL, NULL, '중화권 영업 담당', 'system', NULL),
-('2022055', 1, 'E', 'P&G Korea', '영업관리', '매니저', '2018-01-01', '2022-04-30', 52, '이직', '주요 채널 영업 전략 수립', 'system', NULL),
-('2022055', 2, 'I', '(주)넥스트코어', '영업팀', '과장', '2022-05-01', '2025-06-30', 38, NULL, '북미/남미 지역 총괄', 'system', NULL),
-('2022055', 3, 'I', '(주)넥스트코어', '영업본부', '부장', '2025-07-01', NULL, NULL, NULL, '승진', 'system', NULL),
-('2021032', 1, 'I', '(주)넥스트코어', '영업팀', '사원', '2021-03-02', '2024-12-31', 46, NULL, '국내영업 담당', 'system', NULL),
-('2021032', 2, 'I', '(주)넥스트코어', '영업팀', '대리', '2025-01-01', NULL, NULL, NULL, '승진', 'system', NULL),
+-- ============================================================
+-- [5] 개발팀 경력직 (DEV, DEV_SVR, DEV_WEB, DEV_AI)
+-- ============================================================
+-- 2207006 윤서아 (웹)
+('2207006', 1, '10', '카페24', '솔루션개발팀', '주임', 'PHP/React', '쇼핑몰 프론트엔드 기능 개선', '2019-03-01', '2022-06-30', 40000000, '기술 스택 변경', 100, NULL, NULL, 'system_admin'),
 
--- 생산/품질관리 (PROD/QC)
-('2019112', 1, 'I', '(주)넥스트코어', '생산1팀', '사원', '2019-11-01', '2023-04-30', 42, NULL, '공정 관리', 'system', NULL),
-('2019112', 2, 'I', '(주)넥스트코어', '품질관리팀', '대리', '2023-05-01', NULL, NULL, NULL, '부서 이동', 'system', NULL),
-('2021042', 1, 'I', '(주)넥스트코어', '생산2팀', '사원', '2021-04-05', NULL, NULL, NULL, '베트남 공장 파견 예정', 'system', NULL),
+-- 2209007 강도윤 (서버)
+('2209007', 1, '10', 'NHN', '게임서버팀', '전임', 'C++', '실시간 게임 서버 로직 구현', '2017-01-01', '2020-12-31', 50000000, '도메인 변경', 100, NULL, NULL, 'system_admin'),
+('2209007', 2, '10', '라인플러스', '메시징서버팀', '대리', 'Java/Netty', '대용량 메시지 큐 처리', '2021-01-15', '2022-08-15', 65000000, '이직', 100, NULL, NULL, 'system_admin'),
 
--- 디자인팀 (DSGN)
-('2020121', 1, 'E', '코코아 디자인', 'UI/UX팀', '디자이너', '2018-11-01', '2020-11-30', 25, '이직', NULL, 'system', NULL),
-('2020121', 2, 'I', '(주)넥스트코어', '디자인팀', '선임 디자이너', '2020-12-01', NULL, NULL, NULL, 'UI/UX 디자인 리드', 'system', NULL);
+-- 2301012 장은우 (AI)
+('2301012', 1, '40', '솔트룩스', 'AI연구소', '인턴', '데이터 라벨링', '자연어 처리 학습 데이터 구축', '2021-07-01', '2021-12-31', 24000000, '계약 만료', 80, NULL, '인턴 수료', 'system_admin'),
+('2301012', 2, '10', '마인즈랩', '음성인식팀', '연구원', 'Python', 'STT 모델 튜닝', '2022-01-01', '2022-12-31', 42000000, '처우 개선', 100, NULL, NULL, 'system_admin'),
+
+-- 2310019 배준호 (서버)
+('2310019', 1, '20', 'SK C&C', '반도체사업팀', '계약직', 'SM', '공장 자동화 시스템 운영', '2020-01-01', '2021-12-31', 38000000, '계약 만료', 100, NULL, NULL, 'system_admin'),
+('2310019', 2, '10', '메가존클라우드', 'MSP팀', '매니저', 'Cloud Eng', 'AWS 인프라 구축 및 마이그레이션', '2022-01-15', '2023-09-15', 52000000, '개발 직무 희망', 100, NULL, NULL, 'system_admin'),
+
+-- 2403025 노하린 (AI - 중고신입)
+('2403025', 1, '50', '크몽', 'IT개발', '프리랜서', '데이터 크롤링', '웹 데이터 수집 및 전처리 외주', '2023-01-01', '2023-12-31', 30000000, '정규직 취업', 50, NULL, '프리랜서 경력', 'system_admin'),
+
+-- 2404027 표지성 (서버)
+('2404027', 1, '10', '가비아', '호스팅팀', '사원', 'Linux Admin', '리눅스 서버 보안 설정 및 모니터링', '2021-01-01', '2024-03-01', 38000000, '백엔드 개발 전환', 100, NULL, NULL, 'system_admin'),
+
+-- 2504046 경수호 (AI - 석사 후 입사)
+('2504046', 1, '40', 'Naver CLOVA', 'Vision AI', 'Research Intern', 'OCR 연구', '문서 인식 알고리즘 리서치', '2024-07-01', '2024-12-31', 30000000, '계약 만료', 80, NULL, '논문 참여', 'system_admin'),
+
+-- 2505047 봉준서 (서버)
+('2505047', 1, '60', '멋쟁이사자처럼', '교육팀', '멘토', '교육 보조', '백엔드 부트캠프 멘토링', '2024-06-01', '2024-12-31', 0, '학업 복귀', 0, NULL, '교육 봉사', 'system_admin'),
+
+
+-- ============================================================
+-- [6] 영업/마케팅 (BIZ)
+-- ============================================================
+-- 2201002 이영희 (마케팅 - 퇴직)
+('2201002', 1, '10', '제일기획', '디지털캠페인팀', 'AE', '광고 기획', 'SNS 마케팅 전략 수립', '2016-01-01', '2019-12-31', 48000000, '이직', 100, NULL, NULL, 'system_admin'),
+('2201002', 2, '10', '에코마케팅', '퍼포먼스팀', '대리', '퍼포먼스 마케팅', 'ROAS 최적화', '2020-01-01', '2021-12-31', 55000000, '이직', 100, NULL, NULL, 'system_admin'),
+
+-- 2210009 한지우 (마케팅)
+('2210009', 1, '20', '티몬', '컨텐츠제작팀', '계약직', '에디터', '상품 상세페이지 기획 및 제작', '2020-03-01', '2022-02-28', 32000000, '계약 만료', 100, NULL, NULL, 'system_admin'),
+
+-- 2312020 조민서 (영업)
+('2312020', 1, '10', '한샘', 'B2C영업', 'SC', '가구 영업', '대리점 고객 응대 및 판매', '2022-01-01', '2023-10-31', 40000000, '직무 변경', 80, NULL, '영업관리 희망', 'system_admin'),
+
+-- 2407032 방민호 (영업)
+('2407032', 1, '10', '롯데칠성음료', '주류영업팀', '사원', '루트 세일즈', '거래처 관리 및 수금', '2022-01-01', '2024-05-31', 42000000, 'IT업계 전향', 100, NULL, NULL, 'system_admin'),
+
+-- 2501042 원태준 (사업)
+('2501042', 1, '40', 'KOTRA', '해외무역관', '인턴', '시장조사', '일본 시장 동향 조사 보고서 작성', '2024-01-01', '2024-06-30', 22000000, '인턴 종료', 80, NULL, '오사카 무역관', 'system_admin'),
+
+-- 2502043 라희선 (마케팅)
+('2502043', 1, '40', '대학내일', '트렌드연구소', '인턴', '자료조사', 'MZ세대 트렌드 리서치', '2024-07-01', '2024-12-31', 22000000, '인턴 종료', 80, NULL, NULL, 'system_admin'),
+
+
+-- ============================================================
+-- [7] 경영지원/인사 (MGT, HR)
+-- ============================================================
+-- 2211010 오시우 (경영)
+('2211010', 1, '30', '삼성물산', '총무팀', '파견직', '총무 보조', '비품 관리 및 행사 지원', '2020-01-01', '2021-12-31', 30000000, '계약 종료', 80, NULL, NULL, 'system_admin'),
+
+-- 2301011 신유나 (인사)
+('2301011', 1, '20', '노무법인유앤', '급여팀', '계약직', '급여 아웃소싱', '4대보험 취득상실 신고', '2021-03-01', '2022-12-31', 32000000, '정규직 희망', 100, NULL, NULL, 'system_admin'),
+
+-- 2401021 유정민 (재무)
+('2401021', 1, '10', '중소기업', '경리팀', '사원', '더존 입력', '세금계산서 발행 및 비용 처리', '2022-06-01', '2023-12-31', 30000000, '규모 있는 회사 희망', 100, NULL, NULL, 'system_admin'),
+
+-- 2503044 설강민 (인사)
+('2503044', 1, '40', '한국전력공사', '인사처', '체험형인턴', '서류 정리', '채용 서류 검토 보조', '2024-09-01', '2024-12-31', 21000000, '계약 만료', 50, NULL, '공기업 인턴', 'system_admin'),
+
+
+-- ============================================================
+-- [8] 기타 사원 및 신입 (인턴 경험 등)
+-- ============================================================
+-- 2210008 임하윤 (사업)
+('2210008', 1, '10', '이랜드월드', '패션사업부', '주임', 'MD', '상품 기획 및 발주 관리', '2018-01-01', '2022-08-31', 42000000, 'IT업계 이직', 100, NULL, NULL, 'system_admin'),
+
+-- 2302013 송지아 (사업)
+('2302013', 1, '40', '무신사', 'MD팀', '인턴', '보조', '입점 브랜드 관리 보조', '2022-07-01', '2022-12-31', 24000000, '계약 만료', 80, NULL, NULL, 'system_admin'),
+
+-- 2304014 권혁준 (앱)
+('2304014', 1, '50', '숨고', '개발팀', '프리랜서', '앱 개발', '안드로이드 UI 수정 외주', '2022-01-01', '2023-02-28', 0, '프로젝트 종료', 50, NULL, '건당 계약', 'system_admin'),
+
+-- 2305015 황수빈 (마케팅)
+('2305015', 1, '60', '스타벅스', '마케팅팀', '아르바이트', '이벤트 보조', '프로모션 물품 관리', '2022-06-01', '2023-02-28', 0, '취업', 0, NULL, NULL, 'system_admin'),
+
+-- 2305016 안태현 (경영)
+('2305016', 1, '20', 'LG전자', '구매팀', '계약직', '구매 보조', 'PO 발행 및 납기 관리', '2020-01-01', '2022-12-31', 35000000, '계약 만료', 100, NULL, NULL, 'system_admin'),
+
+-- 2308017 문채원 (인사)
+('2308017', 1, '40', '원티드', '운영팀', '인턴', 'CS', '기업 고객 응대', '2022-08-01', '2023-02-28', 25000000, '계약 만료', 80, NULL, NULL, 'system_admin'),
+
+-- 2309018 고은별 (웹)
+('2309018', 1, '10', 'SI업체', '개발1팀', '사원', 'JSP', '공공기관 유지보수', '2021-01-01', '2023-07-31', 32000000, '자체 서비스 희망', 100, NULL, NULL, 'system_admin'),
+
+-- 2401022 홍예준 (웹)
+('2401022', 1, '40', '당근마켓', '플랫폼팀', '인턴', 'QA', '테스트 케이스 작성 및 수행', '2023-07-01', '2023-12-31', 26000000, '계약 만료', 80, NULL, NULL, 'system_admin'),
+
+-- 2402024 백시원 (인사)
+('2402024', 1, '40', 'SK하이닉스', 'HR팀', '인턴', '교육 운영', '신입사원 연수 지원', '2023-01-01', '2023-02-28', 24000000, '계약 만료', 80, NULL, '동계 인턴', 'system_admin'),
+
+-- 2405028 기태영 (경영)
+('2405028', 1, '20', '한국타이어', '회계팀', '계약직', '전표 처리', '비용 정산 및 부가세 신고 보조', '2022-01-01', '2024-03-31', 34000000, '계약 만료', 100, NULL, NULL, 'system_admin'),
+
+-- 2405029 선우진 (앱)
+('2405029', 1, '10', '게임스타트업', '클라이언트팀', '사원', 'Unity', '모바일 캐주얼 게임 개발', '2022-01-01', '2024-03-31', 36000000, '폐업', 100, NULL, NULL, 'system_admin'),
+
+-- 2406030 왕지현 (마케팅)
+('2406030', 1, '10', '광고대행사', '기획팀', '사원', 'SNS운영', '카드뉴스 제작 및 업로드', '2022-06-01', '2024-04-30', 30000000, '인하우스 희망', 100, NULL, NULL, 'system_admin'),
+
+-- 2407031 서재윤 (인사)
+('2407031', 1, '40', '롯데백화점', '인사팀', '인턴', '채용 보조', '면접 안내 및 진행', '2023-09-01', '2024-02-28', 23000000, '계약 만료', 80, NULL, NULL, 'system_admin'),
+
+-- 2408033 편지후 (웹)
+('2408033', 1, '50', '개인', '개발', '프리랜서', '홈페이지', '워드프레스 홈페이지 제작', '2023-01-01', '2024-06-30', 0, '취업', 50, NULL, NULL, 'system_admin'),
+
+-- 2409034 성주원 (재무)
+('2409034', 1, '20', '신한은행', '지점', '텔러', '창구 수납', '공과금 수납 및 예금 상담', '2022-01-01', '2024-06-30', 35000000, '본사 근무 희망', 80, NULL, '계약직', 'system_admin'),
+
+-- 2409035 위하늘 (AI)
+('2409035', 1, '40', '뤼이드', 'AI팀', '인턴', 'Research', '논문 구현 및 실험', '2024-01-01', '2024-06-30', 28000000, '계약 만료', 80, NULL, NULL, 'system_admin'),
+
+-- 2410036 명지안 (서버)
+('2410036', 1, '10', '보안관제센터', '관제팀', '사원', 'OP', '서버 모니터링 및 로그 분석', '2022-01-01', '2024-08-31', 32000000, '개발 전향', 80, NULL, '3교대 근무', 'system_admin'),
+
+-- 2411037 금예서 (마케팅)
+('2411037', 1, '40', '아모레퍼시픽', '브랜드팀', '인턴', '보조', '신제품 런칭 지원', '2024-03-01', '2024-08-31', 24000000, '계약 만료', 80, NULL, NULL, 'system_admin'),
+
+-- 2411038 도윤재 (사업)
+('2411038', 1, '10', '물류회사', '운영팀', '사원', '물류 관리', '입출고 관리 및 배차', '2020-01-01', '2024-09-30', 38000000, '사업기획 희망', 80, NULL, NULL, 'system_admin'),
+
+-- 2412039 채수현 (인사)
+('2412039', 1, '60', '관공서', '행정팀', '아르바이트', '사무 보조', '문서 스캔 및 정리', '2024-01-01', '2024-10-31', 0, '취업', 0, NULL, NULL, 'system_admin'),
+
+-- 2412040 하동균 (앱)
+('2412040', 1, '10', '에이전시', '모바일팀', '사원', 'iOS', '쇼핑몰 앱 유지보수', '2020-01-01', '2024-10-31', 36000000, '자체 서비스 희망', 100, NULL, NULL, 'system_admin'),
+
+-- 2501041 진세아 (웹)
+('2501041', 1, '40', '토스', 'Frontend', '인턴', 'UI 개발', '어드민 페이지 개발', '2024-07-01', '2024-12-31', 28000000, '계약 만료', 80, NULL, NULL, 'system_admin'),
+
+-- 2503045 옥다은 (재무)
+('2503045', 1, '20', '국민연금공단', '재무팀', '인턴', '사무', '지출 증빙 정리', '2024-07-01', '2024-12-31', 22000000, '계약 만료', 80, NULL, NULL, 'system_admin'),
+
+-- 2507049 엄지아 (마케팅)
+('2507049', 1, '60', '영화관', '매점', '아르바이트', '서비스', '고객 응대', '2023-01-01', '2024-12-31', 0, '취업', 0, NULL, NULL, 'system_admin'),
+
+-- 2508050 함유주 (앱)
+('2508050', 1, '40', '넥슨', '모바일사업부', '인턴', 'QA', '게임 테스트', '2024-07-01', '2024-12-31', 24000000, '계약 만료', 80, NULL, NULL, 'system_admin');
 
 
 -- 포상 관리 --

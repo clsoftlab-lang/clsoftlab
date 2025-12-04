@@ -16,5 +16,5 @@ public interface EmployeeCertRepository extends JpaRepository<EmployeeCert, Long
 	public Page<EmployeeCert> findByPernr (String pernr, Pageable pageable);
 
 	// 사번으로 list조회
-	public List<EmployeeCert> findByPernr(String pernr);
+	public List<EmployeeCert> findAllByPernrOrderBySeq(String pernr);
 }

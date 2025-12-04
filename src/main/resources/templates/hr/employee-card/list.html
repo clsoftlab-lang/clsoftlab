@@ -99,6 +99,12 @@
 		                        <li class="nav-item" role="presentation">
 		                            <button class="nav-link" id="tab-family" data-bs-toggle="tab" data-bs-target="#familyInfo" type="button" role="tab">가족 정보</button>
 		                        </li>
+		                        <li class="nav-item" role="presentation">
+							        <button class="nav-link" id="tab-cert" data-bs-toggle="tab" data-bs-target="#certInfo" type="button" role="tab">자격증 정보</button>
+							    </li>
+							    <li class="nav-item" role="presentation">
+			                        <button class="nav-link" id="tab-lang" data-bs-toggle="tab" data-bs-target="#langInfo" type="button" role="tab">어학 정보</button>
+			                    </li>
 		                    </ul>
 		
 		                    <!-- 탭 컨텐츠 -->
@@ -245,6 +251,67 @@
 								        </div>
 								    </div>
 								</div>
+								
+								<!-- 자격증 정보 -->
+								<div class="tab-pane fade" id="certInfo" role="tabpanel">
+								    <h5 class="mb-3 text-primary"><i class="ti ti-certificate"></i> 자격증 정보</h5>
+								    
+								    <div class="card">
+								        <div class="table-responsive">
+								            <table class="table table-vcenter card-table table-hover">
+		                                        <thead>
+		                                            <tr>
+		                                                <th>자격증명</th>
+		                                                <th>등급/점수</th>
+		                                                <th>발급기관</th>
+		                                                <th>취득일</th> 
+		                                                <th>종료일</th>
+		                                                <th class="text-center">수당</th>
+		                                                <th class="text-center">상태</th> 
+		                                            </tr>
+		                                        </thead>
+		                                        <tbody id="certTableBody">
+		                                            <!-- JS 바인딩 -->
+		                                        </tbody>
+		                                    </table>
+								        </div>
+								        
+								        <div id="noCertMsg" class="text-center p-5 text-muted" style="display:none;">
+								            <i class="ti ti-files-off fs-2 d-block mb-2"></i>
+								            등록된 자격증 정보가 없습니다.
+								        </div>
+								    </div>
+								</div>
+								
+								<!-- [TAB 5] 어학 정보 -->
+			                    <div class="tab-pane fade" id="langInfo" role="tabpanel">
+			                        <h5 class="mb-3 text-primary"><i class="ti ti-language"></i> 외국어 능력</h5>
+			                        
+			                        <div class="card">
+			                            <div class="table-responsive">
+			                                <table class="table table-vcenter card-table table-hover">
+			                                    <thead>
+			                                        <tr>
+			                                            <th>언어</th>
+			                                            <th>시험명</th> 
+			                                            <th>점수/등급</th> 
+			                                            <th>취득일</th>
+			                                            <th>만료일</th>
+			                                            <th>회화 수준</th>
+			                                            <th>독해 수준</th>
+			                                        </tr>
+			                                    </thead>
+			                                    <tbody id="langTableBody">
+			                                    </tbody>
+			                                </table>
+			                            </div>
+			                            
+			                            <div id="noLangMsg" class="text-center p-5 text-muted" style="display:none;">
+			                                <i class="ti ti-files-off fs-2 d-block mb-2"></i>
+			                                등록된 어학 정보가 없습니다.
+			                            </div>
+			                        </div>
+			                    </div>
 		                    </div>
 		                </form>
 		            </div>
@@ -264,6 +331,11 @@
         const militaryList = /*[[${militaryCodeList}]]*/ [];
         const relationList = /*[[${relationCodeList}]]*/ [];
         const jobList      = /*[[${jobCodeList}]]*/ [];
+        const certList     = /*[[${certCodeList}]]*/ []; 
+        const certRankList = /*[[${certRankList}]]*/ []; 
+        const langList     = /*[[${langCodeList}]]*/ [];      
+        const langTestList = /*[[${langTestCodeList}]]*/ [];  
+        const langLvlList  = /*[[${langLvlCodeList}]]*/ [];   
         </script>
         <script src="/assets/js/hr/employee-card.js"></script>
     </th:block> 

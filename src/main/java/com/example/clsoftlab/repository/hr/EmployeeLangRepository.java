@@ -16,5 +16,5 @@ public interface EmployeeLangRepository extends JpaRepository<EmployeeLang, Long
 	public Page<EmployeeLang> findByPernr (String pernr, Pageable pageable);
 	
 	// 사번으로 어학 리스트 조회
-	public List<EmployeeLang> findByPernr (String pernr);
+	public List<EmployeeLang> findAllByPernrOrderBySeq (String pernr);
 }

@@ -81,7 +81,7 @@ public class EmployeeFamilyController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
-	//관리자용 list 조회
+	//카드 페이지 심플list 조회
 	@GetMapping("/simple/{pernr}")
 	public ResponseEntity<?> findById (@PathVariable String pernr, @SessionAttribute(name = "LOGIN_USER", required = false) UserAccountResponseDto sessionUser) {
 		

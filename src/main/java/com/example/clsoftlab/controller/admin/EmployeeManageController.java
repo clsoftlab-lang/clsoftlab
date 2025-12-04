@@ -44,9 +44,7 @@ public class EmployeeManageController {
 		model.addAttribute("empStatusList", codeDetailService.findActiveCodesByGroupId("HR_STATUS"));
 		model.addAttribute("dutyCodeList", codeDetailService.findActiveCodesByGroupId("HR_DUTY"));
 		model.addAttribute("rankCodeList", codeDetailService.findActiveCodesByGroupId("HR_RANK"));
-		model.addAttribute("empStatusList", codeDetailService.findActiveCodesByGroupId("HR_STATUS"));
-		model.addAttribute("dutyCodeList", codeDetailService.findActiveCodesByGroupId("HR_DUTY"));
-		System.out.println(codeDetailService.findActiveCodesByGroupId("HR_DEPT"));
+		
 		
 		return "admin/employee-manage/list";
 	}

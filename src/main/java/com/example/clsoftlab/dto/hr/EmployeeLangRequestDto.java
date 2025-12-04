@@ -17,24 +17,25 @@ import lombok.Setter;
 @AllArgsConstructor
 public class EmployeeLangRequestDto {
 
-	private Long id;
+private Long id;
 	
-	@NotBlank(message = "사번은 필수 입력 항목입니다.")
+    @NotBlank(message = "사번은 필수 입력 항목입니다.")
     @Size(max = 10, message = "사번은 최대 10자까지 입력 가능합니다.")
     private String pernr;
 
     @NotNull(message = "순번은 필수 입력 항목입니다.")
     private Integer seq;
 
-    @NotBlank(message = "외국어명은 필수 입력 항목입니다.")
-    @Size(max = 20, message = "외국어명은 최대 20자까지 입력 가능합니다.")
-    private String lang;
+    @NotBlank(message = "언어 코드는 필수 입력 항목입니다.")
+    @Size(max = 20, message = "언어 코드는 최대 20자까지 입력 가능합니다.")
+    private String langCode;
 
-    @NotBlank(message = "시험명은 필수 입력 항목입니다.")
+    @Size(max = 20, message = "시험 코드는 최대 20자까지 입력 가능합니다.")
+    private String testCode;
+
     @Size(max = 50, message = "시험명은 최대 50자까지 입력 가능합니다.")
-    private String examName;
+    private String testName;
 
-    @NotBlank(message = "성적은 필수 입력 항목입니다.")
     @Size(max = 20, message = "성적은 최대 20자까지 입력 가능합니다.")
     private String score;
 

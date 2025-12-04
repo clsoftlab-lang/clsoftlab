@@ -16,5 +16,5 @@ public interface EmployeeCareerRepository extends JpaRepository<EmployeeCareer, 
 	public Page<EmployeeCareer> findByPernr (String pernr, Pageable pageable);
 	
 	// 사번으로 경력 list 조회
-	public List<EmployeeCareer> findByPernr (String pernr);
+	public List<EmployeeCareer> findAllByPernrOrderBySeq (String pernr);
 }

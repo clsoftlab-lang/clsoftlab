@@ -23,7 +23,7 @@ public class EmployeeCardController {
 	
 	// 메인 페이지
 	@GetMapping("")
-	public String employCard (Model model) {
+	public String employeeCard (Model model) {
 		
 		model.addAttribute("deptCodeList", codeDetailService.findActiveCodesByGroupId("HR_DEPT"));
 		model.addAttribute("rankCodeList", codeDetailService.findActiveCodesByGroupId("HR_RANK"));
@@ -32,10 +32,13 @@ public class EmployeeCardController {
 		model.addAttribute("nationCodeList", codeDetailService.findActiveCodesByGroupId("HR_NATION"));
 		model.addAttribute("maritalCodeList", codeDetailService.findActiveCodesByGroupId("HR_MARITAL"));
 		model.addAttribute("militaryCodeList", codeDetailService.findActiveCodesByGroupId("HR_MILITARY"));
-		model.addAttribute("maritalCodeList", codeDetailService.findActiveCodesByGroupId("HR_MARITAL"));
-		model.addAttribute("militaryCodeList", codeDetailService.findActiveCodesByGroupId("HR_MILITARY"));
 		model.addAttribute("relationCodeList", codeDetailService.findActiveCodesByGroupId("HR_REL_TYPE"));
 		model.addAttribute("jobCodeList", codeDetailService.findActiveCodesByGroupId("HR_JOB_TYPE"));
+		model.addAttribute("certCodeList", codeDetailService.findActiveCodesByGroupId("HR_CERT_CD"));
+		model.addAttribute("certRankList", codeDetailService.findActiveCodesByGroupId("HR_CERT_RANK"));
+		model.addAttribute("langCodeList", codeDetailService.findActiveCodesByGroupId("HR_LANG"));
+		model.addAttribute("langTestCodeList", codeDetailService.findActiveCodesByGroupId("HR_LANG_TEST"));
+		model.addAttribute("langLvlCodeList", codeDetailService.findActiveCodesByGroupId("HR_LANG_LVL"));
 		
 		return "hr/employee-card/list";
 	}

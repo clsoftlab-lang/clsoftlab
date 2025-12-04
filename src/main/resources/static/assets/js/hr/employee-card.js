@@ -7,7 +7,12 @@ const codeMaps = {
     marital: {},  
     military: {},
 	relation: {}, 
-	job: {}
+	job: {},
+	cert: {},
+	certRank: {},
+	lang: {},
+    langTest: {},
+    langLvl: {}
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -22,6 +27,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof militaryList !== 'undefined') militaryList.forEach(c => codeMaps.military[c.code] = c.name);
 	if (typeof relationList !== 'undefined') relationList.forEach(c => codeMaps.relation[c.code] = c.name);
     if (typeof jobList !== 'undefined') jobList.forEach(c => codeMaps.job[c.code] = c.name);
+	if (typeof certList !== 'undefined')     certList.forEach(c => codeMaps.cert[c.code] = c.name);
+	if (typeof certRankList !== 'undefined') certRankList.forEach(c => codeMaps.certRank[c.code] = c.name);
+	if (typeof langList !== 'undefined')     langList.forEach(c => codeMaps.lang[c.code] = c.name);
+    if (typeof langTestList !== 'undefined') langTestList.forEach(c => codeMaps.langTest[c.code] = c.name);
+    if (typeof langLvlList !== 'undefined')  langLvlList.forEach(c => codeMaps.langLvl[c.code] = c.name);
+
 
     // 초기 로드 (URL 파라미터 or 로그인 유저)
 	const urlParams = new URLSearchParams(window.location.search);
@@ -57,31 +68,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 	
-	// 발령 이력 탭 클릭 시 데이터 로드 (Lazy Loading)
-    const tabJoin = document.getElementById('tab-join');
-    if (tabJoin) {
-        tabJoin.addEventListener('shown.bs.tab', function () {
-            const currentPernr = getCurrentPernr();
-            loadAppointHistory(currentPernr);
-        });
-    }
-
-    // 가족 정보 탭 클릭 시 데이터 로드
-    const tabFamily = document.getElementById('tab-family');
-    if (tabFamily) {
-        tabFamily.addEventListener('shown.bs.tab', function () {
-            const currentPernr = getCurrentPernr();
-            loadFamilyData(currentPernr);
-        });
-    }
-	
-    // 탭 변경 시 '정보 수정' 버튼 표시/숨김 제어
+	// 탭 이벤트 핸들러
     const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
     tabEls.forEach(tab => {
         tab.addEventListener('shown.bs.tab', function (event) {
-            const activeTabId = event.target.id; // 클릭한 탭의 ID (tab-basic, tab-join, tab-family)
+            const activeTabId = event.target.id;
             const btnEdit = document.getElementById('btnEditMode');
             const btnGroup = document.getElementById('editBtnGroup');
+            const currentPernr = getCurrentPernr();
 
             toggleEditMode(false); 
 
@@ -89,8 +83,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (btnEdit) btnEdit.style.display = 'block';
             } else {
                 if (btnEdit) btnEdit.style.display = 'none';
-                if (btnGroup) btnGroup.style.display = 'none'; 
+                if (btnGroup) btnGroup.style.display = 'none';
             }
+
+            // 탭별 데이터 Lazy Load
+            if (activeTabId === 'tab-join') loadAppointHistory(currentPernr);
+            if (activeTabId === 'tab-family') loadFamilyData(currentPernr);
+            if (activeTabId === 'tab-cert') loadCertData(currentPernr);
+			if (activeTabId === 'tab-lang') loadLangData(currentPernr);
         });
     });
 	
@@ -367,6 +367,168 @@ async function loadFamilyData(pernr) {
     }
 }
 
+// 자격증 정보 로드 
+async function loadCertData(pernr) {
+    const $tbody = $('#certTableBody');
+    const $noMsg = $('#noCertMsg');
+
+    if (!pernr) return;
+
+    try {
+        // 로딩 중 
+        $tbody.html('<tr><td colspan="6" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>');
+        $noMsg.hide();
+
+        const response = await fetch(`/hr/employee-cert/simple/${pernr}`); 
+        
+        if (!response.ok) {
+			throw new Error('자격증 정보 조회 실패');
+		}
+
+        const list = await response.json();
+        
+        $tbody.empty();
+
+        if (!list || list.length === 0) {
+            $noMsg.show();
+            return;
+        }
+
+        let html = '';
+        list.forEach(item => {
+            
+            // 1. 자격증명
+			let certTxt = item.certName;
+            if (item.certCode && item.certCode !== 'ETC99') {
+                certTxt = codeMaps.cert[item.certCode] || item.certName || '-';
+            }
+            
+            // 2. 등급/점수 조합
+			const rankTxt = codeMaps.certRank[item.certRank];
+            let subInfo = [];
+
+			if (rankTxt && rankTxt !== '등급없음') {
+                subInfo.push(rankTxt);
+            }
+            if (item.certScore && item.certScore > 0) {
+                subInfo.push(`${item.certScore}점`);
+            }
+            const displaySubInfo = subInfo.length > 0 ? subInfo.join(' / ') : '-';
+
+            // 3. 종료일
+			let expDateTxt = item.expDate;
+            if (!item.expDate || item.expDate === '9999-12-31') {
+                expDateTxt = '-'; 
+            } else {
+                const today = new Date().toISOString().split('T')[0];
+                if (item.expDate < today) {
+                    expDateTxt += ` <span class="text-danger small">(만료)</span>`;
+                }
+            }
+
+			// 4. 수당 (체크박스)
+            const allowChecked = item.allowYn === 'Y' ? 'checked' : '';
+            const allowCheckbox = `<div class="d-flex justify-content-center"><input type="checkbox" class="form-check-input" ${allowChecked} onclick="return false;"></div>`;
+
+            // 5. 상태 (체크박스) - 승인 여부
+            const statusChecked = item.confirmYn === 'Y' ? 'checked' : '';
+            const statusCheckbox = `<div class="d-flex justify-content-center"><input type="checkbox" class="form-check-input" ${statusChecked} onclick="return false;"></div>`;
+
+			html += `
+                <tr>
+                    <td class="fw-bold text-dark">${certTxt}</td>
+                    <td>${displaySubInfo}</td>
+                    <td class="text-secondary">${item.certOrg}</td>
+					<td class="small text-muted">${item.getDate}</td> 
+					<td class="small text-muted">${expDateTxt}</td> 
+                    <td class="text-center">${allowCheckbox}</td>
+                    <td class="text-center">${statusCheckbox}</td>
+                </tr>
+            `;
+        });
+
+        $tbody.html(html);
+
+    } catch (error) {
+        console.error(error);
+        $tbody.html('<tr><td colspan="6" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
+    }
+}
+
+// 어학 정보 로드
+async function loadLangData(pernr) {
+    const $tbody = $('#langTableBody');
+    const $noMsg = $('#noLangMsg');
+
+    if (!pernr) return;
+
+    try {
+        // 로딩 중
+        $tbody.html('<tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>');
+        $noMsg.hide();
+
+        // API 호출
+        const response = await fetch(`/hr/employee-lang/simple/${pernr}`); 
+        if (!response.ok) throw new Error('어학 정보 조회 실패');
+
+        const list = await response.json();
+        $tbody.empty();
+
+        if (!list || list.length === 0) {
+            $noMsg.show();
+            return;
+        }
+
+        let html = '';
+        list.forEach(item => {
+            
+            // 1. 언어명
+            const langTxt = codeMaps.lang[item.langCode] || item.langCode || '-';
+
+            // 2. 시험명
+            let testTxt = item.testName;
+            if (item.testCode && item.testCode !== 'ETC') {
+                testTxt = codeMaps.langTest[item.testCode] || item.testName || '-';
+            }
+
+            // 3. 점수/등급
+            const scoreTxt = item.score ? `<span class="fw-bold text-dark">${item.score}</span>` : '-';
+
+            // 4. 회화/독해 수준
+            const speakTxt = codeMaps.langLvl[item.speakLvl] || '-';
+            const readTxt  = codeMaps.langLvl[item.readLvl]  || '-';
+
+            // 5. 만료일 체크
+            let expDateTxt = item.expDate;
+            if (item.expDate) {
+                const today = new Date().toISOString().split('T')[0];
+                if (item.expDate < today) {
+                    expDateTxt += ` <span class="text-danger small">(만료)</span>`;
+                }
+            } else {
+                expDateTxt = '-';
+            }
+
+            html += `
+                <tr>
+                    <td class="fw-bold">${langTxt}</td>
+                    <td>${testTxt}</td>
+                    <td>${scoreTxt}</td>
+                    <td class="text-secondary small">${item.getDate}</td>
+                    <td class="text-secondary small">${expDateTxt}</td>
+                    <td>${speakTxt}</td>
+                    <td>${readTxt}</td>
+                </tr>
+            `;
+        });
+
+        $tbody.html(html);
+
+    } catch (error) {
+        console.error(error);
+        $tbody.html('<tr><td colspan="7" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
+    }
+}
 
 function toggleEditMode(isEdit) {
     const form = document.getElementById('editForm');

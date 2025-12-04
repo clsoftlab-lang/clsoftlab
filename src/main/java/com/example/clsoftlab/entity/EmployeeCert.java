@@ -45,7 +45,7 @@ public class EmployeeCert extends BaseEntity {
     private String certCode;
 
     @Column(name = "ZCERT_NAME", nullable = false, length = 100)
-    private String certName; // 자격증명 (기타일 경우 직접 입력)
+    private String certName; // 자격증명
 
     @Column(name = "ZCERT_RANK", length = 20)
     private String certRank;
@@ -85,12 +85,20 @@ public class EmployeeCert extends BaseEntity {
     
     public void update (EmployeeCertRequestDto dto) {
     	this.seq = dto.getSeq();
+        
+        this.certCode = dto.getCertCode();
     	this.certName = dto.getCertName();
+        this.certRank = dto.getCertRank();
+        this.certScore = dto.getCertScore();
+        
     	this.certOrg = dto.getCertOrg();
     	this.certNo = dto.getCertNo();
     	this.getDate = dto.getGetDate();
     	this.expDate = dto.getExpDate();
+        
     	this.jobRel = dto.getJobRel();
+        this.allowYn = dto.getAllowYn();
+        
     	this.remark = dto.getRemark();
     	this.attachId = dto.getAttachId();
     }
