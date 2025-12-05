@@ -16,5 +16,5 @@ public interface EmployeeRewardRepository extends JpaRepository<EmployeeReward, 
 	public Page<EmployeeReward> findByPernr (String pernr, Pageable pageable);
 	
 	// 사번으로 포상 list 조회
-	public List<EmployeeReward> findByPernr (String pernr);
+	public List<EmployeeReward> findAllByPernrOrderBySeq (String pernr);
 }

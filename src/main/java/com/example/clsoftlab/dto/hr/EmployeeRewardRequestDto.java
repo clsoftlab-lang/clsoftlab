@@ -2,6 +2,7 @@ package com.example.clsoftlab.dto.hr;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,7 +19,7 @@ public class EmployeeRewardRequestDto {
 
 	private Long id;
 	
-	@NotBlank(message = "사번은 필수 입력 항목입니다.")
+    @NotBlank(message = "사번은 필수 입력 항목입니다.")
     @Size(max = 10, message = "사번은 최대 10자까지 입력 가능합니다.")
     private String pernr;
 
@@ -26,23 +27,27 @@ public class EmployeeRewardRequestDto {
     private Integer seq;
 
     @NotNull(message = "수여일자는 필수 입력 항목입니다.")
-    private LocalDate awardDate;
+    private LocalDate rewardDate;
 
     @NotBlank(message = "포상명은 필수 입력 항목입니다.")
     @Size(max = 100, message = "포상명은 최대 100자까지 입력 가능합니다.")
-    private String awardName;
+    private String rewardName;
 
     @NotBlank(message = "포상 종류는 필수 입력 항목입니다.")
-    @Size(min = 1, max = 1, message = "포상 종류는 한 글자여야 합니다. (I 또는 E)")
-    private String awardType;
+    @Size(max = 20, message = "포상 종류 코드는 최대 20자까지 입력 가능합니다.")
+    private String rewardType;
 
     @NotBlank(message = "수여기관은 필수 입력 항목입니다.")
     @Size(max = 100, message = "수여기관은 최대 100자까지 입력 가능합니다.")
-    private String awardOrg;
+    private String rewardOrg;
 
     @NotBlank(message = "포상사유는 필수 입력 항목입니다.")
     @Size(max = 200, message = "포상사유는 최대 200자까지 입력 가능합니다.")
     private String reason;
+
+    @NotNull(message = "포상 금액은 필수입니다. (없으면 0)")
+    @Min(value = 0, message = "포상 금액은 0원 이상이어야 합니다.")
+    private Long rewardAmt;
 
     @Size(max = 100, message = "포상내용은 최대 100자까지 입력 가능합니다.")
     private String content;

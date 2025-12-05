@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,27 +15,26 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.clsoftlab.dto.common.UserAccountResponseDto;
 import com.example.clsoftlab.dto.hr.EmployeeCareerDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeeCareerRequestDto;
 import com.example.clsoftlab.service.common.FileService;
 import com.example.clsoftlab.service.hr.EmployeeCareerService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/hr/employee-career")
+@RequiredArgsConstructor
 public class EmployeeCareerController {
 	
 	private final EmployeeCareerService employeeCareerService;
 	private final FileService fileService;
 	
-	public EmployeeCareerController(EmployeeCareerService employeeCareerService, FileService fileService) {
-		this.employeeCareerService = employeeCareerService;
-		this.fileService = fileService;
-	}
-
 	// 메인 페이지
 	@GetMapping("")
 	public String employeeCareer () {
@@ -64,6 +64,27 @@ public class EmployeeCareerController {
 		
 		Page<EmployeeCareerDetailDto> employeeCareerPage = employeeCareerService.findByPernr(pernr, page, size);
 		return ResponseEntity.ok(employeeCareerPage);
+	}
+	
+	//카드 페이지 심플list 조회
+	@GetMapping("/simple/{pernr}")
+	public ResponseEntity<?> findById (@PathVariable String pernr, @SessionAttribute(name = "LOGIN_USER", required = false) UserAccountResponseDto sessionUser) {
+		
+		if (sessionUser == null) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+	    }
+
+	    boolean isMyData = sessionUser.getUserId().equals(pernr);
+	    
+	    boolean isAdminOrHr = "ADMIN".equals(sessionUser.getSysRole()) 
+	                       || "HR_MNG".equals(sessionUser.getSysRole());
+
+	    if (!isMyData && !isAdminOrHr) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("타인의 정보를 조회할 권한이 없습니다.");
+	    }
+		
+		return ResponseEntity.ok(employeeCareerService.getSimpleList(pernr));
+				
 	}
 	
 	// 파일 업로드

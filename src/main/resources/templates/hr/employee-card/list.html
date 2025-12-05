@@ -105,6 +105,12 @@
 							    <li class="nav-item" role="presentation">
 			                        <button class="nav-link" id="tab-lang" data-bs-toggle="tab" data-bs-target="#langInfo" type="button" role="tab">어학 정보</button>
 			                    </li>
+			                    <li class="nav-item" role="presentation">
+							        <button class="nav-link" id="tab-career" data-bs-toggle="tab" data-bs-target="#careerInfo" type="button" role="tab">입사 전 경력</button>
+							    </li>
+							    <li class="nav-item" role="presentation">
+							        <button class="nav-link" id="tab-reward" data-bs-toggle="tab" data-bs-target="#rewardInfo" type="button" role="tab">포상 정보</button>
+							    </li>
 		                    </ul>
 		
 		                    <!-- 탭 컨텐츠 -->
@@ -312,6 +318,50 @@
 			                            </div>
 			                        </div>
 			                    </div>
+			                    
+			                    <!-- [TAB 6] 경력 정보 -->
+							    <div class="tab-pane fade" id="careerInfo" role="tabpanel">
+							        <h5 class="mb-3 text-primary"><i class="ti ti-briefcase"></i> 입사 전 경력 사항</h5>
+							        
+							        <div class="card">
+							            <!-- 타임라인 컨테이너 (JS가 내용을 채움) -->
+							            <div class="card-body schedule-timeline" id="careerTimeline">
+							                <div class="text-center text-muted py-5">
+							                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+							                    <div class="mt-2 small">경력 정보를 불러오는 중...</div>
+							                </div>
+							            </div>
+							        </div>
+							    </div>
+							    
+							    <!-- [TAB 7] 포상 정보 (추가됨) -->
+							    <div class="tab-pane fade" id="rewardInfo" role="tabpanel">
+							        <h5 class="mb-3 text-primary"><i class="ti ti-trophy"></i> 포상 및 징계 이력</h5>
+							        
+							        <div class="card">
+							            <div class="table-responsive">
+							                <table class="table table-vcenter card-table table-hover">
+							                    <thead>
+							                        <tr>
+							                            <th style="width: 120px;">수여일자</th>
+							                            <th style="width: 100px;">구분</th>
+							                            <th>포상명</th>
+							                            <th>수여기관</th>
+							                            <th class="text-end" style="width: 120px;">포상금</th>
+							                        </tr>
+							                    </thead>
+							                    <tbody id="rewardTableBody">
+							                        <!-- JS 바인딩 -->
+							                    </tbody>
+							                </table>
+							            </div>
+							            
+							            <div id="noRewardMsg" class="text-center p-5 text-muted" style="display:none;">
+							                <i class="ti ti-mood-empty fs-2 d-block mb-2"></i>
+							                등록된 포상 정보가 없습니다.
+							            </div>
+							        </div>
+							    </div>
 		                    </div>
 		                </form>
 		            </div>
@@ -319,9 +369,7 @@
 		    </div>
 	<th:block layout:fragment="script">
 		<script th:inline="javascript">
-		/*<![CDATA[*/
         const loginUserPernr = /*[[${session.LOGIN_USER.userId}]]*/ '2018001'; 
-        /*]]>*/
         const deptList = /*[[${deptCodeList}]]*/ [];
         const rankList = /*[[${rankCodeList}]]*/ [];
         const dutyList = /*[[${dutyCodeList}]]*/ [];
@@ -336,6 +384,8 @@
         const langList     = /*[[${langCodeList}]]*/ [];      
         const langTestList = /*[[${langTestCodeList}]]*/ [];  
         const langLvlList  = /*[[${langLvlCodeList}]]*/ [];   
+        const careerTypeList = /*[[${careerTypeCodeList}]]*/ [];
+        const rewardTypeList = /*[[${rewardTypeCodeList}]]*/ [];
         </script>
         <script src="/assets/js/hr/employee-card.js"></script>
     </th:block> 

@@ -39,6 +39,8 @@ public class EmployeeCardController {
 		model.addAttribute("langCodeList", codeDetailService.findActiveCodesByGroupId("HR_LANG"));
 		model.addAttribute("langTestCodeList", codeDetailService.findActiveCodesByGroupId("HR_LANG_TEST"));
 		model.addAttribute("langLvlCodeList", codeDetailService.findActiveCodesByGroupId("HR_LANG_LVL"));
+		model.addAttribute("careerTypeCodeList", codeDetailService.findActiveCodesByGroupId("HR_CAREER_TYPE"));
+		model.addAttribute("rewardTypeCodeList", codeDetailService.findActiveCodesByGroupId("HR_REWARD_TYPE"));
 		
 		return "hr/employee-card/list";
 	}

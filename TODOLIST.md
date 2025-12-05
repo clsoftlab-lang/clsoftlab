@@ -72,5 +72,5 @@
 -- 아이디어, api, 자료들 (우선순위 낮음)
     SweeatAlert2 
 
-    경력 컨트롤러부터 작업
+    교육 requestDto~
 

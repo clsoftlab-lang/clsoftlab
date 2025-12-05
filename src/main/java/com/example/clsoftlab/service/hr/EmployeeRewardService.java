@@ -11,33 +11,37 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.hr.EmployeeRewardDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeeRewardRequestDto;
+import com.example.clsoftlab.dto.hr.EmployeeRewardSimpleDto;
 import com.example.clsoftlab.entity.EmployeeReward;
 import com.example.clsoftlab.repository.hr.EmployeeRewardRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeRewardService {
 
 	private final EmployeeRewardRepository employeeRewardRepository;
 	private final ModelMapper modelMapper;
 	
-	public EmployeeRewardService(EmployeeRewardRepository employeeRewardRepository, ModelMapper modelMapper) {
-		this.employeeRewardRepository = employeeRewardRepository;
-		this.modelMapper = modelMapper;
-	}
-	
-	// 사번으로 포상 목록 조회
+	// 사번으로 포상 page 조회
 	public Page<EmployeeRewardDetailDto> findByPernr (String pernr, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("pernr").ascending());
+		Pageable pageable = PageRequest.of(page, size);
 		
 		return employeeRewardRepository.findByPernr(pernr, pageable)
 				.map(i -> modelMapper.map(i, EmployeeRewardDetailDto.class));
+	}
+	
+	// 사번으로 simple List 조회
+	public List<EmployeeRewardSimpleDto> getSimpleList (String pernr) {
+		return employeeRewardRepository.findAllByPernrOrderBySeq(pernr).stream()
+				.map(i -> modelMapper.map(i, EmployeeRewardSimpleDto.class))
+				.toList();
 	}
 	
 	// 포상 목록 저장
@@ -46,7 +50,7 @@ public class EmployeeRewardService {
 		
 		Set<Integer> rewardSeqs = new HashSet<>();
 		
-		List<EmployeeReward> originalReward = employeeRewardRepository.findByPernr(pernr);
+		List<EmployeeReward> originalReward = employeeRewardRepository.findAllByPernrOrderBySeq(pernr);
 		
 		// 순차 검사
 		for (EmployeeRewardRequestDto dto : dtoList) {

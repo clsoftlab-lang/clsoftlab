@@ -12,7 +12,9 @@ const codeMaps = {
 	certRank: {},
 	lang: {},
     langTest: {},
-    langLvl: {}
+    langLvl: {},
+	careerType: {},
+	rewardType: {}
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -32,6 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
 	if (typeof langList !== 'undefined')     langList.forEach(c => codeMaps.lang[c.code] = c.name);
     if (typeof langTestList !== 'undefined') langTestList.forEach(c => codeMaps.langTest[c.code] = c.name);
     if (typeof langLvlList !== 'undefined')  langLvlList.forEach(c => codeMaps.langLvl[c.code] = c.name);
+	if (typeof careerTypeList !== 'undefined') careerTypeList.forEach(c => codeMaps.careerType[c.code] = c.name);
+	if (typeof rewardTypeList !== 'undefined') rewardTypeList.forEach(c => codeMaps.rewardType[c.code] = c.name);
 
 
     // 초기 로드 (URL 파라미터 or 로그인 유저)
@@ -91,6 +95,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (activeTabId === 'tab-family') loadFamilyData(currentPernr);
             if (activeTabId === 'tab-cert') loadCertData(currentPernr);
 			if (activeTabId === 'tab-lang') loadLangData(currentPernr);
+			if (activeTabId === 'tab-career') loadCareerData(currentPernr);
+			if (activeTabId === 'tab-reward') loadRewardData(currentPernr);
         });
     });
 	
@@ -530,6 +536,186 @@ async function loadLangData(pernr) {
     }
 }
 
+async function loadCareerData(pernr) {
+    const container = document.getElementById('careerTimeline');
+    if (!pernr || !container) return;
+
+    try {
+        // 로딩 표시
+        container.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                <div class="mt-2 small">경력 정보를 불러오는 중...</div>
+            </div>`;
+
+        // API 호출
+        const response = await fetch(`/hr/employee-career/simple/${pernr}`); 
+        if (!response.ok) throw new Error('경력 정보 조회 실패');
+
+        const list = await response.json();
+
+        if (!list || list.length === 0) {
+            container.innerHTML = `
+                <div class="text-center p-5 text-muted">
+                    <i class="ti ti-mood-empty fs-2 d-block mb-2"></i>
+                    등록된 경력 정보가 없습니다.
+                </div>`;
+            return;
+        }
+
+        // HTML 조립 (최신 경력이 위로 오도록 정렬되어 있다고 가정)
+        let html = '';
+        list.forEach(item => {
+            html += renderCareerTimelineItem(item);
+        });
+
+        // 타임라인 마감 선
+        html += `
+            <div class="d-flex align-items-center">
+                <div class="flex-fill ps-3 pb-0 timeline-hrline"></div>
+            </div>`;
+
+        container.innerHTML = html;
+
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = '<div class="text-center text-danger py-5">정보를 불러오지 못했습니다.</div>';
+    }
+}
+
+/**
+ * 경력 타임라인 아이템 렌더링
+ */
+function renderCareerTimelineItem(item) {
+    // 1. 근무 형태 (Badge)
+    const typeName = codeMaps.careerType[item.careerType] || item.careerType || '기타';
+    let typeBadgeClass = 'bg-secondary'; // 기본 회색
+    let dotColorClass = 'text-gray-300';    // 타임라인 점 색상
+
+    if (item.careerType === '10') { // 정규직
+        typeBadgeClass = 'bg-blue';
+        dotColorClass = 'text-primary';
+    } else if (item.careerType === '20') { // 계약직
+        typeBadgeClass = 'bg-yellow';
+        dotColorClass = 'text-warning';
+    } else if (item.careerType === '40') { // 인턴
+        typeBadgeClass = 'bg-purple';
+        dotColorClass = 'text-purple';
+    }
+
+    // 2. 직무 정보 조합
+    const rankTxt = item.jobRank || '';
+    const dutyTxt = item.jobDuty || '';
+    let jobInfo = rankTxt;
+    if (rankTxt && dutyTxt) jobInfo += ` <span class="text-muted mx-1">|</span> ${dutyTxt}`;
+    else if (!rankTxt && dutyTxt) jobInfo = dutyTxt;
+    
+    // 부서명
+    const deptHtml = item.deptName ? `<span class="text-muted small ms-1">(${item.deptName})</span>` : '';
+
+    // 3. 퇴사 사유 (있을 경우 표시)
+    let reasonHtml = '';
+    if (item.resignReason) {
+        reasonHtml = `<div class="mt-2 small text-muted bg-light p-2 rounded d-inline-block"><i class="ti ti-info-circle me-1"></i> ${item.resignReason}</div>`;
+    }
+
+    // 4. 기간 뱃지
+    const periodBadge = item.totalPeriod ? `<span class="badge badge-outline text-muted ms-2" style="font-size: 0.75rem;">${item.totalPeriod}</span>` : '';
+
+    return `
+        <div class="d-flex align-items-start mb-4">
+            <!-- [Left] 기간 & 점 -->
+            <div class="d-flex flex-column align-items-end active-time me-3" style="min-width: 110px;">
+                <span class="fw-bold text-dark text-end" style="font-size: 0.95rem;">${item.startDate}</span>
+                <span class="text-muted small text-end">~ ${item.endDate}</span>
+            </div>
+            
+            <div class="d-flex flex-column align-items-center mx-2">
+                <span class="timeline-border d-flex align-items-center justify-content-center bg-white" style="z-index: 1;">
+                    <i class="ti ti-circle-filled ${dotColorClass} fs-12"></i>
+                </span>
+                <div class="timeline-line flex-fill bg-gray-200" style="width: 2px; min-height: 40px;"></div>
+            </div>
+            
+            <!-- [Right] 상세 내용 -->
+            <div class="flex-fill pb-2 ps-2">
+                <div class="card card-body border-0 shadow-sm bg-light-lt p-3 mb-0">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="card-title mb-1 text-dark">
+                                ${item.companyName} 
+                                ${deptHtml}
+                            </h4>
+                            <div class="text-secondary mb-1">
+                                ${jobInfo}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge ${typeBadgeClass}">${typeName}</span>
+                            ${periodBadge}
+                        </div>
+                    </div>
+                    ${reasonHtml}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// [TAB 7] 포상 정보 로드
+async function loadRewardData(pernr) {
+	const $tbody = $('#rewardTableBody');
+	const $noMsg = $('#noRewardMsg');
+	
+	if (!pernr) return;
+	
+	try {
+	    // 로딩 중
+	    $tbody.html('<tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>');
+	    $noMsg.hide();
+	
+	    // API 호출 (Controller 매핑 필요: /hr/employee-reward/simple/{pernr})
+	    const response = await fetch(`/hr/employee-reward/simple/${pernr}`); 
+	    if (!response.ok) throw new Error('포상 정보 조회 실패');
+	
+	    const list = await response.json();
+	    $tbody.empty();
+	
+	    if (!list || list.length === 0) {
+	        $noMsg.show();
+	        return;
+	    }
+	
+	    let html = '';
+	    list.forEach(item => {
+	        
+	        // 1. 포상 구분 
+	        const typeName = codeMaps.rewardType[item.rewardType] || item.rewardType || '기타';
+	
+	        // 2. 포상금 (천단위 콤마)
+	        let amtTxt = '-';
+	        if (item.rewardAmt && item.rewardAmt > 0) {
+	            amtTxt = Number(item.rewardAmt).toLocaleString() + '원';
+	        }
+	
+	        html += `
+	            <tr>
+	                <td class="text-secondary">${item.rewardDate}</td>
+	                <td>${typeName}</td>
+	                <td class="fw-bold text-dark">${item.rewardName}</td>
+	                <td class="text-muted">${item.rewardOrg}</td>
+	                <td class="text-end fw-medium text-dark">${amtTxt}</td>
+	            </tr>
+	        `;
+	    });
+	
+	    $tbody.html(html);
+	
+	} catch (error) {
+	    console.error(error);
+	    $tbody.html('<tr><td colspan="5" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
+	}
+}
 function toggleEditMode(isEdit) {
     const form = document.getElementById('editForm');
     

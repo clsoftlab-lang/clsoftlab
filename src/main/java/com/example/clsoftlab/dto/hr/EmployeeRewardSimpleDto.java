@@ -11,19 +11,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmployeeRewardDetailDto {
+public class EmployeeRewardSimpleDto {
 
-	private Long id;
-    private String pernr;
-    private Integer seq;
+	private Long id;              // PK (수정/삭제용)
+    private Integer seq;          // 정렬 순서
     private String rewardType;    // 포상 구분 (HR_REWARD_TYPE)
     private String rewardName;    // 포상명
     private String rewardOrg;     // 수여기관
     private LocalDate rewardDate; // 수여일자
-    private String reason;        // 포상사유
-    private Long rewardAmt;
-    private String content;       // 기타 포상 내용 (부상 등)
-    private String attachId;
-    private String remark;
-    private Long version;
+    private Long rewardAmt;       // 포상 금액 (리스트에서 바로 확인)
 }
