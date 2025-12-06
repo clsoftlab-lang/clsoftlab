@@ -7,6 +7,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.example.clsoftlab.dto.hr.EmployeeEduRequestDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -83,17 +85,17 @@ public class EmployeeEdu extends BaseEntity {
     @Column(name = "VERSION")
     private Long version;
     
-//    public void update (EmployeeEduRequestDto dto) {
-//    	this.seq = dto.getSeq();
-//    	this.eduName = dto.getEduName();
-//    	this.eduType = dto.getEduType();
-//    	this.eduOrg = dto.getEduOrg();
-//    	this.startDate = dto.getStartDate();
-//    	this.endDate = dto.getEndDate();
-//    	this.completeYn = dto.getCompleteYn();
-//    	this.hour = dto.getHour();
-//    	this.cost = dto.getCost();
-//    	this.attachId = dto.getAttachId();
-//    	this.remark = dto.getRemark();
-//    }
+    public void update (EmployeeEduRequestDto dto) {
+    	this.seq = dto.getSeq();
+    	this.eduName = dto.getEduName();
+    	this.eduType = dto.getEduType();
+    	this.eduOrg = dto.getEduOrg();
+    	this.startDate = dto.getStartDate();
+    	this.endDate = dto.getEndDate();
+    	this.completeYn = dto.getCompleteYn();
+    	this.hour = dto.getHour();
+    	this.cost = dto.getCost();
+    	this.attachId = dto.getAttachId();
+    	this.remark = dto.getRemark();
+    }
 }
