@@ -108,7 +108,7 @@ public class PayItemController {
 			}
 			int size = 1000; //필요한 경우만 사용 가능하도록 변경 필요 size가 0일때는 전체 나오도록 개선 필요.
 
-			Page<PayItemListDto> itemPage = payItemService.searchPayItem(itemName, itemType, useYn, page, size);
+			Page<PayItemListDto> itemPage = payItemService.searchPayItem(List.of(itemName), List.of(itemType), useYn, page, size);
 
 			model.addAttribute("payItem", itemPage.getContent());
 			model.addAttribute("itemName", itemName);
