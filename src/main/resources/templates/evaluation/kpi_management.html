@@ -21,7 +21,13 @@
 
     <div class="main-wrapper">
 
-        <div th:replace="~{common/header :: header}"></div>
+        <div class="header">
+            <div class="main-header">
+                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
+                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
+                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
+            </div>
+        </div>
         <div th:replace="~{common/sidebar :: sidebar}"></div>
 
         <div class="page-wrapper">
@@ -59,7 +65,8 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3 d-flex justify-content-end gap-2">
-                                    <button type="submit" class="btn btn-primary"><i class="ti ti-search me-1"></i>조회</button>
+                                     <button type="submit" class="btn btn-primary w-100"><i class="ti ti-search me-1"></i>조회</button>
+                                     <button type="reset" class="btn btn-outline-secondary w-100"><i class="ti ti-refresh me-1"></i>초기화</button>
                                 </div>
                             </div>
                         </form>
@@ -67,12 +74,8 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header">
                         <h5 class="card-title mb-0">KPI 목록</h5>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kpi-modal"><i class="ti ti-plus me-1"></i>신규 KPI 등록</button>
-                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#copy-modal"><i class="ti ti-file-export me-1"></i>KPI 복사</button>
-                        </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -108,6 +111,14 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end">
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kpi-modal"><i class="ti ti-plus me-1"></i>신규 KPI 등록</button>
+                                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#copy-modal"><i class="ti ti-file-export me-1"></i>KPI 복사</button>
+                            </div>
                         </div>
                     </div>
                 </div>
