@@ -15,32 +15,32 @@
                 <div class="row align-items-end">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label>년도</label>
-                            <input type="number" name="year" class="form-control" th:value="*{year}" />
+                            <label class="form-label">년도</label>
+                            <input type="number" name="year" class="form-control" th:value="*{year}" placeholder="년도 입력" />
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label>KPI 레벨</label>
-                            <select name="level" class="form-select" th:value="*{level}">
-                                <option value="전체">전체</option>
-                                <option th:each="level : ${kpiLevels}" th:value="${level}" th:text="${level}"></option>
+                            <label class="form-label">KPI 레벨</label>
+                            <select name="level" class="form-select">
+                                <option value="">전체</option>
+                                <option th:each="lvl : ${kpiLevels}" th:value="${lvl}" th:text="${lvl}" th:selected="${lvl == filters.level}"></option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label>사용여부</label>
-                            <select name="isUsed" class="form-select" th:value="*{isUsed}">
-                                <option value="전체">전체</option>
-                                <option value="true">사용</option>
-                                <option value="false">미사용</option>
+                            <label class="form-label">사용여부</label>
+                            <select name="isUsed" class="form-select">
+                                <option value="">전체</option>
+                                <option value="true" th:selected="${filters.isUsed == true}">사용</option>
+                                <option value="false" th:selected="${filters.isUsed == false}">미사용</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-3 d-flex justify-content-end gap-2">
                         <button type="submit" class="btn btn-primary w-100"><i class="ti ti-search me-1"></i>조회</button>
-                        <button type="reset" class="btn btn-outline-secondary w-100"><i class="ti ti-refresh me-1"></i>초기화</button>
+                        <button type="button" class="btn btn-outline-secondary w-100" onclick="location.href='/evaluation/kpi'"><i class="ti ti-refresh me-1"></i>초기화</button>
                     </div>
                 </div>
             </form>
@@ -68,20 +68,30 @@
                     </thead>
                     <tbody>
                     <tr th:each="kpi : ${kpiList}">
-                        <td th:text="${kpi.name}">샘플 KPI</td>
+                        <td th:text="${kpi.name}" class="fw-medium">샘플 KPI</td>
                         <td th:text="${kpi.level}">팀 KPI</td>
                         <td th:text="${kpi.parentKpiName ?: '-'}">-</td>
-                        <td th:text="${kpi.details}">개발팀</td>
+                        <td th:text="${kpi.detailsFormatted}" class="text-primary fw-semibold">개발팀</td>
                         <td class="text-center" th:text="${kpi.year}">2024</td>
                         <td class="text-center" th:text="${kpi.weight} + '%'">10%</td>
                         <td class="text-center">
-                            <span th:if="${kpi.isUsed}" class="badge bg-success-light">사용</span>
-                            <span th:unless="${kpi.isUsed}" class="badge bg-danger-light">미사용</span>
+                            <span th:if="${kpi.isUsed}" class="badge bg-success-light text-success">사용</span>
+                            <span th:unless="${kpi.isUsed}" class="badge bg-danger-light text-danger">미사용</span>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-outline-primary"><i class="ti ti-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-danger"><i class="ti ti-trash"></i></button>
+                            <button class="btn btn-sm btn-outline-primary btn-edit-kpi"
+                                    th:data-id="${kpi.id}"
+                                    th:data-kpi='${kpiJsonString}'
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#kpi-modal"
+                                    data-bs-title="KPI 수정">
+                                <i class="ti ti-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" th:onclick="|deleteKpi(${kpi.id})|"><i class="ti ti-trash"></i></button>
                         </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(kpiList)}">
+                        <td colspan="8" class="text-center py-4">데이터가 존재하지 않습니다.</td>
                     </tr>
                     </tbody>
                 </table>
@@ -90,7 +100,7 @@
         <div class="card-footer">
             <div class="d-flex justify-content-end">
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kpi-modal" data-bs-title="신규 KPI 등록"><i class="ti ti-plus me-1"></i>신규 KPI 등록</button>
+                    <button type="button" class="btn btn-primary" id="btnAddKpi" data-bs-toggle="modal" data-bs-target="#kpi-modal" data-bs-title="신규 KPI 등록"><i class="ti ti-plus me-1"></i>신규 KPI 등록</button>
                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#copy-modal"><i class="ti ti-file-export me-1"></i>KPI 복사</button>
                 </div>
             </div>
@@ -105,11 +115,121 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-center text-muted py-5">KPI 등록/수정 폼 영역</p>
+                    <form id="kpiForm">
+                        <input type="hidden" id="kpiId" name="id">
+
+                        <h6 class="border-bottom pb-2 mb-3 fw-bold text-primary">기본 정보</h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">해당 연도 <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="kpiYear" name="year" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">KPI 명 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="kpiName" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">KPI 단계 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="kpiLevel" name="level" required>
+                                    <option value="">선택하세요</option>
+                                    <option th:each="lvl : ${kpiLevels}" th:value="${lvl}" th:text="${lvl}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">상위 KPI</label>
+                                <select class="form-select" id="parentKpiId" name="parentId">
+                                    <option value="">상위 KPI 없음</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="detailFieldsContainer" class="bg-light p-3 rounded mb-3 d-none">
+                            <h6 class="small fw-bold text-secondary mb-3">적용 대상 상세 설정</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4 detail-group group-division">
+                                    <label class="form-label small">사업부</label>
+                                    <select class="form-select form-select-sm" name="details.division">
+                                        <option value="">모든 사업부</option>
+                                        <option th:each="d : ${kpiDivisions}" th:value="${d}" th:text="${d}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 detail-group group-department">
+                                    <label class="form-label small">부서</label>
+                                    <select class="form-select form-select-sm" name="details.department">
+                                        <option value="">모든 부서</option>
+                                        <option th:each="d : ${kpiDepartments}" th:value="${d}" th:text="${d}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 detail-group group-team">
+                                    <label class="form-label small">팀</label>
+                                    <select class="form-select form-select-sm" name="details.team">
+                                        <option value="">모든 팀</option>
+                                        <option th:each="t : ${kpiTeams}" th:value="${t}" th:text="${t}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 detail-group group-position">
+                                    <label class="form-label small">직급</label>
+                                    <select class="form-select form-select-sm" name="details.position">
+                                        <option value="">모든 직급</option>
+                                        <option th:each="p : ${kpiPositions}" th:value="${p}" th:text="${p}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 detail-group group-jobRole">
+                                    <label class="form-label small">직무</label>
+                                    <select class="form-select form-select-sm" name="details.jobRole">
+                                        <option value="">모든 직무</option>
+                                        <option th:each="r : ${kpiJobRoles}" th:value="${r}" th:text="${r}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 detail-group group-jobFunction">
+                                    <label class="form-label small">직능</label>
+                                    <select class="form-select form-select-sm" name="details.jobFunction">
+                                        <option value="">모든 직능</option>
+                                        <option th:each="f : ${kpiJobFunctions}" th:value="${f}" th:text="${f}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="border-bottom pb-2 mb-3 fw-bold text-primary">상세 내용</h6>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">KPI 설명</label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">측정 기준</label>
+                                <input type="text" class="form-control" name="metric">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">목표 값</label>
+                                <input type="text" class="form-control" name="targetValue">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">가중치 (%)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="weight" min="0" max="100" value="10">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold d-block">사용 여부</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="isUsed" id="useY" value="true" checked>
+                                <label class="form-check-label" for="useY">사용</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="isUsed" id="useN" value="false">
+                                <label class="form-check-label" for="useN">미사용</label>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-                    <button type="button" class="btn btn-primary">저장</button>
+                    <button type="button" class="btn btn-primary" onclick="saveKpi()">저장</button>
                 </div>
             </div>
         </div>
@@ -123,19 +243,23 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>이전 연도의 KPI를 복사하여 새로운 연도에 등록합니다.</p>
-                    <div class="form-group mb-3">
-                        <label class="form-label">원본 연도</label>
-                        <input type="number" class="form-control" placeholder="예: 2024"/>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">대상 연도</label>
-                        <input type="number" class="form-control" placeholder="예: 2025"/>
-                    </div>
+                    <p class="text-muted small mb-4">이전 연도의 KPI를 복사하여 새로운 연도에 등록합니다.</p>
+                    <form id="copyForm">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">원본 연도</label>
+                            <input type="number" class="form-control" id="sourceYear"
+                                   th:value="${#temporals.createNow().year - 1}"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label fw-bold">대상 연도</label>
+                            <input type="number" class="form-control" id="targetYear"
+                                   th:value="${#temporals.createNow().year}"/>
+                        </div>
+                    </form>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn btn-primary">복사 실행</button>
+                    <button type="button" class="btn btn-primary" onclick="copyKpi()">복사 실행</button>
                 </div>
             </div>
         </div>
@@ -145,17 +269,103 @@
 <th:block layout:fragment="script">
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // KPI 모달 타이틀 동적 변경 스크립트
-            var kpiModal = document.getElementById('kpi-modal');
-            if(kpiModal){
-                kpiModal.addEventListener('show.bs.modal', function (event) {
-                    var button = event.relatedTarget;
-                    var title = button.getAttribute('data-bs-title');
-                    var modalTitle = kpiModal.querySelector('.modal-title');
-                    modalTitle.textContent = title || 'KPI 정보';
+            const kpiModalEl = document.getElementById('kpi-modal');
+            const kpiForm = document.getElementById('kpiForm');
+            const levelSelect = document.getElementById('kpiLevel');
+            const detailContainer = document.getElementById('detailFieldsContainer');
+
+            // 모달 열릴 때 초기화 및 타이틀 설정
+            kpiModalEl.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const title = button.getAttribute('data-bs-title');
+                const modalTitle = kpiModalEl.querySelector('.modal-title');
+                const id = button.getAttribute('data-id');
+
+                modalTitle.textContent = title || 'KPI 정보';
+
+                if (id) {
+                    // 수정 모드 로직 (AJAX 등을 통해 데이터를 가져와야 함)
+                    console.log("Edit Mode ID:", id);
+                } else {
+                    // 신규 등록 모드: 폼 초기화
+                    kpiForm.reset();
+                    document.getElementById('kpiYear').value = new Date().getFullYear();
+                    levelSelect.dispatchEvent(new Event('change')); // 디테일 필드 초기화
+                }
+            });
+
+            // KPI 레벨 변경에 따른 상세 필드 표시 로직
+            levelSelect.addEventListener('change', function() {
+                const level = this.value;
+                const groups = detailContainer.querySelectorAll('.detail-group');
+
+                // 모든 그룹 숨김 및 값 초기화
+                groups.forEach(el => {
+                    el.style.display = 'none';
+                    el.querySelector('select').value = "";
                 });
-            }
+                detailContainer.classList.add('d-none');
+
+                if (!level) return;
+
+                let showContainer = false;
+
+                // 조건별 필드 표시
+                if (['사업부 KPI', '부서 KPI', '팀 KPI'].includes(level)) {
+                    detailContainer.querySelector('.group-division').style.display = 'block';
+                    showContainer = true;
+                }
+                if (['부서 KPI', '팀 KPI'].includes(level)) {
+                    detailContainer.querySelector('.group-department').style.display = 'block';
+                    showContainer = true;
+                }
+                if (['팀 KPI'].includes(level)) {
+                    detailContainer.querySelector('.group-team').style.display = 'block';
+                    showContainer = true;
+                }
+                if (['팀 KPI', '개인 KPI', '직급 KPI'].includes(level)) {
+                    detailContainer.querySelector('.group-position').style.display = 'block';
+                    showContainer = true;
+                }
+                if (['팀 KPI', '개인 KPI', '직무 KPI'].includes(level)) {
+                    detailContainer.querySelector('.group-jobRole').style.display = 'block';
+                    showContainer = true;
+                }
+                if (['팀 KPI', '개인 KPI', '직능 KPI'].includes(level)) {
+                    detailContainer.querySelector('.group-jobFunction').style.display = 'block';
+                    showContainer = true;
+                }
+
+                if (showContainer) {
+                    detailContainer.classList.remove('d-none');
+                }
+            });
         });
+
+        function saveKpi() {
+            alert('저장되었습니다.');
+            location.reload();
+        }
+
+        function deleteKpi(id) {
+            if(confirm('정말 삭제하시겠습니까?')) {
+                alert('삭제되었습니다.');
+                location.reload();
+            }
+        }
+
+        function copyKpi() {
+            const src = document.getElementById('sourceYear').value;
+            const target = document.getElementById('targetYear').value;
+
+            if(src == target) {
+                alert('원본 연도와 대상 연도는 같을 수 없습니다.');
+                return;
+            }
+
+            alert(src + '년도 KPI를 ' + target + '년도로 복사합니다.');
+            location.reload();
+        }
     </script>
 </th:block>
 </body>
