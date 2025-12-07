@@ -114,7 +114,15 @@
 								</ul>
 							</li>
 					
-							<li><a href="javascript:void(0);"><i class="ti ti-chart-infographic"></i> <span>평가</span></a></li>
+							<li class="submenu">
+								<a href="javascript:void(0);" th:classappend="${currentUrl != null && currentUrl.startsWith('/evaluation/')} ? 'active subdrop' : ''">
+									<i class="ti ti-chart-infographic"></i>
+									<span> 평가 </span>
+									<span class="menu-arrow"></span> </a>
+								<ul style="display: none;">
+									<li><a th:href="@{/evaluation/kpi-management}" th:classappend="${currentUrl != null && currentUrl.startsWith('/evaluation/kpi-management')} ? 'active' : ''">KPI 관리</a></li>
+								</ul>
+							</li>
 					
 							<li class="submenu">
 								<a href="javascript:void(0);" th:classappend="${currentUrl != null && (currentUrl == '/hr' || currentUrl.startsWith('/hr/'))} ? 'active subdrop' : ''">
@@ -220,7 +228,15 @@
 						</ul>
 					</li>
 					
-					<li><a href="#"><i class="ti ti-chart-infographic"></i> <span>평가</span></a></li>
+					<li class="submenu">
+						<a href="javascript:void(0);" th:classappend="${currentUrl != null && currentUrl.startsWith('/evaluation/')} ? 'subdrop' : ''">
+							<i class="ti ti-chart-infographic"></i>
+							<span> 평가 </span>
+							<span class="menu-arrow"></span> </a>
+						<ul style="display: none;">
+							<li><a th:href="@{/evaluation/kpi-management}" th:classappend="${currentUrl != null && currentUrl.startsWith('/evaluation/kpi-management')} ? 'active' : ''">KPI 관리</a></li>
+						</ul>
+					</li>
 					
 					<li class="submenu">
 						<a href="#" >
@@ -289,7 +305,7 @@
 							<i class="ti ti-cash"></i>
 						</a>
 							
-						<a href="#" class="nav-link" title="평가" >
+						<a href="#" class="nav-link" title="평가" data-bs-toggle="tab" data-bs-target="#evaluation">
 							<i class="ti ti-chart-infographic"></i>
 						</a>
 							
@@ -387,6 +403,12 @@
 								<li><a th:href="@{/pay/log-pay-calc}" th:classappend="${currentUrl != null && (currentUrl == '/pay/log-pay-calc' || currentUrl.startsWith('/pay/ilog-pay-calc?'))} ? 'active' : ''">급여 항목 계산 이력</a></li>
 							</ul>
 						</div>
+						<div class="tab-pane fade" id="evaluation" role="tabpanel">
+							<ul>
+								<li class="menu-title"><span>평가</span></li>
+								<li><a th:href="@{/evaluation/kpi-management}" th:classappend="${currentUrl != null && currentUrl.startsWith('/evaluation/kpi-management')} ? 'active' : ''">KPI 관리</a></li>
+							</ul>
+						</div>
 						<div class="tab-pane fade" id="hr" role="tabpanel">
 							<ul>
 								<li class="menu-title"><span>인사</span></li>
@@ -480,7 +502,7 @@
 									</a>
 								</div>
 								<div class="col-6">
-									<a href="#" role="tab" class="nav-link" title="평가">
+									<a href="#menu-evaluation" role="tab" class="nav-link" title="평가" data-bs-toggle="tab" data-bs-target="#menu-evaluation">
 										<span>
 											<i class="ti ti-chart-infographic"></i>
 										</span>
@@ -620,6 +642,11 @@
 									<li><a th:href="@{/pay/insurance-rate}" th:classappend="${currentUrl != null && (currentUrl == '/pay/insurance-rate' || currentUrl.startsWith('/pay/insurance-rate?'))} ? 'active' : ''">4대보험 요율 관리</a></li>
 									<li><a th:href="@{/pay/log-pay-calc}" th:classappend="${currentUrl != null && (currentUrl == '/pay/log-pay-calc' || currentUrl.startsWith('/pay/ilog-pay-calc?'))} ? 'active' : ''">급여 항목 계산 이력</a></li>
 								</ul>
+						</div>
+						<div class="tab-pane fade" id="menu-evaluation" role="tabpanel">
+							<ul class="stack-submenu">
+								<li><a th:href="@{/evaluation/kpi-management}" th:classappend="${currentUrl != null && currentUrl.startsWith('/evaluation/kpi-management')} ? 'active' : ''">KPI 관리</a></li>
+							</ul>
 							</div>
 							<div class="tab-pane fade" id="menu-hr" role="tabpanel">
 								<ul class="stack-submenu">
