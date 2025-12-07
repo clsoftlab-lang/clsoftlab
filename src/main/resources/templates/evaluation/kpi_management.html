@@ -1,151 +1,102 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/base}">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KPI 관리</title>
-
-    <link rel="shortcut icon" href="/assets/img/favicon.png" type="image/x-icon">
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/plugins/tabler-icons/tabler-icons.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 
 <body>
-    <div id="global-loader">
-        <div class="page-loader"></div>
-    </div>
-
-    <div class="main-wrapper">
-
-        <div class="header">
-            <div class="main-header">
-                <div class="header-left"><a href="/" class="logo"><img src="/assets/img/logo.svg" alt="Logo"></a></div>
-                <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar me-1"><i class="ti ti-arrow-bar-to-left"></i></a>
-                <a id="mobile_btn" class="mobile_btn" href="#sidebar"><span class="bar-icon"><span></span><span></span><span></span></span></a>
-            </div>
+<div layout:fragment="content">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">KPI 검색</h5>
         </div>
-        <div th:replace="~{common/sidebar :: sidebar}"></div>
-
-        <div class="page-wrapper">
-            <div class="content">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">KPI 관리</h5>
-                    </div>
-                    <div class="card-body">
-                        <form th:action="@{/evaluation/kpi}" method="get" th:object="${filters}">
-                            <div class="row align-items-end">
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label>년도</label>
-                                        <input type="number" name="year" class="form-control" th:value="*{year}" />
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label>KPI 레벨</label>
-                                        <select name="level" class="form-select" th:value="*{level}">
-                                            <option value="전체">전체</option>
-                                            <option th:each="level : ${kpiLevels}" th:value="${level}" th:text="${level}"></option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label>사용여부</label>
-                                        <select name="isUsed" class="form-select" th:value="*{isUsed}">
-                                            <option value="전체">전체</option>
-                                            <option value="true">사용</option>
-                                            <option value="false">미사용</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 d-flex justify-content-end gap-2">
-                                     <button type="submit" class="btn btn-primary w-100"><i class="ti ti-search me-1"></i>조회</button>
-                                     <button type="reset" class="btn btn-outline-secondary w-100"><i class="ti ti-refresh me-1"></i>초기화</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">KPI 목록</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="text-left">KPI 명</th>
-                                        <th class="text-left">KPI 단계</th>
-                                        <th class="text-left">상위 KPI 명</th>
-                                        <th class="text-left">적용 대상</th>
-                                        <th class="text-center">연도</th>
-                                        <th class="text-center">가중치(%)</th>
-                                        <th class="text-center">사용여부</th>
-                                        <th class="text-center">작업</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="kpi : ${kpiList}">
-                                        <td th:text="${kpi.name}">샘플 KPI</td>
-                                        <td th:text="${kpi.level}">팀 KPI</td>
-                                        <td th:text="${kpi.parentKpiName ?: '-'}">-</td>
-                                        <td th:text="${kpi.details}">개발팀</td>
-                                        <td class="text-center" th:text="${kpi.year}">2024</td>
-                                        <td class="text-center" th:text="${kpi.weight} + '%'">10%</td>
-                                        <td class="text-center">
-                                            <span th:if="${kpi.isUsed}" class="badge bg-success-light">사용</span>
-                                            <span th:unless="${kpi.isUsed}" class="badge bg-danger-light">미사용</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-primary"><i class="ti ti-pencil"></i></button>
-                                            <button class="btn btn-sm btn-outline-danger"><i class="ti ti-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+        <div class="card-body">
+            <form th:action="@{/evaluation/kpi}" method="get" th:object="${filters}">
+                <div class="row align-items-end">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>년도</label>
+                            <input type="number" name="year" class="form-control" th:value="*{year}" />
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <div class="d-flex justify-content-end">
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kpi-modal"><i class="ti ti-plus me-1"></i>신규 KPI 등록</button>
-                                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#copy-modal"><i class="ti ti-file-export me-1"></i>KPI 복사</button>
-                            </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>KPI 레벨</label>
+                            <select name="level" class="form-select" th:value="*{level}">
+                                <option value="전체">전체</option>
+                                <option th:each="level : ${kpiLevels}" th:value="${level}" th:text="${level}"></option>
+                            </select>
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>사용여부</label>
+                            <select name="isUsed" class="form-select" th:value="*{isUsed}">
+                                <option value="전체">전체</option>
+                                <option value="true">사용</option>
+                                <option value="false">미사용</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="ti ti-search me-1"></i>조회</button>
+                        <button type="reset" class="btn btn-outline-secondary w-100"><i class="ti ti-refresh me-1"></i>초기화</button>
+                    </div>
                 </div>
-            </div>
-            <div th:replace="~{common/footer :: footer}"></div>
+            </form>
         </div>
     </div>
 
-    <script src="/assets/js/jquery-3.7.1.min.js"></script>
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery.slimscroll.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="/assets/js/jquery.dataTables.min.js"></script>
-    <script src="/assets/js/dataTables.bootstrap5.min.js"></script>
-    <script src="/assets/js/script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var kpiModal = document.getElementById('kpi-modal');
-            kpiModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var title = button.getAttribute('data-bs-title');
-                var modalTitle = kpiModal.querySelector('.modal-title');
-                modalTitle.textContent = title || 'KPI';
-            });
-        });
-    </script>
-    <!-- KPI 편집/생성 모달 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">KPI 목록</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover w-100" id="kpiTable">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="text-left">KPI 명</th>
+                        <th class="text-left">KPI 단계</th>
+                        <th class="text-left">상위 KPI 명</th>
+                        <th class="text-left">적용 대상</th>
+                        <th class="text-center">연도</th>
+                        <th class="text-center">가중치(%)</th>
+                        <th class="text-center">사용여부</th>
+                        <th class="text-center">작업</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="kpi : ${kpiList}">
+                        <td th:text="${kpi.name}">샘플 KPI</td>
+                        <td th:text="${kpi.level}">팀 KPI</td>
+                        <td th:text="${kpi.parentKpiName ?: '-'}">-</td>
+                        <td th:text="${kpi.details}">개발팀</td>
+                        <td class="text-center" th:text="${kpi.year}">2024</td>
+                        <td class="text-center" th:text="${kpi.weight} + '%'">10%</td>
+                        <td class="text-center">
+                            <span th:if="${kpi.isUsed}" class="badge bg-success-light">사용</span>
+                            <span th:unless="${kpi.isUsed}" class="badge bg-danger-light">미사용</span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary"><i class="ti ti-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger"><i class="ti ti-trash"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-end">
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kpi-modal" data-bs-title="신규 KPI 등록"><i class="ti ti-plus me-1"></i>신규 KPI 등록</button>
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#copy-modal"><i class="ti ti-file-export me-1"></i>KPI 복사</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="kpi-modal" tabindex="-1" aria-labelledby="kpiModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -154,7 +105,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- 모달 콘텐츠는 JavaScript로 채워집니다. -->
+                    <p class="text-center text-muted py-5">KPI 등록/수정 폼 영역</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
@@ -164,7 +115,6 @@
         </div>
     </div>
 
-    <!-- KPI 복사 모달 -->
     <div class="modal fade" id="copy-modal" tabindex="-1" aria-labelledby="copyModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -174,13 +124,13 @@
                 </div>
                 <div class="modal-body">
                     <p>이전 연도의 KPI를 복사하여 새로운 연도에 등록합니다.</p>
-                    <div class="form-group">
-                        <label>원본 연도</label>
-                        <input type="number" class="form-control"/>
+                    <div class="form-group mb-3">
+                        <label class="form-label">원본 연도</label>
+                        <input type="number" class="form-control" placeholder="예: 2024"/>
                     </div>
                     <div class="form-group">
-                        <label>대상 연도</label>
-                        <input type="number" class="form-control"/>
+                        <label class="form-label">대상 연도</label>
+                        <input type="number" class="form-control" placeholder="예: 2025"/>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -190,5 +140,23 @@
             </div>
         </div>
     </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // KPI 모달 타이틀 동적 변경 스크립트
+            var kpiModal = document.getElementById('kpi-modal');
+            if(kpiModal){
+                kpiModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var title = button.getAttribute('data-bs-title');
+                    var modalTitle = kpiModal.querySelector('.modal-title');
+                    modalTitle.textContent = title || 'KPI 정보';
+                });
+            }
+        });
+    </script>
+</th:block>
 </body>
 </html>
