@@ -20,8 +20,8 @@ import lombok.Setter;
 public class EmployeeEduRequestDto {
 
 	private Long id;
-	
-	@NotBlank(message = "사번은 필수 입력 항목입니다.")
+
+    @NotBlank(message = "사번은 필수 입력 항목입니다.")
     @Size(max = 10, message = "사번은 최대 10자까지 입력 가능합니다.")
     private String pernr;
 
@@ -33,7 +33,7 @@ public class EmployeeEduRequestDto {
     private String eduName;
 
     @NotBlank(message = "교육유형은 필수 입력 항목입니다.")
-    @Size(max = 1, message = "교육유형은 한 글자만 입력 가능합니다. (I: 사내, E: 사외)")
+    @Size(max = 20, message = "교육유형은 최대 20자까지 입력 가능합니다.") 
     private String eduType;
 
     @NotBlank(message = "교육기관은 필수 입력 항목입니다.")
@@ -50,10 +50,17 @@ public class EmployeeEduRequestDto {
     @Size(max = 1, message = "수료 여부는 한 글자만 입력 가능합니다. (Y/N)")
     private String completeYn;
 
+    @NotBlank(message = "필수교육 여부는 필수 입력 항목입니다.")
+    @Size(max = 1, message = "필수교육 여부는 한 글자만 입력 가능합니다. (Y/N)")
+    private String mandatoryYn;
+
+    @PositiveOrZero(message = "교육점수는 0 이상의 숫자여야 합니다.")
+    private Integer eduScore;
+
     @PositiveOrZero(message = "교육시간은 0 이상의 숫자여야 합니다.")
     private Integer hour;
-    
-    @Digits(integer = 11, fraction = 2, message = "교육비용은 정수부 11자리, 소수부 2자리까지 입력 가능합니다.")
+
+    @Digits(integer = 13, fraction = 0, message = "교육비용은 정수 13자리까지 입력 가능하며 소수점은 허용되지 않습니다.")
     @PositiveOrZero(message = "교육비용은 0 이상의 숫자여야 합니다.")
     private BigDecimal cost;
 

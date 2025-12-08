@@ -14,7 +14,8 @@ const codeMaps = {
     langTest: {},
     langLvl: {},
 	careerType: {},
-	rewardType: {}
+	rewardType: {},
+	eduType: {}
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof langLvlList !== 'undefined')  langLvlList.forEach(c => codeMaps.langLvl[c.code] = c.name);
 	if (typeof careerTypeList !== 'undefined') careerTypeList.forEach(c => codeMaps.careerType[c.code] = c.name);
 	if (typeof rewardTypeList !== 'undefined') rewardTypeList.forEach(c => codeMaps.rewardType[c.code] = c.name);
+	if (typeof eduTypeList !== 'undefined') eduTypeList.forEach(c => codeMaps.eduType[c.code] = c.name);
 
 
     // 초기 로드 (URL 파라미터 or 로그인 유저)
@@ -97,6 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (activeTabId === 'tab-lang') loadLangData(currentPernr);
 			if (activeTabId === 'tab-career') loadCareerData(currentPernr);
 			if (activeTabId === 'tab-reward') loadRewardData(currentPernr);
+			if (activeTabId === 'tab-edu') loadEduData(currentPernr);
         });
     });
 	
@@ -715,6 +718,86 @@ async function loadRewardData(pernr) {
 	    console.error(error);
 	    $tbody.html('<tr><td colspan="5" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
 	}
+}
+
+
+// [수정] 교육 훈련 정보 로드 (체크박스 버전)
+async function loadEduData(pernr) {
+    const $tbody = $('#eduTableBody');
+    const $noMsg = $('#noEduMsg');
+
+    if (!pernr) {
+		return;
+	}
+
+    try {
+        // 1. 로딩 중 표시
+        $tbody.html('<tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>');
+        $noMsg.hide();
+
+        // 2. API 호출
+        const response = await fetch(`/hr/employee-edu/simple/${pernr}`); 
+        
+        if (!response.ok) {
+            throw new Error('교육 정보 조회 실패');
+        }
+
+        const list = await response.json();
+        
+        $tbody.empty(); 
+
+        // 3. 데이터 없음 처리
+        if (!list || list.length === 0) {
+            $noMsg.show();
+            return;
+        }
+
+        // 4. HTML 렌더링
+        let html = '';
+        list.forEach(item => {
+            
+            // (1) 교육 유형
+            const typeName = codeMaps.eduType[item.eduType] || item.eduType || '-';
+
+            // (2) 교육 시간
+            const hourTxt = item.hour ? `${item.hour}H` : '-';
+
+            // (3) 기간 포맷팅
+            const period = `${item.startDate} ~ ${item.endDate}`;
+
+            // (4) [변경] 필수 여부 (체크박스)
+            const mandatoryChecked = (item.mandatoryYn === 'Y') ? 'checked' : '';
+            const mandatoryCheckbox = `
+                <div class="d-flex justify-content-center">
+                    <input type="checkbox" class="form-check-input" ${mandatoryChecked} onclick="return false;">
+                </div>`;
+
+            // (5) [변경] 수료 여부 (체크박스)
+            const completeChecked = (item.completeYn === 'Y') ? 'checked' : '';
+            const completeCheckbox = `
+                <div class="d-flex justify-content-center">
+                    <input type="checkbox" class="form-check-input" ${completeChecked} onclick="return false;">
+                </div>`;
+
+            html += `
+                <tr>
+                    <td>${typeName}</td>
+                    <td class="fw-bold text-dark">${item.eduName}</td>
+                    <td class="text-secondary">${item.eduOrg}</td>
+                    <td class="small text-muted">${period}</td>
+                    <td class="text-center">${hourTxt}</td>
+                    <td class="text-center">${mandatoryCheckbox}</td>
+                    <td class="text-center">${completeCheckbox}</td>
+                </tr>
+            `;
+        });
+
+        $tbody.html(html);
+
+    } catch (error) {
+        console.error('교육 정보 로드 오류:', error);
+        $tbody.html('<tr><td colspan="7" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
+    }
 }
 function toggleEditMode(isEdit) {
     const form = document.getElementById('editForm');

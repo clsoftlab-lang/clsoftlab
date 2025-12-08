@@ -26,6 +26,7 @@ public class UserAccountTest {
     @Commit // 테스트 종료 후 DB에 커밋 (데이터 저장)
     @DisplayName("사원 마스터 기반 로그인 계정 일괄 생성")
     void initializeUserAccounts() {
+    	
         
         List<UserAccountRequestDto> dtoList = new ArrayList<>();
 

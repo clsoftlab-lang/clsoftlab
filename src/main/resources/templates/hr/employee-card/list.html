@@ -111,6 +111,9 @@
 							    <li class="nav-item" role="presentation">
 							        <button class="nav-link" id="tab-reward" data-bs-toggle="tab" data-bs-target="#rewardInfo" type="button" role="tab">포상 정보</button>
 							    </li>
+							    <li class="nav-item" role="presentation">
+							        <button class="nav-link" id="tab-edu" data-bs-toggle="tab" data-bs-target="#eduInfo" type="button" role="tab">교육 정보</button>
+							    </li>
 		                    </ul>
 		
 		                    <!-- 탭 컨텐츠 -->
@@ -362,6 +365,36 @@
 							            </div>
 							        </div>
 							    </div>
+							    
+							    <!--  교육 훈련 이력 -->
+							    <div class="tab-pane fade" id="eduInfo" role="tabpanel">
+							        <h5 class="mb-3 text-primary"><i class="ti ti-school"></i> 교육 훈련 이력</h5>
+							        
+							        <div class="card">
+							            <div class="table-responsive">
+							                <table class="table table-vcenter card-table table-hover">
+							                    <thead>
+							                        <tr>
+							                            <th style="width: 80px;">구분</th>
+							                            <th>과정명</th>
+							                            <th>교육기관</th>
+							                            <th style="width: 200px;">교육기간</th>
+							                            <th class="text-center" style="width: 70px;">시간</th>
+							                            <th class="text-center" style="width: 70px;">필수</th>
+							                            <th class="text-center" style="width: 80px;">수료</th>
+							                        </tr>
+							                    </thead>
+							                    <tbody id="eduTableBody">
+							                        </tbody>
+							                </table>
+							            </div>
+							            
+							            <div id="noEduMsg" class="text-center p-5 text-muted" style="display:none;">
+							                <i class="ti ti-files-off fs-2 d-block mb-2"></i>
+							                등록된 교육 정보가 없습니다.
+							            </div>
+							        </div>
+							    </div>
 		                    </div>
 		                </form>
 		            </div>
@@ -386,6 +419,7 @@
         const langLvlList  = /*[[${langLvlCodeList}]]*/ [];   
         const careerTypeList = /*[[${careerTypeCodeList}]]*/ [];
         const rewardTypeList = /*[[${rewardTypeCodeList}]]*/ [];
+        const eduTypeList = /*[[${eduTypeCodeList}]]*/ [];
         </script>
         <script src="/assets/js/hr/employee-card.js"></script>
     </th:block> 

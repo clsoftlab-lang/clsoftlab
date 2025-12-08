@@ -28,7 +28,6 @@ CREATE TABLE ZSYS_CODE_GROUP (
     PRIMARY KEY (ZGROUP_ID)
 ) COMMENT '공통코드 그룹 마스터';
 
-
 -- 더미 데이터 --
 INSERT INTO ZSYS_CODE_GROUP 
 (ZGROUP_ID, ZGROUP_NM, ZUSE_YN, ZORDER, ZREMARK, IS_SYSTEM, CREATED_BY) 
@@ -67,7 +66,14 @@ VALUES
 ('HR_REWARD_TYPE', '포상 구분',     'Y', 300, '장기근속, 우수사원 등',      'N', 'SYSTEM'),
 
 -- [교육 정보 관련]
-('HR_EDU_TYPE',    '교육 유형',     'Y', 400, '직무, 리더십, 법정의무 등',   'N', 'SYSTEM');
+('HR_EDU_TYPE',    '교육 유형',     'Y', 400, '직무, 리더십, 법정의무 등',   'N', 'SYSTEM'),
+
+-- [평가 정보 관련]
+('HR_EVAL_TYPE',  '평가 유형',      'Y', 500, '정기, 수시, 승진 평가 등 구분', 'N', 'SYSTEM'),
+('HR_EVAL_GRADE', '평가 등급',      'Y', 510, 'S, A, B, C 등급 체계',       'N', 'SYSTEM'),
+('HR_EVAL_STAT',  '평가 진행 상태',  'Y', 520, '목표수립, 본평가, 확정 등 단계', 'Y', 'SYSTEM'),
+('HR_EVAL_ITEM', '평가 항목',      'Y', 530, '업적, 역량, 태도 등 평가 요소', 'N', 'SYSTEM'),
+('HR_EVAL_SEQ',  '평가 차수',      'Y', 540, '상반기, 하반기, 1분기 등',    'N', 'SYSTEM');
 
 
 -- 공통코드 상세 테이블 --
@@ -282,7 +288,47 @@ INSERT INTO ZSYS_CODE_DETAIL (ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, IS_SYST
 ('HR_EDU_TYPE', 'LEAD', '리더십',       'Leadership', 30, 'N', 'SYSTEM'),
 ('HR_EDU_TYPE', 'LAW',  '법정의무',     'Mandatory',  40, 'N', 'SYSTEM'),
 ('HR_EDU_TYPE', 'LANG', '외국어',       'Language',   50, 'N', 'SYSTEM'),
-('HR_EDU_TYPE', 'ETC',  '기타',         'Others',     99, 'N', 'SYSTEM');
+('HR_EDU_TYPE', 'ETC',  '기타',         'Others',     99, 'N', 'SYSTEM'),
+
+-- HR_EVAL_TYPE (평가 유형)
+('HR_EVAL_TYPE', 'RG', '정기평가', 'Regular Eval',   10, 'N', 'SYSTEM'),
+('HR_EVAL_TYPE', 'SP', '수시평가', 'Spot Eval',      20, 'N', 'SYSTEM'),
+('HR_EVAL_TYPE', 'UP', '승진평가', 'Promotion Eval', 30, 'N', 'SYSTEM'),
+('HR_EVAL_TYPE', 'PB', '수습평가', 'Probation Eval', 40, 'N', 'SYSTEM'),
+('HR_EVAL_TYPE', 'PJ', '프로젝트평가', 'Project Eval', 50, 'N', 'SYSTEM'),
+
+-- HR_EVAL_GRADE (평가 등급)
+('HR_EVAL_GRADE', 'S',  'S등급', 'Outstanding',      10, 'N', 'SYSTEM'),
+('HR_EVAL_GRADE', 'A',  'A등급', 'Excellent',        20, 'N', 'SYSTEM'),
+('HR_EVAL_GRADE', 'B',  'B등급', 'Good',             30, 'N', 'SYSTEM'),
+('HR_EVAL_GRADE', 'C',  'C등급', 'Needs Improvement',40, 'N', 'SYSTEM'),
+('HR_EVAL_GRADE', 'D',  'D등급', 'Unsatisfactory',   50, 'N', 'SYSTEM'),
+
+-- HR_EVAL_STAT (평가 진행 상태)
+('HR_EVAL_STAT', '10', '작성중',   'Draft',     10, 'Y', 'SYSTEM'),
+('HR_EVAL_STAT', '20', '평가중',   'In Review', 20, 'Y', 'SYSTEM'),
+('HR_EVAL_STAT', '30', '조정중',   'Calibration', 30, 'Y', 'SYSTEM'),
+('HR_EVAL_STAT', '90', '평가확정', 'Confirmed', 90, 'Y', 'SYSTEM'),
+('HR_EVAL_STAT', '99', '취소',     'Canceled',  99, 'Y', 'SYSTEM'),
+
+-- HR_EVAL_ITEM (평가 항목)
+('HR_EVAL_ITEM', 'PERF', '업적평가', 'Performance',    10, 'N', 'SYSTEM'),
+('HR_EVAL_ITEM', 'COMP', '역량평가', 'Competency',     20, 'N', 'SYSTEM'),
+('HR_EVAL_ITEM', 'LEAD', '리더십',   'Leadership',     30, 'N', 'SYSTEM'),
+('HR_EVAL_ITEM', 'COOP', '협업태도', 'Cooperation',    40, 'N', 'SYSTEM'),
+('HR_EVAL_ITEM', 'DIL',  '근태성실', 'Diligence',      50, 'N', 'SYSTEM'),
+('HR_EVAL_ITEM', 'KPI',  'KPI달성도','KPI Achievement',60, 'N', 'SYSTEM'),
+
+-- HR_EVAL_SEQ (평가 차수)
+('HR_EVAL_SEQ',  '00',   '전체/통합', 'All/Integrated', 10, 'N', 'SYSTEM'),
+('HR_EVAL_SEQ',  '01',   '상반기',    '1st Half',       20, 'N', 'SYSTEM'),
+('HR_EVAL_SEQ',  '02',   '하반기',    '2nd Half',       30, 'N', 'SYSTEM'),
+('HR_EVAL_SEQ',  'Q1',   '1분기',     '1st Quarter',    40, 'N', 'SYSTEM'),
+('HR_EVAL_SEQ',  'Q2',   '2분기',     '2nd Quarter',    50, 'N', 'SYSTEM'),
+('HR_EVAL_SEQ',  'Q3',   '3분기',     '3rd Quarter',    60, 'N', 'SYSTEM'),
+('HR_EVAL_SEQ',  'Q4',   '4분기',     '4th Quarter',    70, 'N', 'SYSTEM');
+
+
 
 -- 사원 마스터 (개발용 임시) --
 CREATE TABLE ZHR_EMP_MASTER (
@@ -5190,99 +5236,228 @@ VALUES
 ('2507049', 1, 'OJT', '수시채용 입문 과정', '인재개발팀', '2025-07-01', '2025-07-03', 'Y', 'Y', NULL, 24, 0, 'system_admin');
 
 
+-- [단계 1] 평가 이벤트 (Event)
+CREATE TABLE ZHR_EVAL_EVENT (
+    EVENT_ID         BIGINT        NOT NULL AUTO_INCREMENT COMMENT '평가 이벤트 ID (PK)',
+    
+    -- [비즈니스 데이터]
+    ZYEAR            VARCHAR(4)    NOT NULL COMMENT '연도 (YYYY)',
+    ZSEQ             VARCHAR(2)    NOT NULL COMMENT '차수 (공통코드: HR_EVAL_SEQ - 01:상반기, 02:하반기 등)',
+    ZEVAL_NAME       VARCHAR(100)  NOT NULL COMMENT '평가명 (예: 2024년 상반기 정기평가)',
+    ZEVAL_TYPE       VARCHAR(10)   NOT NULL COMMENT '평가유형 (공통코드: HR_EVAL_TYPE - RG:정기, PB:수습 등)',
+    
+    -- [기간 및 상태]
+    START_DATE       DATE          NOT NULL COMMENT '평가 시작일',
+    END_DATE         DATE          NOT NULL COMMENT '평가 종료일',
+    IS_CLOSED        CHAR(1)       NOT NULL DEFAULT 'N' COMMENT '마감 여부 (Y:마감, N:진행)',
+    
+    -- [동시성/감사]
+    VERSION          BIGINT        NOT NULL DEFAULT 0 COMMENT '버전 (Optimistic Lock)',
+    CREATED_AT       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    CREATED_BY       VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT       DATETIME      NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    UPDATED_BY       VARCHAR(50)   NULL COMMENT '수정자',
+    
+    PRIMARY KEY (EVENT_ID),
+    UNIQUE KEY UQ_EVENT (ZYEAR, ZSEQ, ZEVAL_TYPE)
+) COMMENT '평가 이벤트(차수) 관리';
+
+
+
+-- [2] 평가 템플릿/항목 설정 (Template)
+CREATE TABLE ZHR_EVAL_TEMPLATE (
+    TEMPLATE_ID      BIGINT        NOT NULL AUTO_INCREMENT COMMENT '템플릿 ID (PK)',
+    
+    EVENT_ID         BIGINT        NOT NULL COMMENT '이벤트 ID (FK)',
+    
+    -- [설정 정보]
+    ZTARGET_TYPE     VARCHAR(10)   NOT NULL COMMENT '대상자 유형 (L:리더, M:팀원, S:수습 - 별도 정의)',
+    ZITEM_CD         VARCHAR(20)   NOT NULL COMMENT '평가 항목 코드 (공통코드: HR_EVAL_ITEM - PERF, LEAD 등)',
+    ZITEM_NM         VARCHAR(100)  NOT NULL COMMENT '평가 항목명 (화면 표시용)',
+    ZWEIGHT          INT           NOT NULL DEFAULT 0 COMMENT '가중치 (%)',
+    ZORDER           INT           NOT NULL DEFAULT 0 COMMENT '정렬 순서',
+
+    -- [동시성/감사]
+    VERSION          BIGINT        NOT NULL DEFAULT 0,
+    CREATED_AT       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY       VARCHAR(50)   NOT NULL,
+    UPDATED_AT       DATETIME      NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UPDATED_BY       VARCHAR(50)   NULL,
+
+    PRIMARY KEY (TEMPLATE_ID),
+    UNIQUE KEY UQ_TEMPLATE (EVENT_ID, ZTARGET_TYPE, ZITEM_CD),
+    CONSTRAINT FK_TMPL_EVT FOREIGN KEY (EVENT_ID) REFERENCES ZHR_EVAL_EVENT (EVENT_ID)
+) COMMENT '평가 이벤트별 항목 및 배점 설정';
+
 -- 평가 마스터 --
 CREATE TABLE ZHR_EVAL_RESULT (
     -- 기본 키 컬럼 (PK)
-    EVAL_ID         BIGINT          NOT NULL AUTO_INCREMENT COMMENT '평가 마스터 고유 ID (PK)',
+    EVAL_ID          BIGINT          NOT NULL AUTO_INCREMENT COMMENT '평가 마스터 고유 ID (PK)',
     
     -- 평가 식별 정보
-    PERNR           VARCHAR(10)     NOT NULL COMMENT '사번',
-    ZYEAR           VARCHAR(4)      NOT NULL COMMENT '평가 연도',
-    ZSEQ            VARCHAR(2)      NOT NULL COMMENT '차수 (01:상반기, 02:하반기 등)',
+    PERNR            VARCHAR(10)     NOT NULL COMMENT '사번',
+    ZYEAR            VARCHAR(4)      NOT NULL COMMENT '평가 연도 (YYYY)',
+    ZSEQ             VARCHAR(2)      NOT NULL COMMENT '차수 (01:상반기, 02:하반기, 00:정기 등)',
 
     -- 평가 상세 내용
-    ZEV_TYPE        VARCHAR(2)      NOT NULL COMMENT '평가 유형 (RG:정기, SP:수시 등)',
-    ZTOTAL_SCORE    INT             NOT NULL COMMENT '총점',
-    ZGRADE          VARCHAR(2)      NOT NULL COMMENT '등급 (A, B, C 등)',
-    ZREVIEWER       VARCHAR(10)     NOT NULL COMMENT '최종 평가자 사번',
-    ZCOMMENT        VARCHAR(255)    NULL COMMENT '평가 총평',
+    ZEV_TYPE         VARCHAR(10)     NOT NULL COMMENT '평가 유형 (RG:정기, UP:승진 등) - 길이 여유있게',
+    ZTOTAL_SCORE     DECIMAL(5, 2)   DEFAULT 0 COMMENT '총점 (소수점 2자리)',
+    ZGRADE           VARCHAR(5)      NOT NULL COMMENT '등급 (S, A, B, C, D) - 등급명 길어질 수 있음',
+    ZREVIEWER        VARCHAR(10)     NOT NULL COMMENT '최종 평가자 사번',
+    ZCOMMENT         VARCHAR(2000)   NULL COMMENT '평가 총평',
+    ZSTATUS          VARCHAR(10)     NOT NULL DEFAULT '10' COMMENT '상태 (10:작성중, 90:확정)',
+    ZCONFIRM_DATE    DATE            NULL COMMENT '평가 확정 일자',
     
-	VERSION         BIGINT          NOT NULL DEFAULT 0 COMMENT '낙관적 락을 위한 버전 관리 필드',
+    VERSION          BIGINT          NOT NULL DEFAULT 0 COMMENT '낙관적 락',
 
     -- 감사(Audit) 필드
-    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
-    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+    CREATED_AT       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY       VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY       VARCHAR(50)     NULL COMMENT '수정자',
 
-    -- 기본 키 설정
     PRIMARY KEY (EVAL_ID),
 
-    -- 중복 데이터 방지를 위한 유니크 제약조건 (사번 + 연도 + 차수)
-    UNIQUE KEY UK_EMP_EVAL (PERNR, ZYEAR, ZSEQ)
+    -- 유니크 키 (사번 + 연도 + 차수)
+    UNIQUE KEY UK_EMP_EVAL (PERNR, ZYEAR, ZSEQ),
+    
+    -- [외래키 추가]
+    CONSTRAINT FK_EMP_TO_EVAL 
+        FOREIGN KEY (PERNR) 
+        REFERENCES ZHR_EMP_MASTER (PERNR)
+        ON UPDATE CASCADE      -- 사번이 변경되면 평가 테이블 사번도 같이 변경
+        ON DELETE RESTRICT     -- 사원 정보 삭제 시 평가 이력이 있으면 삭제 불가 (안전장치)
 
 ) COMMENT '사원 평가 마스터 정보 테이블';
+
+-- 더미데이터 --
+
+INSERT INTO ZHR_EVAL_RESULT 
+(PERNR, ZYEAR, ZSEQ, ZEV_TYPE, ZTOTAL_SCORE, ZGRADE, ZREVIEWER, ZCOMMENT, ZSTATUS, ZCONFIRM_DATE, CREATED_BY) 
+VALUES 
+-- =======================================================
+-- [1] 2018001 (양한재 부장) - 리더십 우수, 꾸준한 S등급
+-- =======================================================
+('2018001', '2022', '02', 'RG', 98.50, 'S', 'SYSTEM',  '탁월한 리더십으로 연구소 조직 안정화 기여.', '90', '2022-12-20', 'SYSTEM'),
+('2018001', '2023', '01', 'RG', 97.00, 'S', 'SYSTEM',  '신규 프로젝트 수주 및 팀 역량 강화 주도.', '90', '2023-06-25', 'SYSTEM'),
+('2018001', '2023', '02', 'RG', 96.50, 'S', 'SYSTEM',  '목표 대비 성과 150% 달성.', '90', '2023-12-20', 'SYSTEM'),
+('2018001', '2024', '01', 'RG', 99.00, 'S', 'SYSTEM',  '전사 AI 도입 프로젝트 성공적 런칭.', '90', '2024-06-20', 'SYSTEM'),
+('2018001', '2024', '02', 'RG', 95.50, 'S', 'SYSTEM',  '조직 개편에 따른 혼란 최소화 및 성과 유지.', '90', '2024-12-18', 'SYSTEM'),
+
+-- =======================================================
+-- [2] 2201001 (김철수 대리) - 핵심 인재, 고속 승진 대상
+-- =======================================================
+('2201001', '2022', '01', 'PB', 92.00, 'A', '2018001', '수습 기간 동안 빠른 업무 습득력 보임.', '90', '2022-04-01', 'SYSTEM'),
+('2201001', '2022', '02', 'RG', 94.50, 'A', '2018001', '서버 아키텍처 개선으로 비용 30% 절감.', '90', '2022-12-20', 'SYSTEM'),
+('2201001', '2023', '01', 'RG', 96.00, 'S', '2018001', '백엔드 팀의 핵심 인력으로 성장함.', '90', '2023-06-25', 'SYSTEM'),
+('2201001', '2023', '02', 'RG', 98.00, 'S', '2018001', '장애 대응 프로세스 정립 및 무중단 배포 구현.', '90', '2023-12-20', 'SYSTEM'),
+('2201001', '2024', '01', 'UP', 95.50, 'S', '2018001', '[승진평가] 기술적 깊이와 협업 태도 모두 우수함.', '90', '2024-06-20', 'SYSTEM'),
+('2201001', '2024', '02', 'RG', 93.00, 'A', '2018001', '신규 입사자 멘토링 역할 수행 우수.', '90', '2024-12-18', 'SYSTEM'),
+
+-- =======================================================
+-- [3] 2022년 입사자 그룹 (2023~2024 평가)
+-- =======================================================
+('2201002', '2023', '01', 'RG', 85.00, 'B', '2018001', '맡은 바 업무를 성실히 수행함.', '90', '2023-06-25', 'SYSTEM'),
+('2201002', '2023', '02', 'RG', 78.00, 'C', '2018001', '하반기 프로젝트 일정 지연 발생. 분발 요망.', '90', '2023-12-20', 'SYSTEM'),
+('2203003', '2023', '01', 'RG', 91.00, 'A', '2018001', 'PO로서 기획 의도를 명확히 전달함.', '90', '2023-06-25', 'SYSTEM'),
+('2203003', '2023', '02', 'RG', 89.50, 'B', '2018001', '준수한 성과를 유지하고 있음.', '90', '2023-12-20', 'SYSTEM'),
+('2203004', '2023', '01', 'RG', 88.00, 'B', '2018001', '인사 제도 개선안 초안 작성 완료.', '90', '2023-06-25', 'SYSTEM'),
+('2203004', '2023', '02', 'RG', 92.50, 'A', '2018001', '채용 박람회 운영 성공적 수행.', '90', '2023-12-20', 'SYSTEM'),
+('2203004', '2024', '01', 'RG', 94.00, 'A', '2018001', '평가 시스템 고도화 기획 우수.', '90', '2024-06-20', 'SYSTEM'),
+('2207005', '2023', '01', 'RG', 82.00, 'B', '2018001', '재무 보고서 작성 정확도 향상 필요.', '90', '2023-06-25', 'SYSTEM'),
+('2207005', '2023', '02', 'RG', 75.50, 'C', '2018001', '잦은 실수로 인한 업무 효율 저하.', '90', '2023-12-20', 'SYSTEM'),
+('2207006', '2023', '01', 'RG', 90.00, 'A', '2018001', '프론트엔드 성능 최적화 기여.', '90', '2023-06-25', 'SYSTEM'),
+('2207006', '2023', '02', 'RG', 93.50, 'A', '2018001', 'UI 컴포넌트 라이브러리 구축.', '90', '2023-12-20', 'SYSTEM'),
+('2207006', '2024', '01', 'RG', 95.00, 'S', '2018001', '웹 접근성 개선 프로젝트 리딩.', '90', '2024-06-20', 'SYSTEM'),
+('2209007', '2023', '02', 'RG', 87.00, 'B', '2018001', '안정적인 서버 운영 지원.', '90', '2023-12-20', 'SYSTEM'),
+('2209007', '2024', '01', 'SP', 91.00, 'A', '2018001', '[수시] 긴급 장애 대응 포상.', '90', '2024-03-15', 'SYSTEM'),
+('2210008', '2023', '02', 'RG', 80.00, 'B', '2018001', '기본적인 PO 업무 수행.', '90', '2023-12-20', 'SYSTEM'),
+('2210009', '2023', '02', 'RG', 86.50, 'B', '2018001', '마케팅 디자인 시안 퀄리티 양호.', '90', '2023-12-20', 'SYSTEM'),
+('2211010', '2023', '02', 'RG', 83.00, 'B', '2018001', '전표 처리 속도 개선 필요.', '90', '2023-12-20', 'SYSTEM'),
+
+-- =======================================================
+-- [4] 2023년 입사자 그룹 (2023 하반기 ~ 2024 평가)
+-- =======================================================
+('2301011', '2023', '01', 'PB', 88.00, 'B', '2018001', '수습 평가: 조직 융화력 좋음.', '90', '2023-04-01', 'SYSTEM'),
+('2301011', '2023', '02', 'RG', 70.00, 'C', '2018001', '업무 집중도 저하가 우려됨.', '90', '2023-12-20', 'SYSTEM'),
+('2301011', '2024', '01', 'RG', 68.00, 'D', '2018001', '지각 잦음 및 업무 누락 발생.', '90', '2024-06-20', 'SYSTEM'),
+('2301012', '2023', '02', 'RG', 89.00, 'B', '2018001', 'AI 모델 서빙 API 개발 참여.', '90', '2023-12-20', 'SYSTEM'),
+('2302013', '2023', '02', 'RG', 85.00, 'B', '2018001', '무난한 기획 업무 수행.', '90', '2023-12-20', 'SYSTEM'),
+('2304014', '2023', '02', 'RG', 81.00, 'B', '2018001', '앱 크래시 이슈 대응 노력함.', '90', '2023-12-20', 'SYSTEM'),
+('2305015', '2023', '02', 'RG', 92.00, 'A', '2018001', '창의적인 UX 디자인 제안.', '90', '2023-12-20', 'SYSTEM'),
+('2305015', '2024', '01', 'RG', 94.50, 'A', '2018001', '사용자 경험 개선으로 체류시간 증대.', '90', '2024-06-20', 'SYSTEM'),
+('2305016', '2024', '01', 'RG', 86.00, 'B', '2018001', '회계 결산 지원 업무 수행.', '90', '2024-06-20', 'SYSTEM'),
+('2308017', '2024', '01', 'RG', 83.50, 'B', '2018001', '채용 공고 관리 업무 수행.', '90', '2024-06-20', 'SYSTEM'),
+('2309018', '2024', '01', 'RG', 88.00, 'B', '2018001', '웹표준 준수 노력 요망.', '90', '2024-06-20', 'SYSTEM'),
+('2309018', '2024', '02', 'RG', 90.00, 'A', '2018001', '하반기 프로젝트에서 역할 수행 우수.', '90', '2024-12-18', 'SYSTEM'),
+('2310019', '2024', '01', 'RG', 91.00, 'A', '2018001', '신규 서버 세팅 및 모니터링 구축.', '90', '2024-06-20', 'SYSTEM'),
+('2312020', '2024', '01', 'PB', 90.00, 'A', '2018001', '수습 평가: 영업 마인드가 뛰어남.', '90', '2024-03-01', 'SYSTEM'),
+('2312020', '2024', '02', 'RG', 92.50, 'A', '2018001', '신규 거래처 3곳 확보.', '90', '2024-12-18', 'SYSTEM'),
+
+-- =======================================================
+-- [5] 2024년 입사자 그룹 (2024 평가)
+-- =======================================================
+('2401021', '2024', '01', 'PB', 85.00, 'B', '2018001', '수습 평가: 업무 습득 속도 보통.', '90', '2024-04-01', 'SYSTEM'),
+('2401021', '2024', '02', 'RG', 79.00, 'C', '2018001', '잦은 오타로 인한 문서 수정 반복.', '90', '2024-12-18', 'SYSTEM'),
+('2401022', '2024', '01', 'PB', 93.00, 'A', '2018001', '수습 평가: 코딩 실력이 뛰어남.', '90', '2024-04-01', 'SYSTEM'),
+('2401022', '2024', '02', 'RG', 91.50, 'A', '2018001', '메인 페이지 리뉴얼 퍼블리싱 담당.', '90', '2024-12-18', 'SYSTEM'),
+('2402023', '2024', '01', 'PB', 87.00, 'B', '2018001', '수습 평가: 디자인 툴 활용 능력 우수.', '90', '2024-05-01', 'SYSTEM'),
+('2402024', '2024', '01', 'PB', 90.00, 'A', '2018001', '수습 평가: 인사 규정 이해도 높음.', '90', '2024-05-01', 'SYSTEM'),
+('2403025', '2024', '01', 'PB', 95.00, 'S', '2018001', '수습 평가: AI 최신 트렌드 파악 및 적용.', '90', '2024-06-01', 'SYSTEM'),
+('2403025', '2024', '02', 'RG', 94.00, 'A', '2018001', 'RAG 기반 챗봇 프로토타입 개발.', '90', '2024-12-18', 'SYSTEM'),
+('2404026', '2024', '02', 'RG', 85.00, 'B', '2018001', '기획서 작성 디테일 보완 필요.', '90', '2024-12-18', 'SYSTEM'),
+('2404027', '2024', '02', 'RG', 88.00, 'B', '2018001', 'API 연동 테스트 지원.', '90', '2024-12-18', 'SYSTEM'),
+('2405028', '2024', '02', 'RG', 84.00, 'B', '2018001', '자산 관리 대장 정리 꼼꼼함.', '90', '2024-12-18', 'SYSTEM'),
+('2405029', '2024', '02', 'RG', 89.50, 'B', '2018001', '안드로이드 네이티브 기능 구현.', '90', '2024-12-18', 'SYSTEM'),
+('2406030', '2024', '02', 'RG', 86.00, 'B', '2018001', 'SNS 콘텐츠 제작 지원.', '90', '2024-12-18', 'SYSTEM'),
+('2407031', '2024', '02', 'PB', 88.00, 'B', '2018001', '수습 평가: 근태 양호하며 성실함.', '90', '2024-10-01', 'SYSTEM'),
+('2407032', '2024', '02', 'PB', 92.00, 'A', '2018001', '수습 평가: 적극적인 영업 태도.', '90', '2024-10-01', 'SYSTEM'),
+('2408033', '2024', '02', 'PB', 87.50, 'B', '2018001', '수습 평가: 팀 내 커뮤니케이션 원활.', '90', '2024-11-01', 'SYSTEM'),
+
+-- =======================================================
+-- [6] 2025년 입사자 (수습 평가) - 날짜상 완료 가정
+-- =======================================================
+('2501041', '2025', '01', 'PB', 89.00, 'B', '2018001', '수습 평가: 열정적인 자세 높이 평가.', '90', '2025-04-01', 'SYSTEM'),
+('2501042', '2025', '01', 'PB', 86.00, 'B', '2018001', '수습 평가: 도메인 지식 습득 노력 중.', '90', '2025-04-01', 'SYSTEM');
 
 -- 항목별 상세 점수 --
 CREATE TABLE ZHR_EVAL_DETAIL (
     -- 기본 키 컬럼 (PK)
-    DETAIL_ID       BIGINT          NOT NULL AUTO_INCREMENT COMMENT '평가 상세 고유 ID (PK)',
+    DETAIL_ID        BIGINT          NOT NULL AUTO_INCREMENT COMMENT '평가 상세 고유 ID (PK)',
 
-	EVAL_RESULT_ID  BIGINT          NOT NULL COMMENT '평가 마스터 ID (FK)',
+    EVAL_RESULT_ID   BIGINT          NOT NULL COMMENT '평가 마스터 ID (FK)',
    
     -- 항목별 상세 내용
-    ZITEM_CD        VARCHAR(10)     NOT NULL COMMENT '평가 항목 코드',
-    ZITEM_NM        VARCHAR(100)    NOT NULL COMMENT '평가 항목명',
-    ZPOINT          INT             NOT NULL COMMENT '항목별 점수',
-    ZCOMMENT        VARCHAR(255)    NULL COMMENT '항목별 코멘트',
+    ZITEM_CD         VARCHAR(20)     NOT NULL COMMENT '평가 항목 코드 (업적, 역량 등)',
+    ZITEM_NM         VARCHAR(100)    NOT NULL COMMENT '평가 항목명 (이력 보존을 위해 텍스트 저장)',
+    ZWEIGHT          INT             NOT NULL DEFAULT 0 COMMENT '가중치 (%)',
+    ZPOINT           DECIMAL(5, 2)   NOT NULL DEFAULT 0 COMMENT '항목별 점수',
+    ZORDER           INT             NOT NULL DEFAULT 0 COMMENT '정렬 순서',
+    ZCOMMENT         VARCHAR(1000)   NULL COMMENT '항목별 코멘트',
+    
+    -- 동시성 제어를 위한 버전 컬럼
+    VERSION          BIGINT          NOT NULL DEFAULT 0 COMMENT '낙관적 락',
 
     -- 감사(Audit) 필드
-    CREATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    CREATED_BY      VARCHAR(50)     NOT NULL COMMENT '생성자',
-    UPDATED_AT      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-    UPDATED_BY      VARCHAR(50)     NULL COMMENT '수정자',
+    CREATED_AT       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    CREATED_BY       VARCHAR(50)     NOT NULL COMMENT '생성자',
+    UPDATED_AT       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    UPDATED_BY       VARCHAR(50)     NULL COMMENT '수정자',
 
     -- 기본 키 설정
     PRIMARY KEY (DETAIL_ID),
+
+    -- [수정 5] 중복 방지 (한 평가서 내에서 같은 항목 중복 불가)
+    UNIQUE KEY UQ_EVAL_ITEM (EVAL_RESULT_ID, ZITEM_CD),
 
    -- 외래 키 제약조건 설정
     CONSTRAINT FK_DETAIL_TO_RESULT
         FOREIGN KEY (EVAL_RESULT_ID) 
         REFERENCES ZHR_EVAL_RESULT (EVAL_ID)
-        ON DELETE CASCADE 
+        ON DELETE CASCADE  -- 마스터(평가서)가 삭제되면 상세 내역도 자동 삭제
 
 ) COMMENT '사원 평가 항목별 상세 점수 테이블';
 
--- 더미 데이터 --
-INSERT INTO ZHR_EVAL_RESULT
-(PERNR, ZYEAR, ZSEQ, ZEV_TYPE, ZTOTAL_SCORE, ZGRADE, ZREVIEWER, ZCOMMENT, CREATED_BY, UPDATED_BY)
-VALUES
--- 2012011 (재무팀)
-('2012011', '2023', '02', 'RG', 94, 'A', '2010001', '최고 수준의 성과를 달성했으며, 팀에 대한 기여도가 매우 높음.', 'system', NULL),
-('2012011', '2024', '01', 'RG', 91, 'A', '2010001', '지속적으로 탁월한 성과를 보여주고 있어 팀의 귀감이 됨.', 'system', NULL),
-
--- 2015022 (마케팅팀)
-('2015022', '2023', '02', 'RG', 88, 'B', '2010001', '전반적으로 우수한 성과를 보였으나, 리더십 역량 개발이 필요함.', 'system', NULL),
-('2015022', '2024', '01', 'RG', 92, 'A', '2010001', '마케팅 전략 수립 및 실행 능력이 매우 탁월함.', 'system', NULL),
-
--- 2018013 (연구소)
-('2018013', '2023', '02', 'RG', 96, 'A', '2010001', '뛰어난 문제 해결 능력으로 핵심 기술 과제를 성공적으로 완수함.', 'system', NULL),
-
--- 2019101 (영업팀)
-('2019101', '2023', '02', 'RG', 85, 'B', '2022055', '목표 달성률은 우수하나, 팀워크 증진에 더 많은 노력이 필요함.', 'system', NULL),
-('2019101', '2024', '01', 'RG', 78, 'C', '2022055', '성과가 기대에 다소 미치지 못했음. 분발이 요구됨.', 'system', NULL),
-
--- 2019113 (인사팀)
-('2019113', '2023', '02', 'RG', 90, 'A', '2010001', '인사 제도 개선 프로젝트를 성공적으로 이끌었음.', 'system', NULL),
-
--- 2020023 (마케팅팀)
-('2020023', '2024', '01', 'RG', 68, 'D', '2015022', '업무 책임감 및 성과 개선이 시급함. 면담 및 코칭 예정.', 'system', NULL),
-
--- 2021002 (연구소)
-('2021002', '2024', '01', 'RG', 89, 'B', '2018013', '기술 전문성은 뛰어나나, 동료와의 협업에 더 신경 쓸 필요가 있음.', 'system', NULL),
-
--- 2023133 (재무팀)
-('2023133', '2024', '01', 'RG', 82, 'B', '2012011', '신입사원임에도 불구하고 업무 습득 속도가 빠르고 책임감이 강함.', 'system', NULL);
 
 -- 더미 데이터 --
 INSERT INTO ZHR_EVAL_DETAIL

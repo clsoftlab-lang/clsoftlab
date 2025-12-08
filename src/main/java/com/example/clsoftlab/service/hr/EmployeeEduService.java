@@ -11,33 +11,37 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.hr.EmployeeEduDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeeEduRequestDto;
+import com.example.clsoftlab.dto.hr.EmployeeEduSimpleDto;
 import com.example.clsoftlab.entity.EmployeeEdu;
 import com.example.clsoftlab.repository.hr.EmployeeEduRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeEduService {
 
 	private final EmployeeEduRepository employeeEduRepository;
 	private final ModelMapper modelMapper;
 	
-	public EmployeeEduService(EmployeeEduRepository employeeEduRepository, ModelMapper modelMapper) {
-		this.employeeEduRepository = employeeEduRepository;
-		this.modelMapper = modelMapper;
-	}
-	
 	// 사번으로 page 조회
 	public Page<EmployeeEduDetailDto> findByPernr (String pernr, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size, Sort.by("seq").ascending());
+		Pageable pageable = PageRequest.of(page, size);
 		
 		return employeeEduRepository.findByPernr(pernr, pageable)
 				.map(i -> modelMapper.map(i, EmployeeEduDetailDto.class));
+	}
+	
+	// 사번으로 simple List 조회
+	public List<EmployeeEduSimpleDto> getSimpleList (String pernr) {
+		return employeeEduRepository.findAllByPernrOrderBySeq(pernr).stream()
+				.map(i -> modelMapper.map(i, EmployeeEduSimpleDto.class))
+				.toList();
 	}
 	
 	// 교육 목록 저장
@@ -45,7 +49,7 @@ public class EmployeeEduService {
 	public void saveEduList (String pernr, List<EmployeeEduRequestDto> dtoList) {
 		Set<Integer> eduSeqs = new HashSet<>();
 		
-		List<EmployeeEdu> originalEdu = employeeEduRepository.findByPernr(pernr);
+		List<EmployeeEdu> originalEdu = employeeEduRepository.findAllByPernrOrderBySeq(pernr);
 		
 		// 순차 검사
 		for (EmployeeEduRequestDto dto : dtoList) {

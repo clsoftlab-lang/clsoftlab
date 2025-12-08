@@ -16,5 +16,5 @@ public interface EmployeeEduRepository extends JpaRepository<EmployeeEdu, Long> 
 	public Page<EmployeeEdu> findByPernr (String pernr, Pageable pageable);
 	
 	// 사번으로 list 조회
-	public List<EmployeeEdu> findByPernr (String pernr);
+	public List<EmployeeEdu> findAllByPernrOrderBySeq (String pernr);
 }
