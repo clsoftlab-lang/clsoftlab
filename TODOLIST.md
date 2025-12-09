@@ -71,6 +71,8 @@
 
 -- 아이디어, api, 자료들 (우선순위 낮음)
     SweeatAlert2 
-
+    mapstruct
     평가 테이블 재수정 하기
+
+    evalDetail 테이블 부터 작업
 

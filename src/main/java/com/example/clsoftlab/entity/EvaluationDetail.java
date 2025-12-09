@@ -31,7 +31,7 @@ public class EvaluationDetail extends BaseEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY) 
 	@JoinColumn(name = "EVAL_RESULT_ID") 
-	private EvaluationResult evaluationResult;
+	private EvalResult evaluationResult;
     
     @Column(name = "ZITEM_CD", nullable = false, length = 10)
     private String itemCode;

@@ -12,23 +12,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.clsoftlab.dto.hr.EvalResultDetailDto;
 import com.example.clsoftlab.dto.hr.EvaluationDetailDto;
 import com.example.clsoftlab.dto.hr.EvaluationDetailRequestDto;
-import com.example.clsoftlab.dto.hr.EvaluationResultDetailDto;
-import com.example.clsoftlab.dto.hr.EvaluationResultRequestDto;
-import com.example.clsoftlab.service.hr.EvaluationResultService;
+import com.example.clsoftlab.service.hr.EvalResultService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/hr/evaluation-result")
-public class EvaluationResultController {
+@RequiredArgsConstructor
+public class EvalResultController {
 
-	private final EvaluationResultService evaluationResultService;
+	private final EvalResultService evaluationResultService;
 	
-	public EvaluationResultController(EvaluationResultService evaluationResultService) {
-		this.evaluationResultService = evaluationResultService;
-	}
 	
 	// 메인 페이지
 	@GetMapping("")
@@ -36,27 +34,27 @@ public class EvaluationResultController {
 		return "hr/evaluation-result/list";
 	}
 	
-	// 결과 목록 저장
-	@PutMapping("/{pernr}")
-	public ResponseEntity<?> saveResultList (@PathVariable String pernr, @Valid @RequestBody List<EvaluationResultRequestDto> dtoList) {
-		try {
-			evaluationResultService.saveResultList(pernr, dtoList);
-			return ResponseEntity.ok().build();
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-	}
+//	// 결과 목록 저장
+//	@PutMapping("/{pernr}")
+//	public ResponseEntity<?> saveResultList (@PathVariable String pernr, @Valid @RequestBody List<EvalResultRequestDto> dtoList) {
+//		try {
+//			evaluationResultService.saveResultList(pernr, dtoList);
+//			return ResponseEntity.ok().build();
+//		} catch (IllegalArgumentException e) {
+//			return ResponseEntity.badRequest().body(e.getMessage());
+//		}
+//	}
 	
 	// 사번으로 result 조회
 	@GetMapping("/{pernr}")
-	public ResponseEntity<Page<EvaluationResultDetailDto>> findByPernr (@PathVariable String pernr, @RequestParam(required = false) Integer page) {
+	public ResponseEntity<Page<EvalResultDetailDto>> findByPernr (@PathVariable String pernr, @RequestParam(required = false) Integer page) {
 		if (page == null) {
 			page = 0;
 		}
 		
 		int size = 1000;
 		
-		Page<EvaluationResultDetailDto> resultPage = evaluationResultService.findByPernr(pernr, page, size);
+		Page<EvalResultDetailDto> resultPage = evaluationResultService.findByPernr(pernr, page, size);
 		return ResponseEntity.ok(resultPage);
 	}
 	

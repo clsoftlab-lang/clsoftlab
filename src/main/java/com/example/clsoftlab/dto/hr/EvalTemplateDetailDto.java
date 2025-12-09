@@ -1,5 +1,7 @@
 package com.example.clsoftlab.dto.hr;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,15 +11,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EvaluationResultDetailDto {
+public class EvalTemplateDetailDto {
 
-	private Long id;
-    private String pernr;
+	private String templateId;
+    private String templateName;
     private String year;
-    private String seq;
     private String evType;
-    private Integer totalScore;
-    private String grade;
-    private String reviewer;
-    private String comment;
+    private String status;
+    private LocalDate startDate;
+    private LocalDate endDate;
 }
