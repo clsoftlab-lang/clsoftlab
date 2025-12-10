@@ -74,5 +74,5 @@
     mapstruct
     평가 테이블 재수정 하기
 
-    evalDetail 테이블 부터 작업
+    
 

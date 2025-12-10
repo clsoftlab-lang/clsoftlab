@@ -15,11 +15,30 @@ const codeMaps = {
     langLvl: {},
 	careerType: {},
 	rewardType: {},
-	eduType: {}
+	eduType: {},
+	evalType: {},
+	evalGrade: {},
+	schoolType: {}, 
+	graStat: {}
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    
+	
+	if ($('#empSelect').length > 0) {
+	        $('#empSelect').select2({
+	            placeholder: "이름 또는 사번으로 검색",
+	            allowClear: true,
+	            width: '100%', 
+	            language: "ko",
+				theme: "bootstrap-5"
+	        });
+	    }
+		
+	const btnSearch = document.getElementById('btnSearch');
+	    if (btnSearch) {
+	        btnSearch.addEventListener('click', searchCard);
+	    }
+
     // 코드 리스트를 Map으로 변환
     if (typeof deptList !== 'undefined') deptList.forEach(c => codeMaps.dept[c.code] = c.name);
     if (typeof rankList !== 'undefined') rankList.forEach(c => codeMaps.rank[c.code] = c.name);
@@ -38,6 +57,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	if (typeof careerTypeList !== 'undefined') careerTypeList.forEach(c => codeMaps.careerType[c.code] = c.name);
 	if (typeof rewardTypeList !== 'undefined') rewardTypeList.forEach(c => codeMaps.rewardType[c.code] = c.name);
 	if (typeof eduTypeList !== 'undefined') eduTypeList.forEach(c => codeMaps.eduType[c.code] = c.name);
+	if (typeof evalTypeList !== 'undefined') evalTypeList.forEach(c => codeMaps.evalType[c.code] = c.name);
+	if (typeof evalGradeList !== 'undefined') evalGradeList.forEach(c => codeMaps.evalGrade[c.code] = c.name);
+	if (typeof schoolTypeList !== 'undefined') schoolTypeList.forEach(c => codeMaps.schoolType[c.code] = c.name);
+	if (typeof graStatList !== 'undefined')    graStatList.forEach(c => codeMaps.graStat[c.code] = c.name);
 
 
     // 초기 로드 (URL 파라미터 or 로그인 유저)
@@ -53,12 +76,12 @@ document.addEventListener('DOMContentLoaded', function () {
 	       window.location.href = location.pathname + '?pernr=' + loginUserPernr;
 	       return;
 	   }
-
+	
 	   // 사번이 없으면 본인 사번 기본값
 	   if (!targetPernr) {
 	   		targetPernr = loginUserPernr;
 		}
-
+	
 	   if (targetPernr) {
 	       loadCardData(targetPernr);
 	   }
@@ -100,6 +123,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (activeTabId === 'tab-career') loadCareerData(currentPernr);
 			if (activeTabId === 'tab-reward') loadRewardData(currentPernr);
 			if (activeTabId === 'tab-edu') loadEduData(currentPernr);
+			if (activeTabId === 'tab-eval') loadEvalInfo(currentPernr);
+			if (activeTabId === 'tab-school') loadSchoolData(currentPernr);
         });
     });
 	
@@ -184,12 +209,15 @@ async function loadCardData(pernr) {
 }
 
 function searchCard() {
-    const keyword = document.getElementById('searchKeyword').value;
-    if (!keyword) {
-        alert('사번 또는 성명을 입력하세요.');
+    const selectedPernr = $('#empSelect').val();
+    
+    if (!selectedPernr) {
+        alert('조회할 사원을 선택하세요.');
         return;
     }
-    loadCardData(keyword);
+    
+    // 선택된 사번으로 데이터 로드
+    loadCardData(selectedPernr);
 }
 
 async function loadAppointHistory(pernr) {
@@ -721,7 +749,7 @@ async function loadRewardData(pernr) {
 }
 
 
-// [수정] 교육 훈련 정보 로드 (체크박스 버전)
+// 교육 훈련 정보 로드
 async function loadEduData(pernr) {
     const $tbody = $('#eduTableBody');
     const $noMsg = $('#noEduMsg');
@@ -765,14 +793,14 @@ async function loadEduData(pernr) {
             // (3) 기간 포맷팅
             const period = `${item.startDate} ~ ${item.endDate}`;
 
-            // (4) [변경] 필수 여부 (체크박스)
+            // (4) 필수 여부 (체크박스)
             const mandatoryChecked = (item.mandatoryYn === 'Y') ? 'checked' : '';
             const mandatoryCheckbox = `
                 <div class="d-flex justify-content-center">
                     <input type="checkbox" class="form-check-input" ${mandatoryChecked} onclick="return false;">
                 </div>`;
 
-            // (5) [변경] 수료 여부 (체크박스)
+            // (5) 수료 여부 (체크박스)
             const completeChecked = (item.completeYn === 'Y') ? 'checked' : '';
             const completeCheckbox = `
                 <div class="d-flex justify-content-center">
@@ -799,6 +827,156 @@ async function loadEduData(pernr) {
         $tbody.html('<tr><td colspan="7" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
     }
 }
+
+// [TAB 8] 평가 이력 로드
+async function loadEvalInfo(pernr) {
+    const $tbody = $('#evalTableBody');
+    const $noMsg = $('#noEvalMsg');
+
+    if (!pernr) return;
+
+    try {
+        // 1. 로딩 중 표시
+        $tbody.html('<tr><td colspan="6" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>');
+        $noMsg.hide();
+
+        // 2. API 호출
+        const response = await fetch(`/hr/evaluation-result/simple/${pernr}`);
+        
+        if (!response.ok) {
+            throw new Error('평가 이력 조회 실패');
+        }
+
+        const list = await response.json();
+        
+        $tbody.empty();
+
+        // 3. 데이터 없음 처리
+        if (!list || list.length === 0) {
+            $noMsg.show();
+            return;
+        }
+
+        // 4. HTML 렌더링
+        let html = '';
+        list.forEach(item => {
+            
+            // (1) 평가 유형 명칭
+            const typeName = codeMaps.evalType[item.templateEvType] || item.templateEvType || '-';
+
+            // (2) 완료 여부 판단 (900단계 = 확정)
+            const isCompleted = (item.evalStep === '900');
+
+            // (3) 상태 표시 
+            let statusDisplay = '';
+            if (isCompleted) {
+                // 완료: 초록색 텍스트
+                statusDisplay = '<span class="text-success fw-bold">완료</span>';
+            } else {
+                // 진행중: 회색 텍스트
+                statusDisplay = '<span class="text-muted">진행중</span>';
+            }
+
+            // (4) 점수/등급 표시 로직
+            let scoreDisplay = '-';
+            let gradeDisplay = '-';
+
+            if (isCompleted) {
+                scoreDisplay = item.totalScore !== null ? item.totalScore : '0';
+                
+                if (item.evalGrade) {
+					const gradeName = codeMaps.evalGrade[item.evalGrade] || item.evalGrade;
+                    gradeDisplay = `<span class="fw-bold text-dark" style="font-size: 1.1em;">${gradeName}</span>`;
+                }
+            } else {
+                scoreDisplay = '<span class="text-muted small">집계중</span>';
+                gradeDisplay = '<span class="text-muted small">-</span>';
+            }
+
+            html += `
+                <tr>
+                    <td>${item.templateYear}</td>
+                    <td class="fw-bold text-dark text-start">${item.templateName}</td>
+                    <td>${typeName}</td>
+                    <td class="text-center">${scoreDisplay}</td>
+                    <td class="text-center">${gradeDisplay}</td>
+                    <td class="text-center">${statusDisplay}</td>
+                </tr>
+            `;
+        });
+
+        $tbody.html(html);
+
+    } catch (error) {
+        console.error('평가 이력 로드 오류:', error);
+        $tbody.html('<tr><td colspan="6" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
+    }
+}
+
+// 학력 정보 로드
+async function loadSchoolData(pernr) {
+    const $tbody = $('#schoolTableBody');
+    const $noMsg = $('#noSchoolMsg');
+
+    if (!pernr) return;
+
+    try {
+        // 1. 로딩 중 표시 (컬럼 5개)
+        $tbody.html('<tr><td colspan="5" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>');
+        $noMsg.hide();
+
+        // 2. API 호출
+        const response = await fetch(`/hr/employee-edu-history/simple/${pernr}`);
+        
+        if (!response.ok) throw new Error('학력 정보 조회 실패');
+
+        const list = await response.json();
+        $tbody.empty();
+
+        // 3. 데이터 없음
+        if (!list || list.length === 0) {
+            $noMsg.show();
+            return;
+        }
+
+        // 4. HTML 렌더링
+        let html = '';
+        list.forEach(item => {
+            
+            // (1) 국가 명칭 (HR_NATION)
+            const nationName = codeMaps.nation[item.country] || item.country || '-';
+
+            // (2) 학위 명칭 (HR_SCH_TYPE)
+            const degreeName = codeMaps.schoolType[item.degree] || item.degree || '-';
+
+            // (3) 상태 명칭 (HR_GRA_STAT)
+            const statusName = codeMaps.graStat[item.status] || item.status || '-';
+
+            // (4) 최종학력 뱃지
+            let finalBadge = '-';
+            if (item.finalYn === 'Y') {
+                finalBadge = '<span class="badge bg-info">최종</span>';
+            }
+
+            html += `
+                <tr>
+                    <td class="fw-bold text-dark text-start">${item.school}</td>
+                    <td>${nationName}</td>
+                    <td>${degreeName}</td>
+                    <td class="text-center">${statusName}</td>
+                    <td class="text-center">${finalBadge}</td>
+                </tr>
+            `;
+        });
+
+        $tbody.html(html);
+
+    } catch (error) {
+        console.error('학력 정보 로드 오류:', error);
+        $tbody.html('<tr><td colspan="5" class="text-center text-danger py-3">정보를 불러오지 못했습니다.</td></tr>');
+    }
+}
+
 function toggleEditMode(isEdit) {
     const form = document.getElementById('editForm');
     

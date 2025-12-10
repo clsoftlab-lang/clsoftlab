@@ -2,6 +2,9 @@ package com.example.clsoftlab.entity;
 
 import java.time.LocalDate;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.example.clsoftlab.dto.hr.EmployeeEduHistoryRequestDto;
 
 import jakarta.persistence.Column;
@@ -21,6 +24,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 @Table(name = "ZHR_EMP_EDU_HIST")
 public class EmployeeEduHistory extends BaseEntity {
 
@@ -57,14 +62,14 @@ public class EmployeeEduHistory extends BaseEntity {
     private String status;
 
     @Column(name = "ZFINAL_YN", nullable = false, length = 1)
-    private String finalYn;
+    private String finalYn = "N";
 
     @Column(name = "ZREMARK", length = 255)
     private String remark;
     
     @Version
-    @Column(name = "VERSION")
-    private Long version;
+    @Column(name = "VERSION", nullable = false)
+    private Long version = 0L;
     
     public void update (EmployeeEduHistoryRequestDto dto) {
     	this.seq = dto.getSeq();

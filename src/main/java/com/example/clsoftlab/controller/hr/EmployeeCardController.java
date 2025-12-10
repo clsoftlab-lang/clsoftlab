@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.clsoftlab.dto.hr.EmployeeCardDetailDto;
 import com.example.clsoftlab.service.common.CodeDetailService;
+import com.example.clsoftlab.service.common.EmployeeMasterService;
 import com.example.clsoftlab.service.hr.EmployeeCardService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,14 @@ import lombok.RequiredArgsConstructor;
 public class EmployeeCardController {
 
 	private final EmployeeCardService employeeCardService;
+	private final EmployeeMasterService employeeMasterService;
 	private final CodeDetailService codeDetailService;
 	
 	// 메인 페이지
 	@GetMapping("")
 	public String employeeCard (Model model) {
 		
+		model.addAttribute("employeeList", employeeMasterService.findAll());
 		model.addAttribute("deptCodeList", codeDetailService.findActiveCodesByGroupId("HR_DEPT"));
 		model.addAttribute("rankCodeList", codeDetailService.findActiveCodesByGroupId("HR_RANK"));
 		model.addAttribute("empStatusList", codeDetailService.findActiveCodesByGroupId("HR_STATUS"));
@@ -42,6 +45,10 @@ public class EmployeeCardController {
 		model.addAttribute("careerTypeCodeList", codeDetailService.findActiveCodesByGroupId("HR_CAREER_TYPE"));
 		model.addAttribute("rewardTypeCodeList", codeDetailService.findActiveCodesByGroupId("HR_REWARD_TYPE"));
 		model.addAttribute("eduTypeCodeList", codeDetailService.findActiveCodesByGroupId("HR_EDU_TYPE"));
+		model.addAttribute("evalTypeCodeList", codeDetailService.findActiveCodesByGroupId("EV_TYPE"));
+		model.addAttribute("evalGradeCodeList", codeDetailService.findActiveCodesByGroupId("EV_GRADE"));
+		model.addAttribute("schoolTypeCodeList", codeDetailService.findActiveCodesByGroupId("HR_SCH_TYPE"));
+		model.addAttribute("graStatCodeList", codeDetailService.findActiveCodesByGroupId("HR_GRA_STAT"));
 		
 		return "hr/employee-card/list";
 	}

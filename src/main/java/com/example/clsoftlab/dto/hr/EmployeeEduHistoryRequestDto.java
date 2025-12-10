@@ -19,8 +19,8 @@ import lombok.Setter;
 public class EmployeeEduHistoryRequestDto {
 
 	private Long id;
-	
-	@NotBlank(message = "사번은 필수 입력 항목입니다.")
+
+    @NotBlank(message = "사번은 필수 입력 항목입니다.")
     @Size(max = 10, message = "사번은 최대 10자까지 입력 가능합니다.")
     private String pernr;
 
@@ -55,7 +55,7 @@ public class EmployeeEduHistoryRequestDto {
     private String status;
 
     @NotBlank(message = "최종학력 여부는 필수 입력 항목입니다.")
-    @Pattern(regexp = "[YN]", message = "최종학력 여부는 'Y' 또는 'N'만 가능합니다.")
+    @Pattern(regexp = "^[YN]$", message = "최종학력 여부는 'Y' 또는 'N'만 가능합니다.")
     private String finalYn;
 
     @Size(max = 255, message = "비고는 최대 255자까지 입력 가능합니다.")

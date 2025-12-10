@@ -14,19 +14,34 @@
 		            <div class="card-body">
 		                <form id="searchForm" onsubmit="return false;">
 		                    <div class="row align-items-end">
-		                        <div class="col-md-3">
-		                            <label class="form-label">사번 / 성명</label>
-		                            <div class="input-group">
-		                                <input type="text" class="form-control" id="searchKeyword" placeholder="사번 또는 성명 입력">
-		                                <button type="button" class="btn btn-primary">
-		                                    <i class="ti ti-search"></i>
-		                                </button>
-		                            </div>
-		                        </div>
-		                        <div class="col-md-9 text-muted small pt-2">
-		                            * 사번을 입력하고 엔터 또는 조회 버튼을 누르세요.
-		                        </div>
-		                    </div>
+				                <div class="col-md-4">
+								    <label class="form-label">사번 / 성명</label>
+								    
+								    <div class="row g-1"> 
+								        
+								        <div class="col">
+								            <select name="pernr" class="form-select" id="empSelect">
+								                <option value="">사원 선택</option>
+								                <option th:each="e : ${employeeList}" 
+								                        th:value="${e.pernr}" 
+								                        th:text="|${e.name} (${e.pernr}) - ${e.deptCode}|"
+								                        th:selected="${param.pernr != null and param.pernr[0] == e.pernr}">
+								                </option>
+								            </select>
+								        </div>
+								
+								        <div class="col-auto">
+								            <button type="button" class="btn btn-primary" id="btnSearch">
+								                <i class="ti ti-search"></i>
+								            </button>
+								        </div>
+								        
+								    </div>
+								</div>
+				                <div class="col-md-8 text-muted small pt-2">
+				                    * 검색할 사원을 선택하고 조회 버튼을 누르세요.
+				                </div>
+				            </div>
 		                </form>
 		            </div>
 		        </div>
@@ -114,6 +129,12 @@
 							    <li class="nav-item" role="presentation">
 							        <button class="nav-link" id="tab-edu" data-bs-toggle="tab" data-bs-target="#eduInfo" type="button" role="tab">교육 정보</button>
 							    </li>
+							    <li class="nav-item" role="presentation">
+								    <button class="nav-link" id="tab-eval" data-bs-toggle="tab" data-bs-target="#evalInfo" type="button" role="tab">평가 이력</button>
+								</li>
+								<li class="nav-item" role="presentation">
+								    <button class="nav-link" id="tab-school" data-bs-toggle="tab" data-bs-target="#schoolInfo" type="button" role="tab">학력 정보</button>
+								</li>
 		                    </ul>
 		
 		                    <!-- 탭 컨텐츠 -->
@@ -395,6 +416,61 @@
 							            </div>
 							        </div>
 							    </div>
+							    
+							    <!--  평가 이력 -->
+							    <div class="tab-pane fade" id="evalInfo" role="tabpanel">
+								    <h5 class="mb-3 text-primary"><i class="ti ti-chart-bar"></i> 평가 이력</h5>
+								    
+								    <div class="card">
+								        <div class="table-responsive">
+								            <table class="table table-vcenter card-table table-hover">
+											    <thead>
+											        <tr>
+											            <th style="width: 80px;">연도</th>
+											            <th>평가명</th>
+											            <th style="width: 100px;">유형</th>
+											            <th class="text-center" style="width: 80px;">점수</th> <th class="text-center" style="width: 80px;">등급</th>
+											            <th class="text-center" style="width: 100px;">상태</th>
+											            </tr>
+											    </thead>
+											    <tbody id="evalTableBody"></tbody>
+											</table>
+								        </div>
+								        
+								        <div id="noEvalMsg" class="text-center p-5 text-muted" style="display:none;">
+								            <i class="ti ti-clipboard-x fs-2 d-block mb-2"></i>
+								            평가 이력이 없습니다.
+								        </div>
+								    </div>
+								</div>
+								
+								<!--  학력 정보 -->
+								<div class="tab-pane fade" id="schoolInfo" role="tabpanel">
+								    <h5 class="mb-3 text-primary"><i class="ti ti-school"></i> 학력 이력</h5>
+								    
+								    <div class="card">
+								        <div class="table-responsive">
+								            <table class="table table-vcenter card-table table-hover">
+								                <thead>
+								                    <tr>
+								                        <th>학교명</th>
+								                        <th style="width: 120px;">국가</th>
+								                        <th style="width: 120px;">학위</th>
+								                        <th class="text-center" style="width: 100px;">상태</th>
+								                        <th class="text-center" style="width: 100px;">최종</th>
+								                    </tr>
+								                </thead>
+								                <tbody id="schoolTableBody">
+								                    </tbody>
+								            </table>
+								        </div>
+								        
+								        <div id="noSchoolMsg" class="text-center p-5 text-muted" style="display:none;">
+								            <i class="ti ti-school-off fs-2 d-block mb-2"></i>
+								            등록된 학력 정보가 없습니다.
+								        </div>
+								    </div>
+								</div>
 		                    </div>
 		                </form>
 		            </div>
@@ -420,6 +496,10 @@
         const careerTypeList = /*[[${careerTypeCodeList}]]*/ [];
         const rewardTypeList = /*[[${rewardTypeCodeList}]]*/ [];
         const eduTypeList = /*[[${eduTypeCodeList}]]*/ [];
+        const evalTypeList = /*[[${evalTypeCodeList}]]*/ [];
+        const evalGradeList = /*[[${evalGradeCodeList}]]*/ [];
+        const schoolTypeList = /*[[${schoolTypeCodeList}]]*/ []; 
+        const graStatList    = /*[[${graStatCodeList}]]*/ [];    
         </script>
         <script src="/assets/js/hr/employee-card.js"></script>
     </th:block> 

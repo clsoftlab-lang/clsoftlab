@@ -16,21 +16,19 @@ import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.hr.EmployeeEduHistoryDetailDto;
 import com.example.clsoftlab.dto.hr.EmployeeEduHistoryRequestDto;
+import com.example.clsoftlab.dto.hr.EmployeeEduHistorySimpleDto;
 import com.example.clsoftlab.entity.EmployeeEduHistory;
 import com.example.clsoftlab.repository.hr.EmployeeEduHistoryRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeEduHistoryService {
 
 	private final EmployeeEduHistoryRepository employeeEduHistoryRepository;
 	private final ModelMapper modelMapper;
-	
-	public EmployeeEduHistoryService(EmployeeEduHistoryRepository employeeEduHistoryRepository, ModelMapper modelMapper) {
-		this.employeeEduHistoryRepository = employeeEduHistoryRepository;
-		this.modelMapper = modelMapper;
-	}
 	
 	// 사번으로 page 조회
 	public Page<EmployeeEduHistoryDetailDto> findByPernr (String pernr, int page, int size) {
@@ -38,6 +36,13 @@ public class EmployeeEduHistoryService {
 		
 		return employeeEduHistoryRepository.findByPernr(pernr, pageable)
 				.map(i -> modelMapper.map(i, EmployeeEduHistoryDetailDto.class));
+	}
+	
+	// 사번으로 simpleList 조회
+	public List<EmployeeEduHistorySimpleDto> getSimpleList (String pernr) {
+		return employeeEduHistoryRepository.findAllByPernrOrderBySeq(pernr).stream()
+				.map(i -> modelMapper.map(i, EmployeeEduHistorySimpleDto.class))
+				.toList();
 	}
 	
 	// 학력 리스트 저장
@@ -51,7 +56,7 @@ public class EmployeeEduHistoryService {
 			}
 		}
 		
-		List<EmployeeEduHistory> originalList = employeeEduHistoryRepository.findByPernr(pernr);
+		List<EmployeeEduHistory> originalList = employeeEduHistoryRepository.findAllByPernrOrderBySeq(pernr);
 		
 		Map<Long, EmployeeEduHistory> originalMap = originalList.stream()
 				.collect(Collectors.toMap(EmployeeEduHistory::getId, history -> history));
