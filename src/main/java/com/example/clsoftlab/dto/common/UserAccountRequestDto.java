@@ -24,5 +24,5 @@ public class UserAccountRequestDto {
     @NotBlank(message = "사용자 이름은 필수 입력 값입니다.")
     private String userName;
     private String pernr;
-    private String sysRole;
+    private String roleId;
 }

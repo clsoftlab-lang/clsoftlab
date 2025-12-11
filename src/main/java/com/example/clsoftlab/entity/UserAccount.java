@@ -43,9 +43,9 @@ public class UserAccount extends BaseEntity {
     private String password;
 
     // --- [3] 상태 및 보안 관리 ---
-    @Column(name = "SYS_ROLE", length = 20, nullable = false)
-    @ColumnDefault("'USER'") // 기본값
-    private String sysRole;
+    @Column(name = "ROLE_ID", length = 20, nullable = false)
+    @ColumnDefault("'USER'") 
+    private String roleId;
     
     @Column(name = "LOGIN_FAIL_CNT", nullable = false)
     @ColumnDefault("0")

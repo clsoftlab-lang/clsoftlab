@@ -18,7 +18,7 @@ public class UserAccountResponseDto {
 	private String userId;
 	private String pernr;
     private String userName;
-    private String sysRole;
+    private String roleId;
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastLoginDate;

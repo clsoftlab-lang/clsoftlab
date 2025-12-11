@@ -9,21 +9,16 @@ import com.example.clsoftlab.entity.UserAccount;
 import com.example.clsoftlab.repository.common.UserAccountRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserAccountService {
 
 
 	private final UserAccountRepository userAccountRepository;
 	private final ModelMapper modelMapper;
 	private final PasswordEncoder passwordEncoder;
-	
-	public UserAccountService(UserAccountRepository userAccountRepository, ModelMapper modelMapper, 
-			PasswordEncoder passwordEncoder) {
-		this.userAccountRepository = userAccountRepository;
-		this.modelMapper = modelMapper;
-		this.passwordEncoder = passwordEncoder;
-	}
 	
 	// 새 계정 생성
 	@Transactional

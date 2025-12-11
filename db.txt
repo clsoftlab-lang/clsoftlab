@@ -43,7 +43,6 @@ VALUES
 ('HR_MILITARY',  '병역 구분',     'Y', 70, '군별 및 면제 사유',         'N', 'SYSTEM'),
 ('HR_APPTYPE',   '인사 발령 유형', 'Y', 80, '채용, 승진, 전보, 휴직 등', 'Y', 'SYSTEM'),
 ('HR_APPR_STAT', '발령 결재 상태', 'Y', 90, '임시저장, 상신, 승인, 반려', 'Y', 'SYSTEM'),
-('SYS_ROLE',     '시스템 권한',   'Y', 99, '메뉴 접근 및 기능 제어 권한', 'Y', 'SYSTEM'),
 
 -- [가족 정보 관련]
 ('HR_REL_TYPE',  '가족 관계',     'Y', 100, '배우자, 자녀, 부모 등',     'Y', 'SYSTEM'),
@@ -189,11 +188,6 @@ INSERT INTO ZSYS_CODE_DETAIL (ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, IS_SYST
 ('HR_APPR_STAT', '40', '반려',     'Rejected',       40,  'Y', 'SYSTEM'),
 ('HR_APPR_STAT', '99', '취소',     'Canceled',       99,  'Y', 'SYSTEM'),
 
--- SYS_ROLE (시스템 권한)
-('SYS_ROLE', 'ADMIN',  '슈퍼 관리자', 'Super Admin', 10,  'Y', 'SYSTEM'),
-('SYS_ROLE', 'HR_MNG', '인사 관리자', 'HR Manager',  20,  'Y', 'SYSTEM'),
-('SYS_ROLE', 'USER',   '일반 사용자', 'User',        30,  'Y', 'SYSTEM'),
-
 -- HR_REL_TYPE (가족 관계)
 ('HR_REL_TYPE', '10', '배우자',      'Spouse',         10,  'Y', 'SYSTEM'),
 ('HR_REL_TYPE', '20', '자녀',        'Child',          20,  'Y', 'SYSTEM'),
@@ -327,7 +321,179 @@ INSERT INTO ZSYS_CODE_DETAIL (ZGROUP_ID, ZCODE, ZNAME, ZNAME_EN, ZORDER, IS_SYST
 ('EV_RSLT_STAT', 'T', '임시저장', 'Temporary Save', 10, 'Y', 'SYSTEM'),
 ('EV_RSLT_STAT', 'C', '제출완료', 'Submitted',      20, 'Y', 'SYSTEM');
 
+-- 시스템 권한 --
+CREATE TABLE ZSYS_ROLE (
+    -- [식별자]
+    ROLE_ID       VARCHAR(20)   NOT NULL COMMENT '권한 ID (PK) - 예: ADMIN, USER',
 
+    -- [기본 정보]
+    ROLE_NM       VARCHAR(100)  NOT NULL COMMENT '권한명',
+    ROLE_DESC     VARCHAR(300)  NULL     COMMENT '권한 설명 (비고)',
+    
+    -- [표시 및 제어]
+    ZORDER        INT           NOT NULL DEFAULT 0   COMMENT '표시 순서',
+    ZUSE_YN       CHAR(1)       NOT NULL DEFAULT 'Y' COMMENT '사용 여부 (Y/N)',
+    
+    -- [동시성 제어] (추가된 부분)
+    OBJ_VERSION   INT           NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [Audit]
+    CREATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    CREATED_BY    VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME      NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    UPDATED_BY    VARCHAR(50)   NULL     COMMENT '수정자',
+
+    PRIMARY KEY (ROLE_ID)
+) COMMENT '시스템 권한(Role) 마스터';
+
+-- 더미데이터 -- 
+INSERT INTO ZSYS_ROLE (ROLE_ID, ROLE_NM, ROLE_DESC, ZORDER, OBJ_VERSION, CREATED_BY) VALUES 
+('ADMIN',  '슈퍼 관리자', '시스템 전체 접근 및 설정 권한', 10, 1, 'SYSTEM'),
+('HR_MNG', '인사 관리자', '인사 정보 조회/수정 및 발령 권한', 20, 1, 'SYSTEM'),
+('USER',   '일반 사용자', '본인 인사정보 및 마이페이지 접근 권한', 30, 1, 'SYSTEM');
+
+CREATE TABLE ZSYS_MENU (
+    -- [1] 식별자
+    MENU_ID       VARCHAR(20)   NOT NULL COMMENT '메뉴 ID (PK)',
+
+    -- [2] 계층 구조 (자기 참조)
+    UP_MENU_ID    VARCHAR(20)   NULL     COMMENT '상위 메뉴 ID (Root는 NULL)',
+    
+    -- [3] 기본 정보
+    MENU_NM       VARCHAR(100)  NOT NULL COMMENT '메뉴명',
+    MENU_URL      VARCHAR(200)  NULL     COMMENT 'NULL이면 하위메뉴를 가진 폴더(그룹)로 동작',
+    
+    -- [4] UI 표시
+    ICON_NM       VARCHAR(50)   NULL     COMMENT '프론트엔드 아이콘 클래스명 (예: ti ti-user)',
+    ZORDER        INT           NOT NULL DEFAULT 0 COMMENT '표시 순서',
+    ZUSE_YN       CHAR(1)       NOT NULL DEFAULT 'Y' COMMENT '사용 여부',
+
+    -- [5] 동시성 제어 (Version)
+    OBJ_VERSION   INT           NOT NULL DEFAULT 1 COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [6] Audit (감사)
+    CREATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    CREATED_BY    VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME      NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    UPDATED_BY    VARCHAR(50)   NULL     COMMENT '수정자',
+
+    PRIMARY KEY (MENU_ID),
+
+    -- 자기 참조 외래키 (데이터 무결성 보장)
+    CONSTRAINT FK_MENU_SELF 
+        FOREIGN KEY (UP_MENU_ID) REFERENCES ZSYS_MENU (MENU_ID)
+        ON DELETE SET NULL -- 부모 삭제 시 자식의 부모ID를 NULL로 처리
+) COMMENT '시스템 메뉴 마스터';
+
+INSERT INTO ZSYS_MENU 
+(MENU_ID, UP_MENU_ID, MENU_NM, MENU_URL, ICON_NM, ZORDER, CREATED_BY) 
+VALUES
+-- [1] 대분류 (Root Folder) - 아이콘 있음
+('PAY',       NULL, '급여',           NULL, 'ti ti-cash',              10, 'SYSTEM'),
+('EVAL',      NULL, '평가',           NULL, 'ti ti-chart-infographic', 20, 'SYSTEM'),
+('HR',        NULL, '인사',           NULL, 'ti ti-users',             30, 'SYSTEM'),
+('RETIRE',    NULL, '퇴직',           NULL, 'ti ti-user-off',          40, 'SYSTEM'),
+('APPT',      NULL, '발령',           NULL, 'ti ti-user-plus',         50, 'SYSTEM'),
+('WELFARE',   NULL, '복리후생',       NULL, 'ti ti-gift',              60, 'SYSTEM'),
+('WORK',      NULL, '근태',           NULL, 'ti ti-calendar-time',     70, 'SYSTEM'),
+('RESORT',    NULL, '휴양소',         NULL, 'ti ti-building-cottage',  80, 'SYSTEM'),
+('ORG',       NULL, '조직관리',       NULL, 'ti ti-sitemap',           90, 'SYSTEM'),
+('APPR',      NULL, '결재',           NULL, 'ti ti-clipboard-check',   100,'SYSTEM'),
+('APPL',      NULL, '신청서비스',     NULL, 'ti ti-file-text',         110,'SYSTEM'),
+('YEND',      NULL, '연말정산',       NULL, 'ti ti-file-dollar',       120,'SYSTEM'),
+('COMMON',    NULL, '공통',           NULL, 'ti ti-settings',          130,'SYSTEM'),
+('ADMIN',     NULL, '관리자 (HR)',    NULL, 'ti ti-user-shield',       900,'SYSTEM'),
+
+-- [2] 급여 (PAY) 하위 메뉴
+('PAY_ITEM',      'PAY', '급여 항목 관리',         '/pay/pay-item',              NULL, 10, 'SYSTEM'),
+('PAY_DETAIL',    'PAY', '월별 내역 관리',         '/pay/pay-detail',            NULL, 20, 'SYSTEM'),
+('PAY_RULE',      'PAY', '계산 규칙 관리',         '/pay/pay-rule',              NULL, 30, 'SYSTEM'),
+('PAY_TAX',       'PAY', '세율/구간 관리',         '/pay/tax',                   NULL, 40, 'SYSTEM'),
+('PAY_BACK',      'PAY', '소급 규칙 관리',         '/pay/backpay-rule',          NULL, 50, 'SYSTEM'),
+('PAY_CYCLE',     'PAY', '직군별 급여 주기 관리',   '/pay/pay-cycle',             NULL, 60, 'SYSTEM'),
+('PAY_ALLOW',     'PAY', '사원별 정기 수당 설정',   '/pay/employee-allow',        NULL, 70, 'SYSTEM'),
+('PAY_BASE',      'PAY', '기준 급여 관리',         '/pay/base-pay',              NULL, 80, 'SYSTEM'),
+('PAY_STD_H',     'PAY', '월별 소정 근로시간 관리', '/pay/standard-hours',        NULL, 90, 'SYSTEM'),
+('PAY_STD_H_EMP', 'PAY', '사원별 예외 근로시간 관리','/pay/standard-hours-employee',NULL, 100,'SYSTEM'),
+('PAY_SUM',       'PAY', '정산 메인 관리',         '/pay/pay-summary',           NULL, 110,'SYSTEM'),
+('PAY_RET_SUM',   'PAY', '퇴직 정산 보조 화면',     '/pay/retire-summary',        NULL, 120,'SYSTEM'),
+('PAY_RET_ADJ',   'PAY', '퇴직금 가감',            '/pay/retire-adjust',         NULL, 130,'SYSTEM'),
+('PAY_DEDUCT',    'PAY', '징계/병가 공제 항목 등록', '/pay/pay-deduct',            NULL, 140,'SYSTEM'),
+('PAY_STEP',      'PAY', '호봉 기준 관리',         '/pay/step-base',             NULL, 150,'SYSTEM'),
+('PAY_EMP_STEP',  'PAY', '사원별 호봉 정보 관리',   '/pay/employee-step',         NULL, 160,'SYSTEM'),
+('PAY_BANK',      'PAY', '급여 계좌 관리',         '/pay/bank-account',          NULL, 170,'SYSTEM'),
+('PAY_WITHHOLD',  'PAY', '사원별 원천징수 세율 관리','/pay/employee-withhold-rate', NULL, 180,'SYSTEM'),
+('PAY_FAMILY',    'PAY', '사원 가족 정보 관리',     '/pay/employee-family',       NULL, 190,'SYSTEM'),
+('PAY_RND_HIST',  'PAY', '급여 항목 절사 이력',     '/pay/pay-round-history',     NULL, 200,'SYSTEM'),
+('PAY_CERT',      'PAY', '지급명세표 관리',         '/pay/pay-certificate',       NULL, 210,'SYSTEM'),
+('PAY_CLUB',      'PAY', '사내 회비 항목 관리',     '/pay/club-item',             NULL, 220,'SYSTEM'),
+('PAY_EMP_CLUB',  'PAY', '사원별 회비 납부 설정',   '/pay/employee-club',         NULL, 230,'SYSTEM'),
+('PAY_CLUB_DTL',  'PAY', '납부 내역 기록',         '/pay/club-pay-detail',       NULL, 240,'SYSTEM'),
+('PAY_OVERTIME',  'PAY', '근로자별 시간외근무 실적', '/pay/overtime',              NULL, 250,'SYSTEM'),
+('PAY_TAX_TBL',   'PAY', '간이세액표 관리',         '/pay/simplified-tax-table',  NULL, 260,'SYSTEM'),
+('PAY_CALC_ORD',  'PAY', '급여 항목 계산 순서 관리', '/pay/calc-order',            NULL, 270,'SYSTEM'),
+('PAY_ALW_CYC',   'PAY', '상여금별 계산 주기 관리',  '/pay/allow-cycle',           NULL, 280,'SYSTEM'),
+('PAY_GL_MAP',    'PAY', '회계 계정 매핑 관리',     '/pay/gl-mapping',            NULL, 290,'SYSTEM'),
+('PAY_INS_RATE',  'PAY', '4대보험 요율 관리',       '/pay/insurance-rate',        NULL, 300,'SYSTEM'),
+('PAY_CALC_LOG',  'PAY', '급여 항목 계산 이력',     '/pay/log-pay-calc',          NULL, 310,'SYSTEM'),
+
+-- [3] 평가 (EVAL) 하위 메뉴
+('EVAL_KPI',      'EVAL', 'KPI 관리',              '/evaluation/kpi-management', NULL, 10, 'SYSTEM'),
+
+-- [4] 인사 (HR) 하위 메뉴
+('HR_BIZ',        'HR', '사업장 정보 관리',        '/hr/biz-place',        NULL, 10, 'SYSTEM'),
+('HR_ORG',        'HR', '사업장별 조직 관리',      '/hr/org-unit',         NULL, 20, 'SYSTEM'),
+('HR_PRIV',       'HR', '개인 정보 관리',          '/hr/employee-priv',    NULL, 30, 'SYSTEM'),
+('HR_INFO',       'HR', '인사 정보 관리',          '/hr/employee-info',    NULL, 40, 'SYSTEM'),
+('HR_CERT',       'HR', '자격증 관리',            '/hr/employee-cert',    NULL, 50, 'SYSTEM'),
+('HR_LANG',       'HR', '어학 관리',              '/hr/employee-lang',    NULL, 60, 'SYSTEM'),
+('HR_CAREER',     'HR', '경력 관리',              '/hr/employee-career',  NULL, 70, 'SYSTEM'),
+('HR_REWARD',     'HR', '포상 관리',              '/hr/employee-reward',  NULL, 80, 'SYSTEM'),
+('HR_EDU',        'HR', '교육 이력 관리',          '/hr/employee-edu',     NULL, 90, 'SYSTEM'),
+('HR_EVAL',       'HR', '평가 관리',              '/hr/evaluation-result',NULL, 100,'SYSTEM'),
+('HR_EDU_HIST',   'HR', '학력 정보 관리',          '/hr/employee-edu-history',NULL, 110,'SYSTEM'),
+('HR_PERSONAL',   'HR', '인사 정보 관리(상세)',    '/hr/employee-personal',NULL, 120,'SYSTEM'),
+('HR_UNION',      'HR', '노조 가입 관리',          '/hr/union-member',     NULL, 130,'SYSTEM'),
+('HR_WORKPLACE',  'HR', '근무지 관리',            '/hr/employee-workplace',NULL, 140,'SYSTEM'),
+('HR_CARD',       'HR', '인사 카드 관리',          '/hr/employee-card',    NULL, 150,'SYSTEM'),
+
+-- [5] 관리자 (ADMIN) 하위 메뉴
+('ADM_EMP',       'ADMIN', '사원 관리',            '/admin/employee-manage', NULL, 10, 'SYSTEM'),
+('ADM_AUTH',      'ADMIN', '권한 관리',            '/admin/auth-manage',     NULL, 20, 'SYSTEM'),
+('ADM_ROLE',      'ADMIN', '메뉴 접근 롤 설정',     '/admin/menu-role',       NULL, 30, 'SYSTEM'),
+('ADM_CODE',      'ADMIN', '공통코드 관리',         '/admin/common-code',     NULL, 40, 'SYSTEM'),
+('ADM_ORG',       'ADMIN', '조직 관리',            '/admin/org-manage',      NULL, 50, 'SYSTEM'),
+
+-- [테스트용] 그리드 테스트 메뉴 (공통 하위에 넣음)
+('TEST_GRID',     'COMMON', '그리드 Test',         '/pay/pay-item/test',    NULL, 999,'SYSTEM');
+
+-- 메뉴 매핑 --
+CREATE TABLE ZSYS_ROLE_PERM (
+    -- [1] 식별자 (대리키 추가)
+    PERM_ID       BIGINT        NOT NULL AUTO_INCREMENT COMMENT '권한 매핑 순번 (PK)',
+
+    -- [2] 매핑 정보 (비즈니스 키)
+    ROLE_ID       VARCHAR(20)   NOT NULL COMMENT '권한 ID (ZSYS_ROLE 참조)',
+    MENU_ID       VARCHAR(20)   NOT NULL COMMENT '메뉴 ID (ZSYS_MENU 참조)',
+
+    -- [3] 상세 권한 제어
+    PERM_READ     CHAR(1)       NOT NULL DEFAULT 'Y' COMMENT '조회 권한 (Y/N)',
+    PERM_WRITE    CHAR(1)       NOT NULL DEFAULT 'N' COMMENT '쓰기 권한 (Y/N)',
+
+    -- [4] 동시성 제어 (버전 추가)
+    OBJ_VERSION   INT           NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
+
+    -- [5] Audit
+    CREATED_AT    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    CREATED_BY    VARCHAR(50)   NOT NULL COMMENT '생성자',
+    UPDATED_AT    DATETIME      NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    UPDATED_BY    VARCHAR(50)   NULL     COMMENT '수정자',
+
+    PRIMARY KEY (PERM_ID),
+
+    -- [중요] 중복 방지: 한 권한에 동일 메뉴가 두 번 들어갈 수 없음
+    UNIQUE KEY UQ_ROLE_PERM (ROLE_ID, MENU_ID)
+) COMMENT '시스템 권한-메뉴 매핑 (Permission)';
 
 -- 사원 마스터 (개발용 임시) --
 CREATE TABLE ZHR_EMP_MASTER (
@@ -437,6 +603,7 @@ VALUES
 ('2507049', '엄지아', '2025-07-01', NULL,         'BIZ_MKT', '001', 'UIUX',   '10', 1, 'system_admin'),
 ('2508050', '함유주', '2025-08-01', NULL,         'DEV',     '001', 'SW_APP', '10', 1, 'system_admin');
 
+
 -- 계정 테이블 (로그인) --
 CREATE TABLE ZSYS_USER_ACCOUNT (
     -- [1] 식별자 (사번 사용)
@@ -448,7 +615,7 @@ CREATE TABLE ZSYS_USER_ACCOUNT (
     PASSWD          VARCHAR(255) NOT NULL COMMENT '비밀번호 (암호화)',
 
     -- [3] 상태 및 보안 관리
-    SYS_ROLE        VARCHAR(20)  NOT NULL DEFAULT 'USER' COMMENT '권한 코드 (SYS_ROLE 참조: ADMIN, USER)',
+    ROLE_ID        VARCHAR(20)  NOT NULL DEFAULT 'USER' COMMENT '권한 코드 (SYS_ROLE 참조: ADMIN, USER)',
     LOGIN_FAIL_CNT  INT          NOT NULL DEFAULT 0   COMMENT '실패 횟수',
     IS_LOCKED       CHAR(1)      NOT NULL DEFAULT 'N' COMMENT '잠금 여부',
     IS_USE          CHAR(1)      NOT NULL DEFAULT 'Y' COMMENT '사용 여부',
@@ -470,7 +637,7 @@ CREATE TABLE ZSYS_USER_ACCOUNT (
 -- * 초기 비밀번호 규칙: 사번과 동일 (관리자는 1234)
 -- ==========================================================
 INSERT INTO ZSYS_USER_ACCOUNT 
-(USER_ID, PERNR, USER_NM, PASSWD, SYS_ROLE, LOGIN_FAIL_CNT, IS_LOCKED, IS_USE, CREATED_AT, CREATED_BY) 
+(USER_ID, PERNR, USER_NM, PASSWD, ROLE_ID, LOGIN_FAIL_CNT, IS_LOCKED, IS_USE, CREATED_AT, CREATED_BY) 
 VALUES 
 
 -- [0] 시스템 슈퍼 관리자 (권한: ADMIN)

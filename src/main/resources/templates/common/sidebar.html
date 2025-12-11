@@ -18,7 +18,7 @@
 					<img src="/assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 				</div>
 				<h6 class="fs-12 fw-normal mb-1" th:text="${session.LOGIN_USER.userName}">양한재</h6>
-				<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.sysRole})|">시스템 관리자</p>
+				<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.roleId})|">시스템 관리자</p>
 			</div>
 			<div class="sidebar-nav mb-3">
 				<ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded nav-justified bg-transparent" role="tablist">
@@ -35,7 +35,7 @@
 				</div>
 				<div class="text-start sidebar-profile-info ms-2">
 					<h6 class="fs-12 fw-normal mb-1" th:text="${session.LOGIN_USER.userName}">양한재</h6>
-					<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.sysRole})|">시스템 관리자</p>
+					<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.roleId})|">시스템 관리자</p>
 				</div>
 			</div>
 			<div class="input-group input-group-flat d-inline-flex mb-4">
@@ -162,7 +162,7 @@
 							<li>
 								<a th:href="@{/pay/pay-item/test}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item/test' || currentUrl.startsWith('/pay/pay-item/test?'))} ? 'active' : ''"><i class="ti ti-settings"></i> <span>그리드test</span></a>
 							</li>
-							<li th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}" class="submenu">
+							<li th:if="${session.LOGIN_USER.roleId == 'ADMIN'}" class="submenu">
 							    <a href="javascript:void(0);" >
 							    	<i class="ti ti-user-shield"></i> 
 							    	<span>관리자 (HR)</span> 
@@ -275,7 +275,7 @@
 					<li><a href="#"><i class="ti ti-settings"></i> <span>공통</span></a></li>
 					<li><a th:href="@{/pay/pay-item/test}" th:classappend="${currentUrl != null && (currentUrl == '/pay/pay-item/test' || currentUrl.startsWith('/pay/pay-item/test?'))} ? 'active' : ''"><i class="ti ti-settings"></i> <span>그리드test</span></a></li>
 					
-					<li th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}" class="submenu">
+					<li th:if="${session.LOGIN_USER.roleId == 'ADMIN'}" class="submenu">
 					    <a href="javascript:void(0);" >
 					    	<i class="ti ti-user-shield"></i> 
 					    	<span>관리자 (HR)</span> 
@@ -342,7 +342,7 @@
 						<a href="#" class="nav-link" title="공통" >
 							<i class="ti ti-settings"></i>
 						</a>
-						<a th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}" href="#" class="nav-link" title="관리자 (HR)" data-bs-toggle="tab" data-bs-target="#admin">
+						<a th:if="${session.LOGIN_USER.roleId == 'ADMIN'}" href="#" class="nav-link" title="관리자 (HR)" data-bs-toggle="tab" data-bs-target="#admin">
 					    	<i class="ti ti-user-shield"></i> 
 				    	</a>
 					</div>
@@ -364,7 +364,7 @@
 							<img src="/assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 						</div>
 						<h6 class="fs-12 fw-normal mb-1" th:text="${session.LOGIN_USER.userName}">양한재</h6>
-						<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.sysRole})|">시스템 관리자</p>
+						<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.roleId})|">시스템 관리자</p>
 					</div>
 					<div class="tab-content" id="v-pills-tabContent">
 						<div class="tab-pane fade active show" id="pay" role="tabpanel">
@@ -488,7 +488,7 @@
 							<img src="/assets/img/profiles/avatar-02.jpg" alt="Img" class="img-fluid rounded-circle">
 						</div>
 						<h6 class="fs-12 fw-normal mb-1" th:text="${session.LOGIN_USER.userName}">양한재</h6>
-						<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.sysRole})|">시스템 관리자</p>
+						<p class="fs-10" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.roleId})|">시스템 관리자</p>
 					</div>
 					<div class="stack-menu">
 						<div class="nav flex-column align-items-center nav-pills" role="tablist">
@@ -597,7 +597,7 @@
 										<p>공통</p>
 									</a>
 								</div>
-								<div class="col-6" th:if="${session.LOGIN_USER.sysRole == 'ADMIN'}">
+								<div class="col-6" th:if="${session.LOGIN_USER.roleId == 'ADMIN'}">
 									<a href="#menu-admin" role="tab" class="nav-link" title="관리자 (HR)" data-bs-toggle="tab" data-bs-target="#menu-admin">
 										<span>
 											<i class="ti ti-user-shield"></i>
