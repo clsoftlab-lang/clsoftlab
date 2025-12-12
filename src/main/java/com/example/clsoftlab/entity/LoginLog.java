@@ -58,7 +58,7 @@ public class LoginLog {
     @Column(name = "LOGIN_RESULT", length = 10, nullable = false)
     private String loginResult; // SUCCESS, FAIL, LOCKED
 
-    @Column(name = "FAIL_REASON", length = 255)
+    @Column(name = "FAIL_REASON", length = 1000)
     private String failReason;
 
     // --- [5] 발생 일시 ---

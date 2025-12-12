@@ -180,7 +180,7 @@
 								<li><a href="#"><i class="ti ti-file-text"></i> <span>신청서비스</span></a></li>
 								<li><a href="#"><i class="ti ti-file-dollar"></i> <span>연말정산</span></a></li>
 								<li><a href="#"><i class="ti ti-settings"></i> <span>공통</span></a></li>
-								<li th:if="${session.LOGIN_USER.roleId == 'ADMIN'}" class="submenu">
+								<li th:if="${session.LOGIN_USER?.roleId == 'ADMIN'}" class="submenu">
 								    <a href="#" >
 								    	<i class="ti ti-user-shield"></i> 
 								    	<span>관리자 (HR)</span> 
@@ -343,8 +343,8 @@
                                             <img src="/assets/img/profiles/avatar-12.jpg" alt="img">
                                         </span>
                                         <div>
-                                            <h5 class="mb-0" th:text="${session.LOGIN_USER.userName}">양한재</h5>
-                                            <p class="fs-12 fw-medium mb-0" th:text="|${session.LOGIN_USER.userId} (${session.LOGIN_USER.roleId})|"></p>
+                                            <h5 class="mb-0" th:text="${session.LOGIN_USER?.userName}">양한재</h5>
+                                            <p class="fs-12 fw-medium mb-0" th:text="|${session.LOGIN_USER?.userId} (${session.LOGIN_USER?.roleId})|"></p>
                                         </div>
                                     </div>
                                 </div>

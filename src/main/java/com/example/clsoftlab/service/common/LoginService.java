@@ -1,16 +1,25 @@
 package com.example.clsoftlab.service.common;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.clsoftlab.dto.common.LoginRequestDto;
+import com.example.clsoftlab.dto.common.LoginResultDto;
+import com.example.clsoftlab.dto.common.RolePermDetailDto;
+import com.example.clsoftlab.dto.common.SysMenuDetailDto;
 import com.example.clsoftlab.dto.common.UserAccountResponseDto;
 import com.example.clsoftlab.entity.LoginLog;
+import com.example.clsoftlab.entity.SysMenu;
 import com.example.clsoftlab.entity.UserAccount;
 import com.example.clsoftlab.repository.common.LoginLogRepository;
+import com.example.clsoftlab.repository.common.RolePermRepository;
 import com.example.clsoftlab.repository.common.UserAccountRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,11 +30,12 @@ public class LoginService {
 
 	private final UserAccountRepository userAccountRepository;
 	private final LoginLogRepository loginLogRepository;
+	private final RolePermRepository rolePermRepository;
 	private final ModelMapper modelMapper;
 	private final PasswordEncoder passwordEncoder;
 	
 	// 로그인
-	public UserAccountResponseDto login (LoginRequestDto dto, String clientIp, String userAgent) {
+	public LoginResultDto login (LoginRequestDto dto, String clientIp, String userAgent) {
 		
 		String logResult = LoginLog.RESULT_FAIL; // 기본값 실패
         String failReason = null;
@@ -71,7 +81,25 @@ public class LoginService {
 
             logResult = LoginLog.RESULT_SUCCESS;
             
-            return modelMapper.map(user, UserAccountResponseDto.class);
+            List<RolePermDetailDto> rolePermList = rolePermRepository.findPermsByRoleId(user.getRoleId()).stream()
+            		.map(RolePermDetailDto::fromEntity)
+            		.toList();
+            
+            Map<String, RolePermDetailDto> permMap = new HashMap<>();
+            for (RolePermDetailDto p : rolePermList) {
+                if (p.getMenuUrl() != null) {
+                    permMap.put(p.getMenuUrl(), p);
+                }
+            }
+            UserAccountResponseDto userDto = modelMapper.map(user, UserAccountResponseDto.class);
+            
+            List<SysMenuDetailDto> menuTree = buildMenuTree(user.getRoleId());
+            
+            return LoginResultDto.builder()
+                    .userDto(userDto)
+                    .permMap(permMap)
+                    .menuTree(menuTree)
+                    .build();
             		
         } catch (Exception e) {
             // 예외 발생 시(로그인 실패) 로그에 사유 기록
@@ -98,9 +126,52 @@ public class LoginService {
                     .failReason(failReason)
                     // loginDate는 @CreationTimestamp로 자동 생성됨
                     .build();
-            
+            System.out.println(failReason);
             loginLogRepository.save(log);
             
         }
 	}
+	
+	private List<SysMenuDetailDto> buildMenuTree(String roleId) {
+        // 1. 해당 Role이 볼 수 있는 모든 메뉴 조회 (RolePermRepository에 쿼리 추가 필요)
+        // 쿼리: SELECT m FROM RolePerm rp JOIN rp.menu m WHERE rp.role.id = :roleId AND rp.read = 'Y' ORDER BY m.order ASC
+        List<SysMenu> allowedMenus = rolePermRepository.findMenusByRoleId(roleId);
+        
+        // 2. DTO 변환
+        List<SysMenuDetailDto> dtoList = allowedMenus.stream()
+                .map(SysMenuDetailDto::fromEntityFlat)
+                .toList();
+
+        // 3. 트리 조립 (Map 활용)
+        Map<String, SysMenuDetailDto> lookup = new HashMap<>();
+        List<SysMenuDetailDto> roots = new ArrayList<>();
+
+        // 3-1. 맵에 담기 (ID로 객체 찾기 위함)
+        for (SysMenuDetailDto dto : dtoList) {
+            lookup.put(dto.getId(), dto);
+            // 자식 리스트 초기화 (중요)
+            dto.setChildren(new ArrayList<>());
+        }
+
+        // 3-2. 부모-자식 연결
+        for (SysMenuDetailDto dto : dtoList) {
+            if (dto.getUpMenuId() == null) {
+                // 부모가 없으면 최상위(Root) 메뉴
+                roots.add(dto);
+            } else {
+                // 부모가 있으면 부모의 children에 추가
+                SysMenuDetailDto parent = lookup.get(dto.getUpMenuId());
+                if (parent != null) {
+                    parent.getChildren().add(dto);
+                } else {
+                    // 부모 권한은 없는데 자식 권한만 있는 경우 (고아), 그냥 Root로 취급하거나 정책 결정
+                    // 여기서는 Root로 처리
+                    roots.add(dto); 
+                }
+            }
+        }
+        
+        // 정렬은 DB에서 해왔으므로 패스
+        return roots;
+    }
 }

@@ -469,18 +469,18 @@ VALUES
 
 -- 메뉴 매핑 --
 CREATE TABLE ZSYS_ROLE_PERM (
-    -- [1] 식별자 (대리키 추가)
+    -- [1] 식별자 (대리키)
     PERM_ID       BIGINT        NOT NULL AUTO_INCREMENT COMMENT '권한 매핑 순번 (PK)',
 
-    -- [2] 매핑 정보 (비즈니스 키)
-    ROLE_ID       VARCHAR(20)   NOT NULL COMMENT '권한 ID (ZSYS_ROLE 참조)',
-    MENU_ID       VARCHAR(20)   NOT NULL COMMENT '메뉴 ID (ZSYS_MENU 참조)',
+    -- [2] 매핑 정보 (비즈니스 키 - FK 설정)
+    ROLE_ID       VARCHAR(20)   NOT NULL COMMENT '권한 ID (FK)',
+    MENU_ID       VARCHAR(20)   NOT NULL COMMENT '메뉴 ID (FK)',
 
     -- [3] 상세 권한 제어
     PERM_READ     CHAR(1)       NOT NULL DEFAULT 'Y' COMMENT '조회 권한 (Y/N)',
     PERM_WRITE    CHAR(1)       NOT NULL DEFAULT 'N' COMMENT '쓰기 권한 (Y/N)',
 
-    -- [4] 동시성 제어 (버전 추가)
+    -- [4] 동시성 제어
     OBJ_VERSION   INT           NOT NULL DEFAULT 1   COMMENT '데이터 버전 (낙관적 락)',
 
     -- [5] Audit
@@ -491,9 +491,46 @@ CREATE TABLE ZSYS_ROLE_PERM (
 
     PRIMARY KEY (PERM_ID),
 
-    -- [중요] 중복 방지: 한 권한에 동일 메뉴가 두 번 들어갈 수 없음
-    UNIQUE KEY UQ_ROLE_PERM (ROLE_ID, MENU_ID)
+    -- 중복 방지 (한 권한에 같은 메뉴 중복 불가)
+    UNIQUE KEY UQ_ROLE_PERM (ROLE_ID, MENU_ID),
+
+    -- 외래키 제약조건 (참조 무결성 보장)
+    CONSTRAINT FK_ROLE_PERM_ROLE 
+        FOREIGN KEY (ROLE_ID) REFERENCES ZSYS_ROLE (ROLE_ID) 
+        ON DELETE CASCADE, -- 권한 삭제 시 매핑 데이터도 자동 삭제
+
+    CONSTRAINT FK_ROLE_PERM_MENU 
+        FOREIGN KEY (MENU_ID) REFERENCES ZSYS_MENU (MENU_ID) 
+        ON DELETE CASCADE  -- 메뉴 삭제 시 매핑 데이터도 자동 삭제
+
 ) COMMENT '시스템 권한-메뉴 매핑 (Permission)';
+
+-- [1] ADMIN 권한 부여: 시스템에 존재하는 '모든' 메뉴에 접근 가능 (Full Access)
+INSERT INTO ZSYS_ROLE_PERM (ROLE_ID, MENU_ID, PERM_READ, PERM_WRITE, CREATED_BY)
+SELECT 'ADMIN', MENU_ID, 'Y', 'Y', 'SYSTEM'
+FROM ZSYS_MENU;
+
+-- [2] HR_MNG (인사담당자) 권한 부여: 인사, 급여, 평가, 발령, 조직, 퇴직 관련
+-- (대분류 ID 또는 UP_MENU_ID가 해당 그룹인 경우)
+INSERT INTO ZSYS_ROLE_PERM (ROLE_ID, MENU_ID, PERM_READ, PERM_WRITE, CREATED_BY)
+SELECT 'HR_MNG', MENU_ID, 'Y', 'Y', 'SYSTEM'
+FROM ZSYS_MENU
+WHERE 
+   -- 대분류(폴더) 권한
+   MENU_ID IN ('HR', 'PAY', 'EVAL', 'APPT', 'RETIRE', 'ORG', 'COMMON')
+   -- 하위 메뉴 권한
+   OR UP_MENU_ID IN ('HR', 'PAY', 'EVAL', 'APPT', 'RETIRE', 'ORG', 'COMMON');
+
+-- [3] USER (일반직원) 권한 부여: 근태, 복리후생, 신청서비스, 연말정산, 휴양소, 공통
+INSERT INTO ZSYS_ROLE_PERM (ROLE_ID, MENU_ID, PERM_READ, PERM_WRITE, CREATED_BY)
+SELECT 'USER', MENU_ID, 'Y', 'Y', 'SYSTEM' -- 본인 신청이 필요하므로 Write 권한 Y
+FROM ZSYS_MENU
+WHERE 
+   -- 대분류(폴더) 권한
+   MENU_ID IN ('WORK', 'WELFARE', 'APPL', 'YEND', 'RESORT', 'COMMON')
+   -- 하위 메뉴 권한
+   OR UP_MENU_ID IN ('WORK', 'WELFARE', 'APPL', 'YEND', 'RESORT', 'COMMON');
+
 
 -- 사원 마스터 (개발용 임시) --
 CREATE TABLE ZHR_EMP_MASTER (
@@ -719,7 +756,7 @@ CREATE TABLE ZSYS_LOGIN_LOG (
     
     -- [4] 로그인 결과
     LOGIN_RESULT        VARCHAR(10)  NOT NULL COMMENT '결과 상태 (SUCCESS / FAIL / LOCKED)',
-    FAIL_REASON         VARCHAR(255) NULL     COMMENT '실패 시 사유 (예: 비밀번호 불일치, 계정 잠금)',
+    FAIL_REASON         VARCHAR(1000) NULL     COMMENT '실패 시 사유 (예: 비밀번호 불일치, 계정 잠금)',
 
     -- [5] 발생 일시
     LOGIN_DT            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '로그인 시도 일시',
@@ -737,7 +774,7 @@ CREATE TABLE ZSYS_LOGIN_LOG (
     INDEX IDX_ZSYS_LOGIN_LOG_03 (IP_ADDRESS)
 
 ) COMMENT '시스템 로그인 접속 이력';
-
+select * from zsys_role_perm;
 -- 로그인 정책 및 방식 설정 테이블 --
 CREATE TABLE ZCM_LOGIN_CONFIG (
     -- [1] 식별자

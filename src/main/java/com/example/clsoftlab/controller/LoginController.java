@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.clsoftlab.dto.common.LoginRequestDto;
-import com.example.clsoftlab.dto.common.UserAccountResponseDto;
+import com.example.clsoftlab.dto.common.LoginResultDto;
 import com.example.clsoftlab.service.common.LoginService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,18 +36,22 @@ public class LoginController {
 
         try {
             // 서비스 호출
-            UserAccountResponseDto loginUser = loginService.login(dto, clientIp, userAgent);
+        	LoginResultDto loginResult = loginService.login(dto, clientIp, userAgent);
 
             // 세션 처리 (로그인 성공 시)
             HttpSession session = request.getSession();
             session.invalidate(); // 기존 세션 파기 (보안)
             session = request.getSession(true); // 새 세션 생성
             
-            session.setAttribute("LOGIN_USER", loginUser);
+            session.setAttribute("LOGIN_USER", loginResult.getUserDto());
+            session.setAttribute("USER_PERMS", loginResult.getPermMap());
+            session.setAttribute("USER_MENU_TREE", loginResult.getMenuTree());
             session.setMaxInactiveInterval(10800); // 180분 유지
 
+            
+            System.out.println(loginResult.getMenuTree());
             // 성공 응답 (200 OK + 사용자 정보)
-            return ResponseEntity.ok(loginUser); 
+            return ResponseEntity.ok(loginResult.getUserDto()); 
 
         } catch (Exception e) {
             // 실패 응답 (400 Bad Request + 에러 메시지)

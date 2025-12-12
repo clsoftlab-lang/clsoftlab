@@ -37,9 +37,9 @@ public class SysMenu extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UP_MENU_ID")
-    private SysMenu parentMenu;
+    private SysMenu upMenu;
 
-    @OneToMany(mappedBy = "parentMenu") // 부모 엔티티의 'parent' 필드에 매핑됨
+    @OneToMany(mappedBy = "upMenu") 
     private List<SysMenu> children = new ArrayList<>();
 
     @Column(name = "MENU_NM", length = 100, nullable = false)

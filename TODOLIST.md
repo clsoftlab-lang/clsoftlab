@@ -71,7 +71,8 @@
 -- 아이디어, api, 자료들 (우선순위 낮음)
     SweeatAlert2 
     mapstruct
-    메뉴 requestDto~
+
+    메뉴 수정 및 권한 관리 기능
 
     
 
